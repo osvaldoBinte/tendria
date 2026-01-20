@@ -301,7 +301,27 @@ static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
   // ========================================
   // WIDGETS PERSONALIZADOS
   // ========================================
-  
+    static Widget createAppLogo({
+    String imagePath = 'assets/logo/logo.png',
+    double size = 150,
+    EdgeInsets padding = const EdgeInsets.symmetric(
+      horizontal: 60.0,
+      vertical: 70.0,
+    ),
+  }) {
+    return Padding(
+      padding: padding,
+      child: Center(
+        child: ClipOval(
+          child: Container(
+            child: Center(
+              child: Image.asset(imagePath, width: size, height: size),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   // Badge de "Tu turno"
   static Widget createTurnBadge(String text) {
     return Container(

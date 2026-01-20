@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:tendria/common/settings/routes_names.dart';
+import 'package:tendria/features/auth/presentation/page/Splash/splash_page.dart';
 import 'package:tendria/features/auth/presentation/page/home/start_page.dart';
 import 'package:tendria/features/auth/presentation/page/login/login_page.dart';
 import 'package:tendria/features/auth/presentation/page/register/register_page.dart';
@@ -13,7 +14,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () => StartPage()),
+        GetPage(name: RoutesNames.welcomePage, page: () => SplashPage()),
         GetPage(name: RoutesNames.foryoupage, page: () => ForYouPage()),
         GetPage(name: RoutesNames.loginPage, page: () => LoginPage()),
         GetPage(name: RoutesNames.registerPage, page: () => RegisterPage()),

@@ -77,7 +77,6 @@ class LoginPage extends GetView<LoginController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ Campo de Email usando createLabeledTextField directamente
           ThemeColor.createLabeledTextField(
             label: 'Correo electrónico:',
             controller: controller.emailController,
@@ -89,7 +88,6 @@ class LoginPage extends GetView<LoginController> {
           
           SizedBox(height: ThemeColor.paddingLarge),
           
-          // ✅ Campo de Password usando createLabeledTextField con Obx
           Obx(
             () => ThemeColor.createLabeledTextField(
               label: 'Contraseña:',

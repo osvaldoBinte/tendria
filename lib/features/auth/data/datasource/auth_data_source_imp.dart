@@ -2,6 +2,7 @@ import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/common/errors/api_errors.dart';
 import 'package:tendria/features/auth/data/model/loginResponse/login_response_model.dart';
 import 'package:tendria/features/auth/data/model/user/create_user_model.dart';
+import 'package:tendria/features/user/data/model/get_user_model.dart';
 import 'package:tendria/features/auth/domain/entities/response/login_response_entity.dart';
 import 'package:tendria/features/auth/domain/entities/user/create_user_entity.dart';
 import 'dart:async';
@@ -9,6 +10,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 class AuthDataSourceImp {
       String defaultApiServer = AppConstants.serverBase;
 
@@ -18,7 +20,7 @@ class AuthDataSourceImp {
       Uri url = Uri.parse('$defaultApiServer/Auth/login');
       final bodyData = jsonEncode({
         'email': email, 
-        'contrasena': password, 
+        'password': password, 
       });
       
       final response = await http.post(

@@ -19,7 +19,6 @@ class LoginController extends GetxController {
   final LoginUsecase loginUsecase;
   //final SaveTokenFcmUsecase saveTokenFcmUsecase;
 
-  // NUEVO: Mapeo de roles a rutas para desktop/web
 
   LoginController({
     required this.loginUsecase,
@@ -168,7 +167,9 @@ class LoginController extends GetxController {
     }
   }
 
-  void onRegisterTap() {}
+  void onRegisterTap() {
+    Get.toNamed(RoutesNames.registerPage);
+  }
 
   @override
   void onClose() {

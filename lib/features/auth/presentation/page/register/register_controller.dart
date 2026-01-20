@@ -6,14 +6,27 @@ import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/features/auth/domain/entities/user/create_user_entity.dart';
+import 'package:tendria/features/auth/domain/entities/user/registration_step.dart';
 import 'package:tendria/features/auth/domain/usecase/create_user_usecase.dart';
+import 'package:tendria/features/catalog/domain/entities/catalog_entity.dart';
+import 'package:tendria/features/catalog/domain/usecase/fetch_interests_usecase.dart';
+import 'package:tendria/features/catalog/domain/usecase/fetch_qualities_usecase.dart';
 
 class RegisterController extends GetxController {
   final CreateUserUsecase createUserUsecase;
-  
-  RegisterController({required this.createUserUsecase});
+  final FetchQualitiesUsecase fetchQualitiesUsecase;
+  final FetchInterestsUsecase fetchInterestsUsecase;
 
-  // Controllers de texto
+  RegisterController({
+    required this.createUserUsecase,
+    required this.fetchQualitiesUsecase,
+    required this.fetchInterestsUsecase,
+  });
+
+  final Rx<RegistrationStep> currentStep = RegistrationStep.basicInfo.obs;
+  final RxInt currentStepIndex = 0.obs;
+  late final FixedExtentScrollController heightScrollController;
+
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
@@ -21,7 +34,6 @@ class RegisterController extends GetxController {
   late final TextEditingController heightController;
   late final TextEditingController cityController;
 
-  // Focus Nodes
   late final FocusNode nameFocusNode;
   late final FocusNode emailFocusNode;
   late final FocusNode passwordFocusNode;
@@ -29,40 +41,50 @@ class RegisterController extends GetxController {
   late final FocusNode heightFocusNode;
   late final FocusNode cityFocusNode;
 
-  // Estados observables
   final RxBool isLoading = false.obs;
   final RxBool showPassword = false.obs;
   final RxBool showConfirmPassword = false.obs;
   final RxBool isLoadingLocation = false.obs;
   final RxBool locationObtained = false.obs;
+  final RxBool isLoadingQualities = false.obs;
+  final RxBool isLoadingInterests = false.obs;
 
-  // Datos del formulario
   final Rx<DateTime?> dateOfBirth = Rx<DateTime?>(null);
   final RxString selectedGender = ''.obs;
-  final RxString selectedLanguage = ''.obs;
+  final RxString selectedLanguage = 'Español'.obs;
   final RxList<int> selectedInterests = <int>[].obs;
   final RxList<int> selectedQualities = <int>[].obs;
 
-  // Ubicación
+  final RxList<CatalogEntity> qualities = <CatalogEntity>[].obs;
+  final RxList<CatalogEntity> interests = <CatalogEntity>[].obs;
+
   final RxString latitude = ''.obs;
   final RxString longitude = ''.obs;
+  final RxString city = ''.obs;
 
-  // Errores de validación
   final RxBool emailError = false.obs;
   final RxBool passwordError = false.obs;
   final RxBool confirmPasswordError = false.obs;
   final RxBool nameError = false.obs;
 
-  // Mensajes de error
   final RxString emailErrorMessage = ''.obs;
   final RxString passwordErrorMessage = ''.obs;
   final RxString confirmPasswordErrorMessage = ''.obs;
   final RxString nameErrorMessage = ''.obs;
 
+  final RxInt selectedHeight = 170.obs;
+
+  void selectHeight(int height) {
+    heightController.text = height.toString();
+    selectedHeight.value = height;
+  }
+
   @override
   void onInit() {
     super.onInit();
     _initializeControllers();
+    _loadCatalogs();
+    heightScrollController = FixedExtentScrollController(initialItem: 16);
   }
 
   void _initializeControllers() {
@@ -80,11 +102,157 @@ class RegisterController extends GetxController {
     heightFocusNode = FocusNode();
     cityFocusNode = FocusNode();
 
-    // Listeners para validación en tiempo real
     emailController.addListener(_validateEmail);
     passwordController.addListener(_validatePassword);
     confirmPasswordController.addListener(_validateConfirmPassword);
     nameController.addListener(_validateName);
+  }
+
+  // ==========================================
+  // CARGA DE CATÁLOGOS
+  // ==========================================
+
+  Future<void> _loadCatalogs() async {
+    await Future.wait([_loadQualities(), _loadInterests()]);
+  }
+
+  Future<void> _loadQualities() async {
+    try {
+      isLoadingQualities.value = true;
+      final result = await fetchQualitiesUsecase.execute();
+      qualities.value = result;
+    } catch (e) {
+      print('Error cargando cualidades: $e');
+    } finally {
+      isLoadingQualities.value = false;
+    }
+  }
+
+  Future<void> _loadInterests() async {
+    try {
+      isLoadingInterests.value = true;
+      final result = await fetchInterestsUsecase.execute();
+      interests.value = result;
+    } catch (e) {
+      print('Error cargando intereses: $e');
+    } finally {
+      isLoadingInterests.value = false;
+    }
+  }
+
+  // ==========================================
+  // NAVEGACIÓN ENTRE PASOS
+  // ==========================================
+
+  void nextStep() {
+    if (_validateCurrentStep()) {
+      if (currentStepIndex.value < 4) {
+        currentStepIndex.value++;
+        currentStep.value = RegistrationStep.values[currentStepIndex.value];
+
+        if (currentStep.value == RegistrationStep.personalInfo) {
+          _autoGetLocation();
+        }
+      }
+    }
+  }
+
+  void previousStep() {
+    if (currentStepIndex.value > 0) {
+      currentStepIndex.value--;
+      currentStep.value = RegistrationStep.values[currentStepIndex.value];
+    }
+  }
+
+  bool _validateCurrentStep() {
+    switch (currentStep.value) {
+      case RegistrationStep.basicInfo:
+        return _validateBasicInfo();
+      case RegistrationStep.personalInfo:
+        return _validatePersonalInfo();
+      case RegistrationStep.physicalInfo:
+        return _validatePhysicalInfo();
+      case RegistrationStep.interests:
+        return _validateInterests();
+      case RegistrationStep.qualities:
+        return true; 
+    }
+  }
+
+  bool _validateBasicInfo() {
+    bool isValid = true;
+
+    if (nameController.text.isEmpty || nameController.text.length < 3) {
+      nameError.value = true;
+      nameErrorMessage.value = nameController.text.isEmpty
+          ? 'El nombre es requerido'
+          : 'Mínimo 3 caracteres';
+      isValid = false;
+    }
+
+    if (emailController.text.isEmpty) {
+      emailError.value = true;
+      emailErrorMessage.value = 'El correo es requerido';
+      isValid = false;
+    } else if (emailError.value) {
+      isValid = false;
+    }
+
+    if (passwordController.text.isEmpty || passwordController.text.length < 8) {
+      passwordError.value = true;
+      passwordErrorMessage.value = passwordController.text.isEmpty
+          ? 'La contraseña es requerida'
+          : 'Mínimo 8 caracteres';
+      isValid = false;
+    }
+
+    if (confirmPasswordController.text != passwordController.text) {
+      confirmPasswordError.value = true;
+      confirmPasswordErrorMessage.value = 'Las contraseñas no coinciden';
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  bool _validatePersonalInfo() {
+    if (dateOfBirth.value == null) {
+      _showErrorAlert('Campo requerido', 'Selecciona tu fecha de nacimiento');
+      return false;
+    }
+
+    if (selectedGender.value.isEmpty) {
+      _showErrorAlert('Campo requerido', 'Selecciona tu género');
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validatePhysicalInfo() {
+    if (heightController.text.isEmpty) {
+      _showErrorAlert('Campo requerido', 'Ingresa tu altura');
+      return false;
+    }
+
+    final height = int.tryParse(heightController.text);
+    if (height == null || height < 100 || height > 250) {
+      _showErrorAlert(
+        'Altura inválida',
+        'Ingresa una altura válida entre 100 y 250 cm',
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateInterests() {
+    if (selectedInterests.isEmpty) {
+      _showErrorAlert('Campo requerido', 'Selecciona al menos un interés');
+      return false;
+    }
+    return true;
   }
 
   // ==========================================
@@ -144,136 +312,32 @@ class RegisterController extends GetxController {
     }
   }
 
-  bool _validateAllFields() {
-    bool isValid = true;
-
-    if (nameController.text.isEmpty) {
-      nameError.value = true;
-      nameErrorMessage.value = 'El nombre es requerido';
-      isValid = false;
-    }
-
-    if (emailController.text.isEmpty) {
-      emailError.value = true;
-      emailErrorMessage.value = 'El correo es requerido';
-      isValid = false;
-    }
-
-    if (passwordController.text.isEmpty) {
-      passwordError.value = true;
-      passwordErrorMessage.value = 'La contraseña es requerida';
-      isValid = false;
-    }
-
-    if (confirmPasswordController.text.isEmpty) {
-      confirmPasswordError.value = true;
-      confirmPasswordErrorMessage.value = 'Confirma tu contraseña';
-      isValid = false;
-    }
-
-    if (dateOfBirth.value == null) {
-      _showErrorAlert('Campo requerido', 'Selecciona tu fecha de nacimiento');
-      isValid = false;
-    }
-
-    if (selectedGender.value.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona tu género');
-      isValid = false;
-    }
-
-    if (heightController.text.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Ingresa tu altura');
-      isValid = false;
-    }
-
-    if (selectedLanguage.value.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona tu idioma principal');
-      isValid = false;
-    }
-
-    if (cityController.text.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Ingresa tu ciudad');
-      isValid = false;
-    }
-
-    if (!locationObtained.value) {
-      _showErrorAlert('Ubicación requerida', 'Por favor, obtén tu ubicación');
-      isValid = false;
-    }
-
-    if (selectedInterests.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona al menos un interés');
-      isValid = false;
-    }
-
-    if (selectedQualities.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona al menos una cualidad');
-      isValid = false;
-    }
-
-    // Validar errores existentes
-    if (emailError.value || passwordError.value || confirmPasswordError.value || nameError.value) {
-      isValid = false;
-    }
-
-    return isValid;
-  }
-
   // ==========================================
-  // PERMISOS Y UBICACIÓN
+  // UBICACIÓN AUTOMÁTICA
   // ==========================================
 
-  Future<void> requestLocationPermission() async {
+  Future<void> _autoGetLocation() async {
     try {
       isLoadingLocation.value = true;
 
-      // Verificar si el servicio de ubicación está habilitado
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _showErrorAlert(
-          'Servicio deshabilitado',
-          'Por favor, habilita el servicio de ubicación en tu dispositivo',
-        );
-        isLoadingLocation.value = false;
         return;
       }
 
-      // Verificar permisos
       LocationPermission permission = await Geolocator.checkPermission();
-      
+
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _showErrorAlert(
-            'Permiso denegado',
-            'Necesitamos acceso a tu ubicación para crear tu perfil',
-          );
-          isLoadingLocation.value = false;
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _showPermissionDeniedDialog();
-        isLoadingLocation.value = false;
         return;
       }
 
-      // Obtener ubicación
-      await _getCurrentLocation();
-    } catch (e) {
-      print('Error obteniendo permisos: $e');
-      _showErrorAlert(
-        'Error',
-        'No se pudo obtener la ubicación: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isLoadingLocation.value = false;
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -282,32 +346,11 @@ class RegisterController extends GetxController {
       longitude.value = position.longitude.toString();
       locationObtained.value = true;
 
-      _showSuccessAlert(
-        'Ubicación obtenida',
-        'Tu ubicación se ha obtenido correctamente',
-      );
+      city.value = 'Ciudad'; 
     } catch (e) {
       print('Error obteniendo ubicación: $e');
-      _showErrorAlert(
-        'Error',
-        'No se pudo obtener tu ubicación: ${cleanExceptionMessage(e)}',
-      );
-    }
-  }
-
-  void _showPermissionDeniedDialog() {
-    if (Get.context != null) {
-      showCustomAlert(
-        context: Get.context!,
-        title: 'Permiso denegado permanentemente',
-        message: 'Para usar esta función, necesitas habilitar los permisos de ubicación en la configuración de tu dispositivo.',
-        confirmText: 'Ir a configuración',
-        cancelText: 'Cancelar',
-        type: CustomAlertType.warning,
-        onConfirm: () {
-          openAppSettings();
-        },
-      );
+    } finally {
+      isLoadingLocation.value = false;
     }
   }
 
@@ -344,11 +387,22 @@ class RegisterController extends GetxController {
   }
 
   // ==========================================
-  // REGISTRO
+  // REGISTRO FINAL
   // ==========================================
 
   Future<void> onRegisterTap() async {
-    if (!_validateAllFields()) return;
+    if (selectedQualities.isEmpty) {
+      _showErrorAlert('Campo requerido', 'Selecciona al menos una cualidad');
+      return;
+    }
+
+    if (!locationObtained.value) {
+      _showErrorAlert(
+        'Ubicación requerida',
+        'Necesitamos tu ubicación para completar el registro. Por favor, habilita los permisos de ubicación.',
+      );
+      return;
+    }
 
     try {
       isLoading.value = true;
@@ -361,7 +415,7 @@ class RegisterController extends GetxController {
         gender: selectedGender.value,
         heightcm: heightController.text.trim(),
         primarylanguage: selectedLanguage.value,
-        city: cityController.text.trim(),
+        city: city.value.isNotEmpty ? city.value : 'Ciudad desconocida',
         lat: latitude.value,
         lng: longitude.value,
         interestsIds: selectedInterests.toList(),
@@ -381,10 +435,7 @@ class RegisterController extends GetxController {
       _clearFields();
     } catch (e) {
       print('Error en registro: $e');
-      _showErrorAlert(
-        'Error en el registro',
-        cleanExceptionMessage(e),
-      );
+      _showErrorAlert('Error en el registro', cleanExceptionMessage(e));
     } finally {
       isLoading.value = false;
     }
@@ -415,14 +466,18 @@ class RegisterController extends GetxController {
   }
 
   void onConfirmPasswordSubmitted() {
-    confirmPasswordFocusNode.unfocus();
+    nextStep();
   }
 
   // ==========================================
   // ALERTAS
   // ==========================================
 
-  void _showErrorAlert(String title, String message, {VoidCallback? onDismiss}) {
+  void _showErrorAlert(
+    String title,
+    String message, {
+    VoidCallback? onDismiss,
+  }) {
     if (Get.context != null) {
       showCustomAlert(
         context: Get.context!,
@@ -435,7 +490,11 @@ class RegisterController extends GetxController {
     }
   }
 
-  void _showSuccessAlert(String title, String message, {VoidCallback? onDismiss}) {
+  void _showSuccessAlert(
+    String title,
+    String message, {
+    VoidCallback? onDismiss,
+  }) {
     if (Get.context != null) {
       showCustomAlert(
         context: Get.context!,
@@ -459,26 +518,29 @@ class RegisterController extends GetxController {
     confirmPasswordController.clear();
     heightController.clear();
     cityController.clear();
-    
+
     dateOfBirth.value = null;
     selectedGender.value = '';
-    selectedLanguage.value = '';
+    selectedLanguage.value = 'Español';
     selectedInterests.clear();
     selectedQualities.clear();
     latitude.value = '';
     longitude.value = '';
+    city.value = '';
     locationObtained.value = false;
+    currentStepIndex.value = 0;
+    currentStep.value = RegistrationStep.basicInfo;
+      heightScrollController.dispose();
+
   }
 
   @override
   void onClose() {
-    // Remover listeners
     emailController.removeListener(_validateEmail);
     passwordController.removeListener(_validatePassword);
     confirmPasswordController.removeListener(_validateConfirmPassword);
     nameController.removeListener(_validateName);
 
-    // Dispose controllers
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
@@ -486,7 +548,6 @@ class RegisterController extends GetxController {
     heightController.dispose();
     cityController.dispose();
 
-    // Dispose focus nodes
     nameFocusNode.dispose();
     emailFocusNode.dispose();
     passwordFocusNode.dispose();

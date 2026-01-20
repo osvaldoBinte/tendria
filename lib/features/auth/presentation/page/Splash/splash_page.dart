@@ -66,7 +66,7 @@ Widget build(BuildContext context) {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            //  ThemeColor.createAppLogo(size: 250,padding: EdgeInsets.only(bottom: 20)),
+              ThemeColor.createAppLogo(size: 250,padding: EdgeInsets.only(bottom: 20)),
            
             ],
           ),

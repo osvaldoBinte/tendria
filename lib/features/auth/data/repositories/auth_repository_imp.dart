@@ -2,6 +2,7 @@ import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/features/auth/data/datasource/auth_data_source_imp.dart';
 import 'package:tendria/features/auth/domain/entities/response/login_response_entity.dart';
 import 'package:tendria/features/auth/domain/entities/user/create_user_entity.dart';
+import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/auth/domain/repositories/auth_repository.dart';
 import 'dart:async';
 
@@ -19,5 +20,7 @@ class AuthRepositoryImp extends AuthRepository {
   Future<void> createUser(CreateUserEntity entity) async  {
     return await authDataSourceImp.createuser(entity);
   }
+
+ 
 
 }

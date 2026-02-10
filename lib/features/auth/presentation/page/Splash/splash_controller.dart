@@ -33,7 +33,7 @@ class SplashController extends GetxController {
   }
 if (status.isPermanentlyDenied) {
   showCustomAlert(
-    context: Get.context!, // GetX nos da el context
+    context: Get.context!,
     title: 'Permiso de ubicación',
     message: 'Debes habilitar la ubicación desde ajustes para continuar',
     confirmText: 'Abrir ajustes',
@@ -58,8 +58,8 @@ if (status.isPermanentlyDenied) {
   Future<void> checkUserSession() async {
     try {
      
-      await getUserUsecase.call();
-   Get.offAllNamed(RoutesNames.homePage);
+      await getUserUsecase.execute();
+   Get.offAllNamed(RoutesNames.preferencesPage);
 
 
     } catch (e) {

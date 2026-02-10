@@ -35,7 +35,14 @@ class ForYouPage extends StatelessWidget {
       automaticallyImplyLeading: false,
       title: Row(
         children: [
-          Image.asset('assets/logo/logo.png', width: 100, height: 30),
+          Text('NUCLEO' 
+          
+          , style: GoogleFonts.lato(
+              fontSize: 20,
+              color: ThemeColor.textPrimaryColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -152,7 +159,7 @@ class ForYouPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Text(
-              'Recomendadas para ti',
+              'Según tu perfil y tus conexiones previas',
               style: GoogleFonts.lato(
                 fontSize: 12,
                 color: ThemeColor.textSecondaryColor,

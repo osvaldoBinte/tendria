@@ -31,10 +31,38 @@ class LoginPage extends GetView<LoginController> {
       ),
     );
   }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
+Widget _buildHeader() {
+  return Column(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/logo/logo.png',
+          width: 120,
+          height: 120,
+          cacheWidth: 240,
+          cacheHeight: 240,
+          filterQuality: FilterQuality.medium,
+          // ✅ Manejo de error
+          errorBuilder: (context, error, stackTrace) {
+            print('❌ Error cargando logo: $error');
+            return Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: ThemeColor.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                Icons.image_not_supported,
+                size: 50,
+                color: ThemeColor.primaryColor,
+              ),
+            );
+          },
+        ),
+      ),
+       SizedBox(height: ThemeColor.paddingLarge),
         Text(
           'Iniciar Sesión',
           style: ThemeColor.headingLarge.copyWith(
@@ -67,9 +95,9 @@ class LoginPage extends GetView<LoginController> {
             ),
           ],
         ),
-      ],
-    );
-  }
+    ],
+  );
+}
 
   Widget _buildLoginForm() {
     return Container(

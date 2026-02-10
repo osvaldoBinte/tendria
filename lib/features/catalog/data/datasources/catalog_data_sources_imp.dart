@@ -13,7 +13,7 @@ class CatalogDataSourcesImp {
 
   Future<List<CatalogEntity>> getQualities() async {
     try {
-      Uri url = Uri.parse('$defaultApiServer/Catalogos/intereses');
+      Uri url = Uri.parse('$defaultApiServer/Catalogos/cualidades');
       final response = await http.get(
         url,
         headers: <String, String>{'Content-Type': 'application/json'},
@@ -39,7 +39,7 @@ class CatalogDataSourcesImp {
 
   Future<List<CatalogEntity>> getInterests() async {
     try {
-      Uri url = Uri.parse('$defaultApiServer/Catalogos/cualidades');
+      Uri url = Uri.parse('$defaultApiServer/Catalogos/intereses');
       final response = await http.get(
         url,
         headers: <String, String>{'Content-Type': 'application/json'},
@@ -61,5 +61,70 @@ class CatalogDataSourcesImp {
       }
       throw Exception('$e');
     }
+  }Future<void> postInterests(List<int> interestsIds, String token) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/User/intereses');
+    print('POST a: $url con body: $interestsIds');
+
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(interestsIds),
+    );
+
+    print('Status code: ${response.statusCode}');
+    print('Body de la respuesta: ${response.body}');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
+    }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+  } catch (e, stackTrace) {
+    print('Error en postInterests: $e');
+    print('Stack trace: $stackTrace');
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+      throw Exception(convertMessageException(error: e));
+    }
+    throw Exception('$e');
   }
+}
+
+Future<void> postQualities(List<int> qualitiesIds,String token) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/User/cualidades');
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(qualitiesIds),
+    );
+
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
+    }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+  } catch (e, stackTrace) {
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+      throw Exception(convertMessageException(error: e));
+    }
+    throw Exception('$e');
+  }
+}
+
 }

@@ -12,17 +12,13 @@ class StartPage extends StatelessWidget {
     final StartController controller = Get.put(StartController());
 
     return Obx(() => ThemeColor.createMainScaffold(
-      body: controller.currentPage,
-      currentIndex: controller.selectedIndex.value,
-      onNavigationTap: controller.changePage,
-      iconPaths: [
-        controller.getIconPath(0),
-        controller.getIconPath(1),
-        controller.getIconPath(2),
-        controller.getIconPath(3),
-      ],
-      backgroundColor: ThemeColor.backgroundColorfondo,
-      bottomNavBackgroundColor: Colors.white,
-    ));
+  body: controller.currentPage,
+  currentIndex: controller.selectedIndex.value,
+  onNavigationTap: controller.changePage,
+  iconPaths: controller.iconPaths,
+  backgroundColor: ThemeColor.backgroundColorfondo,
+  bottomNavBackgroundColor: Colors.white,
+));
+
   }
 }

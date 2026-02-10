@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 
 class UserModel {
   final String id;
@@ -98,17 +99,10 @@ class ForYouController extends GetxController {
     if (index != -1) {
       recommendations[index].isFavorite = !recommendations[index].isFavorite;
       recommendations.refresh();
-      
-      Get.snackbar(
-        recommendations[index].isFavorite ? 'Agregado' : 'Eliminado',
-        recommendations[index].isFavorite
+          showWarningSnackbar(  recommendations[index].isFavorite
             ? '${recommendations[index].name} fue agregada a favoritos'
-            : '${recommendations[index].name} fue eliminada de favoritos',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: ThemeColor.primaryColor,
-        colorText: ThemeColor.textLightColor,
-        duration: const Duration(seconds: 2),
-      );
+            : '${recommendations[index].name} fue eliminada de favoritos');
+
     }
   }
 }

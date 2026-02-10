@@ -1,6 +1,8 @@
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/features/user/data/datasources/user_data_sources_imp.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
+import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
+import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
 import 'package:tendria/features/user/domain/repositories/user_repository.dart';
 
 class UserRepositoryImp extends UserRepository {
@@ -9,7 +11,31 @@ class UserRepositoryImp extends UserRepository {
   UserRepositoryImp({required this.userDataSourcesImp});
   @override
   Future<GetUserEntity> fetchUser() async {
-   final token = await authService.getToken() ??( throw Exception("No hay sesión activa. El usuario debe iniciar sesión."));
-   return await userDataSourcesImp.getuser(token);
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.getuser(token);
+  }
+
+  @override
+  Future<void> preferencesUser(PreferencesEntity entity) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.preferencesUser(entity, token);
+  }
+
+  @override
+  Future<void> uploadMedia(List<UploadMediaEntity> entities) async {
+      final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+      return await userDataSourcesImp.createMedia(entities, token);
+  }
+  
+  @override
+  Future<List<GetUserEntity>> fetchNearbyUsers(int pageNumber,int pageSize,) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.getNearbyUsers(pageNumber,pageSize,token);
+  }
+  
+  @override
+  Future<void> uploadPicturePerfile(String file) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.uploadPicturePerfil(file, token);
   }
 }

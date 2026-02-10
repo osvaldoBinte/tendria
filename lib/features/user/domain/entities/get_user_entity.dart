@@ -1,36 +1,45 @@
+import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
+
 class GetUserEntity {
+  final int? id;
   final String? name;
-  final String? age;
+  final int? age;
   final String? fotoUrl;
-  final List<Asset>? assets;
-  final List<QualitiesIds>? qualitiesIds;
-  final List<InterestsIds>? interestsIds;
+  final String? bio;
+  final List<AssetEntity>? assets;
+  final List<QualitiesIdsEntity>? qualitiesIds;
+  final List<InterestsIdsEntity>? interestsIds;
+  final List<PreferencesEntity>? preferences;
   GetUserEntity({
+       this.id,
      this.name,
      this.age,
      this.fotoUrl,
      this.assets,
+      this.bio,
      this.qualitiesIds,
      this.interestsIds,
+      this.preferences,
   });
 
 }
-class Asset {
+class AssetEntity {
   final int id;
   final String url;
   final String type;
-  final String orden;
+  final int orden;
 
-  Asset({required this.id, required this.url, required this.type, required this.orden});
+  AssetEntity({required this.id, required this.url, required this.type, required this.orden});
 }
-class QualitiesIds {
+class QualitiesIdsEntity {
   final int id;
   final String name;
 
-  QualitiesIds({required this.id, required this.name});
+  QualitiesIdsEntity({required this.id, required this.name});
 }
-class InterestsIds {
+
+class InterestsIdsEntity {
   final int id;
   final String name;  
-  InterestsIds({required this.id, required this.name});
+  InterestsIdsEntity({required this.id, required this.name});
 }

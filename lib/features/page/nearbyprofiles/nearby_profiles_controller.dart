@@ -1,6 +1,7 @@
 
 import 'package:get/get.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 
 class ProfileModel {
   final String name;
@@ -60,12 +61,7 @@ class NearbyProfilesController extends GetxController {
   final RxInt nearbyCount = 10.obs;
 
   void onProfileTap(ProfileModel profile) {
-    Get.snackbar(
-      'Perfil seleccionado',
-      'Has seleccionado el perfil de ${profile.name}',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: ThemeColor.primaryColor,
-      colorText: ThemeColor.textLightColor,
-    );
+        showWarningSnackbar( 'Has seleccionado el perfil de ${profile.name}');
+
   }
 }

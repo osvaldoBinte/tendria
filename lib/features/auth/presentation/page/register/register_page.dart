@@ -39,7 +39,7 @@ class RegisterPage extends GetView<RegisterController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: ThemeColor.paddingExtraLarge),
-            
+
             Text(
               'Empezar',
               style: ThemeColor.headingLarge.copyWith(
@@ -69,9 +69,9 @@ class RegisterPage extends GetView<RegisterController> {
                 ),
               ],
             ),
-            
+
             SizedBox(height: ThemeColor.paddingExtraLarge * 1.5),
-            
+
             Obx(
               () => ThemeColor.createLabeledTextField(
                 label: 'Nombre Completo:',
@@ -84,9 +84,9 @@ class RegisterPage extends GetView<RegisterController> {
                 showError: controller.nameError.value,
               ),
             ),
-            
+
             SizedBox(height: ThemeColor.paddingLarge),
-            
+
             Obx(
               () => ThemeColor.createLabeledTextField(
                 label: 'Correo electrónico:',
@@ -100,9 +100,9 @@ class RegisterPage extends GetView<RegisterController> {
                 showError: controller.emailError.value,
               ),
             ),
-            
+
             SizedBox(height: ThemeColor.paddingLarge),
-            
+
             Obx(
               () => ThemeColor.createLabeledTextField(
                 label: 'Crea una contraseña',
@@ -125,9 +125,9 @@ class RegisterPage extends GetView<RegisterController> {
                 ),
               ),
             ),
-            
+
             SizedBox(height: ThemeColor.paddingLarge),
-            
+
             Obx(
               () => ThemeColor.createLabeledTextField(
                 label: 'Confirma tu contraseña:',
@@ -150,9 +150,9 @@ class RegisterPage extends GetView<RegisterController> {
                 ),
               ),
             ),
-            
+
             SizedBox(height: ThemeColor.paddingExtraLarge),
-          
+
             Text(
               'Al registrarte estas aceptando el Aviso de Privacidad y los Términos y Condiciones.',
               style: ThemeColor.bodySmall.copyWith(
@@ -160,9 +160,9 @@ class RegisterPage extends GetView<RegisterController> {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             SizedBox(height: ThemeColor.paddingLarge),
-            
+
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -178,13 +178,11 @@ class RegisterPage extends GetView<RegisterController> {
                 ),
                 child: Text(
                   'Registrarse',
-                  style: ThemeColor.buttonText.copyWith(
-                    fontSize: 16,
-                  ),
+                  style: ThemeColor.buttonText.copyWith(fontSize: 16),
                 ),
               ),
             ),
-            
+
             SizedBox(height: ThemeColor.paddingExtraLarge),
           ],
         ),
@@ -204,7 +202,7 @@ class RegisterPage extends GetView<RegisterController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-                  
+
                   Text(
                     'Iniciemos con lo\nbásico',
                     style: ThemeColor.headingLarge.copyWith(
@@ -214,209 +212,209 @@ class RegisterPage extends GetView<RegisterController> {
                       height: 1.2,
                     ),
                   ),
-                  
+
                   SizedBox(height: ThemeColor.paddingExtraLarge * 1.5),
-                  
-Text(
-  'Selecciona tu fecha de nacimiento',
-  style: ThemeColor.bodyMedium.copyWith(
-    color: ThemeColor.textDarkColor,
-    fontWeight: FontWeight.w500,
-  ),
-),
-SizedBox(height: ThemeColor.paddingMedium),
-Obx(
-  () => InkWell(
-    onTap: () => _showDatePicker(),
-    child: Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: ThemeColor.paddingLarge,
-        vertical: ThemeColor.paddingMedium + 2,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: ThemeColor.mediumBorderRadius,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            controller.dateOfBirth.value != null
-                ? '${controller.dateOfBirth.value!.day.toString().padLeft(2, '0')}/${controller.dateOfBirth.value!.month.toString().padLeft(2, '0')}/${controller.dateOfBirth.value!.year}'
-                : '14/05/1993',
-            style: ThemeColor.bodyMedium.copyWith(
-              color: controller.dateOfBirth.value != null
-                  ? ThemeColor.textDarkColor
-                  : ThemeColor.textSecondaryColor,
-            ),
-          ),
-          Icon(
-            Icons.calendar_today,
-            color: ThemeColor.textSecondaryColor,
-            size: 20,
-          ),
-        ],
-      ),
-    ),
-  ),
-),
-                  
-                  SizedBox(height: ThemeColor.paddingExtraLarge),
-                  
+
+                  // Fecha de nacimiento
                   Text(
-                    '¿Cómo te identificas?',
+                    'Selecciona tu fecha de nacimiento',
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textDarkColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingMedium),
-                  _buildGenderOption('Mujer', Icons.female),
-                  SizedBox(height: ThemeColor.paddingSmall),
-                  _buildGenderOption('Hombre', Icons.male),
-                  SizedBox(height: ThemeColor.paddingSmall),
-                  _buildGenderOption('Género no binario', Icons.transgender),
-                  
-                  SizedBox(height: ThemeColor.paddingMedium),
-                  
-                  _buildGenderOption('Escribe cómo te identificas', Icons.edit, isCustom: true),
-                  
-                  if (controller.selectedGender.value == 'Otro')
-                    Padding(
-                      padding: EdgeInsets.only(top: ThemeColor.paddingMedium),
+                  Obx(
+                    () => InkWell(
+                      onTap: () => _showDatePicker(),
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: ThemeColor.paddingLarge,
-                          vertical: ThemeColor.paddingSmall,
+                          vertical: ThemeColor.paddingMedium + 2,
                         ),
                         decoration: BoxDecoration(
-                          color: ThemeColor.backgroundColorfondo,
+                          color: Colors.white,
                           borderRadius: ThemeColor.mediumBorderRadius,
                         ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Escribe algo...',
-                            hintStyle: ThemeColor.bodyMedium.copyWith(
-                              color: ThemeColor.textSecondaryColor.withOpacity(0.5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              controller.dateOfBirth.value != null
+                                  ? '${controller.dateOfBirth.value!.day.toString().padLeft(2, '0')}/${controller.dateOfBirth.value!.month.toString().padLeft(2, '0')}/${controller.dateOfBirth.value!.year}'
+                                  : '14/05/1993',
+                              style: ThemeColor.bodyMedium.copyWith(
+                                color: controller.dateOfBirth.value != null
+                                    ? ThemeColor.textDarkColor
+                                    : ThemeColor.textSecondaryColor,
+                              ),
                             ),
-                            border: InputBorder.none,
-                          ),
-                          style: ThemeColor.bodyMedium,
+                            Icon(
+                              Icons.calendar_today,
+                              color: ThemeColor.textSecondaryColor,
+                              size: 20,
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                  ),
+
+                  SizedBox(height: ThemeColor.paddingExtraLarge),
+
+                 // En _buildPersonalInfoStep(), reemplaza la sección de género:
+
+Text(
+  '¿Cómo te identificas?',
+  style: ThemeColor.bodyMedium.copyWith(
+    color: ThemeColor.textDarkColor,
+    fontWeight: FontWeight.w500,
+  ),
+),
+SizedBox(height: ThemeColor.paddingMedium),
+
+// Generar opciones dinámicamente desde genderOptions
+...controller.genderOptions.map((option) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
+    child: _buildGenderOption(
+      option['label'] as String,
+      option['icon'] as IconData,
+      option['value'] as String,
+    ),
+  );
+}).toList(),
+
+                  SizedBox(height: ThemeColor.paddingExtraLarge),
+
+                  Obx(
+                    () => ThemeColor.createLabeledTextField(
+                      label: 'Cuéntanos sobre ti:',
+                      controller: controller.bioController,
+                      focusNode: controller.bioFocusNode,
+                      hintText: 'Escribe una breve biografía...',
+                      maxLines: 4,
+                      keyboardType: TextInputType.multiline,
+                      isRequired: true, 
+                      errorText: controller.bioErrorMessage.value,
+                      showError: controller.bioError.value,
+                      borderRadius: ThemeColor.smallBorderRadius
+                    ),
+                  ),
+
+                 
                 ],
               ),
             ),
           ),
         ),
-        
+
         _buildNavigationButtons(),
       ],
     );
   }
 
-  Widget _buildGenderOption(String text, IconData icon, {bool isCustom = false}) {
-    return Obx(
-      () {
-        final isSelected = isCustom 
-            ? controller.selectedGender.value == 'Otro'
-            : controller.selectedGender.value == text;
-        
-        return InkWell(
-          onTap: () => controller.selectGender(isCustom ? 'Otro' : text),
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingLarge,
-              vertical: ThemeColor.paddingMedium + 2,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: ThemeColor.mediumBorderRadius,
-              border: isSelected
-                  ? Border.all(color: ThemeColor.tertiaryColor, width: 2)
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    text,
-                    style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textDarkColor,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? ThemeColor.tertiaryColor : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.textSecondaryColor,
-                      width: 2,
-                    ),
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.circle,
-                          color: Colors.white,
-                          size: 12,
-                        )
-                      : null,
-                ),
-              ],
-            ),
+ Widget _buildGenderOption(String text, IconData icon, String value, {bool isCustom = false}) {
+  return Obx(
+    () {
+      final isSelected = controller.selectedGender.value == value;
+      
+      return InkWell(
+        onTap: () => controller.selectGender(value),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: ThemeColor.paddingLarge,
+            vertical: ThemeColor.paddingMedium + 2,
           ),
-        );
-      },
-    );
-  }
-void _showDatePicker() async {
-  final DateTime today = DateTime.now();
-  final DateTime maxDate = DateTime(
-    today.year - 18,
-    today.month,
-    today.day,
-  );
-  
-  final DateTime initialDate = DateTime(
-    today.year - 25,
-    today.month,
-    today.day,
-  );
-  
-  final DateTime minDate = DateTime(
-    today.year - 100,
-    today.month,
-    today.day,
-  );
-
-  final DateTime? picked = await showDatePicker(
-    context: Get.context!,
-    initialDate: initialDate,
-    firstDate: minDate,
-    lastDate: maxDate,
-    builder: (context, child) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: ColorScheme.light(
-            primary: ThemeColor.primaryColor,
-            onPrimary: Colors.white,
-            surface: Colors.white,
-            onSurface: ThemeColor.textDarkColor,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: ThemeColor.mediumBorderRadius,
+            border: isSelected
+                ? Border.all(color: ThemeColor.tertiaryColor, width: 2)
+                : null,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: isSelected 
+                    ? ThemeColor.tertiaryColor 
+                    : ThemeColor.textSecondaryColor,
+                size: 24,
+              ),
+              SizedBox(width: ThemeColor.paddingMedium),
+              Expanded(
+                child: Text(
+                  text,
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textDarkColor,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ),
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? ThemeColor.tertiaryColor : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.textSecondaryColor,
+                    width: 2,
+                  ),
+                ),
+                child: isSelected
+                    ? Icon(
+                        Icons.circle,
+                        color: Colors.white,
+                        size: 12,
+                      )
+                    : null,
+              ),
+            ],
           ),
         ),
-        child: child!,
       );
     },
   );
-  
-  if (picked != null) {
-    controller.selectDateOfBirth(picked);
-  }
 }
+
+  void _showDatePicker() async {
+    final DateTime today = DateTime.now();
+    final DateTime maxDate = DateTime(today.year - 18, today.month, today.day);
+
+    final DateTime initialDate = DateTime(
+      today.year - 25,
+      today.month,
+      today.day,
+    );
+
+    final DateTime minDate = DateTime(today.year - 100, today.month, today.day);
+
+    final DateTime? picked = await showDatePicker(
+      context: Get.context!,
+      initialDate: initialDate,
+      firstDate: minDate,
+      lastDate: maxDate,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: ThemeColor.primaryColor,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: ThemeColor.textDarkColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      controller.selectDateOfBirth(picked);
+    }
+  }
 
   // PASO 3: ALTURA
   Widget _buildPhysicalInfoStep() {
@@ -452,82 +450,82 @@ void _showDatePicker() async {
                   ],
                 ),
               ),
-              
-              Expanded(
-                child: _buildHeightPicker(),
-              ),
+
+              Expanded(child: _buildHeightPicker()),
             ],
           ),
         ),
-        
+
         _buildNavigationButtons(showSkip: true),
       ],
     );
   }
 
-Widget _buildHeightPicker() {
-  return Stack(
-    alignment: Alignment.center,
-    children: [
-      IgnorePointer(
-        child: Container(
-          height: 60,
-          margin: EdgeInsets.symmetric(
-            horizontal: ThemeColor.paddingExtraLarge * 2,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: ThemeColor.extraLargeBorderRadius,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
-      ),
-      
-      ListWheelScrollView.useDelegate(
-        controller: controller.heightScrollController,
-        itemExtent: 60, 
-        diameterRatio: 1.5,
-        perspective: 0.003,
-        physics: FixedExtentScrollPhysics(),
-        onSelectedItemChanged: (index) {
-          final height = 154 + index;
-          controller.selectHeight(height);
-        },
-        childDelegate: ListWheelChildBuilderDelegate(
-          childCount: 96, 
-          builder: (context, index) {
-            final height = 154 + index;
-            
-            return Obx(() {
-              final isSelected = height == controller.selectedHeight.value;
-              
-              return Container(
-                height: 60,
-                alignment: Alignment.center,
-                child: Text(
-                  '$height cm',
-                  style: ThemeColor.bodyLarge.copyWith(
-                    color: isSelected
-                        ? ThemeColor.textDarkColor
-                        : ThemeColor.textSecondaryColor,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    fontSize: isSelected ? 20 : 16,
-                  ),
+  Widget _buildHeightPicker() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IgnorePointer(
+          child: Container(
+            height: 60,
+            margin: EdgeInsets.symmetric(
+              horizontal: ThemeColor.paddingExtraLarge * 2,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: ThemeColor.extraLargeBorderRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: Offset(0, 2),
                 ),
-              );
-            });
-          },
+              ],
+            ),
+          ),
         ),
-      ),
-    ],
-  );
-}
+
+        ListWheelScrollView.useDelegate(
+          controller: controller.heightScrollController,
+          itemExtent: 60,
+          diameterRatio: 1.5,
+          perspective: 0.003,
+          physics: FixedExtentScrollPhysics(),
+          onSelectedItemChanged: (index) {
+            final height = 154 + index;
+            controller.selectHeight(height);
+          },
+          childDelegate: ListWheelChildBuilderDelegate(
+            childCount: 96,
+            builder: (context, index) {
+              final height = 154 + index;
+
+              return Obx(() {
+                final isSelected = height == controller.selectedHeight.value;
+
+                return Container(
+                  height: 60,
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$height cm',
+                    style: ThemeColor.bodyLarge.copyWith(
+                      color: isSelected
+                          ? ThemeColor.textDarkColor
+                          : ThemeColor.textSecondaryColor,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontSize: isSelected ? 20 : 16,
+                    ),
+                  ),
+                );
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
   // PASO 4: INTERESES
   Widget _buildInterestsStep() {
@@ -541,8 +539,7 @@ Widget _buildHeightPicker() {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-                  
-                  
+
                   Text(
                     'Elige tus intereses\nprincipales',
                     style: ThemeColor.headingLarge.copyWith(
@@ -560,9 +557,9 @@ Widget _buildHeightPicker() {
                       height: 1.4,
                     ),
                   ),
-                  
+
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-                  
+
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: ThemeColor.paddingLarge,
@@ -594,30 +591,32 @@ Widget _buildHeightPicker() {
                       ],
                     ),
                   ),
-                  
+
                   SizedBox(height: ThemeColor.paddingLarge),
-                  
-                  Obx(() => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Intereses populares',
-                            style: ThemeColor.bodyMedium.copyWith(
-                              color: ThemeColor.textDarkColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+
+                  Obx(
+                    () => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Intereses populares',
+                          style: ThemeColor.bodyMedium.copyWith(
+                            color: ThemeColor.textDarkColor,
+                            fontWeight: FontWeight.w600,
                           ),
-                          Text(
-                            '${controller.selectedInterests.length}/5 seleccionados',
-                            style: ThemeColor.bodyMedium.copyWith(
-                              color: ThemeColor.textSecondaryColor,
-                            ),
+                        ),
+                        Text(
+                          '${controller.selectedInterests.length}/5 seleccionados',
+                          style: ThemeColor.bodyMedium.copyWith(
+                            color: ThemeColor.textSecondaryColor,
                           ),
-                        ],
-                      )),
-                  
+                        ),
+                      ],
+                    ),
+                  ),
+
                   SizedBox(height: ThemeColor.paddingMedium),
-                  
+
                   Obx(() {
                     if (controller.isLoadingInterests.value) {
                       return Center(
@@ -647,7 +646,8 @@ Widget _buildHeightPicker() {
                       spacing: ThemeColor.paddingSmall,
                       runSpacing: ThemeColor.paddingSmall,
                       children: controller.interests.map((interest) {
-                        final isSelected = controller.selectedInterests.contains(interest.id);
+                        final isSelected = controller.selectedInterests
+                            .contains(interest.id);
                         return _buildInterestChip(
                           interest.name,
                           _getInterestIcon(interest.name),
@@ -657,9 +657,9 @@ Widget _buildHeightPicker() {
                       }).toList(),
                     );
                   }),
-                  
+
                   SizedBox(height: ThemeColor.paddingLarge),
-                  
+
                   Center(
                     child: Text(
                       'si no se encuentran tus resultados escríbelos...',
@@ -669,42 +669,27 @@ Widget _buildHeightPicker() {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  
+
                   SizedBox(height: ThemeColor.paddingMedium),
-                  
-                  Center(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: ThemeColor.paddingLarge,
-                        vertical: ThemeColor.paddingSmall,
-                      ),
-                      decoration: BoxDecoration(
-                        color: ThemeColor.tertiaryColor,
-                        borderRadius: ThemeColor.circularBorderRadius,
-                      ),
-                      child: Text(
-                        'Añadir',
-                        style: ThemeColor.bodyMedium.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  
+
                   SizedBox(height: ThemeColor.paddingExtraLarge),
                 ],
               ),
             ),
           ),
         ),
-        
+
         _buildNavigationButtons(showSkip: true),
       ],
     );
   }
 
-  Widget _buildInterestChip(String label, IconData icon, bool isSelected, VoidCallback onTap) {
+  Widget _buildInterestChip(
+    String label,
+    IconData icon,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -770,7 +755,7 @@ Widget _buildHeightPicker() {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-                  
+
                   Text(
                     'Lo que más aprecias en una\npersona',
                     style: ThemeColor.headingLarge.copyWith(
@@ -788,19 +773,21 @@ Widget _buildHeightPicker() {
                       height: 1.4,
                     ),
                   ),
-                  
+
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-                  
-                  Obx(() => Text(
-                        'Lo que buscas en alguien        ${controller.selectedQualities.length}/3 seleccionados',
-                        style: ThemeColor.bodyMedium.copyWith(
-                          color: ThemeColor.textDarkColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )),
-                  
+
+                  Obx(
+                    () => Text(
+                      'Lo que buscas en alguien        ${controller.selectedQualities.length}/3 seleccionados',
+                      style: ThemeColor.bodyMedium.copyWith(
+                        color: ThemeColor.textDarkColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+
                   SizedBox(height: ThemeColor.paddingMedium),
-                  
+
                   Obx(() {
                     if (controller.isLoadingQualities.value) {
                       return Center(
@@ -830,7 +817,8 @@ Widget _buildHeightPicker() {
                       spacing: ThemeColor.paddingSmall,
                       runSpacing: ThemeColor.paddingSmall,
                       children: controller.qualities.map((quality) {
-                        final isSelected = controller.selectedQualities.contains(quality.id);
+                        final isSelected = controller.selectedQualities
+                            .contains(quality.id);
                         return _buildQualityChip(
                           quality.name,
                           isSelected,
@@ -839,14 +827,14 @@ Widget _buildHeightPicker() {
                       }).toList(),
                     );
                   }),
-                  
+
                   SizedBox(height: ThemeColor.paddingExtraLarge * 2),
                 ],
               ),
             ),
           ),
         ),
-        
+
         _buildNavigationButtons(showSkip: true, isLastStep: true),
       ],
     );
@@ -879,33 +867,33 @@ Widget _buildHeightPicker() {
   }
 
   // NAVEGACIÓN INFERIOR
-  Widget _buildNavigationButtons({bool showSkip = false, bool isLastStep = false}) {
+  Widget _buildNavigationButtons({
+    bool showSkip = false,
+    bool isLastStep = false,
+  }) {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
-      decoration: BoxDecoration(
-        color: ThemeColor.backgroundColorfondo,
-      ),
+      decoration: BoxDecoration(color: ThemeColor.backgroundColorfondo),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Obx(() => controller.currentStepIndex.value > 0
-              ? GestureDetector(
-                  onTap: controller.previousStep,
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: ThemeColor.tertiaryColor,
-                      shape: BoxShape.circle,
+          Obx(
+            () => controller.currentStepIndex.value > 0
+                ? GestureDetector(
+                    onTap: controller.previousStep,
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: ThemeColor.tertiaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.arrow_back, color: Colors.white),
                     ),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                    ),
-                  ),
-                )
-              : SizedBox(width: 56)),
-          
+                  )
+                : SizedBox(width: 56),
+          ),
+
           if (showSkip)
             GestureDetector(
               onTap: isLastStep ? null : controller.nextStep,
@@ -919,14 +907,16 @@ Widget _buildHeightPicker() {
             )
           else
             SizedBox(),
-          
+
           Obx(() {
             final isLoading = controller.isLoading.value;
-            
+
             return GestureDetector(
               onTap: isLoading
                   ? null
-                  : (isLastStep ? controller.onRegisterTap : controller.nextStep),
+                  : (isLastStep
+                        ? controller.onRegisterTap
+                        : controller.nextStep),
               child: Container(
                 width: 56,
                 height: 56,
@@ -943,14 +933,13 @@ Widget _buildHeightPicker() {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
                       )
-                    : Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                      ),
+                    : Icon(Icons.arrow_forward, color: Colors.white),
               ),
             );
           }),

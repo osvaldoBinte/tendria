@@ -33,7 +33,11 @@ class RegisterController extends GetxController {
   late final TextEditingController confirmPasswordController;
   late final TextEditingController heightController;
   late final TextEditingController cityController;
+  late final TextEditingController customGenderController;
 
+  late final TextEditingController bioController;
+  late final FocusNode bioFocusNode;
+  late final FocusNode customGenderFocusNode;
   late final FocusNode nameFocusNode;
   late final FocusNode emailFocusNode;
   late final FocusNode passwordFocusNode;
@@ -54,6 +58,8 @@ class RegisterController extends GetxController {
   final RxString selectedLanguage = 'Español'.obs;
   final RxList<int> selectedInterests = <int>[].obs;
   final RxList<int> selectedQualities = <int>[].obs;
+  final RxInt bioCharCount = 0.obs;
+  final RxBool showCustomGender = false.obs;
 
   final RxList<CatalogEntity> qualities = <CatalogEntity>[].obs;
   final RxList<CatalogEntity> interests = <CatalogEntity>[].obs;
@@ -74,6 +80,18 @@ class RegisterController extends GetxController {
 
   final RxInt selectedHeight = 170.obs;
 
+  final RxBool bioError = false.obs;
+  final RxString bioErrorMessage = ''.obs;
+
+  final List<Map<String, dynamic>> genderOptions = [
+    {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
+    {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
+    {
+      'label': 'Persona no binaria',
+      'value': 'No_binario',
+      'icon': Icons.transgender,
+    },
+  ];
   void selectHeight(int height) {
     heightController.text = height.toString();
     selectedHeight.value = height;
@@ -94,6 +112,8 @@ class RegisterController extends GetxController {
     confirmPasswordController = TextEditingController();
     heightController = TextEditingController();
     cityController = TextEditingController();
+    bioController = TextEditingController();
+    customGenderController = TextEditingController(); // NUEVO
 
     nameFocusNode = FocusNode();
     emailFocusNode = FocusNode();
@@ -101,11 +121,14 @@ class RegisterController extends GetxController {
     confirmPasswordFocusNode = FocusNode();
     heightFocusNode = FocusNode();
     cityFocusNode = FocusNode();
+    bioFocusNode = FocusNode();
+    customGenderFocusNode = FocusNode(); // NUEVO
 
     emailController.addListener(_validateEmail);
     passwordController.addListener(_validatePassword);
     confirmPasswordController.addListener(_validateConfirmPassword);
     nameController.addListener(_validateName);
+    bioController.addListener(_validateBio);
   }
 
   // ==========================================
@@ -175,7 +198,7 @@ class RegisterController extends GetxController {
       case RegistrationStep.interests:
         return _validateInterests();
       case RegistrationStep.qualities:
-        return true; 
+        return true;
     }
   }
 
@@ -226,6 +249,35 @@ class RegisterController extends GetxController {
       return false;
     }
 
+    // NUEVO: Si seleccionó "Otro", validar que haya escrito algo
+    if (selectedGender.value == 'Otro' &&
+        customGenderController.text.trim().isEmpty) {
+      _showErrorAlert('Campo requerido', 'Escribe cómo te identificas');
+      return false;
+    }
+
+    // Validar bio como requerido
+    if (bioController.text.trim().isEmpty) {
+      _showErrorAlert('Campo requerido', 'La biografía es requerida');
+      return false;
+    }
+
+    if (bioController.text.trim().length < 10) {
+      _showErrorAlert(
+        'Biografía muy corta',
+        'La biografía debe tener al menos 10 caracteres',
+      );
+      return false;
+    }
+
+    if (bioController.text.length > 500) {
+      _showErrorAlert(
+        'Biografía muy larga',
+        'La biografía debe tener máximo 500 caracteres',
+      );
+      return false;
+    }
+
     return true;
   }
 
@@ -258,6 +310,30 @@ class RegisterController extends GetxController {
   // ==========================================
   // VALIDACIONES
   // ==========================================
+  void _validateBio() {
+    bioCharCount.value = bioController.text.length; // ACTUALIZAR contador
+
+    if (bioController.text.isEmpty) {
+      bioError.value = true; // CAMBIO: ahora es requerido
+      bioErrorMessage.value = 'La biografía es requerida';
+      return;
+    }
+
+    if (bioController.text.length < 10) {
+      // Mínimo 10 caracteres
+      bioError.value = true;
+      bioErrorMessage.value = 'Mínimo 10 caracteres';
+      return;
+    }
+
+    if (bioController.text.length > 500) {
+      bioError.value = true;
+      bioErrorMessage.value = 'Máximo 500 caracteres';
+      return;
+    }
+
+    bioError.value = false;
+  }
 
   void _validateName() {
     if (nameController.text.isEmpty) {
@@ -346,7 +422,7 @@ class RegisterController extends GetxController {
       longitude.value = position.longitude.toString();
       locationObtained.value = true;
 
-      city.value = 'Ciudad'; 
+      city.value = 'Ciudad';
     } catch (e) {
       print('Error obteniendo ubicación: $e');
     } finally {
@@ -364,6 +440,14 @@ class RegisterController extends GetxController {
 
   void selectGender(String gender) {
     selectedGender.value = gender;
+
+    // Si selecciona "Otro", mostrar campo personalizado
+    if (gender == 'Otro') {
+      showCustomGender.value = true;
+    } else {
+      showCustomGender.value = false;
+      customGenderController.clear(); // Limpiar campo personalizado
+    }
   }
 
   void selectLanguage(String language) {
@@ -407,12 +491,20 @@ class RegisterController extends GetxController {
     try {
       isLoading.value = true;
 
+      // NUEVO: Determinar el género final
+      String finalGender = selectedGender.value;
+      if (selectedGender.value == 'Otro' &&
+          customGenderController.text.trim().isNotEmpty) {
+        finalGender = customGenderController.text.trim();
+      }
+
       final entity = CreateUserEntity(
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
         dateofbirth: _formatDate(dateOfBirth.value!),
-        gender: selectedGender.value,
+        gender: finalGender, // Usar el género final
+        bio: bioController.text.trim(),
         heightcm: heightController.text.trim(),
         primarylanguage: selectedLanguage.value,
         city: city.value.isNotEmpty ? city.value : 'Ciudad desconocida',
@@ -424,15 +516,10 @@ class RegisterController extends GetxController {
 
       await createUserUsecase.execute(entity);
 
-      _showSuccessAlert(
-        'Registro exitoso',
-        'Tu cuenta ha sido creada correctamente',
-        onDismiss: () {
-          Get.offAllNamed(RoutesNames.loginPage);
-        },
-      );
-
       _clearFields();
+      Future.delayed(const Duration(seconds: 3), () {
+        onLoginTap();
+      });
     } catch (e) {
       print('Error en registro: $e');
       _showErrorAlert('Error en el registro', cleanExceptionMessage(e));
@@ -518,6 +605,8 @@ class RegisterController extends GetxController {
     confirmPasswordController.clear();
     heightController.clear();
     cityController.clear();
+    bioController.clear();
+    customGenderController.clear(); // NUEVO
 
     dateOfBirth.value = null;
     selectedGender.value = '';
@@ -530,8 +619,9 @@ class RegisterController extends GetxController {
     locationObtained.value = false;
     currentStepIndex.value = 0;
     currentStep.value = RegistrationStep.basicInfo;
-      heightScrollController.dispose();
-
+    bioCharCount.value = 0;
+    showCustomGender.value = false; // NUEVO
+    heightScrollController.dispose();
   }
 
   @override
@@ -540,6 +630,7 @@ class RegisterController extends GetxController {
     passwordController.removeListener(_validatePassword);
     confirmPasswordController.removeListener(_validateConfirmPassword);
     nameController.removeListener(_validateName);
+    bioController.removeListener(_validateBio);
 
     nameController.dispose();
     emailController.dispose();
@@ -547,6 +638,8 @@ class RegisterController extends GetxController {
     confirmPasswordController.dispose();
     heightController.dispose();
     cityController.dispose();
+    bioController.dispose();
+    customGenderController.dispose(); // NUEVO
 
     nameFocusNode.dispose();
     emailFocusNode.dispose();
@@ -554,6 +647,8 @@ class RegisterController extends GetxController {
     confirmPasswordFocusNode.dispose();
     heightFocusNode.dispose();
     cityFocusNode.dispose();
+    bioFocusNode.dispose();
+    customGenderFocusNode.dispose(); // NUEVO
 
     super.onClose();
   }

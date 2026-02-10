@@ -4,7 +4,7 @@ class CreateUserEntity {
   final String password;
   final String dateofbirth;
   final String gender;
-   String? bio;
+  final String bio;
   final String heightcm;
   final String primarylanguage;
   final String city;
@@ -19,7 +19,7 @@ class CreateUserEntity {
     required this.password,
     required this.dateofbirth,
     required this.gender,
-     this.bio,
+    required this.bio,
     required this.heightcm,
     required this.primarylanguage,
     required this.city,

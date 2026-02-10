@@ -565,7 +565,7 @@ void toggleQuality(int qualityId) {
   }
 
   @override
-  void onClose() {
+  void onClose() {  
     emailController.removeListener(_validateEmail);
     passwordController.removeListener(_validatePassword);
     confirmPasswordController.removeListener(_validateConfirmPassword);

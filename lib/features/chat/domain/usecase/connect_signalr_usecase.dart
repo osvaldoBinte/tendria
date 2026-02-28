@@ -2,11 +2,11 @@
 import 'package:tendria/features/chat/domain/repositories/chat_repository.dart';
 
 class ConnectSignalRUsecase {
-  final ChatRepository repository;
+  final ChatRepository chatRepository;
 
-  ConnectSignalRUsecase({required this.repository});
+  ConnectSignalRUsecase({required this.chatRepository});
 
   Future<void> execute(String token) async {
-    return await repository.connectSignalR(token);
+    return await chatRepository.connectSignalR(token);
   }
 }

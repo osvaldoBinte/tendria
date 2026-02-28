@@ -1,87 +1,251 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:tendria/common/errors/convert_message.dart';
-import 'package:tendria/common/settings/routes_names.dart';
+import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
-import 'package:tendria/features/like/domain/usecase/get_like_by_users_usecase.dart';
-import 'package:tendria/features/like/domain/entities/liked_by_users_entity.dart';
+import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/features/like/domain/usecase/get_pending_liked_chats_usecase.dart';
+import 'package:tendria/features/like/domain/usecase/unlock_chat_usecase.dart';
+import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
+import 'package:tendria/common/settings/routes_names.dart';
 
 class LikedByUsersController extends GetxController {
-  final GetLikeByUsersUsecase getLikeByUsersUsecase;
+  final GetPendingLikedChatsUsecase getPendingLikedChatsUsecase;
+  final UnlockChatUsecase unlockChatUsecase;
 
-  LikedByUsersController({required this.getLikeByUsersUsecase});
+  LikedByUsersController({
+    required this.getPendingLikedChatsUsecase,
+    required this.unlockChatUsecase,
+  });
 
   // Estados reactivos
-  final RxList<LikedByUsersEntity> likedByUsers = <LikedByUsersEntity>[].obs;
+  final RxList<PendingChatEntity> pendingChats = <PendingChatEntity>[].obs;
   final RxBool isLoading = false.obs;
-  final RxBool hasError = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxBool hasError = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadLikedByUsers();
+    loadPendingChats();
   }
 
-  // Cargar usuarios que te dieron like
-  Future<void> loadLikedByUsers() async {
+  // Cargar chats pendientes
+  Future<void> loadPendingChats() async {
     try {
       isLoading.value = true;
       hasError.value = false;
       errorMessage.value = '';
 
-      // Obtener el postId del usuario actual
-      // Nota: Ajusta esto según tu lógica de negocio
-      final postId = 0; // Puedes obtenerlo de AuthService o pasarlo como argumento
-
-      final result = await getLikeByUsersUsecase.execute(postId);
-      
-      // Ordenar por fecha más reciente
-      result.sort((a, b) => b.likedAt.compareTo(a.likedAt));
-      
-      likedByUsers.value = result;
+      final result = await getPendingLikedChatsUsecase.execute();
+      pendingChats.value = result;
     } catch (e) {
       hasError.value = true;
-      errorMessage.value = 'Error al cargar usuarios: ${cleanExceptionMessage(e)}';
-      print('Error loading liked by users: $e');
+      errorMessage.value = 'Error al cargar chats pendientes: ${cleanExceptionMessage(e)}';
+      print('Error loading pending chats: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Refrescar lista
-  Future<void> refreshLikedByUsers() async {
-    await loadLikedByUsers();
+  // Refrescar chats pendientes
+  Future<void> refreshPendingChats() async {
+    await loadPendingChats();
   }
 
-  // Navegar al perfil del usuario
-  void navigateToProfile(int userId) {
-    Get.toNamed(RoutesNames.profileDetailPage, arguments: {
-      'userId': userId,
+  // Desbloquear chat
+  Future<void> unlockChat(PendingChatEntity chat) async {
+    // Mostrar diálogo de confirmación
+    _showUnlockConfirmation(chat);
+  }
+
+  // Mostrar confirmación de desbloqueo con CustomAlertDialog
+  void _showUnlockConfirmation(PendingChatEntity chat) {
+    showCustomAlert(
+      context: Get.context!,
+      title: 'Desbloquear chat',
+      message: '',
+      confirmText: 'Desbloquear',
+      cancelText: 'Cancelar',
+      type: CustomAlertType.confirm,
+      customWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '¿Deseas desbloquear este chat con ${chat.name ?? 'este usuario'}?',
+            style: ThemeColor.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          
+          if (chat.hiddenMessage != null) ...[
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: ThemeColor.backgroundColorfondo,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: ThemeColor.dividerColor,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.message,
+                        size: 16,
+                        color: ThemeColor.textSecondaryColor,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Mensaje oculto:',
+                        style: ThemeColor.caption.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: ThemeColor.textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    chat.hiddenMessage!,
+                    style: ThemeColor.bodyMedium.copyWith(
+                      fontStyle: FontStyle.italic,
+                      color: ThemeColor.textPrimaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: Size(0, 40),
+                    foregroundColor: ThemeColor.textSecondaryColor,
+                  ),
+                  onPressed: () => Get.back(),
+                  child: Text('Cancelar'),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ThemeColor.primaryColor,
+                    minimumSize: Size(0, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    Get.back(); // Cerrar diálogo
+                    _performUnlock(chat);
+                  },
+                  child: Text(
+                    'Desbloquear',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      onConfirm: null, // Manejado por el botón personalizado
+      onCancel: null,  // Manejado por el botón personalizado
+    );
+  }
+
+  // Ejecutar desbloqueo
+  Future<void> _performUnlock(PendingChatEntity chat) async {
+    try {
+      // Mostrar loading
+         showCustomAlert(
+        context: Get.context!,
+        title: '',
+        message: 'Desbloqueando chat...',
+        confirmText: '',
+        type: CustomAlertType.warning,
+        customWidget: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              ThemeColor.primaryColor,
+            ),
+          ),
+        ),
+      );
+      // Desbloquear chat
+      await unlockChatUsecase.execute(chat.chatId);
+
+      // Cerrar loading
+      Get.back();
+
+      // Mostrar mensaje de éxito
+      showSuccessSnackbar('Chat desbloqueado correctamente');
+
+      // Remover de la lista
+      pendingChats.removeWhere((item) => item.chatId == chat.chatId);
+
+      // Navegar al chat
+      navigateToChat(chat.chatId, chat.name ?? 'Usuario');
+
+    } catch (e) {
+      // Cerrar loading si está abierto
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      // Mostrar error con snackbar
+      showErrorSnackbar('Error al desbloquear chat: ${cleanExceptionMessage(e)}');
+      
+      print('Error unlocking chat: $e');
+    }
+  }
+
+  // Navegar al chat
+  void navigateToChat(int chatId, String name) {
+    Get.toNamed(RoutesNames.chatPage, arguments: {
+      'chatId': chatId,
+      'name': name,
     });
   }
 
-  // Dar like de vuelta
-  void likeBack(LikedByUsersEntity user) {
-    showSuccessSnackbar('¡Match con ${user.username}!');
-    // Aquí puedes llamar al usecase de toggle like si es necesario
-    // await toggleLikeUsecase.execute(user.fromusererId, true);
+  // Navegar al perfil
+  void navigateToProfile(int userId) {
+    
+    Get.toNamed(
+                            RoutesNames.userProfileDetailPage,
+                            arguments: {'userId': userId},);
   }
 
   // Formatear tiempo transcurrido
-  String getTimeAgo(DateTime likedAt) {
+  String getTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
-    final difference = now.difference(likedAt);
+    final difference = now.difference(dateTime);
 
-    if (difference.inMinutes < 1) {
-      return 'Ahora';
-    } else if (difference.inMinutes < 60) {
-      return 'Hace ${difference.inMinutes}m';
-    } else if (difference.inHours < 24) {
-      return 'Hace ${difference.inHours}h';
-    } else if (difference.inDays < 7) {
+    if (difference.inDays > 365) {
+      final years = (difference.inDays / 365).floor();
+      return 'Hace ${years}a';
+    } else if (difference.inDays > 30) {
+      final months = (difference.inDays / 30).floor();
+      return 'Hace ${months}m';
+    } else if (difference.inDays > 0) {
       return 'Hace ${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      return 'Hace ${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return 'Hace ${difference.inMinutes}min';
     } else {
-      return 'Hace ${(difference.inDays / 7).floor()}sem';
+      return 'Ahora';
     }
   }
 }

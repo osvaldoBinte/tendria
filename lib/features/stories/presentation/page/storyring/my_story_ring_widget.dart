@@ -298,8 +298,7 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
     final ProfileController userController = Get.find<ProfileController>();
 
     return Container(
-      margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
-      child: Obx(() {
+  margin: const EdgeInsets.only(right: 12),      child: Obx(() {
         if (storyController.isLoadingMyStory.value) {
           return StoryRingLoading(size: widget.size);
         }

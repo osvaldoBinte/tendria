@@ -21,9 +21,9 @@ class RegisterPage extends GetView<RegisterController> {
             case RegistrationStep.physicalInfo:
               return _buildPhysicalInfoStep();
             case RegistrationStep.interests:
-              return _buildInterestsStep();
+              return buildInterestsStep();
             case RegistrationStep.qualities:
-              return _buildQualitiesStep();
+              return buildQualitiesStep();
           }
         }),
       ),
@@ -262,7 +262,6 @@ class RegisterPage extends GetView<RegisterController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                 // En _buildPersonalInfoStep(), reemplaza la sección de género:
 
 Text(
   '¿Cómo te identificas?',
@@ -492,13 +491,13 @@ SizedBox(height: ThemeColor.paddingMedium),
           perspective: 0.003,
           physics: FixedExtentScrollPhysics(),
           onSelectedItemChanged: (index) {
-            final height = 154 + index;
+            final height = 100 + index;
             controller.selectHeight(height);
           },
           childDelegate: ListWheelChildBuilderDelegate(
             childCount: 96,
             builder: (context, index) {
-              final height = 154 + index;
+              final height = 100 + index;
 
               return Obx(() {
                 final isSelected = height == controller.selectedHeight.value;
@@ -527,8 +526,7 @@ SizedBox(height: ThemeColor.paddingMedium),
     );
   }
 
-  // PASO 4: INTERESES
-  Widget _buildInterestsStep() {
+  Widget buildInterestsStep() {
     return Column(
       children: [
         Expanded(
@@ -726,25 +724,75 @@ SizedBox(height: ThemeColor.paddingMedium),
     );
   }
 
-  IconData _getInterestIcon(String interest) {
-    final icons = {
-      'Bailar': Icons.music_note,
-      'Foodie': Icons.restaurant,
-      'Conciertos': Icons.music_note,
-      'Escribir': Icons.edit,
-      'Café': Icons.coffee,
-      'Arte': Icons.palette,
-      'Museos y galerías': Icons.museum,
-      'Yoga': Icons.self_improvement,
-      'Perros': Icons.pets,
-      'Libros': Icons.book,
-      'Deportes': Icons.sports_soccer,
-    };
-    return icons[interest] ?? Icons.favorite;
-  }
+IconData _getInterestIcon(String interest) {
+  final icons = {
+    // Arte
+    'Pintura': Icons.brush,
+    'Fotografía': Icons.camera_alt,
+    'Arte': Icons.palette,
+
+    // Entretenimiento
+    'Cine': Icons.movie,
+    'Videojuegos': Icons.videogame_asset,
+    'Anime': Icons.auto_awesome,
+    
+    // Música
+    'Música en vivo': Icons.mic,
+    'Rock': Icons.music_note,
+    'Reggaetón': Icons.headphones,
+    'Conciertos': Icons.music_note,
+    'Festivales': Icons.festival,
+    'Bailar': Icons.music_note,
+
+    // Fitness & bienestar
+    'Gimnasio': Icons.fitness_center,
+    'Correr': Icons.directions_run,
+    'Yoga': Icons.self_improvement,
+    'Meditación': Icons.spa,
+    'Deportes': Icons.sports_soccer,
+
+    // Aventura
+    'Senderismo': Icons.terrain,
+    'Viajar': Icons.flight_takeoff,
+    'Playa': Icons.beach_access,
+
+    // Gastronomía
+    'Café': Icons.coffee,
+    'Vino': Icons.wine_bar,
+    'Cocinar': Icons.restaurant_menu,
+    'Foodie': Icons.restaurant,
+
+    // Intelectual
+    'Lectura': Icons.menu_book,
+    'Libros': Icons.book,
+    'Psicología': Icons.psychology,
+    'Programación': Icons.code,
+
+    // Lifestyle & negocios
+    'Emprendimiento': Icons.rocket_launch,
+    'Startups': Icons.trending_up,
+    'Criptomonedas': Icons.currency_bitcoin,
+    'Autos deportivos': Icons.directions_car,
+    'Nómada digital': Icons.laptop_mac,
+
+    // Mascotas
+    'Perros': Icons.pets,
+    'Gatos': Icons.pets,
+
+    // Romance
+    'Relación seria': Icons.favorite,
+    'Algo casual': Icons.sentiment_satisfied_alt,
+
+    // Otros
+    'Escribir': Icons.edit,
+    'Museos y galerías': Icons.museum,
+  };
+
+  return icons[interest] ?? Icons.favorite;
+}
 
   // PASO 5: CUALIDADES
-  Widget _buildQualitiesStep() {
+  Widget buildQualitiesStep() {
     return Column(
       children: [
         Expanded(

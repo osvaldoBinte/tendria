@@ -5,6 +5,7 @@ class UsuarioChatModel extends UsuarioChatEntity {
     required super.id,
     required super.nombre,
     super.fotoUrl,
+    super.isActive
   });
 
   factory UsuarioChatModel.fromJson(Map<String, dynamic> json) {
@@ -12,6 +13,7 @@ class UsuarioChatModel extends UsuarioChatEntity {
       id: json['id'],
       nombre: json['nombre'],
       fotoUrl: json['fotoUrl'],
+      isActive: json['estaActivo']
     );
   }
 }

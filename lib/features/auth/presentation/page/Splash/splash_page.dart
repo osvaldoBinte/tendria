@@ -57,7 +57,7 @@ Widget build(BuildContext context) {
       final SplashController controller = Get.find<SplashController>();
 
   return Scaffold(
-    backgroundColor: ThemeColor.textDarkColor,
+    backgroundColor: ThemeColor.backgroundColor,
     body: SafeArea(
       child: Center(
         child: SingleChildScrollView(

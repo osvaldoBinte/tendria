@@ -14,6 +14,7 @@ import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:image_picker/image_picker.dart';
 // Modelo para textos
 class StoryText {
   final String text;
@@ -79,7 +80,31 @@ class CreateStoryController extends GetxController {
 
   // Flag para indicar si se está procesando el video
   final RxBool isProcessingVideo = false.obs;
+// Agregar import al controller
 
+Future<void> selectFromImagePicker() async {
+  try {
+    final ImagePicker picker = ImagePicker();
+    
+    // Mostrar opciones: foto o video
+    final XFile? file = await picker.pickMedia();
+    if (file == null) return;
+
+    final path = file.path.toLowerCase();
+    final isVideo = path.endsWith('.mp4') || path.endsWith('.mov') ||
+        path.endsWith('.avi') || path.endsWith('.mkv');
+
+    capturedFile.value = File(file.path);
+    contentType.value = isVideo ? 'Video' : 'Foto';
+
+    if (contentType.value == 'Video') {
+      await initializeVideoController();
+    }
+  } catch (e) {
+    debugPrint('Error seleccionando de galería: $e');
+    showErrorSnackbar('No se pudo seleccionar el archivo');
+  }
+}
   @override
   void onInit() {
     super.onInit();
@@ -114,7 +139,40 @@ class CreateStoryController extends GetxController {
       storyTexts.refresh();
     }
   }
+Future<File?> convertToPng(File inputFile) async {
+  try {
+    // Si ya es PNG, no convertir
+    final ext = inputFile.path.toLowerCase().split('.').last;
+    if (ext == 'png') {
+      debugPrint('✅ Ya es PNG, no se convierte');
+      return inputFile;
+    }
 
+    debugPrint('🔄 Convirtiendo a PNG: ${inputFile.path}');
+
+    final directory = await getTemporaryDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final outputPath = '${directory.path}/story_$timestamp.png';
+
+    final command = '-i "${inputFile.path}" -y "$outputPath"';
+    final session = await FFmpegKit.execute(command);
+    final returnCode = await session.getReturnCode();
+
+    if (ReturnCode.isSuccess(returnCode)) {
+      final outputFile = File(outputPath);
+      if (await outputFile.exists()) {
+        debugPrint('✅ Convertido a PNG: $outputPath');
+        return outputFile;
+      }
+    }
+
+    debugPrint('⚠️ No se pudo convertir, usando original');
+    return inputFile;
+  } catch (e) {
+    debugPrint('💥 Error convirtiendo a PNG: $e');
+    return inputFile;
+  }
+}
   // Actualizar escala de texto
   void updateTextScale(String textId, double newScale) {
     final index = storyTexts.indexWhere((t) => t.id == textId);
@@ -142,7 +200,7 @@ class CreateStoryController extends GetxController {
       }
 
       // Para videos, usar FFmpeg
-      if (contentType.value == 'video') {
+if (contentType.value == 'Video') {
         return await processVideoWithTexts();
       }
 
@@ -407,9 +465,61 @@ class CreateStoryController extends GetxController {
       debugPrint('Error starting recording: $e');
     }
   }
+// Convertir video temporal a MP4
+Future<File?> convertToMp4(File inputFile) async {
+  try {
+    debugPrint('🔄 Convirtiendo video a MP4...');
+    debugPrint('📥 Input: ${inputFile.path}');
 
-  // Detener grabación
- // Detener grabación - CORREGIDO para iOS
+    final directory = await getTemporaryDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final outputPath = '${directory.path}/video_$timestamp.mp4';
+
+    debugPrint('📤 Output: $outputPath');
+
+    // Comando FFmpeg para convertir a MP4
+    final command = '-i "${inputFile.path}" '
+        '-c:v libx264 '          // Codec de video H.264
+        '-preset ultrafast '      // Velocidad de conversión
+        '-c:a aac '              // Codec de audio AAC
+        '-strict experimental '   // Permitir codecs experimentales
+        '-y "$outputPath"';      // Sobrescribir si existe
+
+    debugPrint('🚀 Ejecutando conversión FFmpeg');
+
+    final session = await FFmpegKit.execute(command);
+    final returnCode = await session.getReturnCode();
+    final output = await session.getOutput();
+
+    debugPrint('📊 FFmpeg Return Code: ${returnCode?.getValue()}');
+
+    if (ReturnCode.isSuccess(returnCode)) {
+      final outputFile = File(outputPath);
+      
+      if (await outputFile.exists()) {
+        final fileSize = await outputFile.length();
+        debugPrint('✅ Conversión exitosa');
+        debugPrint('📦 Tamaño: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
+        
+        return outputFile;
+      } else {
+        debugPrint('❌ Archivo de salida no encontrado');
+        debugPrint('📋 Output: $output');
+        return null;
+      }
+    } else {
+      debugPrint('❌ FFmpeg falló: ${returnCode?.getValue()}');
+      debugPrint('📋 Output: $output');
+      return null;
+    }
+  } catch (e, stackTrace) {
+    debugPrint('💥 Error convirtiendo a MP4: $e');
+    debugPrint('📚 Stack: $stackTrace');
+    return null;
+  }
+}
+
+// Detener grabación - ACTUALIZADO para convertir a MP4
 Future<void> stopRecording() async {
   if (!isRecording.value) return;
 
@@ -417,43 +527,46 @@ Future<void> stopRecording() async {
     recordingTimer?.cancel();
     final XFile video = await cameraController.value!.stopVideoRecording();
 
-    // ✅ En iOS, mantener la extensión original (.mov)
-    // El video_player de iOS soporta .mov nativamente
-    final File videoFile = File(video.path);
-    
     debugPrint('📹 Video grabado: ${video.path}');
-    debugPrint('📦 Tamaño: ${await videoFile.length()} bytes');
+    
+    // ✅ Convertir a MP4
+    final File tempFile = File(video.path);
+    final fileSize = await tempFile.length();
+    debugPrint('📦 Tamaño original: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
 
-    isRecording.value = false;
-    recordingSeconds.value = 0;
-    capturedFile.value = videoFile;
-    contentType.value = 'video';
+    // Mostrar indicador de conversión
+    showInfoSnackbar('Procesando video...');
 
-    await initializeVideoController();
+    final File? mp4File = await convertToMp4(tempFile);
+
+    if (mp4File != null) {
+      debugPrint('✅ Video convertido a MP4: ${mp4File.path}');
+      
+      isRecording.value = false;
+      recordingSeconds.value = 0;
+      capturedFile.value = mp4File;
+      contentType.value = 'Video';
+
+      await initializeVideoController();
+    } else {
+      debugPrint('⚠️ No se pudo convertir, usando archivo original');
+      
+      isRecording.value = false;
+      recordingSeconds.value = 0;
+      capturedFile.value = tempFile;
+      contentType.value = 'Video';
+
+      await initializeVideoController();
+    }
   } catch (e) {
     debugPrint('❌ Error deteniendo grabación: $e');
     isRecording.value = false;
+    showErrorSnackbar('Error al procesar el video');
   }
 }
-
-  // Tomar foto
-  Future<void> takePicture() async {
-    if (cameraController.value == null || !cameraController.value!.value.isInitialized) return;
-
-    try {
-      final XFile photo = await cameraController.value!.takePicture();
-
-      capturedFile.value = File(photo.path);
-      contentType.value = 'Foto';
-    } catch (e) {
-      debugPrint('Error taking picture: $e');
-    }
-  }
-
-  // Inicializar video controller
- // Inicializar video controller - MEJORADO
+// Inicializar video controller - MEJORADO
 Future<void> initializeVideoController() async {
-  if (capturedFile.value == null || contentType.value != 'Video')  return;
+if (capturedFile.value == null || contentType.value != 'Video') return; // antes: 'video'
 
   try {
     isVideoReady.value = false;
@@ -504,8 +617,7 @@ Future<void> initializeVideoController() async {
     videoController?.dispose();
     videoController = null;
     isVideoReady.value = false;
-    showErrorSnackbar(  'No se pudo cargar el video. Intenta de nuevo.',
-    );
+    showErrorSnackbar('No se pudo cargar el video. Intenta de nuevo.');
   }
 }
 
@@ -515,15 +627,29 @@ Future<void> selectFromGallery(AssetEntity asset) async {
     if (file == null) return;
 
     capturedFile.value = file;
-    contentType.value = asset.type == AssetType.image ? 'Foto' : 'Video'; // ✅ CAMBIO
+contentType.value = asset.type == AssetType.image ? 'Foto' : 'Video'; // antes: 'image'/'video'
 
-    if (contentType.value == 'Video') { // ✅ CAMBIO
+if (contentType.value == 'Video') {
       await initializeVideoController();
     }
   } catch (e) {
     debugPrint('Error selecting from gallery: $e');
   }
+}
+
+// Tomar foto
+Future<void> takePicture() async {
+  if (cameraController.value == null || !cameraController.value!.value.isInitialized) return;
+
+  try {
+    final XFile photo = await cameraController.value!.takePicture();
+
+    capturedFile.value = File(photo.path);
+    contentType.value = 'Foto'; 
+  } catch (e) {
+    debugPrint('Error taking picture: $e');
   }
+}
 
   // Limpiar captura
   void clearCapture() {

@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/features/stories/domain/entities/getstories/story_entity.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:video_player/video_player.dart';
 
 void showStoryModal(
@@ -41,7 +44,7 @@ class StoryModalWidget extends StatefulWidget {
 class _StoryModalWidgetState extends State<StoryModalWidget>
     with TickerProviderStateMixin {
   final StoryController controller = Get.find<StoryController>();
-
+  final ProfileController _userController = Get.find<ProfileController>();
   @override
   void initState() {
     super.initState();
@@ -220,7 +223,7 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                                   Text(
                                     isViewingMyStory
                                         ? "Mi historia"
-                                        : controller.currentUser!.nombreDoctor,
+                                        : controller.currentUser!.nombreUsuario,
                                     style: GoogleFonts.rubik(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -365,12 +368,19 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
   }
 
   Widget _fallbackIcon() {
-    return Container(
-      color: ThemeColor.backgroundColor,
-      child: const Center(
-        child: Icon(Icons.person, size: 20, color: Colors.grey),
-      ),
-    );
+    return ClipOval(
+  child: _userController.profilePhotoUrl != null &&
+          _userController.profilePhotoUrl!.isNotEmpty
+      ? CachedNetworkImage(
+          imageUrl: _userController.profilePhotoUrl!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          placeholder: (context, url) => _fallbackIcon(),
+          errorWidget: (context, url, error) => _fallbackIcon(),
+        )
+      : _fallbackIcon(),
+);
   }
 
   Widget _buildStoryContent(StoryEntity story) {
@@ -573,32 +583,19 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
     );
   }
 
-  void _confirmDeleteStory(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Eliminar historia'),
-        content: const Text(
-          '¿Estás seguro de que deseas eliminar tu historia? Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: ThemeColor.textSecondaryColor),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await controller.deleteMyStory();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-  }
+void _confirmDeleteStory(BuildContext context) {
+  showCustomAlert(
+    context: context,
+    title: 'Eliminar historia',
+    message: '¿Estás seguro de que deseas eliminar tu historia? Esta acción no se puede deshacer.',
+    confirmText: 'Eliminar',
+    cancelText: 'Cancelar',
+    type: CustomAlertType.warning,
+    onConfirm: () async {
+      Get.back();
+      await controller.deleteMyStory();
+    },
+    onCancel: () => Get.back(),
+  );
+}
 }

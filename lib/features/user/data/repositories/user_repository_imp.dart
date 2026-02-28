@@ -1,4 +1,5 @@
 import 'package:tendria/common/services/auth_service.dart';
+import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
 import 'package:tendria/features/user/data/datasources/user_data_sources_imp.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
@@ -37,5 +38,35 @@ class UserRepositoryImp extends UserRepository {
   Future<void> uploadPicturePerfile(String file) async {
     final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
     return await userDataSourcesImp.uploadPicturePerfil(file, token);
+  }
+  
+  @override
+  Future<GetUserEntity> getuserbyid(int iduser) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.getuserbyid(iduser, token);
+  }
+
+  @override
+  Future<void> updateUser(UpdateUserEntity entity) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.updateuser(entity, token);
+  }
+  
+  @override
+  Future<void> putpreferencesUser(PreferencesEntity entity)  async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.putpreferencesUser(entity, token);
+  }
+  
+  @override
+  Future<void> deleteMedia(int mediaId) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.deleteMedia(mediaId, token);
+  }
+  
+  @override
+  Future<void> deleteUser()  async {
+        final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+ return await userDataSourcesImp.deleteUser(token);
   }
 }

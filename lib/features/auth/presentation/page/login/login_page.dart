@@ -10,59 +10,53 @@ class LoginPage extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ThemeColor.backgroundColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingLarge,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildHeader(),
-                SizedBox(height: ThemeColor.paddingExtraLarge * 2),
-                _buildLoginForm(),
-              ],
+      body: Stack(
+        children: [
+          Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset('assets/fondo.png', fit: BoxFit.cover),
+              ),
+
+              Positioned.fill(
+                child: Container(
+                  color: const Color.fromARGB(255, 93, 93, 93).withOpacity(0.6),
+                ),
+              ),
+            ],
+          ),
+
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: ThemeColor.paddingLarge,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHeader(),
+                    SizedBox(height: ThemeColor.paddingExtraLarge * 2),
+                    _buildLoginForm(),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
-Widget _buildHeader() {
-  return Column(
-    children: [
-      ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Image.asset(
-          'assets/logo/logo.png',
-          width: 120,
-          height: 120,
-          cacheWidth: 240,
-          cacheHeight: 240,
-          filterQuality: FilterQuality.medium,
-          // ✅ Manejo de error
-          errorBuilder: (context, error, stackTrace) {
-            print('❌ Error cargando logo: $error');
-            return Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: ThemeColor.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                Icons.image_not_supported,
-                size: 50,
-                color: ThemeColor.primaryColor,
-              ),
-            );
-          },
+
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Image.asset('assets/logo/logo.png', width: 170, height: 70),
         ),
-      ),
-       SizedBox(height: ThemeColor.paddingLarge),
+        SizedBox(height: ThemeColor.paddingLarge),
         Text(
           'Iniciar Sesión',
           style: ThemeColor.headingLarge.copyWith(
@@ -78,7 +72,7 @@ Widget _buildHeader() {
             Text(
               '¿Aún no tienes una cuenta? ',
               style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textDarkColor,
               ),
             ),
             GestureDetector(
@@ -95,9 +89,9 @@ Widget _buildHeader() {
             ),
           ],
         ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _buildLoginForm() {
     return Container(
@@ -113,9 +107,9 @@ Widget _buildHeader() {
             keyboardType: TextInputType.emailAddress,
             onSubmitted: (_) => controller.onemailSubmitted(),
           ),
-          
+
           SizedBox(height: ThemeColor.paddingLarge),
-          
+
           Obx(
             () => ThemeColor.createLabeledTextField(
               label: 'Contraseña:',
@@ -135,7 +129,7 @@ Widget _buildHeader() {
               ),
             ),
           ),
-          
+
           SizedBox(height: ThemeColor.paddingMedium),
           _buildRememberMeCheckbox(),
           SizedBox(height: ThemeColor.paddingExtraLarge),
@@ -162,11 +156,7 @@ Widget _buildHeader() {
             color: ThemeColor.primaryColor,
             borderRadius: ThemeColor.smallBorderRadius,
           ),
-          child: Icon(
-            Icons.check,
-            color: ThemeColor.textLightColor,
-            size: 16,
-          ),
+          child: Icon(Icons.check, color: ThemeColor.textLightColor, size: 16),
         ),
       ],
     );
@@ -202,9 +192,7 @@ Widget _buildHeader() {
                 )
               : Text(
                   'Iniciar Sesión',
-                  style: ThemeColor.buttonText.copyWith(
-                    fontSize: 16,
-                  ),
+                  style: ThemeColor.buttonText.copyWith(fontSize: 16),
                 ),
         ),
       ),

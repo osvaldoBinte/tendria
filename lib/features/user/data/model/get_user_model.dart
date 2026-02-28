@@ -2,13 +2,20 @@ import 'package:tendria/features/user/data/model/preferences_model.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 
 class GetUserModel extends GetUserEntity {
-  GetUserModel({  super.id, required super.name, required super.age, required super.fotoUrl, required super.bio, required super.assets, required super.qualitiesIds, required super.interestsIds, required super.preferences});
+  GetUserModel({  super.id, required super.name, super.status, super.city,required super.age, required super.fotoUrl, required super.bio, required super.assets, required super.qualitiesIds, required super.interestsIds, required super.preferences,super.dateofbirth,super.gender,super.primarylanguage,super.heightcm});
  factory GetUserModel.fromJson(Map<String, dynamic> json) {
+  
   return GetUserModel(
     id: json['id'],
     name: json['nombre'],
     age: json['edad'],
-    fotoUrl: json['fotoUrl'],
+    fotoUrl: json['fotoUrl'] ?? json['foto_perfil'],
+    dateofbirth: json['fecha_nacimiento'],
+    gender: json['genero'],
+    primarylanguage: json['idioma_principal'],
+    heightcm: json['altura_cm'],
+    status: json['status'],
+    city: json['ciudad'],
     bio: json['bio'],
 
     assets: (json['media'] as List<dynamic>?)
@@ -34,9 +41,13 @@ class GetUserModel extends GetUserEntity {
             ))
         .toList(),
 
-    preferences: (json['preferencias'] as List<dynamic>?)
-        ?.map((e) => PreferencesModel.fromJson(e))
-        .toList(),
+    
+  preferences: (json['preferencias'] as List<dynamic>?)
+    ?.isNotEmpty == true
+    ? PreferencesModel.fromJson(
+        json['preferencias'][0] as Map<String, dynamic>,
+      )
+    : null,
   );
 }
 

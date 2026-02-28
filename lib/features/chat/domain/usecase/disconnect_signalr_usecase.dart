@@ -3,11 +3,11 @@
 import 'package:tendria/features/chat/domain/repositories/chat_repository.dart';
 
 class DisconnectSignalRUsecase {
-  final ChatRepository repository;
+  final ChatRepository chatRepository;
 
-  DisconnectSignalRUsecase({required this.repository});
+  DisconnectSignalRUsecase({required this.chatRepository});
 
   Future<void> execute() async {
-    return await repository.disconnectSignalR();
+    return await chatRepository.disconnectSignalR();
   }
 }

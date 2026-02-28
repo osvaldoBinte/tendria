@@ -1,0 +1,188 @@
+{
+  "preferences_page": {
+    "gender_preference": {
+      "title": "What type of people would\nyou like to meet?",
+      "subtitle": "This preference is flexible and editable\nlater.",
+      "visibility_note": "We'll show you profiles compatible with your preferences.",
+      "men": "Men",
+      "women": "Women",
+      "non_binary": "Non-binary person",
+      "everyone": "Everyone"
+    },
+    "connection_type": {
+      "title": "What type of connection\ndo you want?",
+      "subtitle": "Select up to two options that fit\nyou.",
+      "visibility_note": "We'll show this preference to improve your matches.",
+      "friendship": "Friendship and good vibes",
+      "dates": "Meet people and have fun",
+      "serious": "Something stable with a future",
+      "casual": "Connections without strings"
+    },
+    "age_range": {
+      "title": "What age range\ndo you prefer?",
+      "subtitle": "You can adjust this later.",
+      "min_label": "Minimum",
+      "max_label": "Maximum",
+      "range_label": "From {min} to {max} years",
+      "distance_title": "Maximum distance",
+      "distance_no_limit": "No distance limit",
+      "distance_km_label": "Up to {km} km"
+    },
+    "photos": {
+      "title": "Introduce yourself with photos",
+      "subtitle": "Upload at least 2 photos that show your essence.\nThe best connections start with great photos.",
+      "count": "{current}/{max} photos"
+    },
+    "interests": {
+      "title": "Choose your main\ninterests",
+      "subtitle": "Your tastes help us find better\nmatches.",
+      "search_hint": "Search interests",
+      "popular_label": "Popular interests",
+      "count": "{current}/{max} selected",
+      "empty": "No interests available",
+      "search_tip": "If you don't find your results, type them..."
+    },
+    "qualities": {
+      "title": "What you appreciate most\nin a person",
+      "subtitle": "These qualities help us create better\nmatches.",
+      "count": "What you look for in someone        {current}/{max} selected",
+      "empty": "No qualities available"
+    },
+    "nav": {
+      "skip": "Skip"
+    }
+  },
+
+  "profile_page": {
+    "title": "Profile",
+    "add_status": "Add status",
+    "discover_button": "Discover nearby profiles",
+    "photos_section": {
+      "title": "Photos",
+      "hint": "Tap + to add multiple photos at once"
+    },
+    "bio_section": {
+      "title": "My Biography"
+    }
+  },
+
+  "user_profile_detail": {
+    "not_found_title": "User not found",
+    "not_found_subtitle": "Could not load profile",
+    "back_button": "Back",
+    "nearby_label": "Near you",
+    "bio_title": "My Bio",
+    "looking_for_title": "Looking for",
+    "interests_title": "Interests",
+    "qualities_title": "My Qualities",
+    "age_range_chip": "{min} - {max} years"
+  },
+
+  "profile_detail_screen": {
+    "no_users_title": "No users available",
+    "no_users_subtitle": "Try again later",
+    "reload_button": "Reload",
+    "bio_title": "My Bio",
+    "about_me_title": "About me",
+    "looking_for_title": "Looking for",
+    "interests_title": "Interests",
+    "block_button": "Block",
+    "report_button": "Report",
+    "super_like_button": "Super Like",
+    "like_button": "Like"
+  },
+
+  "match_view": {
+    "stories_title": "Stories",
+    "my_story": "My story",
+    "user_fallback": "User",
+    "search_hint": "Search chats...",
+    "chats_title": "Chats",
+    "pending_filter_label": "Unanswered",
+    "filter_title": "Filter chats",
+    "filter_option_label": "Unanswered",
+    "filter_option_description": "Only chats waiting for your reply",
+    "clear_filters": "Clear filters",
+    "your_turn": "Your turn",
+    "start_chat": "Start chatting!",
+    "empty_chats_pending": "No unanswered chats matching \"{query}\"",
+    "empty_chats_all_done": "All caught up! No chats waiting for your reply",
+    "empty_chats_search": "No chats matching \"{query}\"",
+    "see_all_chats": "See all chats",
+    "loading": "Loading chats...",
+    "error_title": "Error loading chats",
+    "empty_title": "No chats yet",
+    "empty_subtitle": "Start liking profiles to find your perfect match",
+    "explore_button": "EXPLORE PROFILES",
+    "retry_button": "RETRY"
+  },
+
+  "liked_by_view": {
+    "header_title": "Pending Chats",
+    "header_subtitle": "Unlock chats to start talking.",
+    "unlock_button": "Unlock",
+    "loading": "Loading pending chats...",
+    "error_title": "Error loading chats",
+    "empty_title": "No pending chats",
+    "empty_subtitle": "When someone messages you, they'll appear here",
+    "explore_button": "EXPLORE PROFILES",
+    "retry_button": "RETRY"
+  },
+
+  "chat_page": {
+    "real_time_active": "Real-time active",
+    "no_real_time": "No real-time connection",
+    "waiting_response": "First message sent. Wait for a reply.",
+    "input_hint": "Write a message...",
+    "input_waiting_hint": "Wait for a reply...",
+    "empty_title": "Start the conversation",
+    "empty_subtitle": "Send the first message to begin",
+    "error_title": "Error loading messages",
+    "retry_button": "RETRY"
+  },
+
+  "register_page": {
+    "basic_info": {
+      "title": "Get started",
+      "login_prompt": "Already have an account? ",
+      "login_link": "Log in",
+      "name_label": "Full name:",
+      "name_hint": "Karen Hernández Costa",
+      "email_label": "Email address:",
+      "email_hint": "email@gmail.com",
+      "password_label": "Create a password",
+      "confirm_password_label": "Confirm your password:",
+      "privacy_notice": "By signing up you agree to the Privacy Policy and Terms & Conditions.",
+      "register_button": "Sign up"
+    },
+    "personal_info": {
+      "title": "Let's start with\nthe basics",
+      "birth_date_label": "Select your date of birth",
+      "gender_label": "How do you identify?",
+      "bio_label": "Tell us about yourself:",
+      "bio_hint": "Write a short bio...",
+      "male": "Male",
+      "female": "Female",
+      "non_binary": "Non-binary"
+    },
+    "physical_info": {
+      "title": "This info helps us\nimprove your matches",
+      "height_label": "Your height"
+    },
+    "interests": {
+      "title": "Choose your main\ninterests",
+      "subtitle": "Your tastes help us find better\nmatches.",
+      "search_hint": "Search interests",
+      "popular_label": "Popular interests",
+      "count": "{current}/5 selected",
+      "empty": "No interests available",
+      "search_tip": "If you don't find your results, type them..."
+    },
+    "qualities": {
+      "title": "What you appreciate most\nin a person",
+      "subtitle": "These qualities help us create better\nmatches.",
+      "count": "What you look for in someone        {current}/3 selected",
+      "empty": "No qualities available"
+    }
+  }
+}

@@ -4,19 +4,31 @@ import 'package:tendria/features/auth/domain/usecase/create_user_usecase.dart';
 import 'package:tendria/features/auth/domain/usecase/login_usecase.dart';
 import 'package:tendria/features/catalog/data/datasources/catalog_data_sources_imp.dart';
 import 'package:tendria/features/catalog/data/repositories/catalog_repository_imp.dart';
+import 'package:tendria/features/catalog/domain/usecase/delete_interests_usecase.dart';
+import 'package:tendria/features/catalog/domain/usecase/delete_qualities_usecase.dart';
 import 'package:tendria/features/catalog/domain/usecase/fetch_interests_usecase.dart';
 import 'package:tendria/features/catalog/domain/usecase/fetch_qualities_usecase.dart';
 import 'package:tendria/features/catalog/domain/usecase/post_interests_usecase.dart';
 import 'package:tendria/features/catalog/domain/usecase/post_qualities_usecase.dart';
 import 'package:tendria/features/chat/data/datasources/chat_data_sources_imp.dart';
 import 'package:tendria/features/chat/data/repositories/chat_repository_imp.dart';
+import 'package:tendria/features/chat/domain/usecase/connect_signalr_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/disconnect_signalr_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/get_chat_mensaje_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/get_my_chats_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/join_chat_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/leave_chat_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/set_on_disconnected_callback_usecase.dart';
+import 'package:tendria/features/like/domain/usecase/payments_chat_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/send_message_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/setup_message_listener_usecase.dart';
+import 'package:tendria/features/like/domain/usecase/start_conversations_usecase.dart';
 import 'package:tendria/features/like/data/datasources/like_data_sources_imp.dart';
 import 'package:tendria/features/like/data/repositories/like_repository_imp.dart';
 import 'package:tendria/features/like/domain/usecase/get_like_by_users_usecase.dart';
-import 'package:tendria/features/like/domain/usecase/my_match_usecase.dart';
+import 'package:tendria/features/like/domain/usecase/get_pending_liked_chats_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
+import 'package:tendria/features/like/domain/usecase/unlock_chat_usecase.dart';
 import 'package:tendria/features/stories/data/datasources/stories_data_sources_imp.dart';
 import 'package:tendria/features/stories/data/repository/stories_repository_imp.dart';
 import 'package:tendria/features/stories/domain/usecase/add_like_to_story_usecase.dart';
@@ -25,11 +37,21 @@ import 'package:tendria/features/stories/domain/usecase/fetch_stories_by_id_usec
 import 'package:tendria/features/stories/domain/usecase/fetch_stories_usecase.dart';
 import 'package:tendria/features/stories/domain/usecase/remove_story_usecase.dart';
 import 'package:tendria/features/stories/domain/usecase/set_story_as_seen_usecase.dart';
+import 'package:tendria/features/unlock/data/datasources/unlock_datasources_imp.dart';
+import 'package:tendria/features/unlock/data/repositories/unlock_repository_imp.dart';
+import 'package:tendria/features/unlock/domain/usecase/block_user_usecase.dart';
+import 'package:tendria/features/unlock/domain/usecase/fetch_blocked_users_usecase.dart';
+import 'package:tendria/features/unlock/domain/usecase/unblock_user_usecase.dart';
 import 'package:tendria/features/user/data/datasources/user_data_sources_imp.dart';
 import 'package:tendria/features/user/data/repositories/user_repository_imp.dart';
+import 'package:tendria/features/user/domain/usecase/delete_media_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/delete_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/preferences_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/put_preferences_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/update_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_picture_perfile_usecase.dart';
 
@@ -40,6 +62,7 @@ class UsecaseConfig {
   StoriesDataSourcesImp? storiesDataSourcesImp;
   ChatDataSourcesImp?chatDataSourcesImp;
   LikeDataSourcesImp? likeDataSourcesImp;
+  UnlockDatasourcesImp? unlockDataSourcesImp;
 
   AuthRepositoryImp? authRepositoryImp;
   CatalogRepositoryImp? catalogRepositoryImp;
@@ -47,6 +70,7 @@ class UsecaseConfig {
   StoriesRepositoryImp? storiesRepositoryImp;
   ChatRepositoryImp?chatRepositoryImp;
   LikeRepositoryImp? likeRepositoryImp;
+  UnlockRepositoryImp? unlockRepositoryImp;
 
   LoginUsecase? loginUsecase;
   CreateUserUsecase? createUserUsecase;
@@ -55,18 +79,34 @@ class UsecaseConfig {
   FetchQualitiesUsecase? fetchQualitiesUsecase;
   PostInterestsUsecase? postInterestsUsecase;
   PostQualitiesUsecase? postQualitiesUsecase;
+  DeleteInterestsUsecase? deleteInterestsUsecase;
+  DeleteQualitiesUsecase? deleteQualitiesUsecase;
   
   GetUserUsecase? getUserUsecase;
+  DeleteUserUsecase?deleteUserUsecase;
+  GetUserByIdUsecase? getUserByIdUsecase;
   FetchNearbyUsersUsecase? fetchNearbyUsersUsecase;
   PreferencesUserUsecase? preferencesUserUsecase;
+  PutPreferencesUserUsecase? putPreferencesUserUsecase;
   UploadMediaUsecase? uploadMediaUsecase;
+  DeleteMediaUsecase? deleteMediaUsecase;
   UploadPicturePerfileUsecase? uploadPicturePerfileUsecase;
+  UpdateUserUsecase? updateUserUsecase;
   
 
  
   GetChatMensajeUsecase?getChatMensajeUsecase;
+  GetMyChatsUsecase? getMyChatsUsecase;
   SendMessageUsecase?sendMessageUsecase;
-
+  ConnectSignalRUsecase? connectSignalRUsecase;
+  DisconnectSignalRUsecase? disconnectSignalRUsecase;
+  JoinChatUsecase? joinChatUsecase;
+  LeaveChatUsecase? leaveChatUsecase;
+  SetOnDisconnectedCallbackUsecase?setOnDisconnectedCallbackUsecase;
+  SetupMessageListenerUsecase? setMessageCallbackUsecase;
+  StartConversationsUsecase? startConversationsUsecase;
+  PaymentsChatUsecase? paymentsChatUsecase;
+  UnlockChatUsecase? unlockChatUsecase;
    AddLikeToStoryUsecase? addLikeToStoryUsecase;
    CreateStroryUsecase? createStroryUsecase;
    FetchStoriesByIdUsecase? fetchStoriesByIdUsecase;
@@ -75,8 +115,13 @@ class UsecaseConfig {
    SetStoryAsSeenUsecase? setStoryAsSeenUsecase;
 
    GetLikeByUsersUsecase? getLikeByUsersUsecase;
-   MyMatchUsecase? myMatchUsecase;
+   GetPendingLikedChatsUsecase? getPendingLikedChatsUsecase;
    ToggleLikeUsecase? toggleLikeUsecase;
+
+
+   UnblockUserUsecase? unblockUserUsecase;
+   BlockUserUsecase? blockUserUsecase;
+  FetchBlockedUsersUsecase? fetchBlockedUsersUsecase;
 
   
   UsecaseConfig(){
@@ -86,23 +131,32 @@ class UsecaseConfig {
     storiesDataSourcesImp = StoriesDataSourcesImp();
     chatDataSourcesImp = ChatDataSourcesImp();
     likeDataSourcesImp = LikeDataSourcesImp();
+    unlockDataSourcesImp = UnlockDatasourcesImp();
     authRepositoryImp = AuthRepositoryImp(authDataSourceImp: authDataSourceImp!);
     catalogRepositoryImp = CatalogRepositoryImp(catalogDataSourcesImp: catalogDataSourcesImp!);
     userRepositoryImp = UserRepositoryImp(userDataSourcesImp: userDataSourcesImp!);
     storiesRepositoryImp = StoriesRepositoryImp(storiesDataSourcesImp: storiesDataSourcesImp!);
-    chatRepositoryImp = ChatRepositoryImp(chatDataSourcesImp: chatDataSourcesImp!);
+    chatRepositoryImp = ChatRepositoryImp(chatDataSourcesImp: chatDataSourcesImp!,);
     likeRepositoryImp = LikeRepositoryImp(likeDataSourcesImp: likeDataSourcesImp!);
+    unlockRepositoryImp = UnlockRepositoryImp(unlockDatasourcesImp: unlockDataSourcesImp!);
 
     loginUsecase = LoginUsecase(authRepository: authRepositoryImp!);
     createUserUsecase = CreateUserUsecase(authRepository: authRepositoryImp!);
     fetchInterestsUsecase = FetchInterestsUsecase(catalogRepository: catalogRepositoryImp!);
     fetchQualitiesUsecase = FetchQualitiesUsecase(catalogRepository: catalogRepositoryImp!);
+    deleteInterestsUsecase = DeleteInterestsUsecase(catalogRepository: catalogRepositoryImp!);
+    deleteQualitiesUsecase = DeleteQualitiesUsecase(catalogRepository: catalogRepositoryImp!);
     getUserUsecase = GetUserUsecase(userRepository: userRepositoryImp!);
+    updateUserUsecase = UpdateUserUsecase(userRepository: userRepositoryImp!);
+    getUserByIdUsecase = GetUserByIdUsecase(userRepository: userRepositoryImp!);
+    deleteUserUsecase = DeleteUserUsecase(userRepository: userRepositoryImp!);
     fetchNearbyUsersUsecase = FetchNearbyUsersUsecase(userRepository: userRepositoryImp!);
     postInterestsUsecase = PostInterestsUsecase(catalogRepository: catalogRepositoryImp!);
     postQualitiesUsecase = PostQualitiesUsecase(catalogRepository: catalogRepositoryImp!);
     preferencesUserUsecase = PreferencesUserUsecase(userRepository: userRepositoryImp!);
+    putPreferencesUserUsecase = PutPreferencesUserUsecase(userRepository: userRepositoryImp!);
     uploadMediaUsecase = UploadMediaUsecase(userRepository: userRepositoryImp!);
+    deleteMediaUsecase = DeleteMediaUsecase(userRepository: userRepositoryImp!);
     uploadPicturePerfileUsecase = UploadPicturePerfileUsecase(userRepository: userRepositoryImp!);
     addLikeToStoryUsecase = AddLikeToStoryUsecase(storiesRepository: storiesRepositoryImp!);
     createStroryUsecase = CreateStroryUsecase(storiesRepository: storiesRepositoryImp!);
@@ -112,8 +166,23 @@ class UsecaseConfig {
     setStoryAsSeenUsecase = SetStoryAsSeenUsecase(storiesRepository: storiesRepositoryImp!);
     getChatMensajeUsecase = GetChatMensajeUsecase(chatRepository: chatRepositoryImp!);
     sendMessageUsecase = SendMessageUsecase(chatRepository: chatRepositoryImp!);
+    getMyChatsUsecase = GetMyChatsUsecase(chatRepository: chatRepositoryImp!);
+    startConversationsUsecase = StartConversationsUsecase(likeRepository: likeRepositoryImp!);
+    paymentsChatUsecase = PaymentsChatUsecase(likeRepository: likeRepositoryImp!);
+    unlockChatUsecase = UnlockChatUsecase(likeRepository: likeRepositoryImp!);
+    connectSignalRUsecase = ConnectSignalRUsecase(chatRepository: chatRepositoryImp!);
+
+    disconnectSignalRUsecase = DisconnectSignalRUsecase(chatRepository: chatRepositoryImp!);
+    setOnDisconnectedCallbackUsecase =SetOnDisconnectedCallbackUsecase(chatRepository: chatRepositoryImp!);
+    joinChatUsecase = JoinChatUsecase(chatRepository: chatRepositoryImp!);
+    leaveChatUsecase = LeaveChatUsecase(chatRepository: chatRepositoryImp!);
+    setMessageCallbackUsecase = SetupMessageListenerUsecase(chatRepository: chatRepositoryImp!);
     getLikeByUsersUsecase = GetLikeByUsersUsecase(likeRepository: likeRepositoryImp!);
-    myMatchUsecase = MyMatchUsecase(likeRepository: likeRepositoryImp!);
+    getPendingLikedChatsUsecase = GetPendingLikedChatsUsecase(likeRepository: likeRepositoryImp!);
     toggleLikeUsecase = ToggleLikeUsecase(likeRepository: likeRepositoryImp!);
+
+    unblockUserUsecase = UnblockUserUsecase(unlockRepository: unlockRepositoryImp!);
+    blockUserUsecase = BlockUserUsecase(unlockRepository: unlockRepositoryImp!);
+    fetchBlockedUsersUsecase = FetchBlockedUsersUsecase(unlockRepository: unlockRepositoryImp!);
   }
 }

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test SignalR Chat - Tendria</title>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f2f5;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #1e3a8a; }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #messages { 
+            border: 1px solid #e5e7eb; 
+            height: 400px; 
+            overflow-y: auto; 
+            padding: 15px; 
+            margin: 15px 0;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        .message { 
+            padding: 8px 12px; 
+            margin: 8px 0; 
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .my-message { 
+            background: #dcf8c6; 
+            border-left: 3px solid #25d366;
+        }
+        .other-message {
+            background: #fff;
+            border-left: 3px solid #128c7e;
+        }
+        .system { 
+            background: #e3f2fd; 
+            color: #1565c0;
+            font-style: italic;
+            border-left: 3px solid #1976d2;
+        }
+        .error { 
+            background: #fee; 
+            color: #c00;
+            border-left: 3px solid #f00;
+        }
+        input, button { 
+            padding: 12px; 
+            margin: 5px; 
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            min-width: 250px;
+        }
+        input[type="number"] {
+            width: 100px;
+        }
+        button {
+            background: #128c7e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        button:hover { background: #0a6b5f; }
+        button:active { transform: scale(0.98); }
+        #status { 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .connected { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 2px solid #28a745;
+        }
+        .disconnected { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 2px solid #dc3545;
+        }
+        #token-display {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .section-title {
+            color: #374151;
+            margin-top: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        #debug-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .log-info { color: #4fc3f7; }
+        .log-error { color: #ef5350; }
+        .log-success { color: #66bb6a; }
+        .log-warning { color: #ffb74d; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Test Chat SignalR - Tendria</h1>
+    
+    <div class="container">
+        <div id="status" class="disconnected">❌ Desconectado</div>
+    </div>
+    
+    <div class="container">
+        <h3 class="section-title">1️⃣ Login</h3>
+        <input type="email" id="email" placeholder="Email" value="prueba@prueba.com">
+        <input type="password" id="password" placeholder="Password" value="Prueba123">
+        <button onclick="login()">🔐 Login</button>
+        
+        <div id="token-display" style="display: none;">
+            <strong>🎫 Token JWT:</strong><br>
+            <span id="token-text"></span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3 class="section-title">2️⃣ Conectar al Chat</h3>
+        <input type="number" id="chatId" placeholder="Chat ID" value="1">
+        <button onclick="connectToChat()">🔌 Conectar</button>
+        <button onclick="disconnectFromChat()" style="background: #dc3545;">❌ Desconectar</button>
+        <button onclick="clearMessages()" style="background: #6c757d;">🗑️ Limpiar</button>
+    </div>
+    
+    <div class="container">
+        <h3 class="section-title">3️⃣ Enviar Mensaje</h3>
+        <input type="text" id="messageText" placeholder="Escribe un mensaje..." style="width: 60%;">
+        <button onclick="sendMessage()">📤 Enviar</button>
+    </div>
+    
+    <div class="container">
+        <h3 class="section-title">💬 Mensajes</h3>
+        <div id="messages"></div>
+    </div>
+    
+    <div class="container">
+        <h3 class="section-title">🔍 Debug Log</h3>
+        <div id="debug-log"></div>
+    </div>
+    
+    <script>
+        let connection = null;
+        let token = null;
+        let currentChatId = null;
+        
+        // ⚠️ CAMBIA ESTA URL SI ESTÁS EN PRODUCCIÓN
+        const API_URL = 'https://api-tendria.grupogerena.com.mx';
+        
+        // === FUNCIONES DE DEBUG ===
+        function logDebug(message, type = 'info') {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            // También en consola
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // === 1. LOGIN ===
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            logDebug(`Intentando login con: ${email}`, 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/Auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                logDebug(`Respuesta del servidor: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(`Login falló: ${errorData}`);
+                }
+                
+                const data = await response.json();
+                token = data.token;
+                
+                document.getElementById('token-display').style.display = 'block';
+                document.getElementById('token-text').textContent = token;
+                
+                logDebug('✅ Login exitoso! Token recibido', 'success');
+                addMessage('✅ Login exitoso!', 'system');
+            } catch (error) {
+                logDebug(`❌ Error en login: ${error.message}`, 'error');
+                addMessage('❌ Error en login: ' + error.message, 'error');
+            }
+        }
+        
+        // === 2. CONECTAR A SIGNALR ===
+        async function connectToChat() {
+            if (!token) {
+                logDebug('❌ No hay token. Debes hacer login primero', 'warning');
+                addMessage('❌ Debes hacer login primero!', 'error');
+                return;
+            }
+            
+            currentChatId = parseInt(document.getElementById('chatId').value);
+            logDebug(`Intentando conectar a SignalR - Chat ID: ${currentChatId}`, 'info');
+            
+            try {
+                // Crear conexión SignalR
+                logDebug('Creando conexión SignalR...', 'info');
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl(`${API_URL}/api/chathub`, {
+                        accessTokenFactory: () => {
+                            logDebug('Token siendo enviado a SignalR', 'info');
+                            return token;
+                        },
+                        transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
+                    })
+                    .configureLogging(signalR.LogLevel.Debug)
+                    .withAutomaticReconnect()
+                    .build();
+                
+                // Event handlers de SignalR
+                connection.onreconnecting(error => {
+                    logDebug(`⚠️ Reconectando: ${error}`, 'warning');
+                    document.getElementById('status').className = 'disconnected';
+                    document.getElementById('status').textContent = '⚠️ Reconectando...';
+                });
+                
+                connection.onreconnected(connectionId => {
+                    logDebug(`✅ Reconectado! ID: ${connectionId}`, 'success');
+                    document.getElementById('status').className = 'connected';
+                    document.getElementById('status').textContent = '✅ Reconectado';
+                });
+                
+                connection.onclose(error => {
+                    logDebug(`❌ Conexión cerrada: ${error}`, 'error');
+                    document.getElementById('status').className = 'disconnected';
+                    document.getElementById('status').textContent = '❌ Desconectado';
+                });
+                
+                // Escuchar mensajes entrantes
+                connection.on("ReceiveMessage", (mensaje) => {
+                    logDebug(`📥 Mensaje recibido de ${mensaje.senderNombre}`, 'success');
+                    console.log("Mensaje completo:", mensaje);
+                    addMessage(
+                        `${mensaje.senderNombre}: ${mensaje.mensaje}`,
+                        mensaje.esPropio ? 'my-message' : 'other-message',
+                        mensaje.enviadoEn
+                    );
+                });
+                
+                // Conectar
+                logDebug('🔌 Iniciando conexión SignalR...', 'info');
+                await connection.start();
+                
+                logDebug(`✅ Conectado! Connection ID: ${connection.connectionId}`, 'success');
+                document.getElementById('status').className = 'connected';
+                document.getElementById('status').textContent = '✅ Conectado a SignalR';
+                addMessage('✅ Conectado al servidor SignalR', 'system');
+                
+                // Unirse al chat específico
+                logDebug(`📍 Uniéndose al chat #${currentChatId}...`, 'info');
+                await connection.invoke("JoinChat", currentChatId);
+                logDebug(`✅ Unido al chat #${currentChatId}`, 'success');
+                addMessage(`✅ Unido al chat #${currentChatId}`, 'system');
+                
+                // Cargar mensajes anteriores
+                await loadMessages();
+                
+            } catch (error) {
+                logDebug(`❌ Error al conectar: ${error.message}`, 'error');
+                console.error('Error completo:', error);
+                addMessage('❌ Error al conectar: ' + error.message, 'error');
+                
+                // Información adicional para debugging
+                if (error.message.includes('CORS')) {
+                    addMessage('💡 Asegúrate de estar sirviendo este HTML desde un servidor local (http://localhost:xxxx)', 'error');
+                    logDebug('💡 CORS Error - Verifica que estés usando un servidor local', 'warning');
+                }
+            }
+        }
+        
+        // === 3. CARGAR MENSAJES ANTERIORES (REST) ===
+        async function loadMessages() {
+            logDebug(`📜 Cargando mensajes del chat #${currentChatId}...`, 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/mensajes/chat/${currentChatId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                logDebug(`✅ Cargados ${data.mensajes.length} mensajes`, 'success');
+                addMessage(`📜 Cargando ${data.mensajes.length} mensajes anteriores...`, 'system');
+                
+                data.mensajes.forEach(msg => {
+                    addMessage(
+                        `${msg.senderNombre}: ${msg.mensaje}`,
+                        msg.esPropio ? 'my-message' : 'other-message',
+                        msg.enviadoEn
+                    );
+                });
+                
+            } catch (error) {
+                logDebug(`❌ Error al cargar mensajes: ${error.message}`, 'error');
+                addMessage('❌ Error al cargar mensajes: ' + error.message, 'error');
+            }
+        }
+        
+        // === 4. ENVIAR MENSAJE (REST) ===
+        async function sendMessage() {
+            if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                logDebug('❌ No hay conexión activa', 'warning');
+                addMessage('❌ No estás conectado!', 'error');
+                return;
+            }
+            
+            const messageText = document.getElementById('messageText').value;
+            if (!messageText.trim()) {
+                logDebug('⚠️ Mensaje vacío', 'warning');
+                return;
+            }
+            
+            logDebug(`📤 Enviando mensaje: "${messageText}"`, 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/mensajes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        chatId: currentChatId,
+                        mensaje: messageText
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(`Error ${response.status}: ${errorData}`);
+                }
+                
+                logDebug('✅ Mensaje enviado', 'success');
+                document.getElementById('messageText').value = '';
+                
+            } catch (error) {
+                logDebug(`❌ Error al enviar: ${error.message}`, 'error');
+                addMessage('❌ Error al enviar: ' + error.message, 'error');
+            }
+        }
+        
+        // === 5. DESCONECTAR ===
+        async function disconnectFromChat() {
+            if (connection) {
+                try {
+                    if (currentChatId) {
+                        logDebug(`👋 Saliendo del chat #${currentChatId}...`, 'info');
+                        await connection.invoke("LeaveChat", currentChatId);
+                    }
+                    
+                    logDebug('🔌 Cerrando conexión...', 'info');
+                    await connection.stop();
+                    
+                    document.getElementById('status').className = 'disconnected';
+                    document.getElementById('status').textContent = '❌ Desconectado';
+                    addMessage('👋 Desconectado del chat', 'system');
+                    logDebug('✅ Desconectado correctamente', 'success');
+                } catch (error) {
+                    logDebug(`❌ Error al desconectar: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        // === FUNCIONES AUXILIARES ===
+        function addMessage(text, type = '', timestamp = null) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + type;
+            
+            let timeStr = '';
+            if (timestamp) {
+                const date = new Date(timestamp);
+                timeStr = `[${date.toLocaleTimeString()}] `;
+            }
+            
+            messageDiv.textContent = timeStr + text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+            logDebug('🗑️ Mensajes limpiados', 'info');
+        }
+        
+        // Enter para enviar mensaje
+        document.getElementById('messageText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Log inicial
+        logDebug('🚀 Test Chat inicializado', 'success');
+        logDebug(`📡 API URL: ${API_URL}`, 'info');
+        logDebug(`🌐 Origen actual: ${window.location.origin}`, 'info');
+    </script>
+</body>
+</html>

@@ -3,11 +3,11 @@
 import 'package:tendria/features/chat/domain/repositories/chat_repository.dart';
 
 class LeaveChatUsecase {
-  final ChatRepository repository;
+  final ChatRepository chatRepository;
 
-  LeaveChatUsecase({required this.repository});
+  LeaveChatUsecase({required this.chatRepository});
 
   Future<void> execute(int chatId) async {
-    return await repository.leaveChat(chatId);
+    return await chatRepository.leaveChat(chatId);
   }
 }

@@ -7,8 +7,10 @@ import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
+import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
+import 'package:tendria/features/user/domain/usecase/delete_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_picture_perfile_usecase.dart';
@@ -17,35 +19,42 @@ class ProfileController extends GetxController {
   final GetUserUsecase getUserUsecase;
   final UploadMediaUsecase uploadMediaUsecase;
   final UploadPicturePerfileUsecase uploadPicturePerfileUsecase;
-
+ final DeleteMediaUsecase deleteMediaUsecase;
   ProfileController({
     required this.getUserUsecase,
     required this.uploadMediaUsecase,
-    required this.uploadPicturePerfileUsecase
+    required this.uploadPicturePerfileUsecase,
+    required this.deleteMediaUsecase
   });
 
   // Estados
   final RxBool isLoading = false.obs;
   final RxBool isUploadingPhoto = false.obs;
   final RxBool isUploadingProfilePhoto = false.obs;
-  
-  // Datos del usuario
+    final RxBool isDeletingPhoto = false.obs; 
+
   final Rx<GetUserEntity?> userEntity = Rx<GetUserEntity?>(null);
   
-  // ImagePicker
   final ImagePicker _picker = ImagePicker();
   
-  // Getters para acceso fácil
   String get userName => userEntity.value?.name ?? 'Usuario';
   int get userAge => userEntity.value?.age ?? 0;
   String get profilePhotoUrl => userEntity.value?.fotoUrl ?? '';
   String get profileBio => userEntity.value?.bio ?? '';
-
+  String get  gender => userEntity.value?.gender ?? '';
+  String get  primarylanguage => userEntity.value?.primarylanguage ?? '';
+  int get  heightcm => userEntity.value?.heightcm ?? 0;
   List<AssetEntity> get assets => userEntity.value?.assets ?? [];
   List<QualitiesIdsEntity> get qualities => userEntity.value?.qualitiesIds ?? [];
   List<InterestsIdsEntity> get interests => userEntity.value?.interestsIds ?? [];
-  
-  // Máximo de fotos permitidas
+  String get city => userEntity.value?.city ?? '';
+  String get status => userEntity.value?.status ?? '';
+
+String get formattedDateOfBirth {
+  final date = userEntity.value?.dateofbirth ?? '';
+  if (date.isEmpty) return '';
+  return date.split('T').first; 
+}
   final int maxPhotos = 6;
   
   @override
@@ -53,10 +62,6 @@ class ProfileController extends GetxController {
     super.onInit();
     loadUserProfile();
   }
-
-  // ==========================================
-  // CARGAR PERFIL
-  // ==========================================
   
   Future<void> loadUserProfile() async {
     try {
@@ -74,10 +79,43 @@ class ProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // FOTO DE PERFIL (PRINCIPAL)
-  // ==========================================
-  
+  Future<void> deletePhoto(int mediaId) async {
+    try {
+      isDeletingPhoto.value = true;
+
+      await deleteMediaUsecase.execute(mediaId);
+      await loadUserProfile();
+
+      showSuccessSnackbar(
+        'La foto se ha eliminado correctamente',
+      );
+    } catch (e) {
+      print('Error eliminando foto: $e');
+      showErrorSnackbar(
+        'No se pudo eliminar la foto: ${cleanExceptionMessage(e)}',
+      );
+    } finally {
+      isDeletingPhoto.value = false;
+    }
+  }
+
+  void confirmDeletePhoto(int mediaId) {
+    if (Get.context != null) {
+      showCustomAlert(
+        context: Get.context!,
+        title: 'Eliminar foto',
+        message: '¿Estás seguro que deseas eliminar esta foto?',
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        type: CustomAlertType.warning,
+        onCancel: () => Get.back(),
+        onConfirm: () {
+          Get.back();
+          deletePhoto(mediaId);
+        },
+      );
+    }
+  }
  void showProfilePhotoOptions() {
   if (Get.context != null) {
     showDialog(
@@ -139,12 +177,10 @@ class ProfileController extends GetxController {
                 ),
               ),
 
-              // Opciones
               Padding(
                 padding: EdgeInsets.all(ThemeColor.paddingMedium),
                 child: Column(
                   children: [
-                    // Opción Galería
                     _buildPhotoOption(
                       icon: Icons.photo_library,
                       title: 'Seleccionar de galería',
@@ -157,7 +193,6 @@ class ProfileController extends GetxController {
 
                     SizedBox(height: ThemeColor.paddingSmall),
 
-                    // Opción Cámara
                     _buildPhotoOption(
                       icon: Icons.camera_alt,
                       title: 'Tomar foto',
@@ -313,66 +348,162 @@ Widget _buildPhotoOption({
     }
   }
 
-  // ==========================================
-  // MANEJO DE FOTOS DE GALERÍA
-  // ==========================================
-  
-  Future<void> addPhoto() async {
-    if (assets.length >= maxPhotos) {
-      _showErrorAlert(
-        'Límite alcanzado',
-        'Puedes tener máximo $maxPhotos fotos en tu perfil',
-      );
-      return;
-    }
-
-    showPhotoOptions();
+ Future<void> addPhoto() async {
+  if (assets.length >= maxPhotos) {
+    _showErrorAlert(
+      'Límite alcanzado',
+      'Puedes tener máximo $maxPhotos fotos en tu perfil',
+    );
+    return;
   }
+  showPhotoOptions();
+}
+void showPhotoOptions() {
+  if (Get.context == null) return;
 
-  void showPhotoOptions() {
-    if (Get.context != null) {
-      showModalBottomSheet(
-        context: Get.context!,
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (context) => Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+  showCustomAlert(
+    context: Get.context!,
+    title: '',
+    message: '',
+    confirmText: '',
+    type: CustomAlertType.confirm,
+    customWidget: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Container(
+          padding: EdgeInsets.all(ThemeColor.paddingLarge),
+          decoration: BoxDecoration(
+            color: ThemeColor.primaryColor.withOpacity(0.05),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Row(
             children: [
               Container(
-                width: 40,
-                height: 4,
-                margin: EdgeInsets.only(bottom: 20),
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
+                  color: ThemeColor.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.photo_library,
+                  color: ThemeColor.primaryColor,
+                  size: 24,
                 ),
               ),
-              ListTile(
-                leading: Icon(Icons.photo_library, color: Colors.black87),
-                title: Text('Galería'),
+              SizedBox(width: ThemeColor.paddingMedium),
+              Expanded(
+                child: Text(
+                  'Agregar fotos',
+                  style: ThemeColor.headingSmall.copyWith(
+                    color: ThemeColor.primaryColor,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: ThemeColor.textSecondaryColor),
+                onPressed: () => Get.back(),
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+              ),
+            ],
+          ),
+        ),
+
+        // Opciones
+        Padding(
+          padding: EdgeInsets.all(ThemeColor.paddingMedium),
+          child: Column(
+            children: [
+              _buildPhotoOption(
+                icon: Icons.photo_library,
+                title: 'Galería (selección múltiple)',
+                subtitle: 'Selecciona varias fotos de jalón',
                 onTap: () {
                   Get.back();
-                  pickImageFromGallery();
+                  pickMultipleImagesFromGallery();
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.camera_alt, color: Colors.black87),
-                title: Text('Cámara'),
+              SizedBox(height: ThemeColor.paddingSmall),
+              _buildPhotoOption(
+                icon: Icons.camera_alt,
+                title: 'Tomar foto',
+                subtitle: 'Captura una nueva foto',
                 onTap: () {
                   Get.back();
                   takePhoto();
                 },
               ),
+              SizedBox(height: ThemeColor.paddingSmall),
             ],
           ),
         ),
+      ],
+    ),
+  );
+}
+/// Selección múltiple de imágenes de galería
+Future<void> pickMultipleImagesFromGallery() async {
+  final remaining = maxPhotos - assets.length;
+  if (remaining <= 0) return;
+
+  try {
+    final List<XFile> images = await _picker.pickMultiImage(
+      maxWidth: 1920,
+      maxHeight: 1920,
+      imageQuality: 85,
+    );
+
+    if (images.isEmpty) return;
+
+    // Limitar a las que caben
+    final toUpload = images.take(remaining).toList();
+
+    if (images.length > remaining) {
+      showSuccessSnackbar(
+        'Solo se subirán $remaining fotos (límite del perfil)',
       );
     }
+
+    await uploadMultiplePhotos(toUpload.map((e) => e.path).toList());
+  } catch (e) {
+    print('Error seleccionando fotos: $e');
+    showErrorSnackbar(
+      'No se pudo seleccionar las fotos: ${cleanExceptionMessage(e)}',
+    );
   }
+}
+
+/// Sube múltiples fotos en una sola llamada
+Future<void> uploadMultiplePhotos(List<String> paths) async {
+  if (paths.isEmpty) return;
+
+  try {
+    isUploadingPhoto.value = true;
+
+    final mediaEntities = paths
+        .map((path) => UploadMediaEntity(mediaPath: path))
+        .toList();
+
+    await uploadMediaUsecase.execute(mediaEntities);
+
+    await loadUserProfile();
+
+    showSuccessSnackbar(
+      '${paths.length} foto${paths.length > 1 ? 's' : ''} agregada${paths.length > 1 ? 's' : ''} correctamente',
+    );
+  } catch (e) {
+    print('Error subiendo fotos: $e');
+    showErrorSnackbar(
+      'No se pudo subir las fotos: ${cleanExceptionMessage(e)}',
+    );
+  } finally {
+    isUploadingPhoto.value = false;
+  }
+}
 
   Future<void> pickImageFromGallery() async {
     try {
@@ -409,8 +540,8 @@ Widget _buildPhotoOption({
       }
     } catch (e) {
       print('Error tomando foto: $e');
-      _showErrorAlert(
-        'Error',
+      
+      showErrorSnackbar(
         'No se pudo tomar la foto: ${cleanExceptionMessage(e)}',
       );
     }
@@ -426,14 +557,14 @@ Widget _buildPhotoOption({
       // Recargar perfil para obtener la nueva foto
       await loadUserProfile();
 
-      _showSuccessAlert(
-        'Foto agregada',
+      showSuccessSnackbar(
+      
         'Tu foto se ha agregado correctamente',
       );
     } catch (e) {
       print('Error subiendo foto: $e');
-      _showErrorAlert(
-        'Error',
+      showErrorSnackbar(
+    
         'No se pudo subir la foto: ${cleanExceptionMessage(e)}',
       );
     } finally {
@@ -441,9 +572,6 @@ Widget _buildPhotoOption({
     }
   }
 
-  // ==========================================
-  // NAVEGACIÓN
-  // ==========================================
   
   void onSettingsTap() {
     if (Get.context != null) {
@@ -464,20 +592,17 @@ Widget _buildPhotoOption({
       );
     }
   }
-
+  void onViewBlockedUsers() {
+    Get.toNamed(RoutesNames.blockedUsersPage);
+  }
   void onHelpTap() {
-    // Navegar a ayuda
-    print('Ir a ayuda');
+    Get.toNamed(RoutesNames.updateProfilePage);
   }
 
   void onEditProfile() {
-    // Navegar a editar perfil
     print('Editar perfil');
   }
 
-  // ==========================================
-  // ALERTAS
-  // ==========================================
 
   void _showErrorAlert(String title, String message, {VoidCallback? onDismiss}) {
     if (Get.context != null) {

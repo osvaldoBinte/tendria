@@ -13,4 +13,10 @@ class PostChatModel extends PostChatEntity {
       'mensaje' : menssage
     };
   }
+  Map<String, dynamic> toJsonfirstMessage() {
+    return {
+      'toUserId':chatId,
+      'primerMensaje' : menssage
+    };
+  }
 }

@@ -58,3 +58,7 @@ buildTypes {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    implementation("com.android.billingclient:billing:7.1.1")
+}

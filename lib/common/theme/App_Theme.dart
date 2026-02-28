@@ -10,7 +10,7 @@ class ThemeColor {
   static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
 
   static const Color accentColor = Color(0xFFB83A5E); // Rosa burdeos claro
-  static const Color radarScanner = Color(0xFF808080); // Burdeos principal
+  static const Color radarScanner = Color.fromARGB(255, 103, 167, 93); // Burdeos principal
 
   // Colores de fondo
   static const Color backgroundColor = Colors.white;
@@ -675,72 +675,93 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
       ),
     );
   }
+static Widget createMainScaffold({
+  required Widget body,
+  required int currentIndex,
+  required Function(int) onNavigationTap,
+  required List<String> iconPaths,
+  List<String>? labels, // ← nuevo
+  Color? backgroundColor,
+  Color? bottomNavBackgroundColor,
+}) {
+  return Scaffold(
+    backgroundColor: backgroundColor ?? bottomNavBackgroundColor,
+    body: body,
+    bottomNavigationBar: createBottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: onNavigationTap,
+      iconPaths: iconPaths,
+      labels: labels, // ← nuevo
+      backgroundColor: bottomNavBackgroundColor,
+    ),
+  );
+}
 
-  static Widget createMainScaffold({
-    required Widget body,
-    required int currentIndex,
-    required Function(int) onNavigationTap,
-    required List<String> iconPaths,
-    Color? backgroundColor,
-    Color? bottomNavBackgroundColor,
-  }) {
-    return Scaffold(
-      backgroundColor: backgroundColor ?? bottomNavBackgroundColor,
-      body: body,
-      bottomNavigationBar: createBottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: onNavigationTap,
-        iconPaths: iconPaths,
-        backgroundColor: bottomNavBackgroundColor,
-      ),
-    );
-  }
-
-  static Widget createBottomNavigationBar({
-    required int currentIndex,
-    required Function(int) onTap,
-    required List<String> iconPaths,
-    Color? backgroundColor,
-    Color? selectedItemColor,
-    Color? unselectedItemColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 0,
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Container(
-          height: 70,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(iconPaths.length, (index) {
-              return GestureDetector(
-                onTap: () => onTap(index),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Image.asset(
-                    iconPaths[index],
-                    width: 30,
-                    height: 30,
-                    fit: BoxFit.contain,
-                    color: currentIndex == index ? ThemeColor.textPrimaryColor: null,
-                  ),
+static Widget createBottomNavigationBar({
+  required int currentIndex,
+  required Function(int) onTap,
+  required List<String> iconPaths,
+  List<String>? labels, // ← nuevo
+  Color? backgroundColor,
+  Color? selectedItemColor,
+  Color? unselectedItemColor,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: backgroundColor ?? Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 0,
+          blurRadius: 4,
+          offset: const Offset(0, -2),
+        ),
+      ],
+    ),
+    child: SafeArea(
+      child: Container(
+        height: 70,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(iconPaths.length, (index) {
+            final isSelected = currentIndex == index;
+            return GestureDetector(
+              onTap: () => onTap(index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      iconPaths[index],
+                      width: 26,
+                      height: 26,
+                      fit: BoxFit.contain,
+                      color: isSelected ? ThemeColor.textPrimaryColor : null,
+                    ),
+                    if (labels != null && index < labels.length) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        labels[index],
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: isSelected
+                              ? ThemeColor.textPrimaryColor
+                              : ThemeColor.textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// Widget reutilizable para campos de texto con label
   /// Soporta email, password, text normal, etc.

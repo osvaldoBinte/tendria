@@ -29,5 +29,19 @@ class CatalogRepositoryImp extends CatalogRepository {
      final token = await authService.getToken()?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
     return await catalogDataSourcesImp.postQualities(qualitiesIds,token);
   }
+  
+  @override
+  Future<void> deleteinterests(List<int> interestsIds) async {
+     final token = await authService.getToken()?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
+    return await catalogDataSourcesImp.deleteInterests(interestsIds,token);
+   
+  }
+  
+  @override
+  Future<void> deletequalities(List<int> qualitiesIds) async {
+     final token = await authService.getToken()?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
+    return await catalogDataSourcesImp.deleteQualities(qualitiesIds,token);
+
+  }
 
 }

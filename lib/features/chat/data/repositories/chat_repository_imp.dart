@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/features/chat/data/datasources/chat_data_sources_imp.dart';
 import 'package:tendria/features/chat/domain/entities/chat_entity.dart';
@@ -6,34 +9,36 @@ import 'package:tendria/features/chat/domain/entities/post_chat_entity.dart';
 import 'package:tendria/features/chat/domain/repositories/chat_repository.dart';
 
 class ChatRepositoryImp implements ChatRepository {
-  final AuthService authService;
-  final ChatDataSourcesImp chatDataSourcesImp;
 
+  final ChatDataSourcesImp chatDataSourcesImp;
+  final AuthService authService = AuthService();
   ChatRepositoryImp({
     required this.chatDataSourcesImp,
-    required this.authService,
+   
   });
 
   // ============ REST API METHODS ============
 
   @override
   Future<ChatEntity> chatmensaje(int chatid) async {
-    final token = await authService.getToken();
-    if (token == null) {
-      throw Exception('No hay sesión activa. El usuario debe iniciar sesión.');
-    }
+        final token = await authService.getToken()?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
+
     return chatDataSourcesImp.chatmensaje(chatid, token);
   }
 
   @override
   Future<void> postchat(PostChatEntity entity) async {
-    final token = await authService.getToken();
-    if (token == null) {
-      throw Exception('No hay sesión activa. El usuario debe iniciar sesión.');
-    }
+        final token = await authService.getToken()?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
+
     return chatDataSourcesImp.sendmessage(entity, token);
   }
-
+  @override
+  Future<List<ChatEntity>> getMyChats() async {
+    final token = await authService.getToken()?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
+    return chatDataSourcesImp.getmychats(token);
+  }
+  
+  
   // ============ SIGNALR METHODS ============
 
   @override
@@ -60,7 +65,14 @@ class ChatRepositoryImp implements ChatRepository {
   void setMessageCallback(Function(MensajeEntity) callback) {
     chatDataSourcesImp.setMessageCallback(callback);
   }
-
+@override
+void setOnDisconnectedCallback(VoidCallback callback) {
+  chatDataSourcesImp.setOnDisconnectedCallback(callback);
+}
   @override
   bool get isSignalRConnected => chatDataSourcesImp.isSignalRConnected;
+  
+
+ 
+ 
 }

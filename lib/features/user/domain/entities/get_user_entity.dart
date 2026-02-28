@@ -6,10 +6,16 @@ class GetUserEntity {
   final int? age;
   final String? fotoUrl;
   final String? bio;
+  final String? dateofbirth;
+  final String?gender;
+  final String? primarylanguage;
+  final int?heightcm;
+  final String? city;
   final List<AssetEntity>? assets;
   final List<QualitiesIdsEntity>? qualitiesIds;
   final List<InterestsIdsEntity>? interestsIds;
-  final List<PreferencesEntity>? preferences;
+  final PreferencesEntity? preferences;
+  final String? status;
   GetUserEntity({
        this.id,
      this.name,
@@ -20,6 +26,12 @@ class GetUserEntity {
      this.qualitiesIds,
      this.interestsIds,
       this.preferences,
+      this.dateofbirth,
+      this.gender,
+      this.primarylanguage,
+      this.heightcm,
+      this.city,
+      this.status
   });
 
 }

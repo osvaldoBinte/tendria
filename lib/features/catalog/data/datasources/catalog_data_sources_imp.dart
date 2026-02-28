@@ -61,10 +61,10 @@ class CatalogDataSourcesImp {
       }
       throw Exception('$e');
     }
-  }Future<void> postInterests(List<int> interestsIds, String token) async {
+  }
+  Future<void> postInterests(List<int> interestsIds, String token) async {
   try {
     Uri url = Uri.parse('$defaultApiServer/User/intereses');
-    print('POST a: $url con body: $interestsIds');
 
     final response = await http.post(
       url,
@@ -75,8 +75,6 @@ class CatalogDataSourcesImp {
       body: jsonEncode(interestsIds),
     );
 
-    print('Status code: ${response.statusCode}');
-    print('Body de la respuesta: ${response.body}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return;
@@ -84,9 +82,8 @@ class CatalogDataSourcesImp {
 
       ApiExceptionCustom exception = ApiExceptionCustom(response: response);
       exception.validateMesage();
+      throw exception;
   } catch (e, stackTrace) {
-    print('Error en postInterests: $e');
-    print('Stack trace: $stackTrace');
 
     if (e is SocketException ||
         e is http.ClientException ||
@@ -116,6 +113,7 @@ Future<void> postQualities(List<int> qualitiesIds,String token) async {
 
       ApiExceptionCustom exception = ApiExceptionCustom(response: response);
       exception.validateMesage();
+      throw exception; 
   } catch (e, stackTrace) {
 
     if (e is SocketException ||
@@ -127,4 +125,64 @@ Future<void> postQualities(List<int> qualitiesIds,String token) async {
   }
 }
 
+  Future<void> deleteInterests(List<int> interestsIds, String token) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/User/intereses');
+
+    final response = await http.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(interestsIds),
+    );
+
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
+    }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+  } catch (e, stackTrace) {
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+      throw Exception(convertMessageException(error: e));
+    }
+    throw Exception('$e');
+  }
+}
+
+Future<void> deleteQualities(List<int> qualitiesIds,String token) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/User/cualidades');
+    final response = await http.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(qualitiesIds),
+    );
+
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
+    }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+  } catch (e, stackTrace) {
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+      throw Exception(convertMessageException(error: e));
+    }
+    throw Exception('$e');
+  }
+}
 }

@@ -1,4 +1,6 @@
 
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tendria/common/settings/routes_names.dart';
@@ -19,40 +21,28 @@ class SplashController extends GetxController {
    await requestLocationPermission();
 
   }
-  Future<bool> requestLocationPermission() async {
-  final status = await Permission.locationWhenInUse.request();
 
-  if (status.isGranted) {
-    return true;
+  Future<void> requestLocationPermission() async {
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+   
+        showErrorSnackbar('Por favor activa los servicios de ubicación para usar la aplicaciór');
+
+    return;
   }
 
-  if (status.isDenied) {
-    showErrorSnackbar('Debes permitir la ubicación para continuar');
+  LocationPermission permission = await Geolocator.checkPermission();
   
-    return false;
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      showErrorSnackbar('Se requieren permisos de ubicación para usar la aplicación');
+
+      return;
+    }
   }
-if (status.isPermanentlyDenied) {
-  showCustomAlert(
-    context: Get.context!,
-    title: 'Permiso de ubicación',
-    message: 'Debes habilitar la ubicación desde ajustes para continuar',
-    confirmText: 'Abrir ajustes',
-    cancelText: 'Cancelar',
-    type: CustomAlertType.warning,
-    onConfirm: () async {
-      Get.back();
-      await openAppSettings();
-    },
-    onCancel: () {
-      Get.back();
-    },
-  );
 
-  return false;
-}
-
-
-  return false;
+  return;
 }
 
   Future<void> checkUserSession() async {

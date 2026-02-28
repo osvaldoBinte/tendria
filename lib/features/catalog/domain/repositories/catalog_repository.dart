@@ -5,4 +5,6 @@ abstract class CatalogRepository {
   Future<List<CatalogEntity>> fetchinterests();
   Future<void> postInterests(List<int> interestsIds);
   Future<void> postQualities(List<int> qualitiesIds);
+  Future<void> deletequalities(List<int> qualitiesIds);
+  Future<void> deleteinterests(List<int> interestsIds);
 }

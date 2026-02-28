@@ -16,9 +16,9 @@ class StartPage extends StatelessWidget {
   currentIndex: controller.selectedIndex.value,
   onNavigationTap: controller.changePage,
   iconPaths: controller.iconPaths,
+  labels: controller.labels, 
   backgroundColor: ThemeColor.backgroundColorfondo,
   bottomNavBackgroundColor: Colors.white,
 ));
-
   }
 }

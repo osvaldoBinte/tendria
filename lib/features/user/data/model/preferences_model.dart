@@ -6,6 +6,7 @@ class PreferencesModel extends PreferencesEntity {
     required super.agemax,
     required super.searchgender,
     required super.connectiontype,
+      super.distancekm,
   });
 
   factory PreferencesModel.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,7 @@ class PreferencesModel extends PreferencesEntity {
       agemax: json['edad_max'],
       searchgender: json['busca_genero'],
       connectiontype: json['tipo_conexion'],
+distancekm: (json['distancia_km'] as num?)?.toDouble(),
     );
   }
   factory PreferencesModel.fromEntity(PreferencesEntity entity) {
@@ -22,15 +24,26 @@ class PreferencesModel extends PreferencesEntity {
       agemax: entity.agemax,
       searchgender: entity.searchgender,
       connectiontype: entity.connectiontype,
+      distancekm: entity.distancekm,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'edad_min': agemin,
-      'edad_max': agemax,
-      'busca_genero': searchgender,
-      'tipo_conexion': connectiontype,
-    };
+ Map<String, dynamic> toJson() {
+  final Map<String, dynamic> data = {
+    'busca_genero': searchgender,
+    'tipo_conexion': connectiontype,
+  };
+
+  if (agemin != null) {
+    data['edad_min'] = agemin;
   }
+
+  if (agemax != null) {
+    data['edad_max'] = agemax;
+  }
+  if (distancekm != null) {
+    data['distancia_km'] = distancekm;
+  }
+  return data;
+}
 }

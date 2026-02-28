@@ -3,17 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/routes/router.dart';
 import 'package:tendria/common/services/auth_service.dart';
+import 'package:tendria/common/services/translation_service.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/auth/presentation/page/Splash/splash_controller.dart';
 import 'package:tendria/features/auth/presentation/page/login/login_controller.dart';
 import 'package:tendria/features/auth/presentation/page/register/register_controller.dart';
 import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
+import 'package:tendria/features/chat/presentation/page/connect.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
+import 'package:tendria/features/like/presentation/controller/start_conversations_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
+import 'package:tendria/features/unlock/presentation/controller/blocked_users_controller.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 import 'package:tendria/features/user/presentation/controller/preferences_controller.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
+import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
+import 'package:tendria/features/user/presentation/controller/user_profile_controller.dart';
 import 'package:tendria/usecase_config.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -44,8 +51,15 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.fetchQualitiesUsecase!, permanent: true);
         Get.put(usecaseConfig.postInterestsUsecase!, permanent: true);
         Get.put(usecaseConfig.postQualitiesUsecase!, permanent: true);
+        Get.put(usecaseConfig.deleteInterestsUsecase!, permanent: true);
+        Get.put(usecaseConfig.deleteQualitiesUsecase!, permanent: true);
         Get.put(usecaseConfig.getUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.updateUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.getUserByIdUsecase!, permanent: true);
+        Get.put(usecaseConfig.deleteUserUsecase!, permanent: true);
         Get.put(usecaseConfig.preferencesUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.putPreferencesUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.deleteMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadPicturePerfileUsecase!, permanent:  true);
         Get.put(usecaseConfig.addLikeToStoryUsecase!, permanent: true);
@@ -56,22 +70,53 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.setStoryAsSeenUsecase!, permanent: true);
         Get.put(usecaseConfig.fetchNearbyUsersUsecase!, permanent: true);
         Get.put(usecaseConfig.getChatMensajeUsecase!,permanent: true);
+        Get.put(usecaseConfig.getMyChatsUsecase!,permanent: true);
+        Get.put(usecaseConfig.connectSignalRUsecase!,permanent: true);
+        Get.put(usecaseConfig.disconnectSignalRUsecase!,permanent: true);
+        Get.put(usecaseConfig.joinChatUsecase!,permanent: true);
+        Get.put(usecaseConfig.leaveChatUsecase!,permanent: true);
+        Get.put(usecaseConfig.setOnDisconnectedCallbackUsecase!, permanent:  true);
+        Get.put(usecaseConfig.setMessageCallbackUsecase!,permanent: true);
+        Get.put(usecaseConfig.startConversationsUsecase!,permanent: true);
+        Get.put(usecaseConfig.paymentsChatUsecase!,permanent: true);
         Get.put(usecaseConfig.sendMessageUsecase!,permanent: true);
         Get.put(usecaseConfig.getLikeByUsersUsecase!, permanent: true);
-        Get.put(usecaseConfig.myMatchUsecase!, permanent: true);
+        Get.put(usecaseConfig.getPendingLikedChatsUsecase!, permanent: true);
         Get.put(usecaseConfig.toggleLikeUsecase!, permanent: true);
+        Get.put(usecaseConfig.unlockChatUsecase!, permanent: true);
+        Get.put(usecaseConfig.fetchBlockedUsersUsecase!, permanent: true);
+        Get.put(usecaseConfig.blockUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.unblockUserUsecase!, permanent: true);
+
 
         Get.lazyPut(() => LoginController(loginUsecase: Get.find(), ), fenix: true);
-        Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find()), fenix: true);
+Get.put(
+  SignalRService(
+    connectSignalRUsecase: Get.find(),
+    disconnectSignalRUsecase: Get.find(),
+    joinChatUsecase: Get.find(),
+    leaveChatUsecase: Get.find(),
+    setupMessageListenerUsecase: Get.find(),
+    setOnDisconnectedCallbackUsecase: Get.find(),
+  ),
+  permanent: true, // 👈 nunca se destruye
+);        Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find()), fenix: true);
         Get.lazyPut(()=> SplashController(getUserUsecase: Get.find()), fenix: true);
         Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find()),  fenix: true);
-        Get.lazyPut(() => ProfileController(getUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find()), fenix: true);
+        Get.lazyPut(() => ProfileController(getUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find(), deleteMediaUsecase: Get.find()), fenix: true);
         Get.lazyPut(() => StoryController(fetchStoriesUsecase:  Get.find(), addLikeToStoryUsecase:  Get.find(), fetchStoriesByIdUsecase: Get.find(), removeStoryUsecase: Get.find(), createStroryUsecase: Get.find(), setStoryAsSeenUsecase:  Get.find()), fenix:  true);
        //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
          Get.lazyPut(()=>NearbyUsersController(fetchNearbyUsersUsecase: Get.find(), toggleLikeUsecase: Get.find()) ,fenix: true);
-         Get.lazyPut(() => MyMatchController(myMatchUsecase:  Get.find()), fenix:true);
-         Get.lazyPut(() => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find()), fenix:true);
-         Get.lazyPut(()=> LikedByUsersController( getLikeByUsersUsecase: Get.find(), ), fenix:true);
+         Get.lazyPut(() => MyMatchController(getMyChatsUsecase:  Get.find()), fenix:true);
+         Get.lazyPut(() => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find(),  authService: Get.find(), startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
+         Get.lazyPut(()=> LikedByUsersController(  getPendingLikedChatsUsecase: Get.find(), unlockChatUsecase: Get.find(), ), fenix:true);
+     //    Get.lazyPut(() => StartConversationsController(startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
+         Get.lazyPut(()=> UserProfileController(getUserByIdUsecase: Get.find(), toggleLikeUsecase: Get.find(), blockUserUsecase:  Get.find()),fenix:true);
+         Get.lazyPut(() => BlockedUsersController(fetchBlockedUsersUsecase: Get.find(), unblockUserUsecase: Get.find()), fenix:true);
+         Get.lazyPut(() => UpdateProfileController(deleteInterestsUsecase: Get.find(), deleteQualitiesUsecase: Get.find(), updateUserUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(), deleteUserUsecase: Get.find()), fenix:true);
+Get.lazyPut(() => LanguageController(),fenix:true);
+Get.put(TranslationService());
+
 
       }),
 

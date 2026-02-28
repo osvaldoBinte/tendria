@@ -7,21 +7,27 @@ import 'package:tendria/features/like/presentation/page/my_match_page.dart';
 import 'package:tendria/features/page/parami/for_you_page.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/page/profile/profile_page.dart';
+import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
 import 'package:tendria/features/user/presentation/profiledetail/profile_detail_page.dart';
 
 class StartController extends GetxController {
   final List<Widget> pages = [
     ProfilePage(),
-    ForYouPage(),
-    ProfileDetailScreen(),
+   // ForYouPage(),
+    RadarScannerScreen(),
     LikedByUsersView(),
     MyMatchView(),
   ];
-
+final List<String> labels = [
+  'Perfil',
+  'Radar',
+  'Home',
+  'Chat',
+];
   final List<String> iconPaths = [
     'assets/icons/home/perfil.png',
     'assets/icons/home/parati.png', 
-    'assets/icons/home/home.png',
+    //'assets/icons/home/home.png',
     'assets/icons/home/heart.png',
     'assets/icons/home/mensaje.png',
   ];
@@ -29,12 +35,12 @@ class StartController extends GetxController {
   final List<String> selectedIconPaths = [
     'assets/icons/home/perfil.png',
     'assets/icons/home/parati.png', 
-    'assets/icons/home/home.png',
+   // 'assets/icons/home/home.png',
     'assets/icons/home/heart.png',
     'assets/icons/home/mensaje.png',
   ];
 
-  final RxInt selectedIndex = 2.obs; // Cambiar a 2 para mostrar ProfileDetailScreen por defecto
+  final RxInt selectedIndex = 0.obs; // Cambiar a 2 para mostrar ProfileDetailScreen por defecto
 
   // Estados de carga
   final RxBool isCheckingProfile = true.obs;
@@ -78,7 +84,7 @@ class StartController extends GetxController {
 
       // Si no existe ProfileController o no tiene datos, navegar a preferencias
       if (profileController == null) {
-        _navigateToPreferences();
+     //   _navigateToPreferences();
         return;
       }
 
@@ -96,9 +102,9 @@ class StartController extends GetxController {
       }
 
       // Verificar cada sección
-      final hasPreferences = user.preferences != null && 
-                            user.preferences!.isNotEmpty &&
-                            user.preferences!.first.searchgender != null;
+      // Verificar cada sección
+final hasPreferences = user.preferences != null &&
+                      user.preferences!.searchgender != null;
       
       final hasPhotos = user.assets != null && 
                        user.assets!.isNotEmpty && 
@@ -120,7 +126,7 @@ class StartController extends GetxController {
       }
     } catch (e) {
       print('Error verificando perfil: $e');
-      _navigateToPreferences();
+  //    _navigateToPreferences();
     } finally {
       isCheckingProfile.value = false;
     }

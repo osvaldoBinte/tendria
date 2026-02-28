@@ -3,16 +3,16 @@ import 'package:tendria/features/stories/domain/entities/getstories/get_stories_
 
 class GetStoriesModel extends GetStoriesEntity {
   GetStoriesModel({
-    required super.doctorId,
-    required super.nombreDoctor,
+    required super.usuarioId,
+    required super.nombreUsuario,
     required super.fotoPerfilUrl,
     required super.historias,
   });
 
   factory GetStoriesModel.fromJson(Map<String, dynamic> json) {
     return GetStoriesModel(
-      doctorId: json['doctorId'],
-      nombreDoctor: json['nombreDoctor'],
+      usuarioId: json['usuarioId'],
+      nombreUsuario: json['nombreUsuario'],
       fotoPerfilUrl: json['fotoPerfilUrl'],
       historias: (json['historias'] as List)
           .map((e) => StoryModel.fromJson(e))

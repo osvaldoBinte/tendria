@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
+import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/auth/domain/entities/user/create_user_entity.dart';
 import 'package:tendria/features/auth/domain/entities/user/registration_step.dart';
 import 'package:tendria/features/auth/domain/usecase/create_user_usecase.dart';
@@ -240,41 +242,35 @@ class RegisterController extends GetxController {
 
   bool _validatePersonalInfo() {
     if (dateOfBirth.value == null) {
-      _showErrorAlert('Campo requerido', 'Selecciona tu fecha de nacimiento');
+      showErrorSnackbar('Selecciona tu fecha de nacimiento');
       return false;
     }
 
     if (selectedGender.value.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona tu género');
+      showErrorSnackbar('Selecciona tu género');
       return false;
     }
 
     // NUEVO: Si seleccionó "Otro", validar que haya escrito algo
     if (selectedGender.value == 'Otro' &&
         customGenderController.text.trim().isEmpty) {
-      _showErrorAlert('Campo requerido', 'Escribe cómo te identificas');
+      showErrorSnackbar('Escribe cómo te identificas');
       return false;
     }
 
     // Validar bio como requerido
     if (bioController.text.trim().isEmpty) {
-      _showErrorAlert('Campo requerido', 'La biografía es requerida');
+      showErrorSnackbar('La biografía es requerida');
       return false;
     }
 
     if (bioController.text.trim().length < 10) {
-      _showErrorAlert(
-        'Biografía muy corta',
-        'La biografía debe tener al menos 10 caracteres',
-      );
+      showErrorSnackbar('La biografía debe tener al menos 10 caracteres');
       return false;
     }
 
     if (bioController.text.length > 500) {
-      _showErrorAlert(
-        'Biografía muy larga',
-        'La biografía debe tener máximo 500 caracteres',
-      );
+      showErrorSnackbar('La biografía debe tener máximo 500 caracteres');
       return false;
     }
 
@@ -283,16 +279,13 @@ class RegisterController extends GetxController {
 
   bool _validatePhysicalInfo() {
     if (heightController.text.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Ingresa tu altura');
+      showErrorSnackbar( 'Ingresa tu altura');
       return false;
     }
 
     final height = int.tryParse(heightController.text);
     if (height == null || height < 100 || height > 250) {
-      _showErrorAlert(
-        'Altura inválida',
-        'Ingresa una altura válida entre 100 y 250 cm',
-      );
+      showErrorSnackbar( 'Ingresa una altura válida entre 100 y 250 cm');
       return false;
     }
 
@@ -301,7 +294,7 @@ class RegisterController extends GetxController {
 
   bool _validateInterests() {
     if (selectedInterests.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona al menos un interés');
+      showErrorSnackbar('Selecciona al menos un interés');
       return false;
     }
     return true;
@@ -391,44 +384,47 @@ class RegisterController extends GetxController {
   // ==========================================
   // UBICACIÓN AUTOMÁTICA
   // ==========================================
+Future<void> _autoGetLocation() async {
+  try {
+    isLoadingLocation.value = true;
 
-  Future<void> _autoGetLocation() async {
-    try {
-      isLoadingLocation.value = true;
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
 
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      latitude.value = position.latitude.toString();
-      longitude.value = position.longitude.toString();
-      locationObtained.value = true;
-
-      city.value = 'Ciudad';
-    } catch (e) {
-      print('Error obteniendo ubicación: $e');
-    } finally {
-      isLoadingLocation.value = false;
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
     }
+    if (permission == LocationPermission.deniedForever) return;
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    latitude.value = position.latitude.toString();
+    longitude.value = position.longitude.toString();
+
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    if (placemarks.isNotEmpty) {
+      final placemark = placemarks.first;
+      city.value = placemark.locality?.isNotEmpty == true
+          ? placemark.locality!
+          : placemark.administrativeArea ?? 'Ciudad desconocida';
+    }
+
+    locationObtained.value = true;
+  } catch (e) {
+    print('Error obteniendo ubicación: $e');
+    city.value = 'Ciudad desconocida';
+  } finally {
+    isLoadingLocation.value = false;
   }
+}
 
   // ==========================================
   // SELECCIÓN DE DATOS
@@ -476,13 +472,12 @@ class RegisterController extends GetxController {
 
   Future<void> onRegisterTap() async {
     if (selectedQualities.isEmpty) {
-      _showErrorAlert('Campo requerido', 'Selecciona al menos una cualidad');
+      showErrorSnackbar('Selecciona al menos una cualidad');
       return;
     }
 
     if (!locationObtained.value) {
-      _showErrorAlert(
-        'Ubicación requerida',
+      showErrorSnackbar(
         'Necesitamos tu ubicación para completar el registro. Por favor, habilita los permisos de ubicación.',
       );
       return;
@@ -522,7 +517,7 @@ class RegisterController extends GetxController {
       });
     } catch (e) {
       print('Error en registro: $e');
-      _showErrorAlert('Error en el registro', cleanExceptionMessage(e));
+      showErrorSnackbar('Error en el registro: ${cleanExceptionMessage(e)}');
     } finally {
       isLoading.value = false;
     }
@@ -560,39 +555,7 @@ class RegisterController extends GetxController {
   // ALERTAS
   // ==========================================
 
-  void _showErrorAlert(
-    String title,
-    String message, {
-    VoidCallback? onDismiss,
-  }) {
-    if (Get.context != null) {
-      showCustomAlert(
-        context: Get.context!,
-        title: title,
-        message: message,
-        confirmText: 'Aceptar',
-        type: CustomAlertType.error,
-        onConfirm: onDismiss,
-      );
-    }
-  }
-
-  void _showSuccessAlert(
-    String title,
-    String message, {
-    VoidCallback? onDismiss,
-  }) {
-    if (Get.context != null) {
-      showCustomAlert(
-        context: Get.context!,
-        title: title,
-        message: message,
-        confirmText: 'Aceptar',
-        type: CustomAlertType.success,
-        onConfirm: onDismiss,
-      );
-    }
-  }
+  
 
   // ==========================================
   // LIMPIEZA

@@ -70,10 +70,7 @@ String get formattedDateOfBirth {
       userEntity.value = user;
     } catch (e) {
       print('Error cargando perfil: $e');
-      _showErrorAlert(
-        'Error',
-        'No se pudo cargar el perfil: ${cleanExceptionMessage(e)}',
-      );
+     
     } finally {
       isLoading.value = false;
     }

@@ -27,16 +27,16 @@ class UpdateUserModel extends UpdateUserEntity {
       city: entity.city,
     );
   }
-  Map<String, dynamic> toJson() {
-    return {
-      'nombre': name,
-      'fecha_nacimiento': dateofbirth,
-      'genero': gender,
-      'bio': bio,
-      'altura': heightcm,
-      'idioma': primarylanguage,
-      'ciudad': city,
-      'status':status
-    };
-  }
+ Map<String, dynamic> toJson() {
+  return {
+    'nombre': name,
+    'fecha_nacimiento': dateofbirth,
+    'genero': gender,
+    'bio': bio,
+    'altura': heightcm,
+    'idioma': primarylanguage,
+    'ciudad': city,
+    if (status != null) 'status': status,
+  };
+}
 }

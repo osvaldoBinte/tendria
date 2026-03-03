@@ -74,9 +74,7 @@ class UserProfileController extends GetxController {
       isFavorite.value = false;
     } catch (e) {
       print('Error cargando perfil de usuario: $e');
-      showErrorSnackbar(
-        'No se pudo cargar el perfil: ${cleanExceptionMessage(e)}',
-      );
+     
     } finally {
       isLoading.value = false;
     }

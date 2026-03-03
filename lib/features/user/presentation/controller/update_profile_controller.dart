@@ -1402,6 +1402,27 @@ class UpdateProfileController extends GetxController {
           PreferencesEntity(distancekm: distancekm),
           _l.t('snack_distance_saved'));
 
+  /// Actualiza la ciudad del usuario silenciosamente (sin snackbar)
+  Future<void> updateCity(String city) async {
+    try {
+      final user = _profile.userEntity.value;
+      final completeEntity = UpdateUserEntity(
+        name: user?.name,
+        dateofbirth: user?.dateofbirth,
+        gender: user?.gender,
+        bio: user?.bio,
+        heightcm: user?.heightcm?.toString(),
+        primarylanguage: user?.primarylanguage,
+        city: city,
+        status: user?.status,
+      );
+      await updateUserUsecase.execute(completeEntity);
+      await _profile.loadUserProfile();
+    } catch (_) {
+      // Silencioso — la ciudad es secundaria, no interrumpir el flujo
+    }
+  }
+
   Future<void> _updateUser(
       UpdateUserEntity entity, String successMsg) async {
     try {

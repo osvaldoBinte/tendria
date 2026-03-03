@@ -21,7 +21,7 @@ class StartController extends GetxController {
 final List<String> labels = [
   'Perfil',
   'Radar',
-  'Home',
+  'Match',
   'Chat',
 ];
   final List<String> iconPaths = [

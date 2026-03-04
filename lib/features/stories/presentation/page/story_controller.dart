@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
@@ -38,10 +39,12 @@ class StoryController extends GetxController with GetTickerProviderStateMixin {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
   final RxBool isViewingMyStory = false.obs;
+final Map<String, VideoPlayerController> _preloadedVideos = {};
 
   final RxList<StoryEntity> myStories = <StoryEntity>[].obs;
   final RxBool isLoadingMyStory = false.obs;
   final RxBool hasMyStory = false.obs;
+final Map<String, bool> _preloadedUrls = {}; // url -> está inicializado
 
   final RxInt currentMyStoryIndex = 0.obs;
   final RxInt currentUserIndex = 0.obs;
@@ -106,18 +109,71 @@ class StoryController extends GetxController with GetTickerProviderStateMixin {
   }
 
   @override
-  void onInit() {
-    super.onInit();
-    fetchStories();
-    fetchMyStory();
+@override
+void onInit() {
+  super.onInit();
+  fetchStories().then((_) => preloadStoriesContent());
+  fetchMyStory().then((_) => preloadStoriesContent());
+}
+
+
+@override
+void onClose() {
+  _preloadedUrls.clear();
+  progressController?.dispose();
+  if (videoController != null) {
+    final old = videoController!;
+    videoController = null;
+    old.dispose();
+  }
+  super.onClose();
+}
+
+Future<void> preloadStoriesContent() async {
+  for (final userStory in allStories) {
+    // Precarga foto de perfil
+    if (userStory.fotoPerfilUrl.isNotEmpty) {
+      CachedNetworkImageProvider(userStory.fotoPerfilUrl)
+          .resolve(const ImageConfiguration());
+    }
+
+    // ✅ Precarga TODAS las historias, no solo la primera
+    for (final story in userStory.historias) {
+      if (story.tipoContenido.toLowerCase() != 'video') {
+        CachedNetworkImageProvider(story.urlContenido)
+            .resolve(const ImageConfiguration());
+      } else {
+        _preloadVideo(story.urlContenido);
+      }
+    }
   }
 
-  @override
-  void onClose() {
-    progressController?.dispose();
-    videoController?.dispose();
-    super.onClose();
+  // Precarga mis historias
+  for (final story in myStories) {
+    if (story.tipoContenido.toLowerCase() != 'video') {
+      CachedNetworkImageProvider(story.urlContenido)
+          .resolve(const ImageConfiguration());
+    } else {
+      _preloadVideo(story.urlContenido);
+    }
   }
+}
+
+Future<void> _preloadVideo(String url) async {
+  if (_preloadedUrls.containsKey(url)) return;
+  _preloadedUrls[url] = false;
+  try {
+    final ctrl = VideoPlayerController.networkUrl(Uri.parse(url));
+    await ctrl.initialize();
+    ctrl.dispose(); // ✅ Solo verificamos que se puede cargar, luego lo soltamos
+    // El cache de red del sistema operativo ya guardó los datos
+    _preloadedUrls[url] = true;
+  } catch (e) {
+    debugPrint('Preload video error: $e');
+    _preloadedUrls.remove(url);
+  }
+}
+
 
   // ─────────────────────────────────────────────
   //  NUEVO: Cargar historias de un usuario por ID
@@ -223,25 +279,42 @@ class StoryController extends GetxController with GetTickerProviderStateMixin {
       setStoryDuration(_defaultStoryDuration);
     }
   }
-
-  Future<void> _initializeVideo(String videoUrl) async {
-    try {
-      videoController?.dispose();
-      videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
-
-      await videoController!.initialize();
-      videoController!.setLooping(true);
-      videoController!.play();
-
-      isVideoInitialized.value = true;
-
-      final videoDuration = videoController!.value.duration;
-      setStoryDuration(videoDuration);
-    } catch (e) {
-      debugPrint('Error initializing video: $e');
-      setStoryDuration(_defaultStoryDuration);
+  
+Future<void> _initializeVideo(String videoUrl) async {
+  try {
+    // ✅ Pausa y desconecta el anterior SIN usar el objeto después
+    if (videoController != null) {
+      final old = videoController!;
+      videoController = null;
+      isVideoInitialized.value = false;
+      old.pause();
+      old.dispose();
     }
+
+    // Siempre crea un controlador nuevo (el cache de red lo hace rápido)
+    final ctrl = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+    await ctrl.initialize();
+
+    // ✅ Verifica que el widget sigue montado antes de asignar
+    if (!isModalActive.value) {
+      ctrl.dispose();
+      return;
+    }
+
+    videoController = ctrl;
+    videoController!.setLooping(true);
+    videoController!.seekTo(Duration.zero);
+    videoController!.play();
+    isVideoInitialized.value = true;
+
+    setStoryDuration(videoController!.value.duration);
+  } catch (e) {
+    debugPrint('Error initializing video: $e');
+    videoController = null;
+    isVideoInitialized.value = false;
+    setStoryDuration(_defaultStoryDuration);
   }
+}
 
   void setStoryDuration(Duration duration) {
     _currentStoryDuration = duration;
@@ -252,11 +325,16 @@ class StoryController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
-  void disposeVideo() {
-    videoController?.dispose();
-    videoController = null;
+void disposeVideo() {
+  if (videoController != null) {
+    final old = videoController!;
+    videoController = null;           // ✅ Desconecta PRIMERO
     isVideoInitialized.value = false;
+    old.pause();
+    old.dispose();                    // ✅ Luego destruye
   }
+  isVideoInitialized.value = false;
+}
 
   Future<void> checkAndUpdateVideo(StoryEntity newStory) async {
     final isVideo = newStory.tipoContenido.toLowerCase() == 'video';
@@ -325,32 +403,33 @@ class StoryController extends GetxController with GetTickerProviderStateMixin {
   //  DISPOSE MODAL
   // ─────────────────────────────────────────────
 
-  void disposeStoryModal() {
-    isModalActive.value = false;
+void disposeStoryModal() {
+  isModalActive.value = false;        // ✅ Primero marca inactivo
 
-    if (videoController != null) {
-      videoController!.pause();
-      videoController!.dispose();
-      videoController = null;
-    }
-
+  // ✅ Patrón seguro: desconectar referencia ANTES de dispose
+  if (videoController != null) {
+    final old = videoController!;
+    videoController = null;
     isVideoInitialized.value = false;
-
-    progressController?.stop();
-    progressController?.dispose();
-    progressController = null;
-    progressAnimation = null;
-
-    isViewingMyStory.value = false;
-    isViewingTargetUserStory.value = false;
-
-    currentStoryIndex.value = 0;
-    currentMyStoryIndex.value = 0;
-    currentTargetStoryIndex.value = 0;
-    currentUserIndex.value = 0;
-
-    _currentStoryDuration = _defaultStoryDuration;
+    old.pause();
+    old.dispose();
   }
+
+  progressController?.stop();
+  progressController?.dispose();
+  progressController = null;
+  progressAnimation = null;
+
+  isViewingMyStory.value = false;
+  isViewingTargetUserStory.value = false;
+
+  currentStoryIndex.value = 0;
+  currentMyStoryIndex.value = 0;
+  currentTargetStoryIndex.value = 0;
+  currentUserIndex.value = 0;
+
+  _currentStoryDuration = _defaultStoryDuration;
+}
 
   void closeStoryModal() {
     disposeStoryModal();

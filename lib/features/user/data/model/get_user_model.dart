@@ -2,7 +2,7 @@ import 'package:tendria/features/user/data/model/preferences_model.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 
 class GetUserModel extends GetUserEntity {
-  GetUserModel({  super.id, required super.name, super.status, super.city,required super.age, required super.fotoUrl, required super.bio, required super.assets, required super.qualitiesIds, required super.interestsIds, required super.preferences,super.dateofbirth,super.gender,super.primarylanguage,super.heightcm});
+  GetUserModel({  super.id, required super.name, super.status, super.city, required super.age, required super.fotoUrl, required super.bio, required super.assets,required super.chat, required super.qualitiesIds, required super.interestsIds, required super.preferences,super.dateofbirth,super.gender,super.primarylanguage,super.heightcm});
  factory GetUserModel.fromJson(Map<String, dynamic> json) {
   
   return GetUserModel(
@@ -40,6 +40,12 @@ class GetUserModel extends GetUserEntity {
               name: e['nombre'],
             ))
         .toList(),
+    chat: json['chatId'] != null
+        ? ChatEntity(
+            id: json['chatId']['chatId'],
+            pendingAcepted: json['chatId']['pendienteAceptacion'],
+          )
+        : null,
 
     
   preferences: (json['preferencias'] as List<dynamic>?)
@@ -62,6 +68,7 @@ class GetUserModel extends GetUserEntity {
       qualitiesIds: entity.qualitiesIds,
       interestsIds: entity.interestsIds,
       preferences: entity.preferences,
+      chat: entity.chat,
     );
   }
   Map<String, dynamic> toJson() {
@@ -90,6 +97,12 @@ class GetUserModel extends GetUserEntity {
               'name': e.name,
             })
         .toList(),
+    'chatId': chat != null
+        ? {
+            'chatId': chat!.id,
+            'pendienteAceptacion': chat!.pendingAcepted,
+          }
+        : null,
   };
 }
 

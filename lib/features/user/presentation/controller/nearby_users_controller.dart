@@ -12,6 +12,8 @@ import 'package:tendria/features/stories/presentation/page/target_user_story_mod
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
+import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
+import 'package:tendria/features/user/presentation/controller/user_profile_controller.dart';
 
 class ProfileDetailModel {
   final String name;
@@ -55,6 +57,7 @@ class NearbyUsersController extends GetxController {
 
   // ── Stories indicator per user ──
   final RxMap<int, bool> userHasStories = <int, bool>{}.obs;
+  ProfileController get myProfileController => Get.find<ProfileController>();
 
   late Rx<ProfileDetailModel> profile;
   late PageController pageController;
@@ -723,6 +726,8 @@ Obx(() {
                               arguments: {
                                 'userid': user.id,
                                 'name': user.name ?? 'Usuario',
+                                'photo': user.fotoUrl,
+                                'MyPhoto': myProfileController.profilePhotoUrl,
                               },
                             );
                           },

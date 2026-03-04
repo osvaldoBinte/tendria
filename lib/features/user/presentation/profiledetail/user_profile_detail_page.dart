@@ -395,25 +395,27 @@ class UserProfileDetailPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: controller.rejectUser,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  ThemeColor.textSecondaryColor,
-                  ThemeColor.textSecondaryColor.withOpacity(0.8),
-                ]),
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(
-                  color: ThemeColor.textSecondaryColor.withOpacity(0.3),
-                  blurRadius: 12, offset: const Offset(0, 4),
-                )],
-              ),
-              child: Icon(Icons.close_rounded, color: ThemeColor.textLightColor, size: 32),
-            ),
-          ),
-
+        Obx(() => controller.showRejectButton
+  ? GestureDetector(
+      onTap: controller.rejectUser,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [
+            ThemeColor.textSecondaryColor,
+            ThemeColor.textSecondaryColor.withOpacity(0.8),
+          ]),
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(
+            color: ThemeColor.textSecondaryColor.withOpacity(0.3),
+            blurRadius: 12, offset: const Offset(0, 4),
+          )],
+        ),
+        child: Icon(Icons.close_rounded, color: ThemeColor.textLightColor, size: 32),
+      ),
+    )
+  : const SizedBox(width: 64), // mantiene el espaciado del Row
+),
           GestureDetector(
             onTap: controller.sendMensaje,
             child: Container(

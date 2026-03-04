@@ -260,30 +260,74 @@ class ChatDataSourcesImp {
     return _hubConnection?.state == HubConnectionState.Connected;
   }
 
-  // Procesar mensaje recibido de SignalR
-  void _handleReceiveMessage(List<Object?>? arguments) {
-    try {
-      if (arguments == null || arguments.isEmpty) {
-        print('⚠️ Mensaje vacío recibido');
-        return;
-      }
-
-      print('📨 Mensaje crudo recibido: $arguments');
-
-      final messageData = arguments[0] as Map<String, dynamic>;
-      
-      // Convertir a MensajeEntity usando el modelo
-      final mensaje = MensajeModel.fromJson(messageData);
-      
-      // Llamar al callback si existe
-      if (_onMessageReceived != null) {
-        _onMessageReceived!(mensaje);
-      }
-      
-    } catch (e) {
-      print('❌ Error procesando mensaje de SignalR: $e');
+void _handleReceiveMessage(List<Object?>? arguments) {
+  try {
+    if (arguments == null || arguments.isEmpty) {
+      print('⚠️ Mensaje vacío recibido');
+      return;
     }
+
+    print('📨 Mensaje crudo recibido: $arguments');
+
+    Map<String, dynamic> messageData;
+
+    final raw = arguments[0];
+
+    if (raw is String) {
+      // ✅ Si llega como String, decodifica UTF-8 correctamente
+      final bytes = utf8.encode(raw);
+      final decoded = utf8.decode(bytes);
+      messageData = jsonDecode(decoded);
+    } else if (raw is Map<String, dynamic>) {
+      // ✅ Si llega como Map, re-serializa y decodifica para corregir acentos
+      final jsonStr = jsonEncode(raw);
+      final bytes = utf8.encode(jsonStr);
+      final decoded = utf8.decode(bytes);
+      messageData = jsonDecode(decoded);
+    } else {
+      // ✅ Fallback: convierte a JSON string y decodifica
+      final jsonStr = jsonEncode(raw);
+      final bytes = utf8.encode(jsonStr);
+      final decoded = utf8.decode(bytes);
+      messageData = jsonDecode(decoded) as Map<String, dynamic>;
+    }
+
+    // Corregir acentos en campos de texto específicos
+    messageData = _fixEncodingInMap(messageData);
+
+    final mensaje = MensajeModel.fromJson(messageData);
+
+    if (_onMessageReceived != null) {
+      _onMessageReceived!(mensaje);
+    }
+
+  } catch (e) {
+    print('❌ Error procesando mensaje de SignalR: $e');
   }
+}
+
+// ✅ Corrige encoding en todos los campos String del Map
+Map<String, dynamic> _fixEncodingInMap(Map<String, dynamic> map) {
+  final fixed = <String, dynamic>{};
+  
+  map.forEach((key, value) {
+    if (value is String) {
+      try {
+        // Intenta corregir Latin-1 mal interpretado como UTF-8
+        final bytes = latin1.encode(value);
+        fixed[key] = utf8.decode(bytes);
+      } catch (_) {
+        fixed[key] = value; // Si falla, deja el valor original
+      }
+    } else if (value is Map<String, dynamic>) {
+      fixed[key] = _fixEncodingInMap(value);
+    } else {
+      fixed[key] = value;
+    }
+  });
+  
+  return fixed;
+}
   void setOnDisconnectedCallback(VoidCallback callback) {
   _hubConnection?.onclose(({Exception? error}) {
     print('❌ SignalR cerrado: ${error?.toString()}');

@@ -60,6 +60,10 @@ class RegisterController extends GetxController {
   final RxString selectedLanguage = 'Español'.obs;
   final RxList<int> selectedInterests = <int>[].obs;
   final RxList<int> selectedQualities = <int>[].obs;
+
+  final int maxInterests = 5;
+  final int maxQualities = 3;
+
   final RxInt bioCharCount = 0.obs;
   final RxBool showCustomGender = false.obs;
 
@@ -279,13 +283,13 @@ class RegisterController extends GetxController {
 
   bool _validatePhysicalInfo() {
     if (heightController.text.isEmpty) {
-      showErrorSnackbar( 'Ingresa tu altura');
+      showErrorSnackbar('Ingresa tu altura');
       return false;
     }
 
     final height = int.tryParse(heightController.text);
     if (height == null || height < 100 || height > 250) {
-      showErrorSnackbar( 'Ingresa una altura válida entre 100 y 250 cm');
+      showErrorSnackbar('Ingresa una altura válida entre 100 y 250 cm');
       return false;
     }
 
@@ -384,47 +388,47 @@ class RegisterController extends GetxController {
   // ==========================================
   // UBICACIÓN AUTOMÁTICA
   // ==========================================
-Future<void> _autoGetLocation() async {
-  try {
-    isLoadingLocation.value = true;
+  Future<void> _autoGetLocation() async {
+    try {
+      isLoadingLocation.value = true;
 
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+      if (permission == LocationPermission.deniedForever) return;
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      latitude.value = position.latitude.toString();
+      longitude.value = position.longitude.toString();
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final placemark = placemarks.first;
+        city.value = placemark.locality?.isNotEmpty == true
+            ? placemark.locality!
+            : placemark.administrativeArea ?? 'Ciudad desconocida';
+      }
+
+      locationObtained.value = true;
+    } catch (e) {
+      print('Error obteniendo ubicación: $e');
+      city.value = 'Ciudad desconocida';
+    } finally {
+      isLoadingLocation.value = false;
     }
-    if (permission == LocationPermission.deniedForever) return;
-
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    latitude.value = position.latitude.toString();
-    longitude.value = position.longitude.toString();
-
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
-
-    if (placemarks.isNotEmpty) {
-      final placemark = placemarks.first;
-      city.value = placemark.locality?.isNotEmpty == true
-          ? placemark.locality!
-          : placemark.administrativeArea ?? 'Ciudad desconocida';
-    }
-
-    locationObtained.value = true;
-  } catch (e) {
-    print('Error obteniendo ubicación: $e');
-    city.value = 'Ciudad desconocida';
-  } finally {
-    isLoadingLocation.value = false;
   }
-}
 
   // ==========================================
   // SELECCIÓN DE DATOS
@@ -450,22 +454,33 @@ Future<void> _autoGetLocation() async {
     selectedLanguage.value = language;
   }
 
-  void toggleInterest(int interestId) {
-    if (selectedInterests.contains(interestId)) {
-      selectedInterests.remove(interestId);
-    } else {
-      selectedInterests.add(interestId);
+void toggleInterest(int interestId) {
+  if (selectedInterests.contains(interestId)) {
+    selectedInterests.remove(interestId);
+  } else {
+    if (selectedInterests.length >= maxInterests) {
+      showErrorSnackbar(
+        'Solo puedes seleccionar hasta $maxInterests intereses',
+      );
+      return;
     }
+    selectedInterests.add(interestId);
   }
+}
 
-  void toggleQuality(int qualityId) {
-    if (selectedQualities.contains(qualityId)) {
-      selectedQualities.remove(qualityId);
-    } else {
-      selectedQualities.add(qualityId);
+void toggleQuality(int qualityId) {
+  if (selectedQualities.contains(qualityId)) {
+    selectedQualities.remove(qualityId);
+  } else {
+    if (selectedQualities.length >= maxQualities) {
+      showErrorSnackbar(
+        'Solo puedes seleccionar hasta $maxQualities cualidades',
+      );
+      return;
     }
+    selectedQualities.add(qualityId);
   }
-
+}
   // ==========================================
   // REGISTRO FINAL
   // ==========================================
@@ -512,9 +527,7 @@ Future<void> _autoGetLocation() async {
       await createUserUsecase.execute(entity);
 
       _clearFields();
-      Future.delayed(const Duration(seconds: 3), () {
-        onLoginTap();
-      });
+     onLoginTap();
     } catch (e) {
       print('Error en registro: $e');
       showErrorSnackbar('Error en el registro: ${cleanExceptionMessage(e)}');
@@ -554,8 +567,6 @@ Future<void> _autoGetLocation() async {
   // ==========================================
   // ALERTAS
   // ==========================================
-
-  
 
   // ==========================================
   // LIMPIEZA

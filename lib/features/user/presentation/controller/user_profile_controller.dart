@@ -5,6 +5,8 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
+import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
+import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
@@ -160,8 +162,29 @@ class UserProfileController extends GetxController {
       isProcessingLike.value = false;
     }
   }
+void sendMensaje() {
+  final chat = currentUser.value?.chat;
 
-  void sendMensaje() {
+  // Si está pendiente de aceptación, llamar unlockChat del LikedByUsersController
+  if (chat != null && chat.pendingAcepted) {
+    final likedByController = Get.find<LikedByUsersController>();
+    likedByController.unlockChat(
+      PendingChatEntity(
+        chatId: chat.id,
+        userId: userId.value,
+        name: userName,
+        photoUrl: currentUser.value?.fotoUrl,
+        age: currentUser.value?.age,
+        hiddenMessage: null,
+        createdAt: DateTime.now(),
+        unlockCost: 0,
+      ),
+    );
+    return;
+  }
+
+  // Sin chat o chatId == 0
+  if (chat == null || chat.id == 0) {
     Get.toNamed(
       RoutesNames.chatPage,
       arguments: {
@@ -169,7 +192,18 @@ class UserProfileController extends GetxController {
         'name': userName,
       },
     );
+    return;
   }
+
+  // Chat existente con ID válido
+  Get.toNamed(
+    RoutesNames.chatPage,
+    arguments: {
+      'chatId': chat.id,
+      'name': userName,
+    },
+  );
+}
 
   void skipUser() => Get.back();
 
@@ -204,7 +238,12 @@ class UserProfileController extends GetxController {
       isProcessingBlock.value = false;
     }
   }
-
+bool get showRejectButton {
+  final chat = currentUser.value?.chat;
+  //&& !chat.pendingAcepted
+  if (chat != null && chat.id != 0 ) return false;
+  return true;
+}
   void reportUser() {
     if (Get.context == null) return;
     showCustomAlert(

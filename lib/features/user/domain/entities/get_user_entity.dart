@@ -16,6 +16,7 @@ class GetUserEntity {
   final List<InterestsIdsEntity>? interestsIds;
   final PreferencesEntity? preferences;
   final String? status;
+  final ChatEntity? chat;
   GetUserEntity({
        this.id,
      this.name,
@@ -31,7 +32,8 @@ class GetUserEntity {
       this.primarylanguage,
       this.heightcm,
       this.city,
-      this.status
+      this.status,
+      this.chat
   });
 
 }
@@ -54,4 +56,13 @@ class InterestsIdsEntity {
   final int id;
   final String name;  
   InterestsIdsEntity({required this.id, required this.name});
+}
+class ChatEntity {
+  final int id;
+ final bool pendingAcepted;
+
+  ChatEntity({
+    required this.id,
+    required this.pendingAcepted,
+  });
 }

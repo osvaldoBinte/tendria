@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
-version: 1.0.9+9
+version: 1.0.13+13
 
 environment:
   sdk: ^3.8.1
@@ -52,6 +52,9 @@ dependencies:
   dio: ^5.9.1
   google_mlkit_translation: ^0.13.1
   geocoding: ^4.0.0
+  webview_flutter: ^4.13.1
+  url_launcher: ^6.3.2
+  firebase_core: ^4.5.0
 flutter_native_splash:
   color: "#FFFFFF"
   image: assets/logo/iosicon.jpg
@@ -112,6 +115,14 @@ flutter:
    - assets/icons/home/heart.png
    - assets/successful.png
    - assets/logo/iosicon.jpg
+   - assets/tutorial/tutorial1.png
+   - assets/tutorial/tutorial2.png
+   - assets/tutorial/tutorial3.png
+   - assets/tutorial/tutorial4.png
+   - assets/tutorial/tutorial5.png
+   - assets/tutorial/tutorial6.png
+   - assets/tutorial/tutorial7.png
+   - assets/tutorial/tutorial8.png
    - assets/fondo.png
    - assets/i18n/es.json
    - assets/i18n/en.json

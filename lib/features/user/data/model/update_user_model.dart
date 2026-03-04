@@ -11,7 +11,6 @@ class UpdateUserModel extends UpdateUserEntity {
     required super.bio,
     required super.heightcm,
     required super.primarylanguage,
-    required super.city,
     required super.status
   });
 
@@ -24,7 +23,6 @@ class UpdateUserModel extends UpdateUserEntity {
       bio: entity.bio,
       heightcm: entity.heightcm,
       primarylanguage: entity.primarylanguage,
-      city: entity.city,
     );
   }
  Map<String, dynamic> toJson() {
@@ -35,7 +33,6 @@ class UpdateUserModel extends UpdateUserEntity {
     'bio': bio,
     'altura': heightcm,
     'idioma': primarylanguage,
-    'ciudad': city,
     if (status != null) 'status': status,
   };
 }

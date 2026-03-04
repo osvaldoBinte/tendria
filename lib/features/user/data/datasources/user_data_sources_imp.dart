@@ -5,7 +5,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/common/errors/api_errors.dart';
+import 'package:tendria/features/user/data/model/update_location_model.dart';
 import 'package:tendria/features/user/data/model/update_user_model.dart';
+import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
 import 'package:tendria/features/user/data/model/get_user_model.dart';
 import 'package:tendria/features/user/data/model/preferences_model.dart';
@@ -358,6 +360,38 @@ Future<void> uploadPicturePerfil(
 }
 
 
+
+  Future<void> updateLocation(UpdateLocationEntity entity,String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/actualizar-ubicacion');
+
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(UpdateLocationModel.fromEntity(entity).toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        print('🌐 Error de red detectado');
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('$e');
+    }
+  }
   Future<void> updateuser(UpdateUserEntity entity,String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/actualizar-perfil');

@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Núcleo 15</string>
+		<string>TATENDRIA</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -47,13 +47,11 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
-
 		<!-- Ubicación -->
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Necesitamos tu ubicación para mostrar lugares cercanos.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 		<string>Necesitamos tu ubicación incluso en segundo plano.</string>
-
 		<!-- Cámara y galería -->
 		<key>NSCameraUsageDescription</key>
 		<string>Necesitamos acceso a tu cámara para tomar fotos y videos.</string>
@@ -61,11 +59,9 @@
 		<string>Necesitamos acceso a tu galería para seleccionar fotos y videos.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>Necesitamos permiso para guardar fotos y videos en tu galería.</string>
-
 		<!-- Micrófono -->
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Necesitamos acceso al micrófono para grabar videos y audio.</string>
-
 		<!-- Encriptación -->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>

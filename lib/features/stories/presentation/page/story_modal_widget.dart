@@ -121,7 +121,7 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Barra de progreso
+                        
                         if (isViewingMyStory) ...[
                           Row(
                             children: List.generate(
@@ -213,7 +213,7 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                                   width: 2,
                                 ),
                               ),
-                              child: ClipOval(child: _fallbackIcon()),
+child: _buildStoryUserAvatar(),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -367,79 +367,94 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
     );
   }
 
-  Widget _fallbackIcon() {
-    return ClipOval(
-  child: _userController.profilePhotoUrl != null &&
-          _userController.profilePhotoUrl!.isNotEmpty
-      ? CachedNetworkImage(
-          imageUrl: _userController.profilePhotoUrl!,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          placeholder: (context, url) => _fallbackIcon(),
-          errorWidget: (context, url, error) => _fallbackIcon(),
-        )
-      : _fallbackIcon(),
-);
-  }
+// ✅ Ícono de fallback real (sin foto, sin recursión)
+Widget _buildDefaultAvatar() {
+  return Container(
+    color: Colors.grey[800],
+    child: const Icon(Icons.person, color: Colors.white54, size: 24),
+  );
+}
 
-  Widget _buildStoryContent(StoryEntity story) {
-    final isVideo = story.tipoContenido.toLowerCase() == 'video';
+// ✅ Avatar del usuario de la historia actual
+Widget _buildStoryUserAvatar() {
+  final isMyStory = controller.isViewingMyStory.value;
 
-    if (isVideo) {
-      return Obx(() {
-        if (controller.videoController != null &&
-            controller.isVideoInitialized.value) {
-          return Center(
-            child: AspectRatio(
-              aspectRatio: controller.videoController!.value.aspectRatio,
-              child: VideoPlayer(controller.videoController!),
-            ),
-          );
-        } else {
-          return Container(
-            color: Colors.grey[900],
-            child: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: Colors.white),
-                  SizedBox(height: 16),
-                  Text(
-                    'Cargando video...',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
+  // Foto a mostrar según si es mi historia o la de otro
+  final String? photoUrl = isMyStory
+      ? _userController.profilePhotoUrl
+      : controller.currentUser?.fotoPerfilUrl;
+
+  return ClipOval(
+    child: photoUrl != null && photoUrl.isNotEmpty
+        ? CachedNetworkImage(
+            imageUrl: photoUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            placeholder: (context, url) => _buildDefaultAvatar(),
+            errorWidget: (context, url, error) => _buildDefaultAvatar(),
+          )
+        : _buildDefaultAvatar(),
+  );
+}
+// Reemplaza el método _buildStoryContent completo:
+Widget _buildStoryContent(StoryEntity story) {
+  final isVideo = story.tipoContenido.toLowerCase() == 'video';
+
+  if (isVideo) {
+    // ✅ Asegura que isVideoInitialized.value siempre se lea dentro del Obx
+    return Obx(() {
+      final initialized = controller.isVideoInitialized.value; // ✅ observable leído primero
+      final videoCtrl = controller.videoController;
+
+      if (initialized && videoCtrl != null && videoCtrl.value.isInitialized) {
+        return Center(
+          child: AspectRatio(
+            aspectRatio: videoCtrl.value.aspectRatio,
+            child: VideoPlayer(videoCtrl),
+          ),
+        );
+      }
+
+      return Container(
+        color: Colors.grey[900],
+        child: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text(
+                'Cargando video...',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
-            ),
-          );
-        }
-      });
-    } else {
-      return Image.network(
-        story.urlContenido,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey[800],
-            child: const Center(
-              child: Icon(Icons.error_outline, color: Colors.white, size: 50),
-            ),
-          );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: Colors.grey[900],
-            child: const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       );
-    }
+    });
+  } else {
+    return CachedNetworkImage(
+      imageUrl: story.urlContenido,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      fadeInDuration: Duration.zero,
+      placeholder: (context, url) => Container(
+        color: Colors.grey[900],
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      ),
+      errorWidget: (context, url, error) => Container(
+        color: Colors.grey[800],
+        child: const Center(
+          child: Icon(Icons.error_outline, color: Colors.white, size: 50),
+        ),
+      ),
+    );
   }
-
+}
   Widget _buildMyStoryFooter(StoryEntity story) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

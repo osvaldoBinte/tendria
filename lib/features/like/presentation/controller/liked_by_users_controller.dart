@@ -58,112 +58,108 @@ class LikedByUsersController extends GetxController {
     // Mostrar diálogo de confirmación
     _showUnlockConfirmation(chat);
   }
+void _showUnlockConfirmation(PendingChatEntity chat) {
+  showCustomAlert(
+    context: Get.context!,
+    title: '¡Conecta con ${chat.name ?? 'este usuario'}!',
+    message: '',
+    confirmText: 'Conectar',
+    cancelText: 'Ahora no',
+    type: CustomAlertType.confirm,
+    customWidget: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${chat.name ?? 'Este usuario'} quiere conectar contigo. ¿Aceptas iniciar la conversación?',
+          style: ThemeColor.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 16),
 
-  // Mostrar confirmación de desbloqueo con CustomAlertDialog
-  void _showUnlockConfirmation(PendingChatEntity chat) {
-    showCustomAlert(
-      context: Get.context!,
-      title: 'Desbloquear chat',
-      message: '',
-      confirmText: 'Desbloquear',
-      cancelText: 'Cancelar',
-      type: CustomAlertType.confirm,
-      customWidget: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '¿Deseas desbloquear este chat con ${chat.name ?? 'este usuario'}?',
-            style: ThemeColor.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
+        if (chat.hiddenMessage != null) ...[
           SizedBox(height: 16),
-          
-          if (chat.hiddenMessage != null) ...[
-            SizedBox(height: 16),
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: ThemeColor.backgroundColorfondo,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: ThemeColor.dividerColor,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.message,
-                        size: 16,
-                        color: ThemeColor.textSecondaryColor,
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: ThemeColor.backgroundColorfondo,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: ThemeColor.dividerColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.lock_open, size: 16, color: ThemeColor.primaryColor),
+                    SizedBox(width: 4),
+                    Text(
+                      'Te envió un mensaje:',
+                      style: ThemeColor.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: ThemeColor.primaryColor,
                       ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Mensaje oculto:',
-                        style: ThemeColor.caption.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: ThemeColor.textSecondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    chat.hiddenMessage!,
-                    style: ThemeColor.bodyMedium.copyWith(
-                      fontStyle: FontStyle.italic,
-                      color: ThemeColor.textPrimaryColor,
                     ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Text(
+                  chat.hiddenMessage!,
+                  style: ThemeColor.bodyMedium.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: ThemeColor.textPrimaryColor,
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: Size(0, 40),
+                  foregroundColor: ThemeColor.textSecondaryColor,
+                ),
+                onPressed: () => Get.back(),
+                child: Text('Ahora no'),
+              ),
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColor.primaryColor,
+                  minimumSize: Size(0, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  Get.back();
+                  _performUnlock(chat);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.favorite, size: 16, color: Colors.white),
+                    SizedBox(width: 6),
+                    Text('Conectar', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
               ),
             ),
           ],
-          SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    minimumSize: Size(0, 40),
-                    foregroundColor: ThemeColor.textSecondaryColor,
-                  ),
-                  onPressed: () => Get.back(),
-                  child: Text('Cancelar'),
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ThemeColor.primaryColor,
-                    minimumSize: Size(0, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.back(); // Cerrar diálogo
-                    _performUnlock(chat);
-                  },
-                  child: Text(
-                    'Desbloquear',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      onConfirm: null, // Manejado por el botón personalizado
-      onCancel: null,  // Manejado por el botón personalizado
-    );
-  }
+        ),
+      ],
+    ),
+    onConfirm: null,
+    onCancel: null,
+  );
+}
 
   // Ejecutar desbloqueo
   Future<void> _performUnlock(PendingChatEntity chat) async {
@@ -193,7 +189,8 @@ class LikedByUsersController extends GetxController {
       showSuccessSnackbar('Chat desbloqueado correctamente');
 
       // Remover de la lista
-      pendingChats.removeWhere((item) => item.chatId == chat.chatId);
+      await loadPendingChats();
+
 
       // Navegar al chat
       navigateToChat(chat.chatId, chat.name ?? 'Usuario');

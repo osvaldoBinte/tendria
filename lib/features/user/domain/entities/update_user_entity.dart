@@ -5,7 +5,6 @@ class UpdateUserEntity {
   final String? bio;
   final String? heightcm;
   final String? primarylanguage;
-  final String ? city;
   final String? status;
  
 
@@ -16,7 +15,6 @@ class UpdateUserEntity {
      this.bio,
      this.heightcm,
      this.primarylanguage,
-     this.city,
      this.status
   });
 }

@@ -87,22 +87,14 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.fetchBlockedUsersUsecase!, permanent: true);
         Get.put(usecaseConfig.blockUserUsecase!, permanent: true);
         Get.put(usecaseConfig.unblockUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.updateLocationUsecase!, permanent: true);
 
 
         Get.lazyPut(() => LoginController(loginUsecase: Get.find(), ), fenix: true);
-Get.put(
-  SignalRService(
-    connectSignalRUsecase: Get.find(),
-    disconnectSignalRUsecase: Get.find(),
-    joinChatUsecase: Get.find(),
-    leaveChatUsecase: Get.find(),
-    setupMessageListenerUsecase: Get.find(),
-    setOnDisconnectedCallbackUsecase: Get.find(),
-  ),
-  permanent: true, // 👈 nunca se destruye
-);        Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find()), fenix: true);
-        Get.lazyPut(()=> SplashController(getUserUsecase: Get.find()), fenix: true);
-        Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find()),  fenix: true);
+        Get.put( SignalRService( connectSignalRUsecase: Get.find(), disconnectSignalRUsecase: Get.find(), joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(),setupMessageListenerUsecase: Get.find(), setOnDisconnectedCallbackUsecase: Get.find(),), permanent: true,);   
+        Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find(), ), fenix: true);
+        Get.lazyPut(()=> SplashController(getUserUsecase: Get.find(), updateLocationUsecase: Get.find(),), fenix: true);
+        Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find()),  fenix: true);
         Get.lazyPut(() => ProfileController(getUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find(), deleteMediaUsecase: Get.find()), fenix: true);
         Get.lazyPut(() => StoryController(fetchStoriesUsecase:  Get.find(), addLikeToStoryUsecase:  Get.find(), fetchStoriesByIdUsecase: Get.find(), removeStoryUsecase: Get.find(), createStroryUsecase: Get.find(), setStoryAsSeenUsecase:  Get.find()), fenix:  true);
        //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);

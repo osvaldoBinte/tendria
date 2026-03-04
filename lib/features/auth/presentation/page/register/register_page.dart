@@ -604,7 +604,7 @@ SizedBox(height: ThemeColor.paddingMedium),
                           ),
                         ),
                         Text(
-                          '${controller.selectedInterests.length}/5 seleccionados',
+                          '${controller.selectedInterests.length}/${controller.maxInterests} seleccionados',
                           style: ThemeColor.bodyMedium.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
@@ -826,7 +826,7 @@ IconData _getInterestIcon(String interest) {
 
                   Obx(
                     () => Text(
-                      'Lo que buscas en alguien        ${controller.selectedQualities.length}/3 seleccionados',
+                      'Lo que buscas en alguien  ${controller.selectedQualities.length}/${controller.maxQualities} seleccionados',
                       style: ThemeColor.bodyMedium.copyWith(
                         color: ThemeColor.textDarkColor,
                         fontWeight: FontWeight.w600,

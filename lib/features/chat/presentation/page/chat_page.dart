@@ -78,21 +78,22 @@ class ChatPage extends GetView<ChatController> {
                           width: 1.5,
                         ),
                       ),
-                      child: ClipOval(
-                        child: usuario?.fotoUrl != null &&
-                                usuario!.fotoUrl!.isNotEmpty
-                            ? Image.network(
-                                usuario.fotoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    _buildDefaultAvatar(),
-                              )
-                            : _buildDefaultAvatar(),
-                      ),
+                    child: ClipOval(
+  child: (usuario?.fotoUrl != null && usuario!.fotoUrl!.isNotEmpty) 
+      || controller.userPhoto != null
+      ? Image.network(
+          usuario?.fotoUrl?.isNotEmpty == true 
+              ? usuario!.fotoUrl! 
+              : controller.userPhoto!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
+        )
+      : _buildDefaultAvatar(),
+),
                     ),
                   ),
                   // Punto verde SignalR
-                  if (isExisting && controller.isSignalRConnected.value)
+                /*  if (isExisting && controller.isSignalRConnected.value)
                     Positioned(
                       right: 0,
                       bottom: 0,
@@ -108,7 +109,7 @@ class ChatPage extends GetView<ChatController> {
                           ),
                         ),
                       ),
-                    ),
+                    ),*/
                 ],
               ),
               const SizedBox(width: 12),
@@ -127,11 +128,11 @@ class ChatPage extends GetView<ChatController> {
                     if (isExisting)
                       Text(
                         controller.isSignalRConnected.value
-                            ? 'Tiempo real activo'
+                            ? 'Todo listo para empezar a conectar'
                             : '',
                         style: ThemeColor.caption.copyWith(
                           color: controller.isSignalRConnected.value
-                              ? ThemeColor.successColor
+                              ? ThemeColor.secondaryColor
                               : ThemeColor.primaryColor,
                         ),
                       ),
@@ -157,21 +158,33 @@ class ChatPage extends GetView<ChatController> {
   //  CONEXIÓN SIGNALR
   // ─────────────────────────────────────────
 
-  Widget _buildConnectionIndicator() {
-    return Obx(() {
-      if (controller.isNewConversation.value) return const SizedBox.shrink();
-      if (controller.isSignalRConnected.value) return const SizedBox.shrink();
-      return Container(
+Widget _buildConnectionIndicator() {
+  return Obx(() {
+    if (controller.isNewConversation.value) return const SizedBox.shrink();
+    if (controller.isSignalRConnected.value) return const SizedBox.shrink();
+
+    return GestureDetector(
+      onTap: controller.retrySignalRConnection,
+      child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         color: ThemeColor.warningColor.withOpacity(0.1),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cloud_off, size: 16, color: ThemeColor.warningColor),
+            Obx(() => controller.isLoading.value  // ✅ muestra spinner mientras reconecta
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: ThemeColor.warningColor,
+                    ),
+                  )
+                : Icon(Icons.refresh, size: 16, color: ThemeColor.warningColor)),
             const SizedBox(width: 8),
             Text(
-              'Sin conexión en tiempo real',
+              'Sin conexión en tiempo real · Toca para reintentar',
               style: ThemeColor.caption.copyWith(
                 color: ThemeColor.warningColor,
                 fontSize: 12,
@@ -179,10 +192,10 @@ class ChatPage extends GetView<ChatController> {
             ),
           ],
         ),
-      );
-    });
-  }
-
+      ),
+    );
+  });
+}
   // ─────────────────────────────────────────
   //  CUERPO
   // ─────────────────────────────────────────
@@ -265,7 +278,7 @@ class ChatPage extends GetView<ChatController> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isOwn) ...[
-            _buildMessageAvatar(mensaje.senderFoto),
+            _buildMessageAvatar(mensaje.senderFoto ),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -314,14 +327,14 @@ class ChatPage extends GetView<ChatController> {
           ),
           if (isOwn) ...[
             const SizedBox(width: 8),
-            _buildMessageAvatar(mensaje.senderFoto),
+            _buildMessageAvatar(mensaje.senderFoto?? controller.myPhoto),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildMessageAvatar(String? photoUrl) {
+  Widget _buildMessageAvatar(String? photoUrl ) {
     return Container(
       width: 32,
       height: 32,

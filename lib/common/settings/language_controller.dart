@@ -55,7 +55,7 @@ class LanguageController extends GetxController {
       // ── LikedByUsersView ───────────────────────────
       'pending_chats': 'Chats Pendientes',
       'unlock_hint': 'Desbloquea los chats para comenzar a conversar.',
-      'unlock': 'Desbloquear',
+      'unlock': 'conectar',
 
       // ── RadarScannerScreen ─────────────────────────
       'searching': 'Buscando conexiones...',
@@ -222,7 +222,7 @@ class LanguageController extends GetxController {
       // ── LikedByUsersView ───────────────────────────
       'pending_chats': 'Pending Chats',
       'unlock_hint': 'Unlock chats to start chatting.',
-      'unlock': 'Unlock',
+      'unlock': 'connect',
 
       // ── RadarScannerScreen ─────────────────────────
       'searching': 'Looking for connections...',

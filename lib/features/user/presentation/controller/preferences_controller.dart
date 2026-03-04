@@ -20,6 +20,7 @@ import 'package:tendria/features/user/domain/entities/preferences_step.dart';
 import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
 import 'package:tendria/features/user/domain/usecase/preferences_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/upload_picture_perfile_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class PreferencesController extends GetxController {
@@ -29,6 +30,7 @@ class PreferencesController extends GetxController {
   final FetchQualitiesUsecase fetchQualitiesUsecase;
   final PostInterestsUsecase postInterestsUsecase;
   final PostQualitiesUsecase postQualitiesUsecase;
+  final UploadPicturePerfileUsecase uploadPicturePerfileUsecase; // 👈 AGREGAR
 
   PreferencesController({
     required this.preferencesUserUsecase,
@@ -37,6 +39,7 @@ class PreferencesController extends GetxController {
     required this.fetchQualitiesUsecase,
     required this.postInterestsUsecase,
     required this.postQualitiesUsecase,
+    required this.uploadPicturePerfileUsecase,
   });
 
   // Control de pasos
@@ -709,7 +712,11 @@ Widget _buildPhotoOption({
           await uploadMediaUsecase.execute(mediaEntities);
           photosAlreadySent.value = true;
           isUploadingPhotos.value = false;
-
+if (selectedPhotos.isNotEmpty) {
+  print('🖼️ Estableciendo foto de perfil...');
+  await uploadPicturePerfileUsecase.execute(selectedPhotos.first);
+  print('✅ Foto de perfil establecida');
+}
           print('✅ Fotos subidas exitosamente');
         }
       }

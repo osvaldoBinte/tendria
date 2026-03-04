@@ -51,6 +51,7 @@ import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/preferences_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/put_preferences_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_picture_perfile_usecase.dart';
@@ -83,6 +84,7 @@ class UsecaseConfig {
   DeleteQualitiesUsecase? deleteQualitiesUsecase;
   
   GetUserUsecase? getUserUsecase;
+  UpdateLocationUsecase? updateLocationUsecase;
   DeleteUserUsecase?deleteUserUsecase;
   GetUserByIdUsecase? getUserByIdUsecase;
   FetchNearbyUsersUsecase? fetchNearbyUsersUsecase;
@@ -149,6 +151,7 @@ class UsecaseConfig {
     getUserUsecase = GetUserUsecase(userRepository: userRepositoryImp!);
     updateUserUsecase = UpdateUserUsecase(userRepository: userRepositoryImp!);
     getUserByIdUsecase = GetUserByIdUsecase(userRepository: userRepositoryImp!);
+    updateLocationUsecase = UpdateLocationUsecase(userRepository: userRepositoryImp!);
     deleteUserUsecase = DeleteUserUsecase(userRepository: userRepositoryImp!);
     fetchNearbyUsersUsecase = FetchNearbyUsersUsecase(userRepository: userRepositoryImp!);
     postInterestsUsecase = PostInterestsUsecase(catalogRepository: catalogRepositoryImp!);

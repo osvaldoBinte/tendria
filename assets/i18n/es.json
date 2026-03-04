@@ -120,7 +120,7 @@
   "liked_by_view": {
     "header_title": "Chats Pendientes",
     "header_subtitle": "Desbloquea los chats para comenzar a conversar.",
-    "unlock_button": "Desbloquear",
+    "unlock_button": "Chatear",
     "loading": "Cargando chats pendientes...",
     "error_title": "Error al cargar chats",
     "empty_title": "No tienes chats pendientes",

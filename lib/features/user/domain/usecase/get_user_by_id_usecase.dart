@@ -8,5 +8,5 @@ class GetUserByIdUsecase {
 
   Future<GetUserEntity> execute(int iduser) async {
     return await userRepository.getuserbyid(iduser);
-  }
+  } 
 }

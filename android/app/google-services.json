@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "630647758640",
+    "project_id": "tatendria",
+    "storage_bucket": "tatendria.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:630647758640:android:8d46d4cdd001d24631f2f5",
+        "android_client_info": {
+          "package_name": "dev.binteconsulting.tendria"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEjAVgCi34HmdEOh4hikIelQEhFP-BHyI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

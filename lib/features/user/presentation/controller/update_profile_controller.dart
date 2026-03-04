@@ -1413,7 +1413,7 @@ class UpdateProfileController extends GetxController {
         bio: user?.bio,
         heightcm: user?.heightcm?.toString(),
         primarylanguage: user?.primarylanguage,
-        city: city,
+       
         status: user?.status,
       );
       await updateUserUsecase.execute(completeEntity);
@@ -1436,7 +1436,6 @@ class UpdateProfileController extends GetxController {
         heightcm: entity.heightcm ?? user?.heightcm?.toString(),
         primarylanguage:
             entity.primarylanguage ?? user?.primarylanguage,
-        city: entity.city ?? user?.city,
         status: entity.status ?? user?.status,
       );
       await updateUserUsecase.execute(completeEntity);

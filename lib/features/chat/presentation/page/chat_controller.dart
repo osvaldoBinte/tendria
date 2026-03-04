@@ -35,13 +35,14 @@ class ChatController extends GetxController {
     required this.sendMessageUsecase,
     required this.authService,
   });
+final RxBool isRetrying = false.obs;
 
   // ── Controllers UI ──
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
   // ── Estado reactivo ──
-  final RxList<MensajeEntity> mensajes = <MensajeEntity>[].obs;
+final mensajes = RxList<MensajeEntity>([]);
   final Rx<UsuarioChatEntity?> otroUsuario = Rx<UsuarioChatEntity?>(null);
   final Rx<ChatEntity?> chat = Rx<ChatEntity?>(null);
 
@@ -60,6 +61,8 @@ class ChatController extends GetxController {
   late int targetUserId;
   int? chatId;
   String? userName;
+  String? userPhoto;
+  String? myPhoto;
 
   // ── Referencia al servicio global ──
   late final SignalRService _signalRService;
@@ -102,6 +105,10 @@ class ChatController extends GetxController {
     targetUserId = args?['userid'] ?? args?['userId'] ?? 0;
     userName = args?['name'];
     isNewConversation.value = (chatId == null);
+    userPhoto = args?['photo'];
+    myPhoto = args?['MyPhoto'];
+
+
 
     if (args?['otroUsuario'] != null) {
       otroUsuario.value = args!['otroUsuario'] as UsuarioChatEntity;
@@ -112,63 +119,131 @@ class ChatController extends GetxController {
   //  SIGNALR — Solo suscripción al chat
   // ─────────────────────────────────────────
 
-  Future<void> _subscribeToChat() async {
-    try {
-      // Reflejar el estado de conexión del servicio global
-      isSignalRConnected.value = _signalRService.isConnected.value;
+Future<void> _subscribeToChat() async {
+  try {
+    isSignalRConnected.value = _signalRService.isConnected.value;
 
-      // Escuchar cambios futuros de conexión (ej: reconexión automática)
-      ever(_signalRService.isConnected, (bool connected) {
-        isSignalRConnected.value = connected;
-      });
-
-      // Suscribirse al chat específico
-      // El SignalRService internamente llama joinChatUsecase
-      await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
-    } catch (e) {
-      isSignalRConnected.value = false;
-      print('Error suscribiéndose al chat: $e');
-    }
-  }
-
-  void _handleIncomingMessage(MensajeEntity mensaje) {
-    final exists = mensajes.any((m) => m.id == mensaje.id);
-    if (!exists) {
-      mensajes.add(mensaje);
-      if (mensaje.esPropio || _isNearBottom()) {
-        Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    // ✅ Cuando se desconecta, intenta reconectar automáticamente
+    ever(_signalRService.isConnected, (bool connected) {
+      isSignalRConnected.value = connected;
+      if (!connected && !isNewConversation.value) {
+        _autoReconnect();
       }
-    }
+    });
+
+    await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
+  } catch (e) {
+    isSignalRConnected.value = false;
+    print('Error suscribiéndose al chat: $e');
+    _autoReconnect(); // ✅ Si falló al suscribirse, también reintenta
   }
+}
+
+Future<void> _autoReconnect() async {
+  if (isRetrying.value || isSignalRConnected.value) return;
+
+  print('🔄 Auto-reconectando SignalR desde ChatController...');
+  
+  // Pequeña espera para no chocar con el intento del SignalRService
+  await Future.delayed(const Duration(seconds: 2));
+  
+  // Si el servicio global ya reconectó, solo re-suscribirse al chat
+  if (_signalRService.isConnected.value) {
+    try {
+      if (chatId != null) {
+        await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
+      }
+    } catch (e) {
+      print('❌ Error re-suscribiéndose: $e');
+    }
+    return;
+  }
+
+  // Si el servicio global sigue caído, forzar reconexión
+  await retrySignalRConnection();
+}void _handleIncomingMessage(MensajeEntity mensaje) {
+  // Evitar duplicados por ID
+  if (mensajes.any((m) => m.id == mensaje.id)) return;
+
+  mensajes.value = [
+    ...mensajes,
+    MensajeEntity(
+      id: mensaje.id,
+      chatId: mensaje.chatId,
+      senderId: mensaje.senderId,
+      senderNombre: mensaje.senderNombre,
+      senderFoto: mensaje.senderFoto,
+      mensaje: mensaje.mensaje,
+      enviadoEn: mensaje.enviadoEn,
+      esPropio: mensaje.esPropio,
+    ),
+  ];
+
+  if (mensaje.esPropio || _isNearBottom()) {
+    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+  }
+}
 
 bool _isNearBottom() {
   if (!scrollController.hasClients) return false;
   return (scrollController.position.maxScrollExtent -
           scrollController.position.pixels) < 100;
 }
+
+Future<void> retrySignalRConnection() async {
+  if (isSignalRConnected.value || isRetrying.value) return;
+  try {
+    isRetrying.value = true;
+    final token = await authService.getToken();
+    if (token == null) return;
+    await _signalRService.connect(token);
+    if (_signalRService.isConnected.value && chatId != null) {
+      await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
+    }
+  } catch (e) {
+    print('❌ Error reconectando: $e');
+  } finally {
+    isRetrying.value = false;
+  }
+}
   // ─────────────────────────────────────────
   //  CARGA DE MENSAJES
   // ─────────────────────────────────────────
 
-  Future<void> loadChatMessages() async {
-    if (chatId == null) return;
-    try {
-      isLoading.value = true;
-      hasError.value = false;
+Future<void> loadChatMessages() async {
+  if (chatId == null) return;
+  try {
+    isLoading.value = true;
+    hasError.value = false;
 
-      final result = await getChatMensajeUsecase.execute(chatId!);
-      chat.value = result;
-      mensajes.value = result.mensajes ?? [];
-      otroUsuario.value = result.otroUsuario;
+    final result = await getChatMensajeUsecase.execute(chatId!);
+    chat.value = result;
 
-      Future.delayed(const Duration(milliseconds: 300), _scrollToBottom);
-    } catch (e) {
-      hasError.value = true;
-      errorMessage.value = 'Error al cargar mensajes: $e';
-    } finally {
-      isLoading.value = false;
-    }
+    // ✅ Convierte cada item explícitamente a MensajeEntity
+    final lista = (result.mensajes ?? [])
+        .map((m) => MensajeEntity(
+              id: m.id,
+              chatId: m.chatId,
+              senderId: m.senderId,
+              senderNombre: m.senderNombre,
+              senderFoto: m.senderFoto,
+              mensaje: m.mensaje,
+              enviadoEn: m.enviadoEn,
+              esPropio: m.esPropio,
+            ))
+        .toList();
+
+    mensajes.value = lista;
+    otroUsuario.value = result.otroUsuario;
+
+    Future.delayed(const Duration(milliseconds: 300), _scrollToBottom);
+  } catch (e) {
+    hasError.value = true;
+    errorMessage.value = 'Error al cargar mensajes: $e';
+  } finally {
+    isLoading.value = false;
   }
+}
 
   Future<void> refreshChat() => loadChatMessages();
 
@@ -226,39 +301,54 @@ bool _isNearBottom() {
     } finally {
       isSending.value = false;
     }
-  }
+  }Future<void> _sendRegularMessage() async {
+  final message = messageController.text.trim();
+  if (message.isEmpty || isSending.value) return;
 
-  Future<void> _sendRegularMessage() async {
-    final message = messageController.text.trim();
-    if (message.isEmpty || isSending.value) return;
+  final tempId = DateTime.now().millisecondsSinceEpoch;
+  final haySignalR = isSignalRConnected.value;
 
-    try {
-      isSending.value = true;
-      messageController.clear();
+  try {
+    isSending.value = true;
+    messageController.clear();
 
-      final postEntity = PostChatEntity(chatId: chatId!, menssage: message);
-      await sendMessageUsecase.execute(postEntity);
-      // El mensaje regresa por SignalR automáticamente
-    } catch (e) {
-      messageController.text = message;
-      showErrorSnackbar('No se pudo enviar el mensaje');
-    } finally {
-      isSending.value = false;
+    // ✅ Solo agregar local si NO hay SignalR
+    // Con SignalR: el mensaje llega por el socket y se muestra ahí
+    // Sin SignalR: mostramos local para que el usuario vea algo
+    if (!haySignalR) {
+      _addLocalMessage(message, tempId: tempId);
+      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
     }
-  }
 
-  void _addLocalMessage(String messageText) {
-    mensajes.add(MensajeEntity(
-      id: DateTime.now().millisecondsSinceEpoch,
-      chatId: targetUserId,
-      senderId: 0,
-      senderNombre: null,
-      senderFoto: null,
-      mensaje: messageText,
-      enviadoEn: DateTime.now(),
-      esPropio: true,
-    ));
+    final postEntity = PostChatEntity(chatId: chatId!, menssage: message);
+    await sendMessageUsecase.execute(postEntity);
+
+  } catch (e) {
+    // Si falló, quitar el local si lo habíamos puesto
+    if (!haySignalR) {
+      mensajes.removeWhere((m) => m.id == tempId);
+    }
+    messageController.text = message;
+    print('Error enviando mensaje: $e');
+    showErrorSnackbar('No se pudo enviar el mensaje');
+  } finally {
+    isSending.value = false;
   }
+}
+void _addLocalMessage(String messageText, {int? tempId}) {
+  final nuevo = MensajeEntity(
+    id: tempId ?? DateTime.now().millisecondsSinceEpoch,
+    chatId: chatId ?? targetUserId,
+    senderId: 0,
+    senderNombre: null,
+    senderFoto: myPhoto,
+    mensaje: messageText,
+    enviadoEn: DateTime.now(),
+    esPropio: true,
+  );
+  // Fuerza el tipo correcto creando una nueva lista
+  mensajes.value = [...mensajes.map((m) => m as MensajeEntity), nuevo];
+}
 
   void _scrollToBottom() {
     if (scrollController.hasClients) {

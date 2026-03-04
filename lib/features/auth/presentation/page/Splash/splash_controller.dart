@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
+import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
 
 class SplashController extends GetxController {
+  final UpdateLocationUsecase updateLocationUsecase;
   final RxBool isLoading = true.obs;
 
   final GetUserUsecase getUserUsecase;
 
-  SplashController({required this.getUserUsecase});
+  SplashController({required this.getUserUsecase, required this.updateLocationUsecase});
 
   @override
   void onInit() async {
@@ -47,52 +52,60 @@ class SplashController extends GetxController {
     }
   }
 
-  /// Obtiene la ciudad actual del GPS y la actualiza en el perfil
   Future<void> _updateUserCity() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low, // low es suficiente para ciudad
-        timeLimit: const Duration(seconds: 10),
-      );
+  try {
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.low,
+      timeLimit: const Duration(seconds: 10),
+    );
 
-      // Convertir coordenadas → nombre de ciudad
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+    final placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
 
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
-        // Preferir locality (ciudad), fallback a subAdminArea (municipio)
-        final city = place.locality?.isNotEmpty == true
-            ? place.locality!
-            : place.subAdministrativeArea ?? '';
+    if (placemarks.isNotEmpty) {
+      final place = placemarks.first;
+      final city = place.locality?.isNotEmpty == true
+          ? place.locality!
+          : place.subAdministrativeArea ?? '';
 
-        if (city.isNotEmpty) {
-          // Solo actualizar si el controller ya está registrado (usuario con sesión)
-          print('city : $city');
-          final updater =
-              Get.isRegistered<UpdateProfileController>()
-                  ? Get.find<UpdateProfileController>()
-                  : null;
+      if (city.isNotEmpty) {
+        print('city : $city');
 
-          await updater?.updateCity(city);
-        }
+        await updateLocationUsecase.execute(
+          UpdateLocationEntity(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            city: city,
+          ),
+        );
       }
-    } catch (_) {
-      // Silencioso — no bloquear el splash por un error de ubicación
     }
+  } catch (e) {
+    print('Error obteniendo ubicación: $e');
   }
+}
+Future<void> checkUserSession() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    const String tutorialKey = AppConstants.tutorialKey;
+    
+    final hasSeenTutorial = prefs.getBool(tutorialKey) ?? false;
+    
+    print('hasSeenTutorial: $hasSeenTutorial');
 
-  Future<void> checkUserSession() async {
-    try {
-      await getUserUsecase.execute();
-      Get.offAllNamed(RoutesNames.preferencesPage);
-    } catch (e) {
-      print('Error checking user session: $e');
-      Get.offAllNamed(RoutesNames.loginPage);
-    } finally {
-      isLoading.value = false;
+    if (!hasSeenTutorial) {
+      Get.offAllNamed(RoutesNames.tutorialPage);
+      return;
     }
+
+    await getUserUsecase.execute();
+    Get.offAllNamed(RoutesNames.preferencesPage);
+  } catch (e) {
+    Get.offAllNamed(RoutesNames.loginPage);
+  } finally {
+    isLoading.value = false;
   }
+}
 }

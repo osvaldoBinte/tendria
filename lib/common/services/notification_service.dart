@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tendria/common/settings/routes_names.dart';
 import 'dart:io' show Platform;
 
 import 'package:tendria/firebase_options.dart';
@@ -194,48 +195,65 @@ class NotificationService {
     _checkInitialMessage();
   }
 
-  void _handleForegroundMessage(RemoteMessage message) {
-    print('📨 Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
+void _handleForegroundMessage(RemoteMessage message) {
+  print('📨 Got a message whilst in the foreground!');
+  print('Message data: ${message.data}');
 
-    if (message.notification != null) {
-      print('📬 Message also contained a notification: ${message.notification}');
-      incrementUnreadCount();
-      
-      // ✅ Notificar que llegó una nueva notificación (actualizar UI)
-      onNotificationReceived?.call();
-      
-      // 🆕 Fetch las notificaciones desde el servidor usando callback
-      onFetchNotifications?.call();
-    }
-  }
-
-  void _handleMessageOpenedApp(RemoteMessage message) {
-    print('📱 Message opened app from background: ${message.data}');
+  if (message.notification != null) {
     incrementUnreadCount();
-    
-    // ✅ Notificar que llegó una nueva notificación
     onNotificationReceived?.call();
-    
-    // 🆕 Fetch las notificaciones desde el servidor
     onFetchNotifications?.call();
   }
 
-  Future<void> _checkInitialMessage() async {
-    RemoteMessage? initialMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
+  // ✅ Navegar si hay ChatId en el data
+  _handleNotificationNavigation(message.data);
+}
 
-    if (initialMessage != null) {
-      print('🚀 App opened from terminated state by notification: ${initialMessage.data}');
-      
-      // Incrementar contador si la app se abrió desde una notificación
-      await incrementUnreadCount();
-      
-      // 🆕 Fetch las notificaciones desde el servidor
-      onFetchNotifications?.call();
-    }
+
+
+void _handleMessageOpenedApp(RemoteMessage message) {
+  print('📱 Message opened app from background: ${message.data}');
+  incrementUnreadCount();
+  onNotificationReceived?.call();
+  onFetchNotifications?.call();
+
+  // ✅ Navegar si hay ChatId en el data
+  _handleNotificationNavigation(message.data);
+}
+Future<void> _checkInitialMessage() async {
+  RemoteMessage? initialMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
+
+  if (initialMessage != null) {
+    print('🚀 App opened from terminated state: ${initialMessage.data}');
+    await incrementUnreadCount();
+    onFetchNotifications?.call();
+
+    // ✅ Pequeño delay para que la app esté lista antes de navegar
+    await Future.delayed(const Duration(milliseconds: 1500));
+    _handleNotificationNavigation(initialMessage.data);
   }
+}
 
+void _handleNotificationNavigation(Map<String, dynamic> data) {
+  final tipo = data['Tipo'] as String?;
+  final chatIdRaw = data['ChatId'] as String?;
+
+  if (tipo == 'Mensaje' && chatIdRaw != null) {
+    final chatId = int.tryParse(chatIdRaw);
+    if (chatId == null) return;
+
+    print('💬 Navegando al chat: $chatId');
+
+    Get.toNamed(
+      RoutesNames.chatPage,
+      arguments: {
+        'chatId': chatId,
+        'goHome': true,
+      },
+    );
+  }
+}
   Future<void> incrementUnreadCount() async {
     unreadNotificationsCount.value++;
     hasNewNotifications.value = true;

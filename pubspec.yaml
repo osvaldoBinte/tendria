@@ -55,6 +55,8 @@ dependencies:
   webview_flutter: ^4.13.1
   url_launcher: ^6.3.2
   firebase_core: ^4.5.0
+  firebase_messaging: ^16.1.0
+
 flutter_native_splash:
   color: "#FFFFFF"
   image: assets/logo/iosicon.jpg

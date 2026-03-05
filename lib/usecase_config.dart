@@ -29,6 +29,11 @@ import 'package:tendria/features/like/domain/usecase/get_like_by_users_usecase.d
 import 'package:tendria/features/like/domain/usecase/get_pending_liked_chats_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/unlock_chat_usecase.dart';
+import 'package:tendria/features/notification/data/datasources/notification_data_sources_imp.dart';
+import 'package:tendria/features/notification/data/repositories/notification_repository_imp.dart';
+import 'package:tendria/features/notification/domain/usecase/get_notification_usecase.dart';
+import 'package:tendria/features/notification/domain/usecase/mark_all_notifications_as_read_usecase.dart';
+import 'package:tendria/features/notification/domain/usecase/save_token_fcm_usecase.dart';
 import 'package:tendria/features/stories/data/datasources/stories_data_sources_imp.dart';
 import 'package:tendria/features/stories/data/repository/stories_repository_imp.dart';
 import 'package:tendria/features/stories/domain/usecase/add_like_to_story_usecase.dart';
@@ -64,6 +69,8 @@ class UsecaseConfig {
   ChatDataSourcesImp?chatDataSourcesImp;
   LikeDataSourcesImp? likeDataSourcesImp;
   UnlockDatasourcesImp? unlockDataSourcesImp;
+  
+  NotificationDataSourcesImp? notificationDataSourcesImp;
 
   AuthRepositoryImp? authRepositoryImp;
   CatalogRepositoryImp? catalogRepositoryImp;
@@ -72,6 +79,8 @@ class UsecaseConfig {
   ChatRepositoryImp?chatRepositoryImp;
   LikeRepositoryImp? likeRepositoryImp;
   UnlockRepositoryImp? unlockRepositoryImp;
+
+   NotificationRepositoryImp? notificationRepositoryImp;
 
   LoginUsecase? loginUsecase;
   CreateUserUsecase? createUserUsecase;
@@ -126,6 +135,12 @@ class UsecaseConfig {
   FetchBlockedUsersUsecase? fetchBlockedUsersUsecase;
 
   
+
+   GetNotificationUsecase? getnotificationUsecase;
+   MarkAllNotificationsAsReadUsecase? markAllNotificationsAsReadUsecase;
+
+   SaveTokenFcmUsecase? saveTokenFcmUsecase;
+
   UsecaseConfig(){
     authDataSourceImp = AuthDataSourceImp();
     userDataSourcesImp = UserDataSourcesImp();
@@ -134,6 +149,8 @@ class UsecaseConfig {
     chatDataSourcesImp = ChatDataSourcesImp();
     likeDataSourcesImp = LikeDataSourcesImp();
     unlockDataSourcesImp = UnlockDatasourcesImp();
+    notificationDataSourcesImp = NotificationDataSourcesImp();
+    notificationRepositoryImp = NotificationRepositoryImp(notificationDataSourcesImp: NotificationDataSourcesImp());
     authRepositoryImp = AuthRepositoryImp(authDataSourceImp: authDataSourceImp!);
     catalogRepositoryImp = CatalogRepositoryImp(catalogDataSourcesImp: catalogDataSourcesImp!);
     userRepositoryImp = UserRepositoryImp(userDataSourcesImp: userDataSourcesImp!);
@@ -143,6 +160,7 @@ class UsecaseConfig {
     unlockRepositoryImp = UnlockRepositoryImp(unlockDatasourcesImp: unlockDataSourcesImp!);
 
     loginUsecase = LoginUsecase(authRepository: authRepositoryImp!);
+    
     createUserUsecase = CreateUserUsecase(authRepository: authRepositoryImp!);
     fetchInterestsUsecase = FetchInterestsUsecase(catalogRepository: catalogRepositoryImp!);
     fetchQualitiesUsecase = FetchQualitiesUsecase(catalogRepository: catalogRepositoryImp!);
@@ -187,5 +205,12 @@ class UsecaseConfig {
     unblockUserUsecase = UnblockUserUsecase(unlockRepository: unlockRepositoryImp!);
     blockUserUsecase = BlockUserUsecase(unlockRepository: unlockRepositoryImp!);
     fetchBlockedUsersUsecase = FetchBlockedUsersUsecase(unlockRepository: unlockRepositoryImp!);
+
+
+      getnotificationUsecase = GetNotificationUsecase(notificationRepository: notificationRepositoryImp!);
+      markAllNotificationsAsReadUsecase = MarkAllNotificationsAsReadUsecase(notificationRepository: notificationRepositoryImp!);
+      saveTokenFcmUsecase = SaveTokenFcmUsecase(notificationRepository: notificationRepositoryImp!);  
+
+
   }
 }

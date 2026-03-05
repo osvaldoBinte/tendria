@@ -89,8 +89,11 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.unblockUserUsecase!, permanent: true);
         Get.put(usecaseConfig.updateLocationUsecase!, permanent: true);
 
+        Get.put(usecaseConfig.getnotificationUsecase!, permanent: true);
+        Get.put(usecaseConfig.markAllNotificationsAsReadUsecase!, permanent: true);
+        Get.put(usecaseConfig.saveTokenFcmUsecase!, permanent: true);
 
-        Get.lazyPut(() => LoginController(loginUsecase: Get.find(), ), fenix: true);
+        Get.lazyPut(() => LoginController(loginUsecase: Get.find(), saveTokenFcmUsecase: Get.find(), ), fenix: true);
         Get.put( SignalRService( connectSignalRUsecase: Get.find(), disconnectSignalRUsecase: Get.find(), joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(),setupMessageListenerUsecase: Get.find(), setOnDisconnectedCallbackUsecase: Get.find(),), permanent: true,);   
         Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find(), ), fenix: true);
         Get.lazyPut(()=> SplashController(getUserUsecase: Get.find(), updateLocationUsecase: Get.find(),), fenix: true);

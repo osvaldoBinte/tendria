@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/services/auth_service.dart';
+import 'package:tendria/common/services/notification_service.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/features/auth/domain/usecase/login_usecase.dart';
+import 'package:tendria/features/notification/domain/usecase/save_token_fcm_usecase.dart';
 
 class LoginController extends GetxController {
   late final TextEditingController emailController;
@@ -17,12 +19,12 @@ class LoginController extends GetxController {
 
   final AuthService _authService = Get.find<AuthService>();
   final LoginUsecase loginUsecase;
-  //final SaveTokenFcmUsecase saveTokenFcmUsecase;
+  final SaveTokenFcmUsecase saveTokenFcmUsecase;
 
 
   LoginController({
     required this.loginUsecase,
-    //required this.saveTokenFcmUsecase,
+    required this.saveTokenFcmUsecase,
   });
 
   @override
@@ -66,7 +68,7 @@ class LoginController extends GetxController {
       );
 
       await _authService.saveLoginResponse(loginResponse);
-
+     await _saveDeviceToken();
       
       _clearFields();
       await _resetControllersForNewSession();
@@ -86,6 +88,36 @@ class LoginController extends GetxController {
   }
 
 
+  Future<void> _saveDeviceToken() async {
+    try {
+      // Solo guardar token en dispositivos móviles
+      if (!GetPlatform.isMobile) {
+        print('ℹ️ Dispositivo no móvil - omitiendo guardado de token FCM');
+        return;
+      }
+
+      // Obtener el token FCM
+      final fcmToken = await NotificationService().getToken();
+
+      if (fcmToken == null) {
+        print('⚠️ No se pudo obtener el token FCM');
+        return;
+      }
+
+      // Detectar el tipo de dispositivo
+      String deviceType = _getDeviceType();
+
+      print('📤 Guardando token FCM en el servidor...');
+      print('   - Token: ${fcmToken.substring(0, 20)}...');
+      print('   - Dispositivo: $deviceType');
+
+      await saveTokenFcmUsecase.execute(fcmToken, deviceType);
+
+      print('✅ Token FCM guardado exitosamente');
+    } catch (e) {
+      print('❌ Error al guardar token FCM: $e');
+    }
+  }
   String _getDeviceType() {
     if (GetPlatform.isAndroid) {
       return 'Android';

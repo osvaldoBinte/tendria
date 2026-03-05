@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/chat/domain/entities/mensaje_entity.dart';
 import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
@@ -40,13 +41,17 @@ class ChatPage extends GetView<ChatController> {
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: ThemeColor.textPrimaryColor),
-        onPressed: () {
-          FocusScope.of(Get.context!).unfocus();
-          Get.back();
-          if (Get.isRegistered<MyMatchController>()) {
-            Get.find<MyMatchController>().loadChats();
-          }
-        },
+       onPressed: () {
+  FocusScope.of(Get.context!).unfocus();
+  if (controller.goHome.value) {
+    Get.offAllNamed(RoutesNames.homePage);
+  } else {
+    Get.back();
+    if (Get.isRegistered<MyMatchController>()) {
+      Get.find<MyMatchController>().loadChats();
+    }
+  }
+},
       ),
       title: Obx(() {
         final usuario = controller.otroUsuario.value;

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -24,6 +25,8 @@ class SplashController extends GetxController {
     super.onInit();
     await checkUserSession();
     await requestLocationPermission();
+          await _requestNotificationPermission();
+
   }
 
   Future<void> requestLocationPermission() async {
@@ -108,4 +111,28 @@ Future<void> checkUserSession() async {
     isLoading.value = false;
   }
 }
+Future<void> _requestNotificationPermission() async {
+    final FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    print('Estado de permisos: ${settings.authorizationStatus}');
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('Permisos de notificaciones concedidos');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print('Permisos provisionales concedidos');
+    } else {
+      print('Permisos de notificaciones denegados');
+    }
+  }
 }

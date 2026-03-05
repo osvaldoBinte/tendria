@@ -213,6 +213,8 @@ void _showUnlockConfirmation(PendingChatEntity chat) {
     Get.toNamed(RoutesNames.chatPage, arguments: {
       'chatId': chatId,
       'name': name,
+        'goHome': true,
+
     });
   }
 

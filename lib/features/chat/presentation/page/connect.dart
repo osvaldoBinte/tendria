@@ -41,7 +41,8 @@ Completer<void>? _connectionCompleter;
   // ── Reconexión ──
   int _reconnectAttempts = 0;
   static const int _maxReconnectAttempts = 5;
-  bool _isReconnecting = false;
+final RxBool isReconnecting = false.obs; // 👈 público y reactivo
+
 
   // ─────────────────────────────────────────
   //  CICLO DE VIDA
@@ -80,7 +81,7 @@ Future<void> _onAppResumed() async {
   // 👇 Si el proceso de reconexión anterior murió (app en bg agotó reintentos)
   // resetear para dar una oportunidad fresca
   if (!isConnected.value) {
-    _isReconnecting = false;
+    isReconnecting.value = false;
     _reconnectAttempts = 0;
     await _reconnect();
   }
@@ -119,31 +120,25 @@ Future<void> connect(String token) async {
   // ─────────────────────────────────────────
 
   void _onUnexpectedDisconnect() {
-    if (_isReconnecting) return; // evitar múltiples reconexiones simultáneas
+    if (isReconnecting.value) return; // evitar múltiples reconexiones simultáneas
     print('⚠️ SignalR desconectado inesperadamente');
     isConnected.value = false;
     _scheduleReconnect();
   }
 
   Future<void> _scheduleReconnect() async {
-    if (_reconnectAttempts >= _maxReconnectAttempts) {
-      print('❌ Máximo de reintentos alcanzado ($_maxReconnectAttempts)');
-      _reconnectAttempts = 0;
-      _isReconnecting = false;
-      return;
-    }
-
-    _isReconnecting = true;
-
-    // Backoff exponencial: 2s, 4s, 8s, 16s, 32s
-    final delay = Duration(seconds: (2 << _reconnectAttempts));
-    _reconnectAttempts++;
-
-    print('⏳ Reintento $_reconnectAttempts/$_maxReconnectAttempts en ${delay.inSeconds}s...');
-    await Future.delayed(delay);
-
-    await _reconnect();
+  if (_reconnectAttempts >= _maxReconnectAttempts) {
+    _reconnectAttempts = 0;
+    isReconnecting.value = false; // 👈
+    return;
   }
+  isReconnecting.value = true; // 👈
+  final delay = Duration(seconds: (2 << _reconnectAttempts));
+  _reconnectAttempts++;
+  await Future.delayed(delay);
+  await _reconnect();
+}
+
 
   Future<void> _reconnect() async {
       if (isConnected.value || _isConnecting) return; // 👈 mismo guard
@@ -151,7 +146,7 @@ Future<void> connect(String token) async {
     final token = await authService.getToken();
     if (token == null) {
       print('⚠️ No hay token disponible para reconectar');
-      _isReconnecting = false;
+      isReconnecting.value = false;
       return;
     }
 
@@ -161,7 +156,7 @@ Future<void> connect(String token) async {
       setOnDisconnectedCallbackUsecase.execute(_onUnexpectedDisconnect);
       isConnected.value = true;
       _reconnectAttempts = 0;
-      _isReconnecting = false;
+      isReconnecting.value = false;
 
       // Rejoinear todos los chats que estaban activos
       for (final chatId in _chatListeners.keys) {

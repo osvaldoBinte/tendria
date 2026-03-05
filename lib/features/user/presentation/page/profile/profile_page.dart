@@ -96,6 +96,11 @@ class ProfilePage extends GetView<ProfileController> {
                     onPressed: controller.onViewBlockedUsers,
                   ),
                   IconButton(
+                    icon: Icon(Icons.notifications_none,
+                        color: ThemeColor.textDarkColor),
+                    onPressed: controller.onViewNotifications,
+                  ),
+                  IconButton(
                     icon: Icon(Icons.edit,
                         color: ThemeColor.textDarkColor),
                     onPressed: controller.onHelpTap,

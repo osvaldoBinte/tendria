@@ -5,6 +5,7 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/chat/domain/entities/mensaje_entity.dart';
 import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
+import 'package:tendria/features/chat/presentation/page/connect.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 
 class ChatPage extends GetView<ChatController> {
@@ -162,14 +163,17 @@ class ChatPage extends GetView<ChatController> {
   // ─────────────────────────────────────────
   //  CONEXIÓN SIGNALR
   // ─────────────────────────────────────────
-
 Widget _buildConnectionIndicator() {
   return Obx(() {
     if (controller.isNewConversation.value) return const SizedBox.shrink();
     if (controller.isSignalRConnected.value) return const SizedBox.shrink();
 
+    // ✅ Reconectando si el controller o el servicio están intentando
+    final isRetrying = controller.isRetrying.value ||
+        Get.find<SignalRService>().isReconnecting.value;
+
     return GestureDetector(
-      onTap: controller.retrySignalRConnection,
+      onTap: isRetrying ? null : controller.retrySignalRConnection, // 👈 no permite tap mientras reconecta
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -177,19 +181,22 @@ Widget _buildConnectionIndicator() {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Obx(() => controller.isLoading.value  // ✅ muestra spinner mientras reconecta
-                ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: ThemeColor.warningColor,
-                    ),
-                  )
-                : Icon(Icons.refresh, size: 16, color: ThemeColor.warningColor)),
+            if (isRetrying)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: ThemeColor.warningColor,
+                ),
+              )
+            else
+              Icon(Icons.refresh, size: 16, color: ThemeColor.warningColor),
             const SizedBox(width: 8),
             Text(
-              'Sin conexión en tiempo real · Toca para reintentar',
+              isRetrying
+                  ? 'Reconectando...'
+                  : 'Sin conexión · Toca para reintentar',
               style: ThemeColor.caption.copyWith(
                 color: ThemeColor.warningColor,
                 fontSize: 12,

@@ -14,4 +14,5 @@ class RoutesNames {
   static const String blockedUsersPage = '/blocked-users-page';
   static const String updateProfilePage = '/update-profile-page';
   static const String tutorialPage = '/tutorial-page';
+  static const String notificationPage = '/notification-page';
 }

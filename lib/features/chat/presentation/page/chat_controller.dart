@@ -67,19 +67,38 @@ final RxBool goHome = false.obs;
 
   // ── Referencia al servicio global ──
   late final SignalRService _signalRService;
+@override
+void onInit() {
+  super.onInit();
+  _signalRService = Get.find<SignalRService>();
+  _loadArguments();
+  messageController.addListener(_onMessageChanged);
 
-  @override
-  void onInit() {
-    super.onInit();
-    _signalRService = Get.find<SignalRService>();
-    _loadArguments();
-    messageController.addListener(_onMessageChanged);
+  if (!isNewConversation.value) {
+    // ✅ Sincroniza estado inicial
+    isSignalRConnected.value = _signalRService.isConnected.value;
 
-    if (!isNewConversation.value) {
-      _subscribeToChat(); // 👈 Solo suscribirse, el socket ya está vivo
-      loadChatMessages();
-    }
+    // ✅ Mueve el ever aquí, fuera de _subscribeToChat
+ ever(_signalRService.isConnected, (bool connected) {
+  isSignalRConnected.value = connected;
+  if (!connected) _autoReconnect();
+});
+
+// 👇 Nuevo: cuando SignalRService está reconectando, reflejarlo aquí
+ever(_signalRService.isReconnecting, (bool reconnecting) {
+  if (reconnecting) isRetrying.value = true;
+  // isRetrying se pone false cuando isConnected cambia a true
+});
+
+ever(_signalRService.isConnected, (bool connected) {
+  isSignalRConnected.value = connected;
+  if (connected) isRetrying.value = false; // 👈 limpia el spinner al conectar
+  if (!connected) _autoReconnect();
+});
+    _subscribeToChat();
+    loadChatMessages();
   }
+}
 
   @override
   void onClose() {
@@ -120,24 +139,12 @@ final RxBool goHome = false.obs;
   // ─────────────────────────────────────────
   //  SIGNALR — Solo suscripción al chat
   // ─────────────────────────────────────────
-
 Future<void> _subscribeToChat() async {
   try {
-    isSignalRConnected.value = _signalRService.isConnected.value;
-
-    // ✅ Cuando se desconecta, intenta reconectar automáticamente
-    ever(_signalRService.isConnected, (bool connected) {
-      isSignalRConnected.value = connected;
-      if (!connected && !isNewConversation.value) {
-        _autoReconnect();
-      }
-    });
-
     await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
   } catch (e) {
-    isSignalRConnected.value = false;
     print('Error suscribiéndose al chat: $e');
-    _autoReconnect(); // ✅ Si falló al suscribirse, también reintenta
+    _autoReconnect();
   }
 }
 

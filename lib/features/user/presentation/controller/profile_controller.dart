@@ -595,6 +595,9 @@ Future<void> uploadMultiplePhotos(List<String> paths) async {
   void onHelpTap() {
     Get.toNamed(RoutesNames.updateProfilePage);
   }
+  void onViewNotifications() {
+    Get.toNamed(RoutesNames.notificationPage);
+  }
 
   void onEditProfile() {
     print('Editar perfil');

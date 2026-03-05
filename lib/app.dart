@@ -14,6 +14,7 @@ import 'package:tendria/features/chat/presentation/page/connect.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/like/presentation/controller/start_conversations_controller.dart';
+import 'package:tendria/features/notification/presentation/page/notification_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/unlock/presentation/controller/blocked_users_controller.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
@@ -109,6 +110,7 @@ class App extends StatelessWidget {
          Get.lazyPut(()=> UserProfileController(getUserByIdUsecase: Get.find(), toggleLikeUsecase: Get.find(), blockUserUsecase:  Get.find()),fenix:true);
          Get.lazyPut(() => BlockedUsersController(fetchBlockedUsersUsecase: Get.find(), unblockUserUsecase: Get.find()), fenix:true);
          Get.lazyPut(() => UpdateProfileController(deleteInterestsUsecase: Get.find(), deleteQualitiesUsecase: Get.find(), updateUserUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(), deleteUserUsecase: Get.find()), fenix:true);
+         Get.lazyPut(() => NotificationController(getNotificationUsecase: Get.find(), markAllNotificationsAsReadUsecase: Get.find()), fenix:true);
 Get.lazyPut(() => LanguageController(),fenix:true);
 Get.put(TranslationService());
 

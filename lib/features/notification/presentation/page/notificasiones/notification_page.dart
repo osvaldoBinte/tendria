@@ -18,30 +18,42 @@ class NotificationPage extends StatelessWidget {
     final controller = Get.find<NotificationController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(0),
-        child: AppBar(
-          backgroundColor: ThemeColor.backgroundColorfondo,
-          elevation: 4,
-          shadowColor: ThemeColor.shadowColor,
-        ),
-      ),
+      backgroundColor: ThemeColor.backgroundColorfondo,
+  appBar: PreferredSize(
+  preferredSize: const Size.fromHeight(10),
+  child: AppBar(
+    backgroundColor: ThemeColor.backgroundColor,
+    elevation: 4,
+    shadowColor: ThemeColor.shadowColor,
+  ),
+),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'NOTIFICACIONES',
-                style: GoogleFonts.rubik(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: ThemeColor.textTertiaryColor,
-                ),
-              ),
-            ),
+                     Align(
+  alignment: Alignment.centerLeft,
+  child: Row(
+    children: [
+      IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          Get.back();
+        },
+      ),
+
+            const SizedBox(height: ThemeColor.paddingLarge),
+      Text(
+        'NOTIFICACIONES',
+        style: GoogleFonts.rubik(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: ThemeColor.textTertiaryColor,
+        ),
+      ),
+    ],
+  ),
+),
             const SizedBox(height: ThemeColor.paddingLarge),
             Expanded(
               child: Obx(() {

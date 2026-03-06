@@ -299,7 +299,7 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
   // WIDGETS PERSONALIZADOS
   // ========================================
   static Widget createAppLogo({
-    String imagePath = 'assets/logo/logo.png',
+    String imagePath = 'assets/logo/icon.jpeg',
     double size = 150,
     EdgeInsets padding = const EdgeInsets.symmetric(
       horizontal: 60.0,

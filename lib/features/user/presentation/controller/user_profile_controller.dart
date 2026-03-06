@@ -165,7 +165,7 @@ class UserProfileController extends GetxController {
 void sendMensaje() {
   final chat = currentUser.value?.chat;
 
-  // Si está pendiente de aceptación, llamar unlockChat del LikedByUsersController
+
   if (chat != null && chat.pendingAcepted) {
     final likedByController = Get.find<LikedByUsersController>();
     likedByController.unlockChat(
@@ -183,24 +183,26 @@ void sendMensaje() {
     return;
   }
 
-  // Sin chat o chatId == 0
+
   if (chat == null || chat.id == 0) {
     Get.toNamed(
       RoutesNames.chatPage,
       arguments: {
         'userid': userId.value,
         'name': userName,
+        'goHomeIndex': 2,
       },
     );
     return;
   }
 
-  // Chat existente con ID válido
+
   Get.toNamed(
     RoutesNames.chatPage,
     arguments: {
       'chatId': chat.id,
       'name': userName,
+      'goHomeIndex': 2,
     },
   );
 }

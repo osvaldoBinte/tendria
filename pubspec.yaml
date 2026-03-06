@@ -58,24 +58,24 @@ dependencies:
   firebase_messaging: ^16.1.0
 
 flutter_native_splash:
-  color: "#FFFFFF"
-  image: assets/logo/iosicon.jpg
+  color: "#000000"
+  image: assets/logo/icon.jpeg
   ios: true
   ios_content_mode: scaleAspectFit
   android_12:
-    image: assets/logo/iosicon.jpg
-    icon_background_color: "#FFFFFF"
-    image_dark: assets/logo/iosicon.jpg
-    icon_background_color_dark: "#FFFFFF"
+    image: assets/logo/icon.jpeg
+    icon_background_color: "#000000"
+    image_dark: assets/logo/icon.jpeg
+    icon_background_color_dark: "#000000"
 
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path_ios: "assets/logo/iosicon.jpg"
-  image_path_android: "assets/logo/iosicon.jpg"
-  adaptive_icon_foreground: "assets/logo/iosicon.jpg"
-  adaptive_icon_background: "#FFFFFF"
+  image_path_ios: "assets/logo/icon.jpeg"
+  image_path_android: "assets/logo/icon.jpeg"
+  adaptive_icon_foreground: "assets/logo/icon.jpeg"
+  adaptive_icon_background: "#000000"
 
 dev_dependencies:
   flutter_test:
@@ -117,6 +117,7 @@ flutter:
    - assets/icons/home/heart.png
    - assets/successful.png
    - assets/logo/iosicon.jpg
+   - assets/logo/icon.jpeg
    - assets/tutorial/tutorial1.png
    - assets/tutorial/tutorial2.png
    - assets/tutorial/tutorial3.png

@@ -111,6 +111,7 @@ class MyMatchController extends GetxController {
     Get.toNamed(RoutesNames.chatPage, arguments: {
       'chatId': chatId,
       'name': name,
+      'goHomeIndex': 3,
     });
   }
 

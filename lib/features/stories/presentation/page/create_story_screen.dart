@@ -6,14 +6,13 @@ import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/stories/presentation/page/create_story_controller.dart';
-import 'package:tendria/features/stories/presentation/page/gallery_picker_screen.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 //import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+
 class DraggableStoryText extends StatefulWidget {
   final String text;
   final Color color;

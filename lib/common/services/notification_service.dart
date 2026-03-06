@@ -9,25 +9,23 @@ import 'package:tendria/firebase_options.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print("📬 Handling a background message: ${message.messageId}");
-  
+
   try {
     final prefs = await SharedPreferences.getInstance();
-    
+
     int currentCount = prefs.getInt('unread_notifications') ?? 0;
     currentCount++;
-    
+
     final saved = await prefs.setInt('unread_notifications', currentCount);
     final savedFlag = await prefs.setBool('has_new_notifications', true);
-    
+
     await prefs.reload();
-    
+
     final verifyCount = prefs.getInt('unread_notifications');
     final verifyFlag = prefs.getBool('has_new_notifications');
-    
+
     print("✅ Background: Contador guardado = $currentCount");
     print("✅ Background: Saved success = $saved && $savedFlag");
     print("✅ Background: Verificación - count=$verifyCount, flag=$verifyFlag");
@@ -42,13 +40,13 @@ class NotificationService {
   NotificationService._internal();
 
   String? fcmToken;
-  
+
   final RxInt unreadNotificationsCount = 0.obs;
   final RxBool hasNewNotifications = false.obs;
-  
+
   // 🆕 Callbacks
-  Function? onNotificationReceived;  // Para actualizar UI
-  Function? onFetchNotifications;    // Para fetch desde servidor
+  Function? onNotificationReceived; // Para actualizar UI
+  Function? onFetchNotifications; // Para fetch desde servidor
 
   SharedPreferences? _prefs;
   static const String _keyUnreadCount = 'unread_notifications';
@@ -56,24 +54,22 @@ class NotificationService {
 
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
-    
+
     await _loadPersistedCount();
-    
+
     // iOS requiere configuración diferente
     if (Platform.isIOS) {
       await _setupiOSNotifications();
     }
-    
-    FirebaseMessaging.onBackgroundMessage(
-      _firebaseMessagingBackgroundHandler,
-    );
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+          alert: true,
+          badge: true,
+          sound: true,
+        );
 
     await _generateFCMToken();
     _listenToTokenRefresh();
@@ -91,25 +87,26 @@ class NotificationService {
       provisional: false,
       sound: true,
     );
-    
+
     // Configurar para recibir notificaciones en foreground
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
   }
 
   Future<void> _loadPersistedCount() async {
     try {
       await _prefs?.reload();
-      
+
       final count = _prefs?.getInt(_keyUnreadCount) ?? 0;
       final hasNew = _prefs?.getBool(_keyHasNew) ?? false;
-      
+
       unreadNotificationsCount.value = count;
       hasNewNotifications.value = hasNew;
-      
+
       print('📱 Contador cargado desde almacenamiento: $count');
       print('🔔 Tiene notificaciones nuevas: $hasNew');
     } catch (e) {
@@ -119,12 +116,20 @@ class NotificationService {
 
   Future<void> _saveCount() async {
     try {
-      final savedCount = await _prefs?.setInt(_keyUnreadCount, unreadNotificationsCount.value);
-      final savedFlag = await _prefs?.setBool(_keyHasNew, hasNewNotifications.value);
-      
+      final savedCount = await _prefs?.setInt(
+        _keyUnreadCount,
+        unreadNotificationsCount.value,
+      );
+      final savedFlag = await _prefs?.setBool(
+        _keyHasNew,
+        hasNewNotifications.value,
+      );
+
       await _prefs?.reload();
-      
-      print('💾 Contador guardado: ${unreadNotificationsCount.value} (success: $savedCount && $savedFlag)');
+
+      print(
+        '💾 Contador guardado: ${unreadNotificationsCount.value} (success: $savedCount && $savedFlag)',
+      );
     } catch (e) {
       print('❌ Error guardando contador: $e');
     }
@@ -133,7 +138,7 @@ class NotificationService {
   Future<void> _generateFCMToken() async {
     try {
       fcmToken = await FirebaseMessaging.instance.getToken();
-      
+
       if (fcmToken != null) {
         print('✅ FCM Token generado: $fcmToken');
       } else {
@@ -145,19 +150,21 @@ class NotificationService {
   }
 
   void _listenToTokenRefresh() {
-    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      fcmToken = newToken;
-      print('🔄 Token FCM actualizado: $newToken');
-    }).onError((error) {
-      print('❌ Error al actualizar token: $error');
-    });
+    FirebaseMessaging.instance.onTokenRefresh
+        .listen((newToken) {
+          fcmToken = newToken;
+          print('🔄 Token FCM actualizado: $newToken');
+        })
+        .onError((error) {
+          print('❌ Error al actualizar token: $error');
+        });
   }
 
   Future<String?> getToken() async {
     if (fcmToken != null) {
       return fcmToken;
     }
-    
+
     try {
       fcmToken = await FirebaseMessaging.instance.getToken();
       return fcmToken;
@@ -188,72 +195,86 @@ class NotificationService {
   void _setupMessageListeners() {
     // Para iOS: manejar notificaciones cuando la app está en foreground
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-    
+
     // Para iOS: manejar cuando el usuario toca la notificación (app en background)
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
-    
+
     _checkInitialMessage();
   }
 
-void _handleForegroundMessage(RemoteMessage message) {
-  print('📨 Got a message whilst in the foreground!');
-  print('Message data: ${message.data}');
+  void _handleForegroundMessage(RemoteMessage message) {
+    print('📨 Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
 
-  if (message.notification != null) {
+    if (message.notification != null) {
+      incrementUnreadCount();
+      onNotificationReceived?.call();
+      onFetchNotifications?.call();
+    }
+
+    // ✅ Navegar si hay ChatId en el data
+    _handleNotificationNavigation(message.data);
+  }
+
+  void _handleMessageOpenedApp(RemoteMessage message) {
+    print('📱 Message opened app from background: ${message.data}');
     incrementUnreadCount();
     onNotificationReceived?.call();
     onFetchNotifications?.call();
+
+    // ✅ Navegar si hay ChatId en el data
+    _handleNotificationNavigation(message.data);
   }
 
-  // ✅ Navegar si hay ChatId en el data
-  _handleNotificationNavigation(message.data);
-}
+  Future<void> _checkInitialMessage() async {
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance
+        .getInitialMessage();
 
+    if (initialMessage != null) {
+      print('🚀 App opened from terminated state: ${initialMessage.data}');
+      await incrementUnreadCount();
+      onFetchNotifications?.call();
 
-
-void _handleMessageOpenedApp(RemoteMessage message) {
-  print('📱 Message opened app from background: ${message.data}');
-  incrementUnreadCount();
-  onNotificationReceived?.call();
-  onFetchNotifications?.call();
-
-  // ✅ Navegar si hay ChatId en el data
-  _handleNotificationNavigation(message.data);
-}
-Future<void> _checkInitialMessage() async {
-  RemoteMessage? initialMessage =
-      await FirebaseMessaging.instance.getInitialMessage();
-
-  if (initialMessage != null) {
-    print('🚀 App opened from terminated state: ${initialMessage.data}');
-    await incrementUnreadCount();
-    onFetchNotifications?.call();
-
-    // ✅ Pequeño delay para que la app esté lista antes de navegar
-    await Future.delayed(const Duration(milliseconds: 1500));
-    _handleNotificationNavigation(initialMessage.data);
+      // ✅ Pequeño delay para que la app esté lista antes de navegar
+      await Future.delayed(const Duration(milliseconds: 1500));
+      _handleNotificationNavigation(initialMessage.data);
+    }
   }
-}
 
 void _handleNotificationNavigation(Map<String, dynamic> data) {
   final tipo = data['Tipo'] as String?;
   final chatIdRaw = data['ChatId'] as String?;
+  final senderIdRaw = data['SenderId'] as String?;
+  final pendiente = data['pendienteAceptacion']?.toString().toLowerCase() == 'true';
 
-  if (tipo == 'Mensaje' && chatIdRaw != null) {
-    final chatId = int.tryParse(chatIdRaw);
+  if (tipo != 'Mensaje') return;
+
+  if (pendiente) {
+    
+    final senderId = int.tryParse(senderIdRaw ?? '');
+    if (senderId == null) return;
+
+    print('👤 Navegando al perfil: $senderId');
+    Get.toNamed(
+      RoutesNames.userProfileDetailPage,
+      arguments: {'userId': senderId},
+    );
+  } else {
+    
+    final chatId = int.tryParse(chatIdRaw ?? '');
     if (chatId == null) return;
 
     print('💬 Navegando al chat: $chatId');
-
     Get.toNamed(
       RoutesNames.chatPage,
       arguments: {
         'chatId': chatId,
-        'goHome': true,
+        'goHomeIndex': 3,
       },
     );
   }
 }
+
   Future<void> incrementUnreadCount() async {
     unreadNotificationsCount.value++;
     hasNewNotifications.value = true;
@@ -269,12 +290,15 @@ void _handleNotificationNavigation(Map<String, dynamic> data) {
   }
 
   Future<void> markAsRead(int count) async {
-    unreadNotificationsCount.value = (unreadNotificationsCount.value - count).clamp(0, 999);
+    unreadNotificationsCount.value = (unreadNotificationsCount.value - count)
+        .clamp(0, 999);
     if (unreadNotificationsCount.value == 0) {
       hasNewNotifications.value = false;
     }
     await _saveCount();
-    print('✅ $count notificaciones marcadas como leídas. Restantes: ${unreadNotificationsCount.value}');
+    print(
+      '✅ $count notificaciones marcadas como leídas. Restantes: ${unreadNotificationsCount.value}',
+    );
   }
 
   Future<void> reloadFromStorage() async {

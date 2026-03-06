@@ -56,13 +56,22 @@ final List<String> labels = [
         ? selectedIconPaths[index] 
         : iconPaths[index];
   }
+@override
+void onInit() {
+  super.onInit();
+  _checkProfileCompletion();
+  _handleInitialTab(); // 👈 agrega esto
+}
 
-  @override
-  void onInit() {
-    super.onInit();
-    _checkProfileCompletion();
+void _handleInitialTab() {
+  final args = Get.arguments as Map<String, dynamic>?;
+  final tab = args?['tab'] as int?;
+  
+  // Si no viene tab, o el índice no existe → queda en 0 (ProfilePage)
+  if (tab != null && tab >= 0 && tab < pages.length) {
+    selectedIndex.value = tab;
   }
-
+}
   // ==========================================
   // VERIFICAR PERFIL COMPLETO
   // ==========================================

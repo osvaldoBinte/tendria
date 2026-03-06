@@ -51,7 +51,7 @@ class UserProfileController extends GetxController {
   void onInit() {
     super.onInit();
     pageController = PageController();
-
+ print('UserProfileController initialized with arguments: ${Get.arguments}');
     if (Get.arguments != null && Get.arguments['userId'] != null) {
       userId.value = Get.arguments['userId'];
       loadUserProfile(userId.value);

@@ -296,8 +296,8 @@ class CustomAlertDialog extends StatelessWidget {
             ),
           ),
           
-          if ((confirmText.isNotEmpty || cancelText?.isNotEmpty == true) &&
-              customWidget == null)
+          // ✅ Después
+if (confirmText.isNotEmpty || cancelText?.isNotEmpty == true)
             Container(
               padding: const EdgeInsets.all(16.0),
               child: _buildButtons(context),

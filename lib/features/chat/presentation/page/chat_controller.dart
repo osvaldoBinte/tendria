@@ -63,7 +63,7 @@ final mensajes = RxList<MensajeEntity>([]);
   String? userName;
   String? userPhoto;
   String? myPhoto;
-final RxBool goHome = false.obs;
+final RxInt goHomeIndex = (-1).obs; 
 
   // ── Referencia al servicio global ──
   late final SignalRService _signalRService;
@@ -129,7 +129,8 @@ ever(_signalRService.isConnected, (bool connected) {
     myPhoto = args?['MyPhoto'];
 
 
-  goHome.value = args?['goHome'] == true;
+   goHomeIndex.value = args?['goHomeIndex'] ?? -1;
+
 
     if (args?['otroUsuario'] != null) {
       otroUsuario.value = args!['otroUsuario'] as UsuarioChatEntity;

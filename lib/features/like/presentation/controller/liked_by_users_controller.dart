@@ -62,24 +62,12 @@ void _showUnlockConfirmation(PendingChatEntity chat) {
   showCustomAlert(
     context: Get.context!,
     title: '¡Conecta con ${chat.name ?? 'este usuario'}!',
-    message: '',
+    message: '${chat.name ?? 'Este usuario'} quiere conectar contigo. ¿Aceptas iniciar la conversación?',
     confirmText: 'Conectar',
     cancelText: 'Ahora no',
     type: CustomAlertType.confirm,
-    customWidget: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${chat.name ?? 'Este usuario'} quiere conectar contigo. ¿Aceptas iniciar la conversación?',
-          style: ThemeColor.bodyMedium,
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 16),
-
-        if (chat.hiddenMessage != null) ...[
-          SizedBox(height: 16),
-          Container(
+    customWidget: chat.hiddenMessage != null
+        ? Container(
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: ThemeColor.backgroundColorfondo,
@@ -112,52 +100,10 @@ void _showUnlockConfirmation(PendingChatEntity chat) {
                 ),
               ],
             ),
-          ),
-        ],
-
-        SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  minimumSize: Size(0, 40),
-                  foregroundColor: ThemeColor.textSecondaryColor,
-                ),
-                onPressed: () => Get.back(),
-                child: Text('Ahora no'),
-              ),
-            ),
-            SizedBox(width: 8),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ThemeColor.primaryColor,
-                  minimumSize: Size(0, 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: () {
-                  Get.back();
-                  _performUnlock(chat);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.favorite, size: 16, color: Colors.white),
-                    SizedBox(width: 6),
-                    Text('Conectar', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-    onConfirm: null,
-    onCancel: null,
+          )
+        : null,
+    onConfirm: () => _performUnlock(chat),
+    onCancel: () => Get.back(),
   );
 }
 
@@ -209,14 +155,13 @@ void _showUnlockConfirmation(PendingChatEntity chat) {
   }
 
   // Navegar al chat
-  void navigateToChat(int chatId, String name) {
-    Get.toNamed(RoutesNames.chatPage, arguments: {
-      'chatId': chatId,
-      'name': name,
-        'goHome': true,
-
-    });
-  }
+void navigateToChat(int chatId, String name) {
+  Get.toNamed(RoutesNames.chatPage, arguments: {
+    'chatId': chatId,
+    'name': name,
+    'goHomeIndex': 2, 
+  });
+}
 
   // Navegar al perfil
   void navigateToProfile(int userId) {

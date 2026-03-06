@@ -371,42 +371,73 @@ if (contentType.value == 'Video') {
 
   // Inicializar cámara
   Future<void> initializeCamera() async {
-    try {
-      isCameraInitialized.value = false;
-      
-      final availableCamerasList = await availableCameras();
-      if (availableCamerasList.isEmpty) {
-        debugPrint('No cameras available');
-        return;
-      }
+  try {
+    isCameraInitialized.value = false;
+    
+    final availableCamerasList = await availableCameras();
+    if (availableCamerasList.isEmpty) return;
 
-      cameras.value = availableCamerasList;
-      final camera = isFrontCamera.value ? cameras.last : cameras.first;
+    cameras.value = availableCamerasList;
+    
+    // ✅ Buscar por lensDirection en vez de asumir índice
+    final camera = _getCamera();
 
-      final newController = CameraController(
-        camera,
-        ResolutionPreset.high,
-        enableAudio: true,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
+    final newController = CameraController(
+      camera,
+      ResolutionPreset.high,
+      enableAudio: true,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
 
-      await newController.initialize();
-      await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
-      await Future.delayed(const Duration(milliseconds: 100));
-      
-      if (newController.value.isInitialized) {
-        cameraController.value = newController;
-        await Future.delayed(const Duration(milliseconds: 50));
-        isCameraInitialized.value = true;
-        
-        debugPrint('Camera initialized');
-      }
-    } catch (e) {
-      debugPrint('Error initializing camera: $e');
-      isCameraInitialized.value = false;
+    await newController.initialize();
+    await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    if (newController.value.isInitialized) {
+      cameraController.value = newController;
+      await Future.delayed(const Duration(milliseconds: 50));
+      isCameraInitialized.value = true;
     }
+  } catch (e) {
+    debugPrint('Error initializing camera: $e');
+    isCameraInitialized.value = false;
+  }
+}
+
+// ✅ Busca la cámara correcta por dirección, no por índice
+CameraDescription _getCamera() {
+  final direction = isFrontCamera.value 
+      ? CameraLensDirection.front 
+      : CameraLensDirection.back;
+  
+  // Buscar por lensDirection
+  final match = cameras.firstWhereOrNull((c) => c.lensDirection == direction);
+  
+  // Si no encontró la dirección deseada, usar la primera disponible
+  if (match == null) {
+    debugPrint('⚠️ No se encontró cámara $direction, usando primera disponible');
+    isFrontCamera.value = !isFrontCamera.value; // revertir el toggle
+    return cameras.first;
+  }
+  
+  debugPrint('📷 Usando cámara: ${match.name} - ${match.lensDirection}');
+  return match;
+}
+
+Future<void> switchCamera() async {
+  if (cameras.length < 2) {
+    debugPrint('⚠️ Solo hay ${cameras.length} cámara(s)');
+    return;
   }
 
+  isFrontCamera.value = !isFrontCamera.value;
+  
+  final controller = cameraController.value;
+  cameraController.value = null;
+  await controller?.dispose();
+  
+  await initializeCamera();
+}
   // Cargar assets de galería
   Future<void> loadGalleryAssets() async {
     isLoadingGallery.value = true;
@@ -429,18 +460,6 @@ if (contentType.value == 'Video') {
     }
 
     isLoadingGallery.value = false;
-  }
-
-  // Cambiar cámara
-  Future<void> switchCamera() async {
-    if (cameras.length < 2) return;
-
-    isFrontCamera.value = !isFrontCamera.value;
-    
-    await cameraController.value?.dispose();
-    cameraController.value = null;
-    
-    await initializeCamera();
   }
 
   // Iniciar grabación

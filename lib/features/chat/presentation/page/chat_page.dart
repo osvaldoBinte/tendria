@@ -42,10 +42,10 @@ class ChatPage extends GetView<ChatController> {
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: ThemeColor.textPrimaryColor),
-       onPressed: () {
+   onPressed: () {
   FocusScope.of(Get.context!).unfocus();
-  if (controller.goHome.value) {
-    Get.offAllNamed(RoutesNames.homePage);
+  if (controller.goHomeIndex.value >= 0) {
+    Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': controller.goHomeIndex.value});
   } else {
     Get.back();
     if (Get.isRegistered<MyMatchController>()) {

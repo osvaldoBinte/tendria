@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/common/settings/routes_names.dart';
@@ -18,22 +19,26 @@ class SplashController extends GetxController {
 
   final GetUserUsecase getUserUsecase;
 
-  SplashController({required this.getUserUsecase, required this.updateLocationUsecase});
+  SplashController({
+    required this.getUserUsecase,
+    required this.updateLocationUsecase,
+  });
 
   @override
   void onInit() async {
     super.onInit();
     await checkUserSession();
     await requestLocationPermission();
-          await _requestNotificationPermission();
-
+    await _requestNotificationPermission();
+    await _requestCameraPermission();
   }
 
   Future<void> requestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       showErrorSnackbar(
-          'Por favor activa los servicios de ubicación para usar la aplicación');
+        'Por favor activa los servicios de ubicación para usar la aplicación',
+      );
       return;
     }
 
@@ -43,7 +48,8 @@ class SplashController extends GetxController {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         showErrorSnackbar(
-            'Se requieren permisos de ubicación para usar la aplicación');
+          'Se requieren permisos de ubicación para usar la aplicación',
+        );
         return;
       }
     }
@@ -56,62 +62,64 @@ class SplashController extends GetxController {
   }
 
   Future<void> _updateUserCity() async {
-  try {
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.low,
-      timeLimit: const Duration(seconds: 10),
-    );
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+        timeLimit: const Duration(seconds: 10),
+      );
 
-    final placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
-    if (placemarks.isNotEmpty) {
-      final place = placemarks.first;
-      final city = place.locality?.isNotEmpty == true
-          ? place.locality!
-          : place.subAdministrativeArea ?? '';
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        final city = place.locality?.isNotEmpty == true
+            ? place.locality!
+            : place.subAdministrativeArea ?? '';
 
-      if (city.isNotEmpty) {
-        print('city : $city');
+        if (city.isNotEmpty) {
+          print('city : $city');
 
-        await updateLocationUsecase.execute(
-          UpdateLocationEntity(
-            latitude: position.latitude,
-            longitude: position.longitude,
-            city: city,
-          ),
-        );
+          await updateLocationUsecase.execute(
+            UpdateLocationEntity(
+              latitude: position.latitude,
+              longitude: position.longitude,
+              city: city,
+            ),
+          );
+        }
       }
+    } catch (e) {
+      print('Error obteniendo ubicación: $e');
     }
-  } catch (e) {
-    print('Error obteniendo ubicación: $e');
   }
-}
-Future<void> checkUserSession() async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    const String tutorialKey = AppConstants.tutorialKey;
-    
-    final hasSeenTutorial = prefs.getBool(tutorialKey) ?? false;
-    
-    print('hasSeenTutorial: $hasSeenTutorial');
 
-    if (!hasSeenTutorial) {
-      Get.offAllNamed(RoutesNames.tutorialPage);
-      return;
+  Future<void> checkUserSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      const String tutorialKey = AppConstants.tutorialKey;
+
+      final hasSeenTutorial = prefs.getBool(tutorialKey) ?? false;
+
+      print('hasSeenTutorial: $hasSeenTutorial');
+
+      if (!hasSeenTutorial) {
+        Get.offAllNamed(RoutesNames.tutorialPage);
+        return;
+      }
+
+      await getUserUsecase.execute();
+      Get.offAllNamed(RoutesNames.preferencesPage);
+    } catch (e) {
+      Get.offAllNamed(RoutesNames.loginPage);
+    } finally {
+      isLoading.value = false;
     }
-
-    await getUserUsecase.execute();
-    Get.offAllNamed(RoutesNames.preferencesPage);
-  } catch (e) {
-    Get.offAllNamed(RoutesNames.loginPage);
-  } finally {
-    isLoading.value = false;
   }
-}
-Future<void> _requestNotificationPermission() async {
+
+  Future<void> _requestNotificationPermission() async {
     final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     NotificationSettings settings = await messaging.requestPermission(
@@ -133,6 +141,20 @@ Future<void> _requestNotificationPermission() async {
       print('Permisos provisionales concedidos');
     } else {
       print('Permisos de notificaciones denegados');
+    }
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      print('✅ Permiso de cámara concedido');
+    } else if (status.isDenied) {
+      print('❌ Permiso de cámara denegado');
+    } else if (status.isPermanentlyDenied) {
+      print('🚫 Permiso de cámara permanentemente denegado');
+      // Opcional: abrir configuración del sistema
+      // await openAppSettings();
     }
   }
 }

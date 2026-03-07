@@ -44,9 +44,10 @@ class NotificationService {
   final RxInt unreadNotificationsCount = 0.obs;
   final RxBool hasNewNotifications = false.obs;
 
-  // 🆕 Callbacks
-  Function? onNotificationReceived; // Para actualizar UI
-  Function? onFetchNotifications; // Para fetch desde servidor
+
+  Function? onNotificationReceived; 
+  
+  Function? onFetchNotifications;
 
   SharedPreferences? _prefs;
   static const String _keyUnreadCount = 'unread_notifications';
@@ -57,7 +58,7 @@ class NotificationService {
 
     await _loadPersistedCount();
 
-    // iOS requiere configuración diferente
+
     if (Platform.isIOS) {
       await _setupiOSNotifications();
     }
@@ -75,8 +76,7 @@ class NotificationService {
     _listenToTokenRefresh();
     _setupMessageListeners();
   }
-
-  // Configuración específica para iOS
+  
   Future<void> _setupiOSNotifications() async {
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
@@ -88,7 +88,7 @@ class NotificationService {
       sound: true,
     );
 
-    // Configurar para recibir notificaciones en foreground
+
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
           alert: true,
@@ -193,10 +193,10 @@ class NotificationService {
   }
 
   void _setupMessageListeners() {
-    // Para iOS: manejar notificaciones cuando la app está en foreground
+    
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    // Para iOS: manejar cuando el usuario toca la notificación (app en background)
+
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
 
     _checkInitialMessage();
@@ -212,7 +212,7 @@ class NotificationService {
       onFetchNotifications?.call();
     }
 
-    // ✅ Navegar si hay ChatId en el data
+
     _handleNotificationNavigation(message.data);
   }
 
@@ -221,8 +221,7 @@ class NotificationService {
     incrementUnreadCount();
     onNotificationReceived?.call();
     onFetchNotifications?.call();
-
-    // ✅ Navegar si hay ChatId en el data
+    
     _handleNotificationNavigation(message.data);
   }
 
@@ -235,7 +234,7 @@ class NotificationService {
       await incrementUnreadCount();
       onFetchNotifications?.call();
 
-      // ✅ Pequeño delay para que la app esté lista antes de navegar
+
       await Future.delayed(const Duration(milliseconds: 1500));
       _handleNotificationNavigation(initialMessage.data);
     }

@@ -26,21 +26,23 @@ class _TutorialPageState extends State<TutorialPage> {
     'assets/tutorial/tutorial7.png',
     'assets/tutorial/tutorial8.png',
   ];
-void nextPage() async {
-  if (currentIndex.value < tutorialImages.length - 1) {
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  } else {
-    await _markTutorialAsSeen(); // 👈
-    Get.offAllNamed(RoutesNames.welcomePage);
+  void nextPage() async {
+    if (currentIndex.value < tutorialImages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      await _markTutorialAsSeen(); // 👈
+      Get.offAllNamed(RoutesNames.welcomePage);
+    }
   }
-}Future<void> _markTutorialAsSeen() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool(AppConstants.tutorialKey, true);
-  print('Tutorial guardado: ${prefs.getBool(AppConstants.tutorialKey)}');
-}
+
+  Future<void> _markTutorialAsSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.tutorialKey, true);
+    print('Tutorial guardado: ${prefs.getBool(AppConstants.tutorialKey)}');
+  }
 
   void previousPage() {
     if (currentIndex.value > 0) {
@@ -59,49 +61,50 @@ void nextPage() async {
         child: Column(
           children: [
             Expanded(
-  child: PageView.builder(
-    controller: _pageController,
-    itemCount: tutorialImages.length,
-    onPageChanged: (index) {
-      currentIndex.value = index;
-    },
-    itemBuilder: (context, index) {
-      return AnimatedBuilder(
-        animation: _pageController,
-        builder: (context, child) {
-          double value = 1.0;
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: tutorialImages.length,
+                onPageChanged: (index) {
+                  currentIndex.value = index;
+                },
+                itemBuilder: (context, index) {
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      double value = 1.0;
 
-          if (_pageController.position.haveDimensions) {
-            value = (_pageController.page! - index);
-            value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
-          }
+                      if (_pageController.position.haveDimensions) {
+                        value = (_pageController.page! - index);
+                        value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
+                      }
 
-          return Center(
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 400),
-              opacity: value,
-              child: Transform.scale(
-                scale: value,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Image.asset(
-                    tutorialImages[index],
-                    fit: BoxFit.contain,
-                  ),
-                ),
+                      return Center(
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 400),
+                          opacity: value,
+                          child: Transform.scale(
+                            scale: value,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Image.asset(
+                                tutorialImages[index],
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-          );
-        },
-      );
-    },
-  ),
-),
 
-            Obx(() => _buildNavigationButtons(
-                  isLastStep:
-                      currentIndex.value == tutorialImages.length - 1,
-                )),
+            Obx(
+              () => _buildNavigationButtons(
+                isLastStep: currentIndex.value == tutorialImages.length - 1,
+              ),
+            ),
           ],
         ),
       ),
@@ -111,34 +114,33 @@ void nextPage() async {
   Widget _buildNavigationButtons({bool isLastStep = false}) {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
-      decoration:
-          BoxDecoration(color: ThemeColor.backgroundColorfondo),
+      decoration: BoxDecoration(color: ThemeColor.backgroundColorfondo),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // BOTÓN ATRÁS
-          Obx(() => currentIndex.value > 0
-              ? GestureDetector(
-                  onTap: previousPage,
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: ThemeColor.tertiaryColor,
-                      shape: BoxShape.circle,
+          Obx(
+            () => currentIndex.value > 0
+                ? GestureDetector(
+                    onTap: previousPage,
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: ThemeColor.tertiaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
-                    child:
-                        const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                )
-              : const SizedBox(width: 56)),
+                  )
+                : const SizedBox(width: 56),
+          ),
 
-          // OMITIR
           GestureDetector(
             onTap: () async {
-    await _markTutorialAsSeen(); // 👈
-    Get.offAllNamed(RoutesNames.welcomePage);
-  },
+              await _markTutorialAsSeen(); // 👈
+              Get.offAllNamed(RoutesNames.welcomePage);
+            },
             child: Text(
               'Omitir',
               style: ThemeColor.bodyMedium.copyWith(
@@ -148,7 +150,6 @@ void nextPage() async {
             ),
           ),
 
-          // BOTÓN SIGUIENTE
           GestureDetector(
             onTap: nextPage,
             child: Container(

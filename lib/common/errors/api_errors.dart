@@ -65,7 +65,7 @@ void validateMesage() {
 
  @override
   String toString() {
-    // Retornar solo el mensaje sin el prefijo "ApiException:"
+    
     return message;
   }
 }

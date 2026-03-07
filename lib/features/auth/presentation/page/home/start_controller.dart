@@ -1,4 +1,5 @@
-// lib/features/start/start_controller.dart
+
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/settings/routes_names.dart';
@@ -13,7 +14,7 @@ import 'package:tendria/features/user/presentation/profiledetail/profile_detail_
 class StartController extends GetxController {
   final List<Widget> pages = [
     ProfilePage(),
-   // ForYouPage(),
+    
     RadarScannerScreen(),
     LikedByUsersView(),
     MyMatchView(),
@@ -27,7 +28,7 @@ final List<String> labels = [
   final List<String> iconPaths = [
     'assets/icons/home/perfil.png',
     'assets/icons/home/parati.png', 
-    //'assets/icons/home/home.png',
+    
     'assets/icons/home/heart.png',
     'assets/icons/home/mensaje.png',
   ];
@@ -35,14 +36,14 @@ final List<String> labels = [
   final List<String> selectedIconPaths = [
     'assets/icons/home/perfil.png',
     'assets/icons/home/parati.png', 
-   // 'assets/icons/home/home.png',
+    
     'assets/icons/home/heart.png',
     'assets/icons/home/mensaje.png',
   ];
 
-  final RxInt selectedIndex = 0.obs; // Cambiar a 2 para mostrar ProfileDetailScreen por defecto
+  final RxInt selectedIndex = 0.obs; 
+  
 
-  // Estados de carga
   final RxBool isCheckingProfile = true.obs;
 
   void changePage(int index) {
@@ -60,30 +61,29 @@ final List<String> labels = [
 void onInit() {
   super.onInit();
   _checkProfileCompletion();
-  _handleInitialTab(); // 👈 agrega esto
+  _handleInitialTab(); 
+  
 }
 
 void _handleInitialTab() {
   final args = Get.arguments as Map<String, dynamic>?;
   final tab = args?['tab'] as int?;
   
-  // Si no viene tab, o el índice no existe → queda en 0 (ProfilePage)
+  
   if (tab != null && tab >= 0 && tab < pages.length) {
     selectedIndex.value = tab;
   }
 }
-  // ==========================================
-  // VERIFICAR PERFIL COMPLETO
-  // ==========================================
+
 
   Future<void> _checkProfileCompletion() async {
     try {
       isCheckingProfile.value = true;
       
-      // Esperar un momento para que ProfileController se inicialice
+      
       await Future.delayed(Duration(milliseconds: 500));
       
-      // Intentar obtener ProfileController
+      
       ProfileController? profileController;
       try {
         profileController = Get.find<ProfileController>();
@@ -91,18 +91,18 @@ void _handleInitialTab() {
         print('ProfileController no encontrado');
       }
 
-      // Si no existe ProfileController o no tiene datos, navegar a preferencias
+
       if (profileController == null) {
      //   _navigateToPreferences();
         return;
       }
 
-      // Esperar a que cargue el perfil
+
       if (profileController.isLoading.value) {
         await Future.delayed(Duration(milliseconds: 1000));
       }
 
-      // Verificar si el perfil está completo
+
       final user = profileController.userEntity.value;
       
       if (user == null) {
@@ -110,8 +110,7 @@ void _handleInitialTab() {
         return;
       }
 
-      // Verificar cada sección
-      // Verificar cada sección
+
 final hasPreferences = user.preferences != null &&
                       user.preferences!.searchgender != null;
       
@@ -125,7 +124,7 @@ final hasPreferences = user.preferences != null &&
       final hasQualities = user.qualitiesIds != null && 
                           user.qualitiesIds!.isNotEmpty;
 
-      // Si falta algo, navegar a preferencias
+
       if (!hasPreferences || !hasPhotos || !hasInterests || !hasQualities) {
         print('Perfil incompleto, redirigiendo a preferencias...');
         _navigateToPreferences();
@@ -142,7 +141,7 @@ final hasPreferences = user.preferences != null &&
   }
 
   void _navigateToPreferences() {
-    // Navegar a PreferencesPage reemplazando toda la navegación
+    
     Future.delayed(Duration(milliseconds: 100), () {
       Get.offAllNamed(RoutesNames.preferencesPage);
     });

@@ -1,5 +1,4 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -11,14 +10,14 @@ import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
-import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
+
 
 class SplashController extends GetxController {
   final UpdateLocationUsecase updateLocationUsecase;
   final RxBool isLoading = true.obs;
 
   final GetUserUsecase getUserUsecase;
-
+  
   SplashController({
     required this.getUserUsecase,
     required this.updateLocationUsecase,
@@ -54,7 +53,7 @@ class SplashController extends GetxController {
       }
     }
 
-    // Si tenemos permiso, obtener y actualizar la ciudad
+
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
       await _updateUserCity();
@@ -153,7 +152,6 @@ class SplashController extends GetxController {
       print('❌ Permiso de cámara denegado');
     } else if (status.isPermanentlyDenied) {
       print('🚫 Permiso de cámara permanentemente denegado');
-      // Opcional: abrir configuración del sistema
       // await openAppSettings();
     }
   }

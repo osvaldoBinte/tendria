@@ -119,7 +119,7 @@ class RegisterController extends GetxController {
     heightController = TextEditingController();
     cityController = TextEditingController();
     bioController = TextEditingController();
-    customGenderController = TextEditingController(); // NUEVO
+    customGenderController = TextEditingController(); 
 
     nameFocusNode = FocusNode();
     emailFocusNode = FocusNode();
@@ -128,7 +128,7 @@ class RegisterController extends GetxController {
     heightFocusNode = FocusNode();
     cityFocusNode = FocusNode();
     bioFocusNode = FocusNode();
-    customGenderFocusNode = FocusNode(); // NUEVO
+    customGenderFocusNode = FocusNode(); 
 
     emailController.addListener(_validateEmail);
     passwordController.addListener(_validatePassword);
@@ -137,9 +137,6 @@ class RegisterController extends GetxController {
     bioController.addListener(_validateBio);
   }
 
-  // ==========================================
-  // CARGA DE CATÁLOGOS
-  // ==========================================
 
   Future<void> _loadCatalogs() async {
     await Future.wait([_loadQualities(), _loadInterests()]);
@@ -169,9 +166,6 @@ class RegisterController extends GetxController {
     }
   }
 
-  // ==========================================
-  // NAVEGACIÓN ENTRE PASOS
-  // ==========================================
 
   void nextStep() {
     if (_validateCurrentStep()) {
@@ -255,14 +249,12 @@ class RegisterController extends GetxController {
       return false;
     }
 
-    // NUEVO: Si seleccionó "Otro", validar que haya escrito algo
     if (selectedGender.value == 'Otro' &&
         customGenderController.text.trim().isEmpty) {
       showErrorSnackbar('Escribe cómo te identificas');
       return false;
     }
 
-    // Validar bio como requerido
     if (bioController.text.trim().isEmpty) {
       showErrorSnackbar('La biografía es requerida');
       return false;
@@ -303,21 +295,16 @@ class RegisterController extends GetxController {
     }
     return true;
   }
-
-  // ==========================================
-  // VALIDACIONES
-  // ==========================================
   void _validateBio() {
-    bioCharCount.value = bioController.text.length; // ACTUALIZAR contador
+    bioCharCount.value = bioController.text.length;
 
     if (bioController.text.isEmpty) {
-      bioError.value = true; // CAMBIO: ahora es requerido
+      bioError.value = true; 
       bioErrorMessage.value = 'La biografía es requerida';
       return;
     }
 
     if (bioController.text.length < 10) {
-      // Mínimo 10 caracteres
       bioError.value = true;
       bioErrorMessage.value = 'Mínimo 10 caracteres';
       return;
@@ -385,9 +372,6 @@ class RegisterController extends GetxController {
     }
   }
 
-  // ==========================================
-  // UBICACIÓN AUTOMÁTICA
-  // ==========================================
   Future<void> _autoGetLocation() async {
     try {
       isLoadingLocation.value = true;
@@ -430,10 +414,6 @@ class RegisterController extends GetxController {
     }
   }
 
-  // ==========================================
-  // SELECCIÓN DE DATOS
-  // ==========================================
-
   void selectDateOfBirth(DateTime date) {
     dateOfBirth.value = date;
   }
@@ -441,12 +421,12 @@ class RegisterController extends GetxController {
   void selectGender(String gender) {
     selectedGender.value = gender;
 
-    // Si selecciona "Otro", mostrar campo personalizado
     if (gender == 'Otro') {
       showCustomGender.value = true;
     } else {
       showCustomGender.value = false;
-      customGenderController.clear(); // Limpiar campo personalizado
+      customGenderController.clear(); 
+      
     }
   }
 
@@ -481,9 +461,6 @@ void toggleQuality(int qualityId) {
     selectedQualities.add(qualityId);
   }
 }
-  // ==========================================
-  // REGISTRO FINAL
-  // ==========================================
 
   Future<void> onRegisterTap() async {
     if (selectedQualities.isEmpty) {
@@ -501,7 +478,6 @@ void toggleQuality(int qualityId) {
     try {
       isLoading.value = true;
 
-      // NUEVO: Determinar el género final
       String finalGender = selectedGender.value;
       if (selectedGender.value == 'Otro' &&
           customGenderController.text.trim().isNotEmpty) {
@@ -513,7 +489,7 @@ void toggleQuality(int qualityId) {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
         dateofbirth: _formatDate(dateOfBirth.value!),
-        gender: finalGender, // Usar el género final
+        gender: finalGender, 
         bio: bioController.text.trim(),
         heightcm: heightController.text.trim(),
         primarylanguage: selectedLanguage.value,
@@ -540,9 +516,6 @@ void toggleQuality(int qualityId) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  // ==========================================
-  // NAVEGACIÓN
-  // ==========================================
 
   void onLoginTap() {
     Get.toNamed(RoutesNames.loginPage);
@@ -564,13 +537,6 @@ void toggleQuality(int qualityId) {
     nextStep();
   }
 
-  // ==========================================
-  // ALERTAS
-  // ==========================================
-
-  // ==========================================
-  // LIMPIEZA
-  // ==========================================
 
   void _clearFields() {
     nameController.clear();
@@ -580,7 +546,7 @@ void toggleQuality(int qualityId) {
     heightController.clear();
     cityController.clear();
     bioController.clear();
-    customGenderController.clear(); // NUEVO
+    customGenderController.clear();
 
     dateOfBirth.value = null;
     selectedGender.value = '';
@@ -594,7 +560,7 @@ void toggleQuality(int qualityId) {
     currentStepIndex.value = 0;
     currentStep.value = RegistrationStep.basicInfo;
     bioCharCount.value = 0;
-    showCustomGender.value = false; // NUEVO
+    showCustomGender.value = false; 
     heightScrollController.dispose();
   }
 
@@ -613,7 +579,7 @@ void toggleQuality(int qualityId) {
     heightController.dispose();
     cityController.dispose();
     bioController.dispose();
-    customGenderController.dispose(); // NUEVO
+    customGenderController.dispose(); 
 
     nameFocusNode.dispose();
     emailFocusNode.dispose();
@@ -622,7 +588,7 @@ void toggleQuality(int qualityId) {
     heightFocusNode.dispose();
     cityFocusNode.dispose();
     bioFocusNode.dispose();
-    customGenderFocusNode.dispose(); // NUEVO
+    customGenderFocusNode.dispose(); 
 
     super.onClose();
   }

@@ -90,13 +90,11 @@ class LoginController extends GetxController {
 
   Future<void> _saveDeviceToken() async {
     try {
-      // Solo guardar token en dispositivos móviles
       if (!GetPlatform.isMobile) {
         print('ℹ️ Dispositivo no móvil - omitiendo guardado de token FCM');
         return;
       }
 
-      // Obtener el token FCM
       final fcmToken = await NotificationService().getToken();
 
       if (fcmToken == null) {
@@ -104,7 +102,6 @@ class LoginController extends GetxController {
         return;
       }
 
-      // Detectar el tipo de dispositivo
       String deviceType = _getDeviceType();
 
       print('📤 Guardando token FCM en el servidor...');

@@ -1,4 +1,5 @@
-// lib/common/services/translation_service.dart
+
+
 import 'package:get/get.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 
@@ -8,7 +9,7 @@ class TranslationService extends GetxService {
 
   final _modelManager = OnDeviceTranslatorModelManager();
 
-  // Cache para no traducir lo mismo dos veces
+
   final Map<String, String> _cacheEn = {};
   final Map<String, String> _cacheEs = {};
 
@@ -22,7 +23,7 @@ class TranslationService extends GetxService {
 
   Future<void> _initTranslators() async {
     try {
-      // Descargar modelos si no están
+      
       final hasEs = await _modelManager.isModelDownloaded(
         TranslateLanguage.spanish.bcpCode,
       );
@@ -57,8 +58,7 @@ class TranslationService extends GetxService {
     }
   }
 
-  /// Traduce un texto al idioma destino.
-  /// [targetLanguage] debe ser 'Inglés' o 'Español'
+
   Future<String> translate(String text, String targetLanguage) async {
     if (text.isEmpty) return text;
     if (!isReady.value) return text;
@@ -76,7 +76,7 @@ class TranslationService extends GetxService {
     }
   }
 
-  /// Traduce una lista de textos al idioma destino
+
   Future<List<String>> translateList(
       List<String> texts, String targetLanguage) async {
     if (!isReady.value) return texts;

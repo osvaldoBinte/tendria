@@ -57,9 +57,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ============================================
-// LOGGER
-// ============================================
+
 class AppLogger {
   static final Logger _logger = Logger(
     printer: PrettyPrinter(
@@ -80,9 +78,7 @@ class AppLogger {
   }
   static void success(String message) => _logger.i('✅ $message');
 }
-// ============================================
-// MODELS
-// ============================================
+
 class AuthResponseModel {
   final String token;
   final String? userId;

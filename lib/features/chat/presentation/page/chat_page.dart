@@ -211,24 +211,38 @@ Widget _buildConnectionIndicator() {
   // ─────────────────────────────────────────
   //  CUERPO
   // ─────────────────────────────────────────
-
-  Widget _buildBody() {
-    return Obx(() {
-      // Solo muestra loading/error en modo existente
-      if (!controller.isNewConversation.value) {
-        if (controller.isLoading.value && controller.mensajes.isEmpty) {
-          return _buildLoadingState();
+Widget _buildBody() {
+  return Stack(
+    children: [
+      // 🖼️ Imagen de fondo
+      Positioned.fill(
+        child: Image.asset(
+          'assets/fodochat.jpeg',
+          fit: BoxFit.cover,
+        ),
+      ),
+      // Capa semitransparente opcional (para que los mensajes se lean mejor)
+      Positioned.fill(
+        child: Container(
+          color: Colors.black.withOpacity(0.15),
+        ),
+      ),
+      // Contenido original
+      Obx(() {
+        if (!controller.isNewConversation.value) {
+          if (controller.isLoading.value && controller.mensajes.isEmpty) {
+            return _buildLoadingState();
+          }
+          if (controller.hasError.value && controller.mensajes.isEmpty) {
+            return _buildErrorState();
+          }
         }
-        if (controller.hasError.value && controller.mensajes.isEmpty) {
-          return _buildErrorState();
-        }
-      }
-
-      if (controller.mensajes.isEmpty) return _buildEmptyState();
-      return _buildMessagesList();
-    });
-  }
-
+        if (controller.mensajes.isEmpty) return _buildEmptyState();
+        return _buildMessagesList();
+      }),
+    ],
+  );
+}
   Widget _buildMessagesList() {
     return RefreshIndicator(
       onRefresh: controller.refreshChat,

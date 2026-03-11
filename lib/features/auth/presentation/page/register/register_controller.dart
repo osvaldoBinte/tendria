@@ -90,8 +90,8 @@ class RegisterController extends GetxController {
   final RxString bioErrorMessage = ''.obs;
 
   final List<Map<String, dynamic>> genderOptions = [
-    {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
-    {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
+    {'label': 'masculino', 'value': 'Hombre', 'icon': Icons.male},
+    {'label': 'femenino', 'value': 'Mujer', 'icon': Icons.female},
     {
       'label': 'Persona no binaria',
       'value': 'No_binario',
@@ -501,8 +501,12 @@ void toggleQuality(int qualityId) {
       );
 
       await createUserUsecase.execute(entity);
-
+     
       _clearFields();
+      showSuccessSnackbar(
+        'Registro exitoso. Por favor, inicia sesión.',
+        
+      );
      onLoginTap();
     } catch (e) {
       print('Error en registro: $e');

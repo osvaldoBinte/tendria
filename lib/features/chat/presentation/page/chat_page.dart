@@ -20,11 +20,13 @@ class ChatPage extends GetView<ChatController> {
         appBar: _buildAppBar(),
         body: Column(
           children: [
-            // Indicador SignalR (solo en modo existente)
+            
             _buildConnectionIndicator(),
-            // Mensajes
+          
+          
             Expanded(child: _buildBody()),
-            // Input
+           
+           
             _buildMessageInput(),
           ],
         ),
@@ -32,9 +34,7 @@ class ChatPage extends GetView<ChatController> {
     );
   }
 
-  // ─────────────────────────────────────────
-  //  APP BAR
-  // ─────────────────────────────────────────
+
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -65,7 +65,7 @@ class ChatPage extends GetView<ChatController> {
           },
           child: Row(
             children: [
-              // Avatar
+              
               Stack(
                 children: [
                   Container(
@@ -98,7 +98,7 @@ class ChatPage extends GetView<ChatController> {
 ),
                     ),
                   ),
-                  // Punto verde SignalR
+
                 /*  if (isExisting && controller.isSignalRConnected.value)
                     Positioned(
                       right: 0,
@@ -160,20 +160,19 @@ class ChatPage extends GetView<ChatController> {
     );
   }
 
-  // ─────────────────────────────────────────
-  //  CONEXIÓN SIGNALR
-  // ─────────────────────────────────────────
+
 Widget _buildConnectionIndicator() {
   return Obx(() {
     if (controller.isNewConversation.value) return const SizedBox.shrink();
     if (controller.isSignalRConnected.value) return const SizedBox.shrink();
 
-    // ✅ Reconectando si el controller o el servicio están intentando
+
     final isRetrying = controller.isRetrying.value ||
         Get.find<SignalRService>().isReconnecting.value;
 
     return GestureDetector(
-      onTap: isRetrying ? null : controller.retrySignalRConnection, // 👈 no permite tap mientras reconecta
+      onTap: isRetrying ? null : controller.retrySignalRConnection,
+      
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -208,26 +207,24 @@ Widget _buildConnectionIndicator() {
     );
   });
 }
-  // ─────────────────────────────────────────
-  //  CUERPO
-  // ─────────────────────────────────────────
+
 Widget _buildBody() {
   return Stack(
     children: [
-      // 🖼️ Imagen de fondo
+      
       Positioned.fill(
         child: Image.asset(
           'assets/fodochat.jpeg',
           fit: BoxFit.cover,
         ),
       ),
-      // Capa semitransparente opcional (para que los mensajes se lean mejor)
+      
       Positioned.fill(
         child: Container(
           color: Colors.black.withOpacity(0.15),
         ),
       ),
-      // Contenido original
+      
       Obx(() {
         if (!controller.isNewConversation.value) {
           if (controller.isLoading.value && controller.mensajes.isEmpty) {
@@ -384,9 +381,7 @@ Widget _buildBody() {
     );
   }
 
-  // ─────────────────────────────────────────
-  //  INPUT
-  // ─────────────────────────────────────────
+
 
   Widget _buildMessageInput() {
     return Obx(() {
@@ -410,7 +405,7 @@ Widget _buildBody() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Banner "espera respuesta" (solo modo nuevo tras enviar)
+                
                 if (blocked)
                   Container(
                     width: double.infinity,
@@ -444,7 +439,7 @@ Widget _buildBody() {
 
                 Row(
                   children: [
-                    // TextField
+                    
                     Expanded(
                       child: Opacity(
                         opacity: blocked ? 0.5 : 1.0,
@@ -485,7 +480,7 @@ Widget _buildBody() {
                     ),
                     const SizedBox(width: 8),
 
-                    // Botón enviar
+
                     Obx(() {
                       final canSend = !blocked &&
                           controller.isTyping.value &&
@@ -546,9 +541,7 @@ Widget _buildBody() {
     });
   }
 
-  // ─────────────────────────────────────────
-  //  ESTADOS
-  // ─────────────────────────────────────────
+
 
   Widget _buildEmptyState() {
     return Center(

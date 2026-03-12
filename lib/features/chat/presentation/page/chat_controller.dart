@@ -17,13 +17,11 @@ import 'package:tendria/features/like/presentation/controller/my_match_controlle
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 
 class ChatController extends GetxController {
-  // ── Use cases nuevas conversaciones ──
+  
   final StartConversationsUsecase startConversationsUsecase;
   final PaymentsChatUsecase paymentsChatUsecase;
 
-  // ── Use cases chat existente ──
-  // 👇 Se eliminaron: connect, disconnect, join, leave, setupListener
-  //    Ahora los maneja SignalRService
+
   final GetChatMensajeUsecase getChatMensajeUsecase;
   final SendMessageUsecase sendMessageUsecase;
   final AuthService authService;
@@ -37,11 +35,11 @@ class ChatController extends GetxController {
   });
 final RxBool isRetrying = false.obs;
 
-  // ── Controllers UI ──
+
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-  // ── Estado reactivo ──
+
 final mensajes = RxList<MensajeEntity>([]);
   final Rx<UsuarioChatEntity?> otroUsuario = Rx<UsuarioChatEntity?>(null);
   final Rx<ChatEntity?> chat = Rx<ChatEntity?>(null);
@@ -53,11 +51,11 @@ final mensajes = RxList<MensajeEntity>([]);
   final RxBool isTyping = false.obs;
   final RxBool isSignalRConnected = false.obs;
 
-  // ── Modo de operación ──
+
   final RxBool isNewConversation = true.obs;
   final RxBool firstMessageSent = false.obs;
 
-  // ── IDs ──
+
   late int targetUserId;
   int? chatId;
   String? userName;
@@ -65,7 +63,7 @@ final mensajes = RxList<MensajeEntity>([]);
   String? myPhoto;
 final RxInt goHomeIndex = (-1).obs; 
 
-  // ── Referencia al servicio global ──
+
   late final SignalRService _signalRService;
 @override
 void onInit() {
@@ -75,24 +73,25 @@ void onInit() {
   messageController.addListener(_onMessageChanged);
 
   if (!isNewConversation.value) {
-    // ✅ Sincroniza estado inicial
+    
     isSignalRConnected.value = _signalRService.isConnected.value;
 
-    // ✅ Mueve el ever aquí, fuera de _subscribeToChat
+
  ever(_signalRService.isConnected, (bool connected) {
   isSignalRConnected.value = connected;
   if (!connected) _autoReconnect();
 });
 
-// 👇 Nuevo: cuando SignalRService está reconectando, reflejarlo aquí
+
 ever(_signalRService.isReconnecting, (bool reconnecting) {
   if (reconnecting) isRetrying.value = true;
-  // isRetrying se pone false cuando isConnected cambia a true
+  
 });
 
 ever(_signalRService.isConnected, (bool connected) {
   isSignalRConnected.value = connected;
-  if (connected) isRetrying.value = false; // 👈 limpia el spinner al conectar
+  if (connected) isRetrying.value = false; 
+  
   if (!connected) _autoReconnect();
 });
     _subscribeToChat();
@@ -106,7 +105,7 @@ ever(_signalRService.isConnected, (bool connected) {
     messageController.dispose();
     scrollController.dispose();
 
-    // 👇 Solo desuscribirse del chat, NO desconectar el SignalR global
+
     if (!isNewConversation.value && chatId != null) {
       _signalRService.unsubscribeFromChat(chatId!);
     }
@@ -114,9 +113,7 @@ ever(_signalRService.isConnected, (bool connected) {
     super.onClose();
   }
 
-  // ─────────────────────────────────────────
-  //  INICIALIZACIÓN
-  // ─────────────────────────────────────────
+
 
   void _loadArguments() {
     final args = Get.arguments as Map<String, dynamic>?;
@@ -137,9 +134,7 @@ ever(_signalRService.isConnected, (bool connected) {
     }
   }
 
-  // ─────────────────────────────────────────
-  //  SIGNALR — Solo suscripción al chat
-  // ─────────────────────────────────────────
+
 Future<void> _subscribeToChat() async {
   try {
     await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
@@ -154,10 +149,10 @@ Future<void> _autoReconnect() async {
 
   print('🔄 Auto-reconectando SignalR desde ChatController...');
   
-  // Pequeña espera para no chocar con el intento del SignalRService
+  
   await Future.delayed(const Duration(seconds: 2));
   
-  // Si el servicio global ya reconectó, solo re-suscribirse al chat
+  
   if (_signalRService.isConnected.value) {
     try {
       if (chatId != null) {
@@ -169,10 +164,10 @@ Future<void> _autoReconnect() async {
     return;
   }
 
-  // Si el servicio global sigue caído, forzar reconexión
+
   await retrySignalRConnection();
 }void _handleIncomingMessage(MensajeEntity mensaje) {
-  // Evitar duplicados por ID
+  
   if (mensajes.any((m) => m.id == mensaje.id)) return;
 
   mensajes.value = [
@@ -216,9 +211,7 @@ Future<void> retrySignalRConnection() async {
     isRetrying.value = false;
   }
 }
-  // ─────────────────────────────────────────
-  //  CARGA DE MENSAJES
-  // ─────────────────────────────────────────
+
 
 Future<void> loadChatMessages() async {
   if (chatId == null) return;
@@ -229,7 +222,7 @@ Future<void> loadChatMessages() async {
     final result = await getChatMensajeUsecase.execute(chatId!);
     chat.value = result;
 
-    // ✅ Convierte cada item explícitamente a MensajeEntity
+
     final lista = (result.mensajes ?? [])
         .map((m) => MensajeEntity(
               id: m.id,
@@ -257,9 +250,7 @@ Future<void> loadChatMessages() async {
 
   Future<void> refreshChat() => loadChatMessages();
 
-  // ─────────────────────────────────────────
-  //  ENVÍO DE MENSAJES
-  // ─────────────────────────────────────────
+
 
   void _onMessageChanged() {
     if (isNewConversation.value && firstMessageSent.value) {
@@ -322,9 +313,8 @@ Future<void> loadChatMessages() async {
     isSending.value = true;
     messageController.clear();
 
-    // ✅ Solo agregar local si NO hay SignalR
-    // Con SignalR: el mensaje llega por el socket y se muestra ahí
-    // Sin SignalR: mostramos local para que el usuario vea algo
+
+
     if (!haySignalR) {
       _addLocalMessage(message, tempId: tempId);
       Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
@@ -334,7 +324,7 @@ Future<void> loadChatMessages() async {
     await sendMessageUsecase.execute(postEntity);
 
   } catch (e) {
-    // Si falló, quitar el local si lo habíamos puesto
+    
     if (!haySignalR) {
       mensajes.removeWhere((m) => m.id == tempId);
     }
@@ -356,7 +346,7 @@ void _addLocalMessage(String messageText, {int? tempId}) {
     enviadoEn: DateTime.now(),
     esPropio: true,
   );
-  // Fuerza el tipo correcto creando una nueva lista
+  
   mensajes.value = [...mensajes.map((m) => m as MensajeEntity), nuevo];
 }
 
@@ -370,9 +360,7 @@ void _addLocalMessage(String messageText, {int? tempId}) {
     }
   }
 
-  // ─────────────────────────────────────────
-  //  NAVEGACIÓN Y UTILIDADES
-  // ─────────────────────────────────────────
+
 
   void navigateToProfile() {
     final uid = otroUsuario.value?.id ?? targetUserId;

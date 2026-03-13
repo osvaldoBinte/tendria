@@ -7,6 +7,8 @@ import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/user/domain/entities/preferences_step.dart';
 import 'package:tendria/features/user/presentation/controller/preferences_controller.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
+import 'package:tendria/features/user/presentation/widget/AgeWheelWidget.dart';
+import 'package:tendria/features/user/presentation/widget/DistanceWheelWidget.dart';
 
 class PreferencesPage extends GetView<PreferencesController> {
   const PreferencesPage({Key? key}) : super(key: key);
@@ -418,27 +420,27 @@ class PreferencesPage extends GetView<PreferencesController> {
                           children: [
                             // Edad mínima
                             Expanded(
-                              child: _buildAgeWheel(
-                                initialAge: controller.minAge.value,
-                                onChanged: (age) {
-                                  controller.updateMinAge(age);
-                                  if (age > controller.maxAge.value) {
-                                    controller.updateMaxAge(age);
-                                  }
-                                },
-                              ),
+                              child:AgeWheelWidget(
+  initialAge: controller.minAge.value,
+  onChanged: (age) {
+    controller.updateMinAge(age);
+    if (age > controller.maxAge.value) {
+      controller.updateMaxAge(age);
+    }
+  },
+),
                             ),
                             // Edad máxima
                             Expanded(
-                              child: _buildAgeWheel(
-                                initialAge: controller.maxAge.value,
-                                onChanged: (age) {
-                                  controller.updateMaxAge(age);
-                                  if (age < controller.minAge.value) {
-                                    controller.updateMinAge(age);
-                                  }
-                                },
-                              ),
+                              child: AgeWheelWidget(
+  initialAge: controller.maxAge.value,
+  onChanged: (age) {
+    controller.updateMaxAge(age);
+    if (age < controller.minAge.value) {
+      controller.updateMinAge(age);
+    }
+  },
+),
                             ),
                           ],
                         ),
@@ -507,10 +509,10 @@ class PreferencesPage extends GetView<PreferencesController> {
                             ),
                           ),
                         ),
-                        _buildDistanceWheel(
-                          initialDistance: controller.distanceKm.value,
-                          onChanged: (km) => controller.updateDistance(km),
-                        ),
+                        DistanceWheelWidget(
+  initialDistance: controller.distanceKm.value,
+  onChanged: (km) => controller.updateDistance(km),
+),
                       ],
                     ),
                   ),

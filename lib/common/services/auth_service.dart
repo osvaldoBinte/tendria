@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/features/auth/data/model/loginResponse/login_response_model.dart';
 import 'package:tendria/features/auth/domain/entities/response/login_response_entity.dart';
+import 'package:tendria/features/chat/presentation/page/connect.dart';
 import 'package:tendria/framework/preferences_service.dart';
 
 class AuthService extends GetxService {
@@ -81,16 +82,18 @@ Future<bool> saveLoginResponse(LoginResponseEntity loginResponse) async {
     return userData != null && userData.token.isNotEmpty;
   }
 
-
-  Future<bool> logout() async {
-    try {
-      _cachedUserData = null;
-      await _prefsUser.removePreferences();
-      print('✅ Sesión cerrada correctamente');
-      return true;
-    } catch (e) {
-      print('❌ Error al cerrar sesión: $e');
-      return false;
+Future<bool> logout() async {
+  try {
+    if (Get.isRegistered<SignalRService>()) {
+      await Get.find<SignalRService>().disconnect();
     }
+
+    _cachedUserData = null;
+    await _prefsUser.removePreferences();
+    return true;
+  } catch (e) {
+    print('❌ Error al cerrar sesión: $e');
+    return false;
   }
+}
 }

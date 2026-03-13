@@ -234,4 +234,26 @@ Future<void> subscribeToChat(int chatId, Function(MensajeEntity) callback) async
     // Siempre notificar al listener global (badges, lista de chats)
     _globalListener?.call(mensaje);
   }
+  // En SignalRService
+Future<void> disconnect() async {
+  try {
+    isReconnecting.value = false;
+    _reconnectAttempts = _maxReconnectAttempts; // evitar auto-reconexión
+    
+    // Salir de todos los chats activos
+    for (final chatId in _chatListeners.keys.toList()) {
+      try {
+        await leaveChatUsecase.execute(chatId);
+      } catch (_) {}
+    }
+    _chatListeners.clear();
+    _globalListener = null;
+
+    await disconnectSignalRUsecase.execute();
+    isConnected.value = false;
+    print('✅ SignalR desconectado por logout');
+  } catch (e) {
+    print('❌ Error desconectando SignalR: $e');
+  }
+}
 }

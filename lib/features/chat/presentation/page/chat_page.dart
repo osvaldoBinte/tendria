@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/chat/domain/entities/mensaje_entity.dart';
@@ -11,30 +10,52 @@ import 'package:tendria/features/like/presentation/controller/my_match_controlle
 class ChatPage extends GetView<ChatController> {
   const ChatPage({Key? key}) : super(key: key);
 
+  MyMatchController get mycontroller => Get.find<MyMatchController>();
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        backgroundColor: ThemeColor.backgroundColor,
-        appBar: _buildAppBar(),
-        body: Column(
-          children: [
-            
-            _buildConnectionIndicator(),
-          
-          
-            Expanded(child: _buildBody()),
-           
-           
-            _buildMessageInput(),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        FocusScope.of(context).unfocus();
+        mycontroller.loadChats();
+        if (controller.goHomeIndex.value >= 0) {
+          Get.offAllNamed(RoutesNames.homePage,
+              arguments: {'tab': controller.goHomeIndex.value});
+        } else {
+          Get.back();
+          mycontroller.loadChats();
+        }
+      },
+  child: Listener(
+  onPointerDown: (e) {
+    controller.setPointerDown(e.position);
+    controller.setPointerDownTime(DateTime.now());
+  },
+  onPointerUp: (e) {
+    final distance = (e.position - controller.pointerDown).distance;
+    final duration = DateTime.now().difference(controller.pointerDownTime);
+    // Solo cierra si fue tap rápido Y no se movió
+    if (distance < 10 && duration.inMilliseconds < 200) {
+      FocusScope.of(context).unfocus();
+    }
+  },
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: ThemeColor.backgroundColor,
+          appBar: _buildAppBar(),
+          body: Column(
+            children: [
+              _buildConnectionIndicator(),
+              Expanded(child: _buildBody()),
+              _buildMessageInput(),
+            ],
+          ),
         ),
       ),
     );
   }
-
-
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -42,17 +63,17 @@ class ChatPage extends GetView<ChatController> {
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: ThemeColor.textPrimaryColor),
-   onPressed: () {
-  FocusScope.of(Get.context!).unfocus();
-  if (controller.goHomeIndex.value >= 0) {
-    Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': controller.goHomeIndex.value});
-  } else {
-    Get.back();
-    if (Get.isRegistered<MyMatchController>()) {
-      Get.find<MyMatchController>().loadChats();
-    }
-  }
-},
+        onPressed: () {
+          FocusScope.of(Get.context!).unfocus();
+          if (controller.goHomeIndex.value >= 0) {
+            mycontroller.loadChats();
+            Get.offAllNamed(RoutesNames.homePage,
+                arguments: {'tab': controller.goHomeIndex.value});
+          } else {
+            Get.back();
+            mycontroller.loadChats();
+          }
+        },
       ),
       title: Obx(() {
         final usuario = controller.otroUsuario.value;
@@ -65,7 +86,6 @@ class ChatPage extends GetView<ChatController> {
           },
           child: Row(
             children: [
-              
               Stack(
                 children: [
                   Container(
@@ -84,38 +104,22 @@ class ChatPage extends GetView<ChatController> {
                           width: 1.5,
                         ),
                       ),
-                    child: ClipOval(
-  child: (usuario?.fotoUrl != null && usuario!.fotoUrl!.isNotEmpty) 
-      || controller.userPhoto != null
-      ? Image.network(
-          usuario?.fotoUrl?.isNotEmpty == true 
-              ? usuario!.fotoUrl! 
-              : controller.userPhoto!,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
-        )
-      : _buildDefaultAvatar(),
-),
+                      child: ClipOval(
+                        child: (usuario?.fotoUrl != null &&
+                                    usuario!.fotoUrl!.isNotEmpty) ||
+                                controller.userPhoto != null
+                            ? Image.network(
+                                usuario?.fotoUrl?.isNotEmpty == true
+                                    ? usuario!.fotoUrl!
+                                    : controller.userPhoto!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    _buildDefaultAvatar(),
+                              )
+                            : _buildDefaultAvatar(),
+                      ),
                     ),
                   ),
-
-                /*  if (isExisting && controller.isSignalRConnected.value)
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: ThemeColor.successColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: ThemeColor.surfaceColor,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),*/
                 ],
               ),
               const SizedBox(width: 12),
@@ -124,9 +128,7 @@ class ChatPage extends GetView<ChatController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      usuario?.nombre ??
-                          controller.userName ??
-                          'Usuario',
+                      usuario?.nombre ?? controller.userName ?? 'Usuario',
                       style: ThemeColor.subtitleLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -149,124 +151,114 @@ class ChatPage extends GetView<ChatController> {
           ),
         );
       }),
-     
     );
   }
 
   Widget _buildDefaultAvatar() {
     return Container(
       color: ThemeColor.backgroundColorfondo,
-      child: Icon(Icons.person, size: 24, color: ThemeColor.textSecondaryColor),
+      child: Icon(Icons.person,
+          size: 24, color: ThemeColor.textSecondaryColor),
     );
   }
 
+  Widget _buildConnectionIndicator() {
+    return Obx(() {
+      if (controller.isNewConversation.value) return const SizedBox.shrink();
+      if (controller.isSignalRConnected.value) return const SizedBox.shrink();
 
-Widget _buildConnectionIndicator() {
-  return Obx(() {
-    if (controller.isNewConversation.value) return const SizedBox.shrink();
-    if (controller.isSignalRConnected.value) return const SizedBox.shrink();
+      final isRetrying = controller.isRetrying.value ||
+          Get.find<SignalRService>().isReconnecting.value;
 
-
-    final isRetrying = controller.isRetrying.value ||
-        Get.find<SignalRService>().isReconnecting.value;
-
-    return GestureDetector(
-      onTap: isRetrying ? null : controller.retrySignalRConnection,
-      
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        color: ThemeColor.warningColor.withOpacity(0.1),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isRetrying)
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: ThemeColor.warningColor,
-                ),
-              )
-            else
-              Icon(Icons.refresh, size: 16, color: ThemeColor.warningColor),
-            const SizedBox(width: 8),
-            Text(
-              isRetrying
-                  ? 'Reconectando...'
-                  : 'Sin conexión · Toca para reintentar',
-              style: ThemeColor.caption.copyWith(
-                color: ThemeColor.warningColor,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  });
-}
-
-Widget _buildBody() {
-  return Stack(
-    children: [
-      
-      Positioned.fill(
-        child: Image.asset(
-          'assets/fodochat.jpeg',
-          fit: BoxFit.cover,
-        ),
-      ),
-      
-      Positioned.fill(
+      return GestureDetector(
+        onTap: isRetrying ? null : controller.retrySignalRConnection,
         child: Container(
-          color: Colors.black.withOpacity(0.15),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          color: ThemeColor.warningColor.withOpacity(0.1),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isRetrying)
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: ThemeColor.warningColor,
+                  ),
+                )
+              else
+                Icon(Icons.refresh, size: 16, color: ThemeColor.warningColor),
+              const SizedBox(width: 8),
+              Text(
+                isRetrying
+                    ? 'Reconectando...'
+                    : 'Sin conexión · Toca para reintentar',
+                style: ThemeColor.caption.copyWith(
+                  color: ThemeColor.warningColor,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      
-      Obx(() {
-        if (!controller.isNewConversation.value) {
-          if (controller.isLoading.value && controller.mensajes.isEmpty) {
-            return _buildLoadingState();
+      );
+    });
+  }
+
+  Widget _buildBody() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/fodochat.jpeg',
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withOpacity(0.15),
+          ),
+        ),
+        Obx(() {
+          if (!controller.isNewConversation.value) {
+            if (controller.isLoading.value && controller.mensajes.isEmpty) {
+              return _buildLoadingState();
+            }
+            if (controller.hasError.value && controller.mensajes.isEmpty) {
+              return _buildErrorState();
+            }
           }
-          if (controller.hasError.value && controller.mensajes.isEmpty) {
-            return _buildErrorState();
-          }
-        }
-        if (controller.mensajes.isEmpty) return _buildEmptyState();
-        return _buildMessagesList();
-      }),
-    ],
-  );
-}
+          if (controller.mensajes.isEmpty) return _buildEmptyState();
+          return _buildMessagesList();
+        }),
+      ],
+    );
+  }
+
   Widget _buildMessagesList() {
     return RefreshIndicator(
       onRefresh: controller.refreshChat,
       color: ThemeColor.primaryColor,
       backgroundColor: ThemeColor.surfaceColor,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (n) {
-          if (n is ScrollStartNotification) {
-            FocusScope.of(Get.context!).unfocus();
-          }
-          return false;
+      child: ListView.builder(
+        controller: controller.scrollController,
+        // onDrag cierra el teclado solo cuando el usuario arrastra
+        // el ListView — complementa el Listener del build principal
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: controller.mensajes.length,
+        itemBuilder: (_, index) {
+          final msg = controller.mensajes[index];
+          return Column(
+            children: [
+              if (controller.shouldShowDateSeparator(index))
+                _buildDateSeparator(msg.enviadoEn),
+              _buildMessageBubble(msg),
+            ],
+          );
         },
-        child: ListView.builder(
-          controller: controller.scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: controller.mensajes.length,
-          itemBuilder: (_, index) {
-            final msg = controller.mensajes[index];
-            return Column(
-              children: [
-                if (controller.shouldShowDateSeparator(index))
-                  _buildDateSeparator(msg.enviadoEn),
-                _buildMessageBubble(msg),
-              ],
-            );
-          },
-        ),
       ),
     );
   }
@@ -301,13 +293,14 @@ Widget _buildBody() {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isOwn) ...[
-            _buildMessageAvatar(mensaje.senderFoto ),
+            _buildMessageAvatar(mensaje.senderFoto),
             const SizedBox(width: 8),
           ],
           Flexible(
             child: Container(
               constraints: BoxConstraints(maxWidth: Get.width * 0.7),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isOwn
                     ? ThemeColor.primaryColor
@@ -350,14 +343,15 @@ Widget _buildBody() {
           ),
           if (isOwn) ...[
             const SizedBox(width: 8),
-            _buildMessageAvatar(mensaje.senderFoto?? controller.myPhoto),
+            _buildMessageAvatar(
+                mensaje.senderFoto ?? controller.myPhoto),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildMessageAvatar(String? photoUrl ) {
+  Widget _buildMessageAvatar(String? photoUrl) {
     return Container(
       width: 32,
       height: 32,
@@ -376,12 +370,11 @@ Widget _buildBody() {
                   color: ThemeColor.textSecondaryColor,
                 ),
               )
-            : Icon(Icons.person, size: 18, color: ThemeColor.textSecondaryColor),
+            : Icon(Icons.person,
+                size: 18, color: ThemeColor.textSecondaryColor),
       ),
     );
   }
-
-
 
   Widget _buildMessageInput() {
     return Obx(() {
@@ -405,7 +398,6 @@ Widget _buildBody() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                
                 if (blocked)
                   Container(
                     width: double.infinity,
@@ -436,10 +428,8 @@ Widget _buildBody() {
                       ],
                     ),
                   ),
-
                 Row(
                   children: [
-                    
                     Expanded(
                       child: Opacity(
                         opacity: blocked ? 0.5 : 1.0,
@@ -457,6 +447,21 @@ Widget _buildBody() {
                             textCapitalization: TextCapitalization.sentences,
                             textInputAction: TextInputAction.done,
                             style: ThemeColor.bodyMedium,
+                            // Al abrir el teclado, esperar que termine
+                            // de animarse y hacer scroll al último mensaje
+                            onTap: blocked
+                                ? null
+                                : () {
+                                    Future.delayed(
+                                      const Duration(milliseconds: 400),
+                                      () {
+                                        if (controller
+                                            .scrollController.hasClients) {
+                                          controller.scrollToBottom();
+                                        }
+                                      },
+                                    );
+                                  },
                             decoration: InputDecoration(
                               hintText: blocked
                                   ? 'Espera la respuesta...'
@@ -479,8 +484,6 @@ Widget _buildBody() {
                       ),
                     ),
                     const SizedBox(width: 8),
-
-
                     Obx(() {
                       final canSend = !blocked &&
                           controller.isTyping.value &&
@@ -495,7 +498,8 @@ Widget _buildBody() {
                               ? ThemeColor.primaryColor
                               : ThemeColor.disabledColor,
                           shape: BoxShape.circle,
-                          boxShadow: canSend ? [ThemeColor.lightShadow] : [],
+                          boxShadow:
+                              canSend ? [ThemeColor.lightShadow] : [],
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -540,8 +544,6 @@ Widget _buildBody() {
       );
     });
   }
-
-
 
   Widget _buildEmptyState() {
     return Center(
@@ -591,7 +593,8 @@ Widget _buildBody() {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 60, color: ThemeColor.errorColor),
+            Icon(Icons.error_outline,
+                size: 60, color: ThemeColor.errorColor),
             const SizedBox(height: 16),
             Text('Error al cargar mensajes',
                 style: ThemeColor.headingSmall, textAlign: TextAlign.center),
@@ -615,6 +618,4 @@ Widget _buildBody() {
       ),
     );
   }
-
-
 }

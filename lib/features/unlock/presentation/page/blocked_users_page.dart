@@ -243,7 +243,7 @@ class BlockedUsersPage extends StatelessWidget {
                   onPressed: isThisUserProcessing
                       ? null
                       : () => controller.showUnblockConfirmation(user),
-                  text: 'Commensar',
+                  text: 'Desbloquear',
                   backgroundColor: ThemeColor.backgroundColor,
                   borderColor: ThemeColor.primaryColor,
                   textColor: ThemeColor.primaryColor,

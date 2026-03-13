@@ -344,7 +344,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                   SizedBox(
                     width: double.infinity,
                     child: ThemeColor.widgetButton(
-                      text: _l.t('unlock'),
+                      text: _l.t('connect'),
                       onPressed: () => controller.unlockChat(chat),
                       backgroundColor: ThemeColor.primaryColor,
                       textColor: ThemeColor.textLightColor,

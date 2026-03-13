@@ -50,7 +50,7 @@ class PreferencesController extends GetxController {
 
   // Lista de pasos disponibles (solo los que faltan por completar)
   final RxList<PreferencesStep> availableSteps = <PreferencesStep>[].obs;
-final RxBool isPickingPhotos = false.obs;
+  final RxBool isPickingPhotos = false.obs;
 
   // Estados de carga
   final RxBool isLoading = false.obs;
@@ -65,7 +65,7 @@ final RxBool isPickingPhotos = false.obs;
 
   final RxInt minAge = 18.obs;
   final RxInt maxAge = 80.obs;
-final RxDouble distanceKm = 50.0.obs;
+  final RxDouble distanceKm = 50.0.obs;
   // ❌ ELIMINADO: final RxNum distanceKm = RxNum(50);
 
   // NUEVO: Flags para saber qué ya fue enviado
@@ -95,9 +95,13 @@ final RxDouble distanceKm = 50.0.obs;
 
   // Opciones de género
   final List<Map<String, dynamic>> genderOptions = [
-  {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
-    {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
-    {'label': 'Persona no binaria', 'value': 'No_binario', 'icon': Icons.transgender},
+    {'label': 'Hombre', 'value': 'Hombre', 'icon': Icons.male},
+    {'label': 'Mujere', 'value': 'Mujer', 'icon': Icons.female},
+    {
+      'label': 'Persona no binaria',
+      'value': 'No_binario',
+      'icon': Icons.transgender,
+    },
     {'label': 'Todos', 'value': 'Todos', 'icon': Icons.people},
   ];
 
@@ -123,77 +127,85 @@ final RxDouble distanceKm = 50.0.obs;
 
     _initializeController();
   }
-Future<String> _ensureValidImageFormat(String originalPath) async {
-  final ext = originalPath.toLowerCase();
 
-  // Si ya es png o jpg, no hace falta convertir
-  if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
-    return originalPath;
-  }
+  Future<String> _ensureValidImageFormat(String originalPath) async {
+    final ext = originalPath.toLowerCase();
 
-  try {
-    // Leer los bytes del archivo original
-    final File originalFile = File(originalPath);
-    final Uint8List bytes = await originalFile.readAsBytes();
-
-    // Guardar como PNG en la carpeta temporal
-    final String tempDir = (await Directory.systemTemp.createTemp('tendria_img')).path;
-    final String newPath = '$tempDir/photo_${DateTime.now().millisecondsSinceEpoch}.png';
-
-    final File newFile = File(newPath);
-    await newFile.writeAsBytes(bytes);
-
-    print('🖼️ Imagen convertida: $originalPath → $newPath');
-    return newPath;
-  } catch (e) {
-    print('⚠️ No se pudo convertir la imagen, usando original: $e');
-    return originalPath; // Fallback: usar el original
-  }
-}
-Future<void> pickMultipleImages() async {
-  final remaining = maxPhotos - selectedPhotos.length;
-  if (remaining <= 0) {
-    _showErrorAlert('Límite alcanzado', 'Puedes subir máximo $maxPhotos fotos');
-    return;
-  }
-
-  try {
-    isPickingPhotos.value = true;
-
-    final List<XFile> images = await _picker.pickMultiImage(
-      maxWidth: 1920,
-      maxHeight: 1920,
-      imageQuality: 85,
-    );
-
-    if (images.isEmpty) return;
-
-    final toAdd = images.take(remaining).toList();
-
-    // Convertir cada imagen a PNG si no es jpg/png
-    final List<String> convertedPaths = [];
-    for (final image in toAdd) {
-      final converted = await _ensureValidImageFormat(image.path);
-      convertedPaths.add(converted);
+    // Si ya es png o jpg, no hace falta convertir
+    if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
+      return originalPath;
     }
 
-    selectedPhotos.addAll(convertedPaths);
+    try {
+      // Leer los bytes del archivo original
+      final File originalFile = File(originalPath);
+      final Uint8List bytes = await originalFile.readAsBytes();
 
-    if (images.length > remaining) {
+      // Guardar como PNG en la carpeta temporal
+      final String tempDir = (await Directory.systemTemp.createTemp(
+        'tendria_img',
+      )).path;
+      final String newPath =
+          '$tempDir/photo_${DateTime.now().millisecondsSinceEpoch}.png';
+
+      final File newFile = File(newPath);
+      await newFile.writeAsBytes(bytes);
+
+      print('🖼️ Imagen convertida: $originalPath → $newPath');
+      return newPath;
+    } catch (e) {
+      print('⚠️ No se pudo convertir la imagen, usando original: $e');
+      return originalPath; // Fallback: usar el original
+    }
+  }
+
+  Future<void> pickMultipleImages() async {
+    final remaining = maxPhotos - selectedPhotos.length;
+    if (remaining <= 0) {
       _showErrorAlert(
         'Límite alcanzado',
-        'Solo se agregaron $remaining fotos (máximo $maxPhotos)',
+        'Puedes subir máximo $maxPhotos fotos',
       );
+      return;
     }
-  } catch (e) {
-    _showErrorAlert(
-      'Error',
-      'No se pudo seleccionar las fotos: ${cleanExceptionMessage(e)}',
-    );
-  } finally {
-    isPickingPhotos.value = false;
+
+    try {
+      isPickingPhotos.value = true;
+
+      final List<XFile> images = await _picker.pickMultiImage(
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+
+      if (images.isEmpty) return;
+
+      final toAdd = images.take(remaining).toList();
+
+      // Convertir cada imagen a PNG si no es jpg/png
+      final List<String> convertedPaths = [];
+      for (final image in toAdd) {
+        final converted = await _ensureValidImageFormat(image.path);
+        convertedPaths.add(converted);
+      }
+
+      selectedPhotos.addAll(convertedPaths);
+
+      if (images.length > remaining) {
+        _showErrorAlert(
+          'Límite alcanzado',
+          'Solo se agregaron $remaining fotos (máximo $maxPhotos)',
+        );
+      }
+    } catch (e) {
+      _showErrorAlert(
+        'Error',
+        'No se pudo seleccionar las fotos: ${cleanExceptionMessage(e)}',
+      );
+    } finally {
+      isPickingPhotos.value = false;
+    }
   }
-}
 
   void updateDistance(double distance) {
     distanceKm.value = distance;
@@ -249,82 +261,81 @@ Future<void> pickMultipleImages() async {
   }
 
   void _preloadExistingData(GetUserEntity user) {
-  // ← preferences ya es un objeto directo, no lista
-  if (user.preferences != null) {
-    final prefs = user.preferences!;
+    // ← preferences ya es un objeto directo, no lista
+    if (user.preferences != null) {
+      final prefs = user.preferences!;
 
-    if (prefs.searchgender != null) {
-      preferencesAlreadySent.value = true;
-      selectedGenderPreference.value = prefs.searchgender!;
+      if (prefs.searchgender != null) {
+        preferencesAlreadySent.value = true;
+        selectedGenderPreference.value = prefs.searchgender!;
+      }
+
+      if (prefs.agemin != null) minAge.value = prefs.agemin!;
+      if (prefs.agemax != null) maxAge.value = prefs.agemax!;
+      if (prefs.distancekm != null) distanceKm.value = prefs.distancekm!;
+      if (prefs.connectiontype != null) {
+        selectedConnectionType.value = prefs.connectiontype!;
+      }
     }
 
-    if (prefs.agemin != null) minAge.value = prefs.agemin!;
-    if (prefs.agemax != null) maxAge.value = prefs.agemax!;
-    if (prefs.distancekm != null) distanceKm.value = prefs.distancekm!;
-    if (prefs.connectiontype != null) {
-      selectedConnectionType.value = prefs.connectiontype!;
+    if (user.assets != null &&
+        user.assets!.isNotEmpty &&
+        user.assets!.length >= minPhotos) {
+      photosAlreadySent.value = true;
+    }
+
+    if (user.interestsIds != null && user.interestsIds!.isNotEmpty) {
+      interestsAlreadySent.value = true;
+      selectedInterests.value = user.interestsIds!.map((i) => i.id).toList();
+    }
+
+    if (user.qualitiesIds != null && user.qualitiesIds!.isNotEmpty) {
+      qualitiesAlreadySent.value = true;
+      selectedQualities.value = user.qualitiesIds!.map((q) => q.id).toList();
     }
   }
-
-  if (user.assets != null &&
-      user.assets!.isNotEmpty &&
-      user.assets!.length >= minPhotos) {
-    photosAlreadySent.value = true;
-  }
-
-  if (user.interestsIds != null && user.interestsIds!.isNotEmpty) {
-    interestsAlreadySent.value = true;
-    selectedInterests.value = user.interestsIds!.map((i) => i.id).toList();
-  }
-
-  if (user.qualitiesIds != null && user.qualitiesIds!.isNotEmpty) {
-    qualitiesAlreadySent.value = true;
-    selectedQualities.value = user.qualitiesIds!.map((q) => q.id).toList();
-  }
-}
   // ==========================================
   // DETERMINAR PASOS DISPONIBLES
   // ==========================================
 
- void _determineAvailableSteps() {
-  availableSteps.clear();
+  void _determineAvailableSteps() {
+    availableSteps.clear();
 
-  final user = _profileController?.userEntity.value;
+    final user = _profileController?.userEntity.value;
 
-  // ← preferences es objeto directo
-  final hasPreferences =
-      user?.preferences != null &&
-      user!.preferences!.searchgender != null;
+    // ← preferences es objeto directo
+    final hasPreferences =
+        user?.preferences != null && user!.preferences!.searchgender != null;
 
-  if (!hasPreferences) {
-    availableSteps.add(PreferencesStep.genderPreference);
-    availableSteps.add(PreferencesStep.connectionType);
-    availableSteps.add(PreferencesStep.ageRange);
+    if (!hasPreferences) {
+      availableSteps.add(PreferencesStep.genderPreference);
+      availableSteps.add(PreferencesStep.connectionType);
+      availableSteps.add(PreferencesStep.ageRange);
+    }
+
+    final hasPhotos =
+        user?.assets != null &&
+        user!.assets!.isNotEmpty &&
+        user.assets!.length >= minPhotos;
+
+    if (!hasPhotos) {
+      availableSteps.add(PreferencesStep.photos);
+    }
+
+    final hasInterests =
+        user?.interestsIds != null && user!.interestsIds!.isNotEmpty;
+
+    if (!hasInterests) {
+      availableSteps.add(PreferencesStep.interests);
+    }
+
+    final hasQualities =
+        user?.qualitiesIds != null && user!.qualitiesIds!.isNotEmpty;
+
+    if (!hasQualities) {
+      availableSteps.add(PreferencesStep.qualities);
+    }
   }
-
-  final hasPhotos =
-      user?.assets != null &&
-      user!.assets!.isNotEmpty &&
-      user.assets!.length >= minPhotos;
-
-  if (!hasPhotos) {
-    availableSteps.add(PreferencesStep.photos);
-  }
-
-  final hasInterests =
-      user?.interestsIds != null && user!.interestsIds!.isNotEmpty;
-
-  if (!hasInterests) {
-    availableSteps.add(PreferencesStep.interests);
-  }
-
-  final hasQualities =
-      user?.qualitiesIds != null && user!.qualitiesIds!.isNotEmpty;
-
-  if (!hasQualities) {
-    availableSteps.add(PreferencesStep.qualities);
-  }
-}
 
   // ==========================================
   // CARGAR CATÁLOGOS
@@ -489,199 +500,228 @@ Future<void> pickMultipleImages() async {
   // MANEJO DE FOTOS
   // ==========================================
 
-Future<void> pickImage() async {
-  if (selectedPhotos.length >= maxPhotos) {
-    _showErrorAlert('Límite alcanzado', 'Puedes subir máximo $maxPhotos fotos');
-    return;
-  }
-
-  try {
-    isPickingPhotos.value = true;
-
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1920,
-      maxHeight: 1920,
-      imageQuality: 85,
-    );
-
-    if (image != null) {
-      final converted = await _ensureValidImageFormat(image.path);
-      selectedPhotos.add(converted);
+  Future<void> pickImage() async {
+    if (selectedPhotos.length >= maxPhotos) {
+      _showErrorAlert(
+        'Límite alcanzado',
+        'Puedes subir máximo $maxPhotos fotos',
+      );
+      return;
     }
-  } catch (e) {
-    print('Error seleccionando Foto: $e');
-    _showErrorAlert(
-      'Error',
-      'No se pudo seleccionar la Foto: ${cleanExceptionMessage(e)}',
-    );
-  } finally {
-    isPickingPhotos.value = false;
-  }
-}
 
-Future<void> takePhoto() async {
-  if (selectedPhotos.length >= maxPhotos) {
-    _showErrorAlert('Límite alcanzado', 'Puedes subir máximo $maxPhotos fotos');
-    return;
-  }
+    try {
+      isPickingPhotos.value = true;
 
-  try {
-    isPickingPhotos.value = true;
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
 
-    final XFile? photo = await _picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 1920,
-      maxHeight: 1920,
-      imageQuality: 85,
-    );
-
-    if (photo != null) {
-      // Las fotos de cámara normalmente ya son jpg, pero convertimos por si acaso
-      final converted = await _ensureValidImageFormat(photo.path);
-      selectedPhotos.add(converted);
+      if (image != null) {
+        final converted = await _ensureValidImageFormat(image.path);
+        selectedPhotos.add(converted);
+      }
+    } catch (e) {
+      print('Error seleccionando Foto: $e');
+      _showErrorAlert(
+        'Error',
+        'No se pudo seleccionar la Foto: ${cleanExceptionMessage(e)}',
+      );
+    } finally {
+      isPickingPhotos.value = false;
     }
-  } catch (e) {
-    _showErrorAlert(
-      'Error',
-      'No se pudo tomar la foto: ${cleanExceptionMessage(e)}',
-    );
-  } finally {
-    isPickingPhotos.value = false;
   }
-}
+
+  Future<void> takePhoto() async {
+    if (selectedPhotos.length >= maxPhotos) {
+      _showErrorAlert(
+        'Límite alcanzado',
+        'Puedes subir máximo $maxPhotos fotos',
+      );
+      return;
+    }
+
+    try {
+      isPickingPhotos.value = true;
+
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+
+      if (photo != null) {
+        // Las fotos de cámara normalmente ya son jpg, pero convertimos por si acaso
+        final converted = await _ensureValidImageFormat(photo.path);
+        selectedPhotos.add(converted);
+      }
+    } catch (e) {
+      _showErrorAlert(
+        'Error',
+        'No se pudo tomar la foto: ${cleanExceptionMessage(e)}',
+      );
+    } finally {
+      isPickingPhotos.value = false;
+    }
+  }
+
   void removePhoto(int index) {
     if (index >= 0 && index < selectedPhotos.length) {
       selectedPhotos.removeAt(index);
     }
   }
-void showPhotoOptions() {
-  if (Get.context == null) return;
 
-  showCustomAlert(
-    context: Get.context!,
-    title: '',
-    message: '',
-    confirmText: '',
-    type: CustomAlertType.confirm,
-    customWidget: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Header
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: ThemeColor.primaryColor.withOpacity(0.05),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+  void showPhotoOptions() {
+    if (Get.context == null) return;
+
+    showCustomAlert(
+      context: Get.context!,
+      title: '',
+      message: '',
+      confirmText: '',
+      type: CustomAlertType.confirm,
+      customWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ThemeColor.primaryColor.withOpacity(0.05),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: ThemeColor.primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.photo_library,
+                    color: ThemeColor.primaryColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Agregar fotos',
+                    style: ThemeColor.headingSmall.copyWith(
+                      color: ThemeColor.primaryColor,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: ThemeColor.textSecondaryColor),
+                  onPressed: () => Get.back(),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
+
+          // Opciones
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                _buildPhotoOption(
+                  icon: Icons.photo_library,
+                  title: 'Galería (selección múltiple)',
+                  subtitle: 'Selecciona varias fotos de jalón',
+                  onTap: () {
+                    Get.back();
+                    pickMultipleImages();
+                  },
+                ),
+                const SizedBox(height: 8),
+                _buildPhotoOption(
+                  icon: Icons.camera_alt,
+                  title: 'Tomar foto',
+                  subtitle: 'Captura una nueva foto',
+                  onTap: () {
+                    Get.back();
+                    takePhoto();
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: ThemeColor.mediumBorderRadius,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: ThemeColor.dividerColor, width: 1),
+            borderRadius: ThemeColor.mediumBorderRadius,
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: ThemeColor.primaryColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
+                  borderRadius: ThemeColor.smallBorderRadius,
                 ),
-                child: Icon(Icons.photo_library, color: ThemeColor.primaryColor, size: 24),
+                child: Icon(icon, color: ThemeColor.primaryColor, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'Agregar fotos',
-                  style: ThemeColor.headingSmall.copyWith(color: ThemeColor.primaryColor),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: ThemeColor.subtitleMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: ThemeColor.bodySmall.copyWith(
+                        color: ThemeColor.textSecondaryColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.close, color: ThemeColor.textSecondaryColor),
-                onPressed: () => Get.back(),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: ThemeColor.textSecondaryColor,
               ),
             ],
           ),
-        ),
-
-        // Opciones
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              _buildPhotoOption(
-                icon: Icons.photo_library,
-                title: 'Galería (selección múltiple)',
-                subtitle: 'Selecciona varias fotos de jalón',
-                onTap: () {
-                  Get.back();
-                  pickMultipleImages();
-                },
-              ),
-              const SizedBox(height: 8),
-              _buildPhotoOption(
-                icon: Icons.camera_alt,
-                title: 'Tomar foto',
-                subtitle: 'Captura una nueva foto',
-                onTap: () {
-                  Get.back();
-                  takePhoto();
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildPhotoOption({
-  required IconData icon,
-  required String title,
-  required String subtitle,
-  required VoidCallback onTap,
-}) {
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: ThemeColor.mediumBorderRadius,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: ThemeColor.dividerColor, width: 1),
-          borderRadius: ThemeColor.mediumBorderRadius,
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: ThemeColor.primaryColor.withOpacity(0.1),
-                borderRadius: ThemeColor.smallBorderRadius,
-              ),
-              child: Icon(icon, color: ThemeColor.primaryColor, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: ThemeColor.subtitleMedium.copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: ThemeColor.bodySmall.copyWith(color: ThemeColor.textSecondaryColor)),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: ThemeColor.textSecondaryColor),
-          ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   // ==========================================
   // ENVÍO FINAL - CON VERIFICACIÓN POR PASO
   // ==========================================
@@ -712,11 +752,11 @@ Widget _buildPhotoOption({
           await uploadMediaUsecase.execute(mediaEntities);
           photosAlreadySent.value = true;
           isUploadingPhotos.value = false;
-if (selectedPhotos.isNotEmpty) {
-  print('🖼️ Estableciendo foto de perfil...');
-  await uploadPicturePerfileUsecase.execute(selectedPhotos.first);
-  print('✅ Foto de perfil establecida');
-}
+          if (selectedPhotos.isNotEmpty) {
+            print('🖼️ Estableciendo foto de perfil...');
+            await uploadPicturePerfileUsecase.execute(selectedPhotos.first);
+            print('✅ Foto de perfil establecida');
+          }
           print('✅ Fotos subidas exitosamente');
         }
       }
@@ -755,11 +795,13 @@ if (selectedPhotos.isNotEmpty) {
         print('⭐ ${selectedQualities.length} cualidades seleccionadas');
       }
 
-      // CASO 4: Guardar preferencias si están disponibles y no se han enviado
       if (!preferencesAlreadySent.value &&
+          currentStep.value == PreferencesStep.ageRange &&
           selectedGenderPreference.value.isNotEmpty &&
           selectedConnectionType.value.isNotEmpty) {
-        print('⚙️ Enviando preferencias (género, edad)...'); // ✅ SIN distancia
+        print(
+          '⚙️ Enviando preferencias con edad min:${minAge.value} max:${maxAge.value}...',
+        );
 
         final preferencesEntity = PreferencesEntity(
           agemin: minAge.value,

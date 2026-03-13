@@ -97,17 +97,6 @@ class SplashController extends GetxController {
 
   Future<void> checkUserSession() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      const String tutorialKey = AppConstants.tutorialKey;
-
-      final hasSeenTutorial = prefs.getBool(tutorialKey) ?? false;
-
-      print('hasSeenTutorial: $hasSeenTutorial');
-
-      if (!hasSeenTutorial) {
-        Get.offAllNamed(RoutesNames.tutorialPage);
-        return;
-      }
 
       await getUserUsecase.execute();
       Get.offAllNamed(RoutesNames.preferencesPage);

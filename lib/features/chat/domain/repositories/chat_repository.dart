@@ -20,5 +20,6 @@ abstract class ChatRepository {
   void setMessageCallback(Function(MensajeEntity) callback);
   bool get isSignalRConnected;
   void setOnDisconnectedCallback(VoidCallback callback);
-
+  void onMensajesLeidos(Function(DateTime leidoEn) callback);
+Future<void> marcarMensajesLeidos(int chatId, int otroUserId);
 }

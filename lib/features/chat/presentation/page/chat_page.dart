@@ -331,15 +331,28 @@ class ChatPage extends GetView<ChatController> {
                       ),
                     ),
                   const SizedBox(height: 4),
-                  Text(
-                    controller.formatMessageTime(mensaje.enviadoEn),
-                    style: ThemeColor.caption.copyWith(
-                      color: isOwn
-                          ? ThemeColor.textLightColor.withOpacity(0.7)
-                          : ThemeColor.textSecondaryColor,
-                      fontSize: 10,
-                    ),
-                  ),
+                 Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    Flexible(
+      child: Text(
+        controller.formatMessageTime(mensaje.enviadoEn),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: ThemeColor.caption.copyWith(
+          color: isOwn
+              ? ThemeColor.textLightColor.withOpacity(0.7)
+              : ThemeColor.textSecondaryColor,
+          fontSize: 10,
+        ),
+      ),
+    ),
+    if (isOwn) ...[
+      const SizedBox(width: 4),
+      _buildMessageStatus(mensaje.leidoEn),
+    ],
+  ],
+)
                 ],
               ),
             ),
@@ -352,7 +365,18 @@ class ChatPage extends GetView<ChatController> {
       ),
     );
   }
-
+Widget _buildMessageStatus(DateTime? leidoEn) {
+  final isRead = leidoEn != null;
+  return AnimatedSwitcher(
+    duration: const Duration(milliseconds: 300),
+    child: Icon(
+      isRead ? Icons.done_all : Icons.done,
+      key: ValueKey(isRead),
+      size: 14,
+      color: isRead ? Colors.blue[200] : Colors.white54,
+    ),
+  );
+}
   Widget _buildMessageAvatar(String? photoUrl) {
     return Container(
       width: 32,
@@ -428,7 +452,7 @@ class ChatPage extends GetView<ChatController> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Primer mensaje enviado. Espera la respuesta.',
+                            'El primer mensaje se enviará y se descontará de tu saldo. Luego espera la respuesta.',
                             style: ThemeColor.caption.copyWith(
                               color: ThemeColor.primaryColor,
                               fontWeight: FontWeight.w500,

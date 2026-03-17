@@ -18,6 +18,8 @@ import 'package:tendria/features/chat/domain/usecase/get_chat_mensaje_usecase.da
 import 'package:tendria/features/chat/domain/usecase/get_my_chats_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/join_chat_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/leave_chat_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/marcar_mensajes_leidos_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/on_mensajes_leidos_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/set_on_disconnected_callback_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/payments_chat_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/send_message_usecase.dart';
@@ -116,6 +118,8 @@ class UsecaseConfig {
   SetOnDisconnectedCallbackUsecase?setOnDisconnectedCallbackUsecase;
   SetupMessageListenerUsecase? setMessageCallbackUsecase;
   StartConversationsUsecase? startConversationsUsecase;
+  MarcarMensajesLeidosUsecase? marcarMensajesLeidosUsecase;
+  OnMensajesLeidosUsecase? onMensajesLeidosUsecase;
   PaymentsChatUsecase? paymentsChatUsecase;
   UnlockChatUsecase? unlockChatUsecase;
    AddLikeToStoryUsecase? addLikeToStoryUsecase;
@@ -201,6 +205,9 @@ class UsecaseConfig {
     getLikeByUsersUsecase = GetLikeByUsersUsecase(likeRepository: likeRepositoryImp!);
     getPendingLikedChatsUsecase = GetPendingLikedChatsUsecase(likeRepository: likeRepositoryImp!);
     toggleLikeUsecase = ToggleLikeUsecase(likeRepository: likeRepositoryImp!);
+    marcarMensajesLeidosUsecase = MarcarMensajesLeidosUsecase(chatRepository: chatRepositoryImp!);
+    onMensajesLeidosUsecase = OnMensajesLeidosUsecase(chatRepository: chatRepositoryImp!);
+
 
     unblockUserUsecase = UnblockUserUsecase(unlockRepository: unlockRepositoryImp!);
     blockUserUsecase = BlockUserUsecase(unlockRepository: unlockRepositoryImp!);

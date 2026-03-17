@@ -47,8 +47,11 @@ class UserProfileController extends GetxController {
       currentUser.value?.qualitiesIds?.map((q) => q.name).toList() ?? [];
   List<String> get userGallery => _buildGallery(currentUser.value);
 
+  final RxInt goPerfilIndex = (-1).obs;
   @override
   void onInit() {
+
+    final args = Get.arguments as Map<String, dynamic>?;
     super.onInit();
     pageController = PageController();
  print('UserProfileController initialized with arguments: ${Get.arguments}');
@@ -56,6 +59,15 @@ class UserProfileController extends GetxController {
       userId.value = Get.arguments['userId'];
       loadUserProfile(userId.value);
     }
+final index = args?['goPerfilIndex'];
+
+if (index is RxInt) {
+  goPerfilIndex.value = index.value;
+} else if (index is int) {
+  goPerfilIndex.value = index;
+} else {
+  goPerfilIndex.value = -1;
+}
   }
 
   @override

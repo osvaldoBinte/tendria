@@ -11,13 +11,12 @@ import 'package:tendria/features/user/domain/entities/update_location_entity.dar
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 
-
 class SplashController extends GetxController {
   final UpdateLocationUsecase updateLocationUsecase;
   final RxBool isLoading = true.obs;
 
   final GetUserUsecase getUserUsecase;
-  
+
   SplashController({
     required this.getUserUsecase,
     required this.updateLocationUsecase,
@@ -30,6 +29,7 @@ class SplashController extends GetxController {
     await requestLocationPermission();
     await _requestNotificationPermission();
     await _requestCameraPermission();
+    await _requestMicrophonePermission();
   }
 
   Future<void> requestLocationPermission() async {
@@ -52,7 +52,6 @@ class SplashController extends GetxController {
         return;
       }
     }
-
 
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
@@ -95,9 +94,20 @@ class SplashController extends GetxController {
     }
   }
 
+  Future<void> _requestMicrophonePermission() async {
+    final status = await Permission.microphone.request();
+
+    if (status.isGranted) {
+      print('✅ Permiso de micrófono concedido');
+    } else if (status.isDenied) {
+      print('❌ Permiso de micrófono denegado');
+    } else if (status.isPermanentlyDenied) {
+      print('🚫 Permiso de micrófono permanentemente denegado');
+    }
+  }
+
   Future<void> checkUserSession() async {
     try {
-
       await getUserUsecase.execute();
       Get.offAllNamed(RoutesNames.preferencesPage);
     } catch (e) {

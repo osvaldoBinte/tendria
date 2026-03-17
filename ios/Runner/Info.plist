@@ -54,11 +54,13 @@
 		<string>Necesitamos tu ubicación incluso en segundo plano.</string>
 		<!-- Cámara y galería -->
 		<key>NSCameraUsageDescription</key>
-		<string>Necesitamos acceso a tu cámara para tomar fotos y videos.</string>
+		<string>Necesitamos acceso a tu cámara para que puedas tomar fotos o videos y subirlos a tus historias o foto de perfil.</string>
+
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Necesitamos acceso a tu galería para seleccionar fotos y videos.</string>
+		<string>Necesitamos acceso a tu galería para que puedas seleccionar fotos o videos y usarlos en tus historias o foto de perfil.</string>
+
 		<key>NSPhotoLibraryAddUsageDescription</key>
-		<string>Necesitamos permiso para guardar fotos y videos en tu galería.</string>
+		<string>Necesitamos permiso para guardar en tu galería las fotos o videos que tomes desde la app.</string>
 		<!-- Micrófono -->
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Necesitamos acceso al micrófono para grabar videos y audio.</string>

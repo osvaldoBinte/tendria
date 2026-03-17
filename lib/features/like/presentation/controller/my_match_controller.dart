@@ -112,6 +112,7 @@ class MyMatchController extends GetxController {
       'chatId': chatId,
       'name': name,
       'goHomeIndex': 3,
+      'goPerfilIndex': 3,
     });
   }
 

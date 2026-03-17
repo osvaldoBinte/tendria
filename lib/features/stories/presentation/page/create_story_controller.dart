@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:video_player/video_player.dart';
@@ -369,37 +370,59 @@ if (contentType.value == 'Video') {
     }
   }
 
-  // Inicializar cámara
-  Future<void> initializeCamera() async {
+  
+Future<void> initializeCamera() async {
   try {
     isCameraInitialized.value = false;
-    
+
+    // ✅ Solicitar permisos ANTES de inicializar
+    final cameraStatus = await Permission.camera.request();
+    final micStatus = await Permission.microphone.request();
+
+    if (!cameraStatus.isGranted) {
+      debugPrint('❌ Permiso de cámara denegado');
+      showErrorSnackbar('Se necesita permiso de cámara para continuar');
+      return;
+    }
+
+    if (!micStatus.isGranted) {
+      debugPrint('⚠️ Permiso de micrófono denegado — solo foto disponible');
+      // No bloqueamos, solo advertimos (fotos no necesitan micrófono)
+    }
+
     final availableCamerasList = await availableCameras();
-    if (availableCamerasList.isEmpty) return;
+    if (availableCamerasList.isEmpty) {
+      debugPrint('❌ No se encontraron cámaras');
+      return;
+    }
 
     cameras.value = availableCamerasList;
-    
-    // ✅ Buscar por lensDirection en vez de asumir índice
     final camera = _getCamera();
 
+    // ✅ enableAudio solo si tenemos permiso de micrófono
     final newController = CameraController(
       camera,
       ResolutionPreset.high,
-      enableAudio: true,
+      enableAudio: micStatus.isGranted,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
     await newController.initialize();
     await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     if (newController.value.isInitialized) {
       cameraController.value = newController;
       await Future.delayed(const Duration(milliseconds: 50));
       isCameraInitialized.value = true;
+      debugPrint('✅ Cámara inicializada correctamente');
     }
+  } on CameraException catch (e) {
+    debugPrint('💥 CameraException: ${e.code} - ${e.description}');
+    isCameraInitialized.value = false;
+    showErrorSnackbar('Error al iniciar la cámara: ${e.description}');
   } catch (e) {
-    debugPrint('Error initializing camera: $e');
+    debugPrint('💥 Error inicializando cámara: $e');
     isCameraInitialized.value = false;
   }
 }

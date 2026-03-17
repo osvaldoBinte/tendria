@@ -72,6 +72,16 @@ void setOnDisconnectedCallback(VoidCallback callback) {
   @override
   bool get isSignalRConnected => chatDataSourcesImp.isSignalRConnected;
   
+  @override
+  Future<void> marcarMensajesLeidos(int chatId, int otroUserId)  async{
+    return await chatDataSourcesImp.marcarMensajesLeidos(chatId, otroUserId);
+  }
+  
+  @override
+  void onMensajesLeidos(Function(DateTime leidoEn) callback)  {
+   return  chatDataSourcesImp.onMensajesLeidos(callback);
+  }
+  
 
  
  

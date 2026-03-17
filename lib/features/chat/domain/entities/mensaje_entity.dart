@@ -7,7 +7,7 @@ class MensajeEntity {
   final String? mensaje;
   final DateTime enviadoEn;
   final bool esPropio;
-
+final DateTime? leidoEn;
   MensajeEntity({
     required this.id,
     required this.chatId,
@@ -17,5 +17,6 @@ class MensajeEntity {
     this.mensaje,
     required this.enviadoEn,
     required this.esPropio,
+    this.leidoEn,
   });
 }

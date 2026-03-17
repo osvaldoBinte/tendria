@@ -728,6 +728,8 @@ Obx(() {
                                 'name': user.name ?? 'Usuario',
                                 'photo': user.fotoUrl,
                                 'MyPhoto': myProfileController.profilePhotoUrl,
+                                'goPerfilIndex': 1,
+                                
                               },
                             );
                           },

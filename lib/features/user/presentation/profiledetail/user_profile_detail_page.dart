@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/user/presentation/controller/user_profile_controller.dart';
 
@@ -65,54 +66,88 @@ class UserProfileDetailPage extends StatelessWidget {
         );
       }
 
-      return Scaffold(
-        backgroundColor: ThemeColor.backgroundColorfondo,
-        body: Column(
-          children: [
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    backgroundColor: ThemeColor.backgroundColorfondo,
-                    elevation: 4,
-                    shadowColor: ThemeColor.shadowColor,
-                    pinned: true,
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Image.asset(
-                          'assets/logo/logo.png',
-                          width: 100,
-                          height: 40,
-                        ),
-                      ],
-                    ),
-                  ),
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          FocusScope.of(Get.context!).unfocus();
+          if (controller.goPerfilIndex.value >= 0) {
+            Get.offAllNamed(
+              RoutesNames.homePage,
+              arguments: {'tab': controller.goPerfilIndex.value},
+            );
+          } else {
+            Get.back();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: ThemeColor.backgroundColorfondo,
+          body: Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      backgroundColor: ThemeColor.backgroundColorfondo,
+                      elevation: 4,
+                      shadowColor: ThemeColor.shadowColor,
+                      pinned: true,
 
-                  _buildSliverAppBar(controller),
+                      leading: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          FocusScope.of(Get.context!).unfocus();
 
-                  SliverToBoxAdapter(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        _buildBioSection(controller),
-                        const SizedBox(height: 16),
-                        _buildBuscoSection(controller),
-                        const SizedBox(height: 16),
-                        if (controller.userQualities.isNotEmpty)
-                          _buildQualitiesSection(controller),
-                        const SizedBox(height: 16),
-                        if (controller.userInterests.isNotEmpty)
-                          _buildInterestsSection(controller),
-                        const SizedBox(height: 20),
-                      ],
+                          if (controller.goPerfilIndex.value >= 0) {
+                            Get.offAllNamed(
+                              RoutesNames.homePage,
+                              arguments: {
+                                'tab': controller.goPerfilIndex.value,
+                              },
+                            );
+                          } else {
+                            Get.back();
+                          }
+                        },
+                      ),
+
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset(
+                            'assets/logo/logo.png',
+                            width: 100,
+                            height: 40,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+
+                    _buildSliverAppBar(controller),
+
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          _buildBioSection(controller),
+                          const SizedBox(height: 16),
+                          _buildBuscoSection(controller),
+                          const SizedBox(height: 16),
+                          if (controller.userQualities.isNotEmpty)
+                            _buildQualitiesSection(controller),
+                          const SizedBox(height: 16),
+                          if (controller.userInterests.isNotEmpty)
+                            _buildInterestsSection(controller),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            _buildReporteButtons(controller),
-          ],
+              _buildReporteButtons(controller),
+            ],
+          ),
         ),
       );
     });
@@ -213,7 +248,6 @@ class UserProfileDetailPage extends StatelessWidget {
                       ),
                     ),
 
-
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -231,7 +265,6 @@ class UserProfileDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          
                           Text(
                             '${controller.userName}, ${controller.userAge}',
                             style: TextStyle(
@@ -251,7 +284,7 @@ class UserProfileDetailPage extends StatelessWidget {
                                 color: ThemeColor.textLightColor,
                               ),
                               const SizedBox(width: 4),
-                              
+
                               Text(
                                 controller.currentUser.value?.city ??
                                     'Cerca de ti',
@@ -298,7 +331,7 @@ class UserProfileDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             Text(
               controller.userBio,
               style: TextStyle(
@@ -315,7 +348,6 @@ class UserProfileDetailPage extends StatelessWidget {
 
   Widget _buildBuscoSection(UserProfileController controller) {
     return Obx(() {
-      
       final pref = controller.currentUser.value?.preferences;
       if (pref == null) return const SizedBox.shrink();
 
@@ -388,7 +420,7 @@ class UserProfileDetailPage extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              
+
               children: controller.userInterests
                   .map((i) => _buildChip(i))
                   .toList(),
@@ -425,7 +457,7 @@ class UserProfileDetailPage extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              
+
               children: controller.userQualities
                   .map((q) => _buildChip(q))
                   .toList(),
@@ -482,101 +514,101 @@ class UserProfileDetailPage extends StatelessWidget {
 
   Widget _buildReporteButtons(UserProfileController controller) {
     return SafeArea(
-    top: false,
-    child:  Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Obx(
-            () => controller.showRejectButton
-                ? GestureDetector(
-                    onTap: controller.rejectUser,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            ThemeColor.textSecondaryColor,
-                            ThemeColor.textSecondaryColor.withOpacity(0.8),
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Obx(
+              () => controller.showRejectButton
+                  ? GestureDetector(
+                      onTap: controller.rejectUser,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              ThemeColor.textSecondaryColor,
+                              ThemeColor.textSecondaryColor.withOpacity(0.8),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: ThemeColor.textSecondaryColor.withOpacity(
+                                0.3,
+                              ),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                         ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: ThemeColor.textSecondaryColor.withOpacity(
-                              0.3,
-                            ),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: ThemeColor.textLightColor,
+                          size: 32,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: ThemeColor.textLightColor,
-                        size: 32,
-                      ),
+                    )
+                  : const SizedBox(width: 64),
+            ),
+            GestureDetector(
+              onTap: controller.sendMensaje,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      ThemeColor.primaryColor,
+                      ThemeColor.primaryColor.withOpacity(0.8),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: ThemeColor.primaryColor.withOpacity(0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                  )
-                : const SizedBox(width: 64),
-          ),
-          GestureDetector(
-            onTap: controller.sendMensaje,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    ThemeColor.primaryColor,
-                    ThemeColor.primaryColor.withOpacity(0.8),
                   ],
                 ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: ThemeColor.primaryColor.withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.message,
-                color: ThemeColor.textLightColor,
-                size: 32,
-              ),
-            ),
-          ),
-
-          GestureDetector(
-            onTap: controller.blockUser,
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.red.shade700, Colors.red.shade400],
+                child: Icon(
+                  Icons.message,
+                  color: ThemeColor.textLightColor,
+                  size: 32,
                 ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.red.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.block_rounded,
-                color: ThemeColor.textLightColor,
-                size: 28,
               ),
             ),
-          ),
-        ],
+
+            GestureDetector(
+              onTap: controller.blockUser,
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade700, Colors.red.shade400],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.block_rounded,
+                  color: ThemeColor.textLightColor,
+                  size: 28,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 }

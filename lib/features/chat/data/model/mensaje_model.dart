@@ -10,6 +10,7 @@ class MensajeModel extends MensajeEntity {
     super.mensaje,
     required super.enviadoEn,
     required super.esPropio,
+    super.leidoEn,
   });
 
   factory MensajeModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,7 @@ class MensajeModel extends MensajeEntity {
       mensaje: json['mensaje'],
       enviadoEn: DateTime.parse(json['enviadoEn']),
       esPropio: json['esPropio'],
+      leidoEn: json['leidoEn'] != null ? DateTime.parse(json['leidoEn']) : null,
     );
   }
 }

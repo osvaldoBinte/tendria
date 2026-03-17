@@ -334,4 +334,42 @@ Map<String, dynamic> _fixEncodingInMap(Map<String, dynamic> map) {
     callback();
   });
 }
+// ── Marcar como leídos (invoca el Hub) ──
+Future<void> marcarMensajesLeidos(int chatId, int otroUserId) async {
+  try {
+    if (_hubConnection?.state != HubConnectionState.Connected) return;
+    await _hubConnection!.invoke('MarcarComoLeidos', args: [chatId, otroUserId]);
+    print('✅ MarcarComoLeidos invocado');
+  } catch (e) {
+    print('❌ Error en MarcarComoLeidos: $e');
+  }
+}
+
+// ── Escuchar evento MensajesLeidos del servidor ──
+// Agregar campo
+Function(DateTime)? _onMensajesLeidosCallback;
+
+void onMensajesLeidos(Function(DateTime leidoEn) callback) {
+  _onMensajesLeidosCallback = callback; // ✅ guardar referencia
+  _registrarListenerMensajesLeidos();
+}
+
+void _registrarListenerMensajesLeidos() {
+  if (_hubConnection == null) return;
+  // Quitar listener anterior para no duplicar
+  _hubConnection!.off('MensajesLeidos');
+  _hubConnection!.on('MensajesLeidos', (args) {
+    try {
+      print('👁️ Evento MensajesLeidos recibido: $args');
+      final raw = args?[0];
+      final leidoEn = raw is String
+          ? DateTime.parse(raw)
+          : DateTime.now();
+      _onMensajesLeidosCallback?.call(leidoEn);
+    } catch (e) {
+      print('❌ Error parseando MensajesLeidos: $e');
+    }
+  });
+  print('✅ Listener MensajesLeidos registrado');
+}
 }

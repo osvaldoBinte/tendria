@@ -106,7 +106,7 @@ void _handleInitialTab() {
       final user = profileController.userEntity.value;
       
       if (user == null) {
-        _navigateToPreferences();
+      //  _navigateToPreferences();
         return;
       }
 

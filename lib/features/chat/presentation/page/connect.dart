@@ -8,6 +8,8 @@ import 'package:tendria/features/chat/domain/usecase/connect_signalr_usecase.dar
 import 'package:tendria/features/chat/domain/usecase/disconnect_signalr_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/join_chat_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/leave_chat_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/marcar_mensajes_leidos_usecase.dart';
+import 'package:tendria/features/chat/domain/usecase/on_mensajes_leidos_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/setup_message_listener_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/set_on_disconnected_callback_usecase.dart';
 
@@ -19,6 +21,8 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
   final LeaveChatUsecase leaveChatUsecase;
   final SetupMessageListenerUsecase setupMessageListenerUsecase;
   final SetOnDisconnectedCallbackUsecase setOnDisconnectedCallbackUsecase;
+  final OnMensajesLeidosUsecase onMensajesLeidosUsecase;
+  final MarcarMensajesLeidosUsecase marcarMensajesLeidosUsecase;
    AuthService authService = AuthService();
 
   SignalRService({
@@ -28,6 +32,8 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
     required this.leaveChatUsecase,
     required this.setupMessageListenerUsecase,
     required this.setOnDisconnectedCallbackUsecase,
+    required this.onMensajesLeidosUsecase,
+    required this.marcarMensajesLeidosUsecase,
   });
 bool _isConnecting = false; 
 Completer<void>? _connectionCompleter;
@@ -256,4 +262,16 @@ Future<void> disconnect() async {
     print('❌ Error desconectando SignalR: $e');
   }
 }
+ Future<void> marcarMensajesLeidos(int chatId, int otroUserId) async {
+    if (!isConnected.value) return;
+    await marcarMensajesLeidosUsecase.execute(chatId, otroUserId);
+  }
+
+  // ✅ Registrar listener del evento MensajesLeidos
+  void escucharMensajesLeidos(Function(DateTime) callback) {
+    print('👂 Registrando listener para mensajes leídos');
+    onMensajesLeidosUsecase.execute(callback);
+  }
+
+
 }

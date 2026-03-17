@@ -56,6 +56,7 @@ class ChatController extends GetxController {
   String? userPhoto;
   String? myPhoto;
   final RxInt goHomeIndex = (-1).obs;
+  final RxInt goPerfilIndex = (-1).obs;
 
   // Usado por el Listener en ChatPage para distinguir tap vs scroll
   Offset pointerDown = Offset.zero;
@@ -66,31 +67,66 @@ class ChatController extends GetxController {
 
   late final SignalRService _signalRService;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _signalRService = Get.find<SignalRService>();
-    _loadArguments();
-    messageController.addListener(_onMessageChanged);
+@override
+void onInit() {
+  super.onInit();
 
-    if (!isNewConversation.value) {
-      isSignalRConnected.value = _signalRService.isConnected.value;
+  // ✅ 1. Asignar PRIMERO
+  _signalRService = Get.find<SignalRService>();
 
-      ever(_signalRService.isConnected, (bool connected) {
-        isSignalRConnected.value = connected;
-        if (connected) isRetrying.value = false;
-        if (!connected) _autoReconnect();
-      });
+  // ✅ 2. Cargar argumentos (necesario para saber chatId, otroUsuario, etc.)
+  _loadArguments();
 
-      ever(_signalRService.isReconnecting, (bool reconnecting) {
-        if (reconnecting) isRetrying.value = true;
-      });
+  // ✅ 3. Registrar listener de "leídos"
+  _signalRService.escucharMensajesLeidos(_onMensajesLeidos);
 
-      _subscribeToChat();
-      loadChatMessages();
-    }
+  messageController.addListener(_onMessageChanged);
+
+  if (!isNewConversation.value) {
+    isSignalRConnected.value = _signalRService.isConnected.value;
+
+    ever(_signalRService.isConnected, (bool connected) {
+      isSignalRConnected.value = connected;
+      if (connected) isRetrying.value = false;
+      if (!connected) _autoReconnect();
+    });
+
+    ever(_signalRService.isReconnecting, (bool reconnecting) {
+      if (reconnecting) isRetrying.value = true;
+    });
+
+    _subscribeToChat();
+    // ✅ 4. Cargar mensajes y marcar leídos después (cuando otroUsuario ya esté disponible)
+    loadChatMessages().then((_) => _marcarComoLeidos());
   }
+}
+// Métodos nuevos:
+Future<void> _marcarComoLeidos() async {
+  if (chatId == null) return;
+  final otroId = otroUsuario.value?.id ?? 0;
+  if (otroId == 0) return;
+  await _signalRService.marcarMensajesLeidos(chatId!, otroId);
+}
 
+void _onMensajesLeidos(DateTime leidoEn) {
+  // Actualizar todos los mensajes propios que aún no tienen leidoEn
+  mensajes.value = mensajes.map((m) {
+    if (m.esPropio && m.leidoEn == null) {
+      return MensajeEntity(
+        id: m.id,
+        chatId: m.chatId,
+        senderId: m.senderId,
+        senderNombre: m.senderNombre,
+        senderFoto: m.senderFoto,
+        mensaje: m.mensaje,
+        enviadoEn: m.enviadoEn,
+        esPropio: m.esPropio,
+        leidoEn: leidoEn, // ✅ marcar como leído
+      );
+    }
+    return m;
+  }).toList();
+}
   @override
   void onClose() {
     messageController.removeListener(_onMessageChanged);
@@ -114,6 +150,7 @@ class ChatController extends GetxController {
     userPhoto = args?['photo'];
     myPhoto = args?['MyPhoto'];
     goHomeIndex.value = args?['goHomeIndex'] ?? -1;
+    goPerfilIndex.value = args?['goPerfilIndex'] ?? -1;
 
     if (args?['otroUsuario'] != null) {
       otroUsuario.value = args!['otroUsuario'] as UsuarioChatEntity;
@@ -206,18 +243,19 @@ class ChatController extends GetxController {
       final result = await getChatMensajeUsecase.execute(chatId!);
       chat.value = result;
 
-      final lista = (result.mensajes ?? [])
-          .map((m) => MensajeEntity(
-                id: m.id,
-                chatId: m.chatId,
-                senderId: m.senderId,
-                senderNombre: m.senderNombre,
-                senderFoto: m.senderFoto,
-                mensaje: m.mensaje,
-                enviadoEn: m.enviadoEn,
-                esPropio: m.esPropio,
-              ))
-          .toList();
+     final lista = (result.mensajes ?? [])
+    .map((m) => MensajeEntity(
+          id: m.id,
+          chatId: m.chatId,
+          senderId: m.senderId,
+          senderNombre: m.senderNombre,
+          senderFoto: m.senderFoto,
+          mensaje: m.mensaje,
+          enviadoEn: m.enviadoEn,
+          esPropio: m.esPropio,
+          leidoEn: m.leidoEn, // ✅ no olvides mapear este campo
+        ))
+    .toList();
 
       mensajes.value = lista;
       otroUsuario.value = result.otroUsuario;
@@ -342,7 +380,7 @@ class ChatController extends GetxController {
 
   void navigateToProfile() {
     final uid = otroUsuario.value?.id ?? targetUserId;
-    Get.toNamed(RoutesNames.userProfileDetailPage, arguments: {'userId': uid});
+    Get.toNamed(RoutesNames.userProfileDetailPage, arguments: {'userId': uid,'goPerfilIndex':goPerfilIndex,});
   }
 
   String formatMessageTime(DateTime dt) {

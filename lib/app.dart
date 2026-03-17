@@ -76,6 +76,8 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.connectSignalRUsecase!,permanent: true);
         Get.put(usecaseConfig.disconnectSignalRUsecase!,permanent: true);
         Get.put(usecaseConfig.joinChatUsecase!,permanent: true);
+        Get.put(usecaseConfig.onMensajesLeidosUsecase!, permanent: true);
+        Get.put(usecaseConfig.marcarMensajesLeidosUsecase!, permanent: true);
         Get.put(usecaseConfig.leaveChatUsecase!,permanent: true);
         Get.put(usecaseConfig.setOnDisconnectedCallbackUsecase!, permanent:  true);
         Get.put(usecaseConfig.setMessageCallbackUsecase!,permanent: true);
@@ -96,7 +98,7 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.saveTokenFcmUsecase!, permanent: true);
 
         Get.lazyPut(() => LoginController(loginUsecase: Get.find(), saveTokenFcmUsecase: Get.find(), ), fenix: true);
-        Get.put( SignalRService( connectSignalRUsecase: Get.find(), disconnectSignalRUsecase: Get.find(), joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(),setupMessageListenerUsecase: Get.find(), setOnDisconnectedCallbackUsecase: Get.find(),), permanent: true,);   
+        Get.put( SignalRService( connectSignalRUsecase: Get.find(), disconnectSignalRUsecase: Get.find(), joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(),setupMessageListenerUsecase: Get.find(), setOnDisconnectedCallbackUsecase: Get.find(), onMensajesLeidosUsecase: Get.find(), marcarMensajesLeidosUsecase: Get.find(),), permanent: true,);   
         Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find(), ), fenix: true);
         Get.lazyPut(()=> SplashController(getUserUsecase: Get.find(), updateLocationUsecase: Get.find(),), fenix: true);
         Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find()),  fenix: true);
@@ -114,7 +116,7 @@ class App extends StatelessWidget {
          Get.lazyPut(() => NotificationController(getNotificationUsecase: Get.find(), markAllNotificationsAsReadUsecase: Get.find()), fenix:true);
 Get.lazyPut(() => LanguageController(),fenix:true);
 Get.put(TranslationService());
-Get.lazyPut(() => TutorialController());
+Get.lazyPut(() => TutorialController(),fenix:true);
 
 
       }),

@@ -90,8 +90,8 @@ class RegisterController extends GetxController {
   final RxString bioErrorMessage = ''.obs;
 
   final List<Map<String, dynamic>> genderOptions = [
-    {'label': 'masculino', 'value': 'Hombre', 'icon': Icons.male},
-    {'label': 'femenino', 'value': 'Mujer', 'icon': Icons.female},
+    {'label': 'Masculino', 'value': 'Hombre', 'icon': Icons.male},
+    {'label': 'Femenino', 'value': 'Mujer', 'icon': Icons.female},
     {
       'label': 'Persona no binaria',
       'value': 'No_binario',

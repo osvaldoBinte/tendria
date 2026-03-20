@@ -67,7 +67,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // ── Pantalla principal ──────────────────────────────────────────────
+        
         Scaffold(
           backgroundColor: ThemeColor.backgroundColor,
           body: Stack(
@@ -107,12 +107,12 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                         SizedBox(height: ThemeColor.paddingLarge),
 
-                        // ── Radar con GlobalKey (paso 1) ──────────────────
+
                         LayoutBuilder(
   builder: (context, constraints) {
     final size = math.min(constraints.maxWidth, 350.0);
     return SizedBox(
-      key: tutorialCtrl.radarKey, // ← sigue aquí pero sin Builder encima
+      key: tutorialCtrl.radarKey, 
       width: size,
       height: size,
       child: Obx(() {
@@ -144,9 +144,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         SizedBox(height: ThemeColor.paddingLarge),
                         SizedBox(height: ThemeColor.paddingLarge),
 
-                        // ── Botón buscar con GlobalKey (paso 3) ───────────
+
                         Obx(() => SizedBox(
-                              key: tutorialCtrl.searchButtonKey, // PASO 3
+                              key: tutorialCtrl.searchButtonKey,
                               width: double.infinity,
                               height: 52,
                               child: ElevatedButton(
@@ -185,7 +185,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                         SizedBox(height: ThemeColor.paddingMedium),
 
-                        // ── Botón ver perfil ──────────────────────────────
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -222,15 +221,12 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           ),
         ),
 
-        // ── Tutorial encima de todo ─────────────────────────────────────────
+
         const TutorialOverlay(),
       ],
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // RADAR WIDGETS
-  // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildGridBackground() {
     return CustomPaint(painter: GridPainter(), child: Container());
@@ -423,9 +419,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
       final points = _calculateUserPositions(users);
 
-      // Paso 2: el contenedor de todos los puntos
       return SizedBox(
-        key: tutorialCtrl.detectedPointsKey, // PASO 2
+        key: tutorialCtrl.detectedPointsKey, 
         width: 350,
         height: 350,
         child: Stack(
@@ -481,7 +476,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     GetUserEntity user,
     int userIndex,
   ) {
-    // Paso 4: sólo al primer perfil se le asigna la GlobalKey
+  
+  
     final bool isFirstProfile = userIndex == 0;
 
     return AnimatedBuilder(
@@ -492,7 +488,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           top: 175 + y - 45,
           child: GestureDetector(
             key: isFirstProfile
-                ? tutorialCtrl.profileDotKey // PASO 4
+                ? tutorialCtrl.profileDotKey 
                 : null,
             behavior: HitTestBehavior.translucent,
             onTap: () => controller.showUserPreviewDialog(user, userIndex),
@@ -503,7 +499,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  // Globo de status
+                  
                   if (user.status != null && user.status!.isNotEmpty)
                     Container(
                       constraints: const BoxConstraints(maxWidth: 70),
@@ -542,7 +538,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                       ),
                     ),
 
-                  // Foto con indicador de tutorial en el primer perfil
+
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -578,7 +574,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         ),
                       ),
 
-                      // Ícono de toque animado sobre el primer perfil (paso 4)
+
                       if (isFirstProfile)
                         Obx(() {
                           if (!tutorialCtrl.isVisible.value ||
@@ -598,7 +594,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                   const SizedBox(height: 4),
 
-                  // Nombre y edad
+
                   Flexible(
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 70),
@@ -657,27 +653,26 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     );
   }
 Widget _buildSideIndicators() {
-  // Obtener la posición real del radar
+  
   final radarRect = tutorialCtrl.getTargetRect(tutorialCtrl.radarKey);
   
-  // Si aún no está disponible, usa el fallback
+  
   final double radarCenterY = radarRect != null
       ? radarRect.top + (radarRect.height / 2)
       : MediaQuery.of(context).size.height / 2;
-
-  // Alto total de los indicadores: 10 barras * (16 + 6 margin) = 220
+      
   const double indicatorHeight = 220.0;
 
   return Stack(
     children: [
       Positioned(
         left: 20,
-        top: radarCenterY - (indicatorHeight / 2), // ← centrado en el radar
+        top: radarCenterY - (indicatorHeight / 2),
         child: _buildVerticalIndicator(),
       ),
       Positioned(
         right: 20,
-        top: radarCenterY - (indicatorHeight / 2), // ← centrado en el radar
+        top: radarCenterY - (indicatorHeight / 2),
         child: _buildVerticalIndicator(),
       ),
     ],
@@ -719,9 +714,7 @@ Widget _buildSideIndicators() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ÍCONO DE TOQUE ANIMADO (paso 3 y 4)
-// ══════════════════════════════════════════════════════════════════════════════
+
 
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
@@ -792,9 +785,7 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// PAINTERS (sin cambios)
-// ══════════════════════════════════════════════════════════════════════════════
+
 
 class GridPainter extends CustomPainter {
   @override

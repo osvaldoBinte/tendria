@@ -18,6 +18,7 @@ import 'package:tendria/features/like/presentation/controller/start_conversation
 import 'package:tendria/features/notification/presentation/page/notification_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/unlock/presentation/controller/blocked_users_controller.dart';
+import 'package:tendria/features/user/presentation/controller/balance_controller.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 import 'package:tendria/features/user/presentation/controller/preferences_controller.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
@@ -56,6 +57,7 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.deleteInterestsUsecase!, permanent: true);
         Get.put(usecaseConfig.deleteQualitiesUsecase!, permanent: true);
         Get.put(usecaseConfig.getUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.getBalanceUsecase!, permanent: true);
         Get.put(usecaseConfig.updateUserUsecase!, permanent: true);
         Get.put(usecaseConfig.getUserByIdUsecase!, permanent: true);
         Get.put(usecaseConfig.deleteUserUsecase!, permanent: true);
@@ -114,9 +116,10 @@ class App extends StatelessWidget {
          Get.lazyPut(() => BlockedUsersController(fetchBlockedUsersUsecase: Get.find(), unblockUserUsecase: Get.find()), fenix:true);
          Get.lazyPut(() => UpdateProfileController(deleteInterestsUsecase: Get.find(), deleteQualitiesUsecase: Get.find(), updateUserUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(), deleteUserUsecase: Get.find()), fenix:true);
          Get.lazyPut(() => NotificationController(getNotificationUsecase: Get.find(), markAllNotificationsAsReadUsecase: Get.find()), fenix:true);
-Get.lazyPut(() => LanguageController(),fenix:true);
-Get.put(TranslationService());
-Get.lazyPut(() => TutorialController(),fenix:true);
+         Get.lazyPut(() => BalanceController(getBalanceUsecase: Get.find()), fenix:true);
+          Get.lazyPut(() => LanguageController(),fenix:true);
+          Get.put(TranslationService());
+          Get.lazyPut(() => TutorialController(),fenix:true);
 
 
       }),

@@ -5,6 +5,7 @@ import 'package:tendria/features/user/data/datasources/user_data_sources_imp.dar
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
 import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
+import 'package:tendria/features/user/domain/entities/user_balance_entity.dart';
 import 'package:tendria/features/user/domain/repositories/user_repository.dart';
 
 class UserRepositoryImp extends UserRepository {
@@ -75,5 +76,11 @@ class UserRepositoryImp extends UserRepository {
   Future<void> updateLocation(UpdateLocationEntity entity)  async{
         final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
   return await userDataSourcesImp.updateLocation(entity, token);
+  }
+
+  @override
+  Future<UserBalanceEntity> getuserbalance() async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.getuserbalance(token);
   }
 }

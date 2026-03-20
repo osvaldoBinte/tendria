@@ -14,6 +14,7 @@ import 'package:tendria/features/chat/presentation/page/connect.dart';
 import 'package:tendria/features/like/domain/usecase/payments_chat_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/start_conversations_usecase.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
+import 'package:tendria/features/user/presentation/controller/balance_controller.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 
 class ChatController extends GetxController {
@@ -36,6 +37,7 @@ class ChatController extends GetxController {
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
+BalanceController get balanceController => Get.find<BalanceController>();
   final mensajes = RxList<MensajeEntity>([]);
   final Rx<UsuarioChatEntity?> otroUsuario = Rx<UsuarioChatEntity?>(null);
   final Rx<ChatEntity?> chat = Rx<ChatEntity?>(null);
@@ -287,41 +289,45 @@ void _onMensajesLeidos(DateTime leidoEn) {
       await _sendRegularMessage();
     }
   }
+Future<void> _sendFirstMessage() async {
+  if (firstMessageSent.value || isSending.value) return;
 
-  Future<void> _sendFirstMessage() async {
-    if (firstMessageSent.value || isSending.value) return;
+  final message = messageController.text.trim();
+  if (message.isEmpty) return;
 
-    final message = messageController.text.trim();
-    if (message.isEmpty) return;
+  try {
+    isSending.value = true;
+    messageController.clear();
 
-    try {
-      isSending.value = true;
-      messageController.clear();
+    final postEntity = PostChatEntity(
+      chatId: targetUserId,
+      menssage: message,
+    );
 
-      final postEntity = PostChatEntity(
-        chatId: targetUserId,
-        menssage: message,
-      );
+    await startConversationsUsecase.execute(postEntity);
 
-      await startConversationsUsecase.execute(postEntity);
+    _addLocalMessage(message);
+    firstMessageSent.value = true;
+    isTyping.value = false;
 
-      _addLocalMessage(message);
-      firstMessageSent.value = true;
-      isTyping.value = false;
-
-      if (Get.isRegistered<NearbyUsersController>()) {
-        Get.find<NearbyUsersController>().loadNearbyUsers();
-      }
-
-      showSuccessSnackbar('Mensaje enviado. Espera la respuesta.');
-      Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
-    } catch (e) {
-      messageController.text = message;
-      showErrorSnackbar('No se pudo enviar: ${cleanExceptionMessage(e)}');
-    } finally {
-      isSending.value = false;
+    // ✅ Recargar balance después de descontar el costo
+    if (Get.isRegistered<BalanceController>()) {
+      await Get.find<BalanceController>().fetchBalance();
     }
+
+    if (Get.isRegistered<NearbyUsersController>()) {
+      Get.find<NearbyUsersController>().loadNearbyUsers();
+    }
+
+    showSuccessSnackbar('Mensaje enviado. Espera la respuesta.');
+    Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
+  } catch (e) {
+    messageController.text = message;
+    showErrorSnackbar('No se pudo enviar: ${cleanExceptionMessage(e)}');
+  } finally {
+    isSending.value = false;
   }
+}
 
   Future<void> _sendRegularMessage() async {
     final message = messageController.text.trim();
@@ -383,47 +389,54 @@ void _onMensajesLeidos(DateTime leidoEn) {
     Get.toNamed(RoutesNames.userProfileDetailPage, arguments: {'userId': uid,'goPerfilIndex':goPerfilIndex,});
   }
 
-  String formatMessageTime(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    final hh = dt.hour.toString().padLeft(2, '0');
-    final mm = dt.minute.toString().padLeft(2, '0');
-    if (diff.inDays == 0) return '$hh:$mm';
-    if (diff.inDays == 1) return 'Ayer $hh:$mm';
-    if (diff.inDays < 7) {
-      const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      return '${days[dt.weekday - 1]} $hh:$mm';
-    }
-    return '${dt.day}/${dt.month}/${dt.year}';
-  }
+String formatMessageTime(DateTime dt) {
+  // ✅ Convertir de UTC a hora local del dispositivo
+  final local = dt.toLocal();
+  final now = DateTime.now();
+  final diff = now.difference(local);
 
-  bool shouldShowDateSeparator(int index) {
-    if (index == 0) return true;
-    final cur = mensajes[index].enviadoEn;
-    final prev = mensajes[index - 1].enviadoEn;
-    return DateTime(cur.year, cur.month, cur.day) !=
-        DateTime(prev.year, prev.month, prev.day);
-  }
+  final hh = local.hour.toString().padLeft(2, '0');
+  final mm = local.minute.toString().padLeft(2, '0');
 
-  String formatDateSeparator(DateTime dt) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final msg = DateTime(dt.year, dt.month, dt.day);
-    if (msg == today) return 'Hoy';
-    if (msg == today.subtract(const Duration(days: 1))) return 'Ayer';
-    if (now.difference(msg).inDays < 7) {
-      const days = [
-        'Lunes',
-        'Martes',
-        'Miércoles',
-        'Jueves',
-        'Viernes',
-        'Sábado',
-        'Domingo'
-      ];
-      return days[dt.weekday - 1];
-    }
-    return '${dt.day}/${dt.month}/${dt.year}';
-  }DateTime pointerDownTime = DateTime.now();
+  if (diff.inDays == 0) return '$hh:$mm';
+  if (diff.inDays == 1) return 'Ayer $hh:$mm';
+  if (diff.inDays < 7) {
+    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    return '${days[local.weekday - 1]} $hh:$mm';
+  }
+  return '${local.day}/${local.month}/${local.year}';
+}
+
+String formatDateSeparator(DateTime dt) {
+  // ✅ Convertir de UTC a hora local del dispositivo
+  final local = dt.toLocal();
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final msg = DateTime(local.year, local.month, local.day);
+
+  if (msg == today) return 'Hoy';
+  if (msg == today.subtract(const Duration(days: 1))) return 'Ayer';
+  if (now.difference(msg).inDays < 7) {
+    const days = [
+      'Lunes', 'Martes', 'Miércoles', 'Jueves',
+      'Viernes', 'Sábado', 'Domingo'
+    ];
+    return days[local.weekday - 1];
+  }
+  return '${local.day}/${local.month}/${local.year}';
+}
+
+bool shouldShowDateSeparator(int index) {
+  if (index == 0) return true;
+  final cur = mensajes[index].enviadoEn.toLocal();
+  final prev = mensajes[index - 1].enviadoEn.toLocal();
+  return DateTime(cur.year, cur.month, cur.day) !=
+      DateTime(prev.year, prev.month, prev.day);
+}
+
+
+
+  DateTime pointerDownTime = DateTime.now();
 
 void setPointerDownTime(DateTime time) {
   pointerDownTime = time;

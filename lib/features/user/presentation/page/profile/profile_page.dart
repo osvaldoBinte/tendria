@@ -6,6 +6,7 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/stories/presentation/page/storyring/my_story_ring_widget.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
+import 'package:tendria/features/user/presentation/controller/balance_controller.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
 import 'package:tendria/features/user/presentation/widget/interests_section_widget.dart';
@@ -16,6 +17,7 @@ class ProfilePage extends GetView<ProfileController> {
 
   UpdateProfileController get _updater =>
       Get.find<UpdateProfileController>();
+  BalanceController get _balanceController => Get.find<BalanceController>();
 
   LanguageController get _l => Get.find<LanguageController>();
 
@@ -63,10 +65,7 @@ class ProfilePage extends GetView<ProfileController> {
       ),
     );
   }
-
-  // ==========================================
-  // HEADER
-  // ==========================================
+  
 
   Widget _buildHeader() {
     return Container(
@@ -139,7 +138,7 @@ class ProfilePage extends GetView<ProfileController> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Globo de status (si tiene)
+                        
                         if (status.isNotEmpty)
                           GestureDetector(
                             onTap: () =>
@@ -191,7 +190,7 @@ class ProfilePage extends GetView<ProfileController> {
                             ),
                           ),
 
-                        // Botón agregar estado (si no tiene)
+
                         if (status.isEmpty)
                           GestureDetector(
                             onTap: () =>
@@ -236,11 +235,21 @@ class ProfilePage extends GetView<ProfileController> {
                               ),
                             ),
                           ),
+                      
 
-                        // Nombre y edad
                         Text(
                           '${controller.userName}, ${controller.userAge}',
                           style: ThemeColor.headingMedium.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: ThemeColor.textDarkColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        Text(
+                          '\$ ${_balanceController.currentBalance} MXN',
+                        style: ThemeColor.headingMedium.copyWith(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: ThemeColor.textDarkColor,
@@ -260,9 +269,7 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-  // ==========================================
-  // NEARBY BUTTON
-  // ==========================================
+
 
   Widget _buildNearbyProfilesButton() {
     return Container(
@@ -298,9 +305,7 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-  // ==========================================
-  // PHOTOS SECTION
-  // ==========================================
+
 
   Widget _buildPhotosSection() {
     return Container(
@@ -494,9 +499,7 @@ class ProfilePage extends GetView<ProfileController> {
     });
   }
 
-  // ==========================================
-  // BIOGRAPHY SECTION
-  // ==========================================
+
 
   Widget _buildBiographySection() {
     return Obx(() {

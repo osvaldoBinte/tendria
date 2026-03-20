@@ -1,4 +1,5 @@
-// lib/features/user/presentation/controller/preferences_controller.dart
+
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -30,7 +31,8 @@ class PreferencesController extends GetxController {
   final FetchQualitiesUsecase fetchQualitiesUsecase;
   final PostInterestsUsecase postInterestsUsecase;
   final PostQualitiesUsecase postQualitiesUsecase;
-  final UploadPicturePerfileUsecase uploadPicturePerfileUsecase; // 👈 AGREGAR
+  final UploadPicturePerfileUsecase uploadPicturePerfileUsecase;
+  
 
   PreferencesController({
     required this.preferencesUserUsecase,
@@ -42,44 +44,41 @@ class PreferencesController extends GetxController {
     required this.uploadPicturePerfileUsecase,
   });
 
-  // Control de pasos
+
   final Rx<PreferencesStep> currentStep = PreferencesStep.genderPreference.obs;
   final RxInt currentStepIndex = 0.obs;
   final RxBool showSuccessScreen = false.obs;
   final RxBool isInitialized = false.obs;
 
-  // Lista de pasos disponibles (solo los que faltan por completar)
+
   final RxList<PreferencesStep> availableSteps = <PreferencesStep>[].obs;
   final RxBool isPickingPhotos = false.obs;
 
-  // Estados de carga
+
   final RxBool isLoading = false.obs;
   final RxBool isUploadingPhotos = false.obs;
   final RxBool isLoadingInterests = false.obs;
   final RxBool isLoadingQualities = false.obs;
   final RxBool isLoadingUserData = false.obs;
 
-  // Datos de preferencias
+
   final RxString selectedGenderPreference = ''.obs;
   final RxString selectedConnectionType = ''.obs;
 
   final RxInt minAge = 18.obs;
   final RxInt maxAge = 80.obs;
   final RxDouble distanceKm = 50.0.obs;
-  // ❌ ELIMINADO: final RxNum distanceKm = RxNum(50);
-
-  // NUEVO: Flags para saber qué ya fue enviado
+  
   final RxBool preferencesAlreadySent = false.obs;
   final RxBool photosAlreadySent = false.obs;
   final RxBool interestsAlreadySent = false.obs;
   final RxBool qualitiesAlreadySent = false.obs;
 
-  // Fotos seleccionadas
+
   final RxList<String> selectedPhotos = <String>[].obs;
   final int maxPhotos = 6;
   final int minPhotos = 2;
 
-  // Intereses y Cualidades
   final RxList<int> selectedInterests = <int>[].obs;
   final RxList<int> selectedQualities = <int>[].obs;
   final RxList<CatalogEntity> interests = <CatalogEntity>[].obs;
@@ -87,16 +86,14 @@ class PreferencesController extends GetxController {
   final int maxInterests = 5;
   final int maxQualities = 3;
 
-  // ImagePicker
   final ImagePicker _picker = ImagePicker();
 
-  // Referencia al ProfileController
   ProfileController? _profileController;
 
-  // Opciones de género
+ 
   final List<Map<String, dynamic>> genderOptions = [
-    {'label': 'Hombre', 'value': 'Hombre', 'icon': Icons.male},
-    {'label': 'Mujere', 'value': 'Mujer', 'icon': Icons.female},
+    {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
+    {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
     {
       'label': 'Persona no binaria',
       'value': 'No_binario',
@@ -118,7 +115,7 @@ class PreferencesController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Intentar obtener el ProfileController si existe
+
     try {
       _profileController = Get.find<ProfileController>();
     } catch (e) {
@@ -131,17 +128,17 @@ class PreferencesController extends GetxController {
   Future<String> _ensureValidImageFormat(String originalPath) async {
     final ext = originalPath.toLowerCase();
 
-    // Si ya es png o jpg, no hace falta convertir
+
     if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
       return originalPath;
     }
 
     try {
-      // Leer los bytes del archivo original
+      
       final File originalFile = File(originalPath);
       final Uint8List bytes = await originalFile.readAsBytes();
 
-      // Guardar como PNG en la carpeta temporal
+
       final String tempDir = (await Directory.systemTemp.createTemp(
         'tendria_img',
       )).path;
@@ -155,7 +152,7 @@ class PreferencesController extends GetxController {
       return newPath;
     } catch (e) {
       print('⚠️ No se pudo convertir la imagen, usando original: $e');
-      return originalPath; // Fallback: usar el original
+      return originalPath; 
     }
   }
 
@@ -182,7 +179,7 @@ class PreferencesController extends GetxController {
 
       final toAdd = images.take(remaining).toList();
 
-      // Convertir cada imagen a PNG si no es jpg/png
+
       final List<String> convertedPaths = [];
       for (final image in toAdd) {
         final converted = await _ensureValidImageFormat(image.path);
@@ -722,14 +719,12 @@ class PreferencesController extends GetxController {
     );
   }
 
-  // ==========================================
-  // ENVÍO FINAL - CON VERIFICACIÓN POR PASO
-  // ==========================================
+
   Future<void> submitPreferences() async {
     try {
       isLoading.value = true;
 
-      // CASO 1: Si estamos en el paso de FOTOS - VALIDAR Y SUBIR
+
       if (currentStep.value == PreferencesStep.photos) {
         if (selectedPhotos.length < minPhotos) {
           _showErrorAlert(
@@ -740,7 +735,7 @@ class PreferencesController extends GetxController {
           return;
         }
 
-        // ✅ SUBIR FOTOS INMEDIATAMENTE si no se han subido
+
         if (selectedPhotos.isNotEmpty && !photosAlreadySent.value) {
           print('📸 Subiendo ${selectedPhotos.length} fotos...');
           isUploadingPhotos.value = true;
@@ -761,7 +756,7 @@ class PreferencesController extends GetxController {
         }
       }
 
-      // CASO 2: Si estamos en el paso de INTERESES - VALIDAR Y GUARDAR
+
       if (currentStep.value == PreferencesStep.interests) {
         if (selectedInterests.isEmpty) {
           _showErrorAlert(
@@ -772,7 +767,7 @@ class PreferencesController extends GetxController {
           return;
         }
 
-        // ✅ GUARDAR INTERESES INMEDIATAMENTE si no se han guardado
+
         if (!interestsAlreadySent.value && selectedInterests.isNotEmpty) {
           print('🎯 Guardando ${selectedInterests.length} intereses...');
           await postInterestsUsecase.execute(selectedInterests.toList());
@@ -781,7 +776,7 @@ class PreferencesController extends GetxController {
         }
       }
 
-      // CASO 3: Si estamos en el paso de CUALIDADES - VALIDAR (se guardará al final)
+
       if (currentStep.value == PreferencesStep.qualities) {
         if (selectedQualities.isEmpty) {
           _showErrorAlert(
@@ -815,16 +810,17 @@ class PreferencesController extends GetxController {
         preferencesAlreadySent.value = true;
       }
 
-      // CASO 5: Si NO es el último paso, avanzar automáticamente
+
       if (currentStepIndex.value < availableSteps.length - 1) {
         print('➡️ Avanzando al siguiente paso...');
         currentStepIndex.value++;
         currentStep.value = availableSteps[currentStepIndex.value];
       } else {
-        // ✅ CASO 6: SI ES EL ÚLTIMO PASO, ENVIAR SOLO LO QUE FALTA
+        
+        
         print('🚀 Último paso alcanzado, enviando lo pendiente...');
 
-        // Guardar cualidades si no se han enviado (lo único que falta)
+
         if (!qualitiesAlreadySent.value && selectedQualities.isNotEmpty) {
           print('⭐ Guardando ${selectedQualities.length} cualidades...');
           await postQualitiesUsecase.execute(selectedQualities.toList());
@@ -832,13 +828,12 @@ class PreferencesController extends GetxController {
           print('✅ Cualidades guardadas exitosamente');
         }
 
-        // Recargar datos en ProfileController
+
         if (_profileController != null) {
           print('🔄 Recargando perfil del usuario...');
           await _profileController!.loadUserProfile();
         }
-
-        // Mostrar pantalla de éxito
+        
         print('✅ Proceso completado exitosamente');
         showSuccessScreen.value = true;
         _clearData();
@@ -855,9 +850,7 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ==========================================
-  // ALERTAS
-  // ==========================================
+
 
   void _showErrorAlert(
     String title,
@@ -893,9 +886,6 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ==========================================
-  // LIMPIEZA
-  // ==========================================
 
   void _clearData() {
     selectedPhotos.clear();

@@ -6,6 +6,7 @@ import 'package:tendria/features/chat/domain/entities/mensaje_entity.dart';
 import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
 import 'package:tendria/features/chat/presentation/page/connect.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
+import 'package:tendria/features/user/presentation/controller/balance_controller.dart';
 
 class ChatPage extends GetView<ChatController> {
   const ChatPage({Key? key}) : super(key: key);
@@ -427,41 +428,62 @@ Widget _buildMessageStatus(DateTime? leidoEn) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (blocked)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: ThemeColor.primaryColor.withOpacity(0.1),
-                      borderRadius: ThemeColor.smallBorderRadius,
-                      border: Border.all(
-                        color: ThemeColor.primaryColor.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 18,
-                          color: ThemeColor.primaryColor,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'El primer mensaje se enviará y se descontará de tu saldo. Luego espera la respuesta.',
-                            style: ThemeColor.caption.copyWith(
-                              color: ThemeColor.primaryColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                if (controller.isNewConversation.value && !controller.firstMessageSent.value)
+  Container(
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: ThemeColor.primaryColor.withOpacity(0.1),
+      borderRadius: ThemeColor.smallBorderRadius,
+      border: Border.all(
+        color: ThemeColor.primaryColor.withOpacity(0.3),
+      ),
+    ),
+    child: Row(
+      children: [
+        Icon(Icons.info_outline, size: 18, color: ThemeColor.primaryColor),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Obx(() => Text(
+            'Este tendra tiene un costo de \$${controller.balanceController.chatCost.toStringAsFixed(0)} MXN. '
+            'Tu  saldo actual es de \$${controller.balanceController.currentBalance.toStringAsFixed(0)}  El mensaje se cobrara solo cuando se envie el primer mensaje.',
+            style: ThemeColor.caption.copyWith(
+              color: ThemeColor.primaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          )),
+        ),
+      ],
+    ),
+  ),
+
+if (blocked)
+  Container(
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: ThemeColor.primaryColor.withOpacity(0.1),
+      borderRadius: ThemeColor.smallBorderRadius,
+      border: Border.all(color: ThemeColor.primaryColor.withOpacity(0.3)),
+    ),
+    child: Row(
+      children: [
+        Icon(Icons.info_outline, size: 18, color: ThemeColor.primaryColor),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Primer mensaje enviado. Espera la respuesta.',
+            style: ThemeColor.caption.copyWith(
+              color: ThemeColor.primaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
                 Row(
                   children: [
                     Expanded(

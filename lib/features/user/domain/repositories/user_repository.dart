@@ -3,6 +3,7 @@ import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
 import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
+import 'package:tendria/features/user/domain/entities/user_balance_entity.dart';
 
 abstract class UserRepository {
     Future<GetUserEntity> fetchUser();
@@ -17,4 +18,5 @@ abstract class UserRepository {
     Future<void> deleteMedia(int mediaId);
     Future<void> deleteUser();
     Future<void>updateLocation(UpdateLocationEntity entity);
+    Future<UserBalanceEntity> getuserbalance();
 }

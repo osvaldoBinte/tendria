@@ -48,7 +48,7 @@ class ProfilePage extends GetView<ProfileController> {
                 children: [
                   _buildHeader(),
                   SizedBox(height: ThemeColor.paddingLarge),
-                  _buildNearbyProfilesButton(),
+              //    _buildNearbyProfilesButton(),
                   SizedBox(height: ThemeColor.paddingLarge),
                   _buildPhotosSection(),
                   SizedBox(height: ThemeColor.paddingLarge),

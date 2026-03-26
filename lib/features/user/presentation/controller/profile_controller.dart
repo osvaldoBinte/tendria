@@ -1,4 +1,5 @@
 // lib/features/user/presentation/controller/profile_controller.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,6 +33,7 @@ class ProfileController extends GetxController {
   final RxBool isUploadingPhoto = false.obs;
   final RxBool isUploadingProfilePhoto = false.obs;
     final RxBool isDeletingPhoto = false.obs; 
+final RxString _cachedProfilePhotoUrl = ''.obs;
 
   final Rx<GetUserEntity?> userEntity = Rx<GetUserEntity?>(null);
   
@@ -39,7 +41,13 @@ class ProfileController extends GetxController {
   
   String get userName => userEntity.value?.name ?? 'Usuario';
   int get userAge => userEntity.value?.age ?? 0;
-  String get profilePhotoUrl => userEntity.value?.fotoUrl ?? '';
+String get profilePhotoUrl {
+  final current = userEntity.value?.fotoUrl ?? '';
+  if (current.isNotEmpty) {
+    _cachedProfilePhotoUrl.value = current;
+  }
+  return _cachedProfilePhotoUrl.value;
+}
   String get profileBio => userEntity.value?.bio ?? '';
   String get  gender => userEntity.value?.gender ?? '';
   String get  primarylanguage => userEntity.value?.primarylanguage ?? '';
@@ -57,44 +65,47 @@ String get formattedDateOfBirth {
 }
   final int maxPhotos = 6;
   
-  @override
-  void onInit() {
-    super.onInit();
+@override
+void onInit() {
+  super.onInit();
+  if (userEntity.value == null) {
     loadUserProfile();
   }
-  
-  Future<void> loadUserProfile() async {
-    try {
-      isLoading.value = true;
-      final user = await getUserUsecase.execute();
-      userEntity.value = user;
-    } catch (e) {
-      print('Error cargando perfil: $e');
-     
-    } finally {
-      isLoading.value = false;
-    }
+}
+Future<void> loadUserProfile() async {
+  try {
+    isLoading.value = true;
+    
+    final user = await getUserUsecase.execute();
+    userEntity.value = user; 
+  } catch (e) {
+    print('Error cargando perfil: $e');
+  } finally {
+    isLoading.value = false;
   }
+}
 
-  Future<void> deletePhoto(int mediaId) async {
-    try {
-      isDeletingPhoto.value = true;
 
-      await deleteMediaUsecase.execute(mediaId);
-      await loadUserProfile();
+Future<void> deletePhoto(int mediaId) async {
+  try {
+    isDeletingPhoto.value = true;
 
-      showSuccessSnackbar(
-        'La foto se ha eliminado correctamente',
-      );
-    } catch (e) {
-      print('Error eliminando foto: $e');
-      showErrorSnackbar(
-        'No se pudo eliminar la foto: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isDeletingPhoto.value = false;
+    final photoUrl = assets.firstWhereOrNull((a) => a.id == mediaId)?.url;
+
+    await deleteMediaUsecase.execute(mediaId);
+
+    if (photoUrl != null) {
+      await CachedNetworkImage.evictFromCache(photoUrl); 
     }
+
+    await loadUserProfile();
+    showSuccessSnackbar('La foto se ha eliminado correctamente');
+  } catch (e) {
+    showErrorSnackbar('No se pudo eliminar la foto: ${cleanExceptionMessage(e)}');
+  } finally {
+    isDeletingPhoto.value = false;
   }
+}
 
   void confirmDeletePhoto(int mediaId) {
     if (Get.context != null) {
@@ -322,28 +333,28 @@ Widget _buildPhotoOption({
   }
 
   Future<void> uploadProfilePhoto(String photoPath) async {
-    try {
-      isUploadingProfilePhoto.value = true;
+  try {
+    isUploadingProfilePhoto.value = true;
 
-      await uploadPicturePerfileUsecase.execute(photoPath);
+    // Guardar URL vieja para limpiar su cache
+    final oldUrl = userEntity.value?.fotoUrl ?? '';
+    final oldCacheKey = Uri.tryParse(oldUrl)?.path ?? oldUrl; // 👈
 
-      // Recargar perfil para obtener la nueva foto
-      await loadUserProfile();
+    await uploadPicturePerfileUsecase.execute(photoPath);
+    await loadUserProfile();
 
-      _showSuccessAlert(
-        '¡Listo!',
-        'Tu foto de perfil se ha actualizado correctamente',
-      );
-    } catch (e) {
-      print('Error subiendo foto de perfil: $e');
-      _showErrorAlert(
-        'Error',
-        'No se pudo actualizar la foto de perfil: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isUploadingProfilePhoto.value = false;
+    // Limpiar cache de la foto anterior para que muestre la nueva
+    if (oldCacheKey.isNotEmpty) {
+      await CachedNetworkImage.evictFromCache(oldCacheKey); // 👈
     }
+
+    _showSuccessAlert('¡Listo!', 'Tu foto de perfil se ha actualizado correctamente');
+  } catch (e) {
+    _showErrorAlert('Error', 'No se pudo actualizar la foto: ${cleanExceptionMessage(e)}');
+  } finally {
+    isUploadingProfilePhoto.value = false;
   }
+}
 
  Future<void> addPhoto() async {
   if (assets.length >= maxPhotos) {

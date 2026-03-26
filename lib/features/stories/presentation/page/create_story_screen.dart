@@ -64,19 +64,16 @@ class _DraggableStoryTextState extends State<DraggableStoryText> {
       child: GestureDetector(
         onTap: widget.onTap,
         onLongPress: widget.onLongPress,
-        // ✅ Usar solo onScaleUpdate para manejar tanto movimiento como zoom
         onScaleStart: (details) {
           baseScale = scale;
           basePosition = position;
         },
         onScaleUpdate: (details) {
           setState(() {
-            // Actualizar escala
             if (details.scale != 1.0) {
               scale = (baseScale * details.scale).clamp(0.5, 3.0);
             }
 
-            // Actualizar posición (funciona con 1 dedo para arrastrar)
             final newX =
                 (basePosition.dx * size.width + details.focalPointDelta.dx) /
                 size.width;
@@ -108,7 +105,7 @@ class _DraggableStoryTextState extends State<DraggableStoryText> {
   scale: scale,
   child: ConstrainedBox(
     constraints: BoxConstraints(
-      maxWidth: MediaQuery.of(context).size.width * 0.75, // máx 75% del ancho
+      maxWidth: MediaQuery.of(context).size.width * 0.75, 
     ),
     child: Text(
       widget.text,
@@ -125,206 +122,12 @@ class _DraggableStoryTextState extends State<DraggableStoryText> {
         ],
       ),
       textAlign: TextAlign.center,
-      softWrap: true,        // ✅ permite saltos de línea
+      softWrap: true,     
       overflow: TextOverflow.visible,
     ),
   ),
 ),
         ),
-      ),
-    );
-  }
-}
-
-// ✅ Editor de texto (incluido inline)
-class StoryTextEditor extends StatefulWidget {
-  final Function(String text, Color color, Offset position, double scale)
-  onTextAdded;
-
-  const StoryTextEditor({Key? key, required this.onTextAdded})
-    : super(key: key);
-
-  @override
-  State<StoryTextEditor> createState() => _StoryTextEditorState();
-}
-
-class _StoryTextEditorState extends State<StoryTextEditor> {
-  final TextEditingController textController = TextEditingController();
-  Color selectedColor = Colors.black;
-
-  final List<Color> availableColors = [
-    Colors.black,
-    Colors.white,
-    Colors.red,
-    Colors.pink,
-    Colors.purple,
-    Colors.deepPurple,
-    Colors.indigo,
-    Colors.blue,
-    Colors.lightBlue,
-    Colors.cyan,
-    Colors.teal,
-    Colors.green,
-    Colors.lightGreen,
-    Colors.lime,
-    Colors.yellow,
-    Colors.amber,
-    Colors.orange,
-    Colors.deepOrange,
-  ];
-
-  @override
-  void dispose() {
-    textController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.9),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[600],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-  controller: textController,
-  autofocus: true,
-  maxLines: null,
-  keyboardType: TextInputType.multiline,  // ✅ permite Enter
-  textInputAction: TextInputAction.newline, // ✅ Enter = salto de línea
-  style: GoogleFonts.rubik(
-    color: selectedColor,
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-  ),
-  textAlign: TextAlign.center,
-  decoration: InputDecoration(
-    hintText: 'Escribe algo...',
-    hintStyle: GoogleFonts.rubik(
-      color: Colors.grey[400],
-      fontSize: 24,
-    ),
-    border: InputBorder.none,
-  ),
-),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: availableColors.length,
-              itemBuilder: (context, index) {
-                final color = availableColors[index];
-                final isSelected = color == selectedColor;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedColor = color;
-                    });
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    margin: const EdgeInsets.only(right: 12),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? Colors.white : Colors.grey[700]!,
-                        width: isSelected ? 3 : 1,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: color.withOpacity(0.5),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () => Get.back(),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.grey[800],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Cancelar',
-                    style: GoogleFonts.rubik(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (textController.text.trim().isNotEmpty) {
-                      widget.onTextAdded(
-                        textController.text,
-                        selectedColor,
-                        const Offset(0.5, 0.5),
-                        1.0,
-                      );
-                      Get.back();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Agregar',
-                    style: GoogleFonts.rubik(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
       ),
     );
   }
@@ -367,7 +170,6 @@ Future<void> _publishStory() async {
 
   File? finalFile = controller.capturedFile.value;
 
-  // ✅ PASO 1: Convertir imagen a PNG
   if (controller.contentType.value == 'Foto') {
     showCustomAlert(
       context: context,
@@ -394,10 +196,9 @@ Future<void> _publishStory() async {
       finalFile = await controller.convertToPng(finalFile!);
     }
 
-    Get.back(); // cerrar alert
+    Get.back();
   }
 
-  // ✅ PASO 2: Convertir video
   if (controller.contentType.value == 'Video') {
     final filePath = finalFile!.path;
 
@@ -459,23 +260,6 @@ Future<void> _publishStory() async {
   await storyController.createStory(finalFile, controller.contentType.value!);
 }
 
-  // ✅ CORREGIDO: Mostrar editor de texto (PERMITIR EN VIDEOS)
-  void _showTextEditor() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StoryTextEditor(
-        onTextAdded: (text, color, position, scale) {
-          debugPrint('📝 Intentando agregar texto: "$text"');
-          controller.addText(text, color, position, scale);
-          debugPrint(
-            '📊 Total de textos ahora: ${controller.storyTexts.length}',
-          );
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -774,14 +558,13 @@ Future<void> _publishStory() async {
       onTap: () => controller.selectText(null),
       child: Stack(
         children: [
-          // ✅ 1. RepaintBoundary (contenido + textos draggables)
           RepaintBoundary(
             key: controller.repaintBoundaryKey,
             child: Stack(
               children: [
                 Positioned.fill(
                   child: Obx(() {
-                    if (controller.contentType.value == 'video') {
+                    if (controller.contentType.value == 'Video') {
                       if (!controller.isVideoReady.value) {
                         return Container(
                           color: Colors.black,
@@ -829,7 +612,6 @@ Future<void> _publishStory() async {
                         controller.updateTextScale(storyText.id, newScale);
                       },
                       onTap: () => controller.selectText(storyText.id),
-                      // ✅ LongPress ahora abre el editor en lugar del diálogo de eliminar
                       onLongPress: () => controller.openTextEditor(textId: storyText.id),
                     );
                   });
@@ -838,13 +620,10 @@ Future<void> _publishStory() async {
             ),
           ),
 
-          // ✅ 2. Header con botones (fuera del RepaintBoundary)
           _buildPreviewHeader(),
 
-          // ✅ 3. Botón agregar texto (fuera del RepaintBoundary)
           _buildAddTextButton(),
 
-          // ✅ 4. Overlay fullscreen del editor de texto ← AQUÍ VA
           Obx(() => controller.isEditingText.value
                 ? _FullscreenTextEditorOverlay(controller: controller)
                 : const SizedBox.shrink()),
@@ -883,28 +662,7 @@ Widget _buildPreviewHeader() {
                 child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
               ),
             ),
-            // ✅ Botón de texto - verificar contentType con minúsculas
-            Obx(() {
-              if (controller.isVideoReady.value || controller.contentType.value == 'Foto') {
-                return GestureDetector(
-                  onTap: () {
-                    debugPrint('👆 Botón de texto presionado');
-                    debugPrint('📹 Tipo: ${controller.contentType.value}');
-                    _showTextEditor();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: const Icon(Icons.text_fields, color: Colors.white, size: 24),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            }),
+           
           ],
         ),
       ),
@@ -919,7 +677,7 @@ Widget _buildAddTextButton() {
       return Column(
         children: [
           GestureDetector(
-            onTap: () => controller.openTextEditor(), // ✅ ya no llama _showTextEditor()
+            onTap: () => controller.openTextEditor(), 
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -962,7 +720,6 @@ Widget _buildAddTextButton() {
     );
   }
 
-  // ✅ NUEVO: Diálogo para confirmar eliminación
   void _showDeleteTextDialog(String textId) {
     Get.dialog(
       AlertDialog(
@@ -1000,9 +757,7 @@ Widget _buildAddTextButton() {
   }
 }
 
-// ─────────────────────────────────────────────
-// _FullscreenTextEditorOverlay
-// ─────────────────────────────────────────────
+
 class _FullscreenTextEditorOverlay extends StatefulWidget {
   final CreateStoryController controller;
   const _FullscreenTextEditorOverlay({required this.controller});
@@ -1056,7 +811,6 @@ class _FullscreenTextEditorOverlayState
           child: SafeArea(
             child: Column(
               children: [
-                // ── Top bar ──────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 10),
@@ -1079,7 +833,6 @@ class _FullscreenTextEditorOverlayState
                       ),
                       const Spacer(),
 
-                      // Alineación
                       ...['left', 'center', 'right'].map((a) {
                         return Obx(() {
                           final isActive =
@@ -1116,7 +869,6 @@ class _FullscreenTextEditorOverlayState
 
                       const Spacer(),
 
-                      // Listo
                       GestureDetector(
                         onTap: () => widget.controller
                             .confirmTextEdit(_textCtrl.text),
@@ -1138,7 +890,6 @@ class _FullscreenTextEditorOverlayState
                   ),
                 ),
 
-                // ── TextField ─────────────────────────────
                 Expanded(
                   child: Center(
                     child: Obx(() {
@@ -1213,7 +964,6 @@ class _FullscreenTextEditorOverlayState
                   ),
                 ),
 
-                // ── Estilos ───────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
@@ -1266,7 +1016,6 @@ class _FullscreenTextEditorOverlayState
                   ),
                 ),
 
-                // ── Colores ───────────────────────────────
                 SizedBox(
                   height: 52,
                   child: ListView.builder(

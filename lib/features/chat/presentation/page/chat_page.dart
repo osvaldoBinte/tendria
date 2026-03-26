@@ -239,31 +239,29 @@ class ChatPage extends GetView<ChatController> {
     );
   }
 
-  Widget _buildMessagesList() {
-    return RefreshIndicator(
-      onRefresh: controller.refreshChat,
-      color: ThemeColor.primaryColor,
-      backgroundColor: ThemeColor.surfaceColor,
-      child: ListView.builder(
-        controller: controller.scrollController,
-        // onDrag cierra el teclado solo cuando el usuario arrastra
-        // el ListView — complementa el Listener del build principal
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: controller.mensajes.length,
-        itemBuilder: (_, index) {
-          final msg = controller.mensajes[index];
-          return Column(
-            children: [
-              if (controller.shouldShowDateSeparator(index))
-                _buildDateSeparator(msg.enviadoEn),
-              _buildMessageBubble(msg),
-            ],
-          );
-        },
-      ),
-    );
-  }
+ Widget _buildMessagesList() {
+  return RefreshIndicator(
+    onRefresh: controller.refreshChat,
+    color: ThemeColor.primaryColor,
+    backgroundColor: ThemeColor.surfaceColor,
+    child: ListView.builder(
+      controller: controller.scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual, // 👈 manual
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: controller.mensajes.length,
+      itemBuilder: (_, index) {
+        final msg = controller.mensajes[index];
+        return Column(
+          children: [
+            if (controller.shouldShowDateSeparator(index))
+              _buildDateSeparator(msg.enviadoEn),
+            _buildMessageBubble(msg),
+          ],
+        );
+      },
+    ),
+  );
+}
 
   Widget _buildDateSeparator(DateTime dt) {
     return Padding(

@@ -513,43 +513,47 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
     );
   }
 
-  Widget _buildProfileImage(String? imageUrl, bool isUploading) {
-    if (isUploading) {
-      return Container(
-        color: ThemeColor.backgroundColor,
-        child: Center(
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: ThemeColor.tertiaryColor,
-          ),
+ Widget _buildProfileImage(String? imageUrl, bool isUploading) {
+  if (isUploading) {
+    return Container(
+      color: ThemeColor.backgroundColor,
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: ThemeColor.tertiaryColor,
         ),
-      );
-    }
-
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      return ClipOval(
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          width: widget.size,
-          height: widget.size,
-          placeholder: (context, url) => Container(
-            color: ThemeColor.backgroundColor,
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: ThemeColor.tertiaryColor,
-              ),
-            ),
-          ),
-          errorWidget: (context, url, error) => _buildFallbackIcon(),
-        ),
-      );
-    } else {
-      return _buildFallbackIcon();
-    }
+      ),
+    );
   }
 
+  if (imageUrl != null && imageUrl.isNotEmpty) {
+    final cacheKey = Uri.tryParse(imageUrl)?.path ?? imageUrl; // 👈
+
+    return ClipOval(
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        cacheKey: cacheKey, 
+        fit: BoxFit.cover,
+        width: widget.size,
+        height: widget.size,
+        fadeInDuration: Duration.zero,     
+        fadeOutDuration: Duration.zero,   
+        placeholder: (context, url) => Container(
+          color: ThemeColor.backgroundColor,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: ThemeColor.tertiaryColor,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => _buildFallbackIcon(),
+      ),
+    );
+  } else {
+    return _buildFallbackIcon();
+  }
+}
   Widget _buildFallbackIcon() {
     return Container(
       color: ThemeColor.backgroundColor,

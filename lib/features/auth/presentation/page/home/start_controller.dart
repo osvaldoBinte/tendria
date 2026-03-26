@@ -15,7 +15,7 @@ class StartController extends GetxController {
   final List<Widget> pages = [
     ProfilePage(),
     
-    RadarScannerScreen(),
+    ProfileDetailScreen(),
     LikedByUsersView(),
     MyMatchView(),
   ];

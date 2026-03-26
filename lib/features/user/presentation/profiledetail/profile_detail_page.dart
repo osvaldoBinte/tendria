@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,9 +18,7 @@ class ProfileDetailScreen extends StatelessWidget {
           backgroundColor: ThemeColor.backgroundColorfondo,
           body: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                ThemeColor.primaryColor,
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
             ),
           ),
         );
@@ -36,32 +35,23 @@ class ProfileDetailScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.people_outline,
-                  size: 80,
-                  color: ThemeColor.textSecondaryColor,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'No hay usuarios disponibles',
-                  style: ThemeColor.headingMedium,
-                ),
-                SizedBox(height: 8),
+                Icon(Icons.people_outline, size: 80, color: ThemeColor.textSecondaryColor),
+                const SizedBox(height: 16),
+                Text('No hay usuarios disponibles', style: ThemeColor.headingMedium),
+                const SizedBox(height: 8),
                 Text(
                   'Intenta más tarde',
-                  style: ThemeColor.bodyMedium.copyWith(
-                    color: ThemeColor.textSecondaryColor,
-                  ),
+                  style: ThemeColor.bodyMedium.copyWith(color: ThemeColor.textSecondaryColor),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: controller.loadNearbyUsers,
-                  icon: Icon(Icons.refresh),
-                  label: Text('Recargar'),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Recargar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ThemeColor.primaryColor,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                 ),
               ],
@@ -81,7 +71,6 @@ class ProfileDetailScreen extends StatelessWidget {
                     backgroundColor: ThemeColor.backgroundColorfondo,
                     elevation: 4,
                     shadowColor: ThemeColor.shadowColor,
-                   // automaticallyImplyLeading: false,
                     pinned: true,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,10 +84,7 @@ class ProfileDetailScreen extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          icon: Icon(
-                            Icons.search,
-                            color: ThemeColor.textDarkColor,
-                          ),
+                          icon: Icon(Icons.search, color: ThemeColor.textDarkColor),
                           onPressed: () {},
                         ),
                       ],
@@ -108,23 +94,26 @@ class ProfileDetailScreen extends StatelessWidget {
                   _buildSliverAppBar(controller),
 
                   SliverToBoxAdapter(
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        _buildBioSection(controller),
-                        const SizedBox(height: 16),
-                        if (controller.profile.value.interests.isNotEmpty)
-                          _buildSobremiSection(controller),
-                        const SizedBox(height: 16),
-                        if (controller.profile.value.qualities.isNotEmpty)
+                    child: Obx(() {
+                      final user = controller.currentProfile.value;
+                      if (user == null) return const SizedBox.shrink();
+
+                      return Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          _buildBioSection(controller),
+                          const SizedBox(height: 16),
                           _buildBuscoSection(controller),
-                        const SizedBox(height: 16),
-                        if (controller.profile.value.interests.isNotEmpty)
-                          _buildInterestsSection(controller),
-                        const SizedBox(height: 20),
-                        _buildReporteButtons(controller),
-                      ],
-                    ),
+                          const SizedBox(height: 16),
+                          if (user.qualitiesIds != null && user.qualitiesIds!.isNotEmpty)
+                            _buildQualitiesSection(controller),
+                          const SizedBox(height: 16),
+                          if (user.interestsIds != null && user.interestsIds!.isNotEmpty)
+                            _buildInterestsSection(controller),
+                          const SizedBox(height: 20),
+                        ],
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -137,9 +126,18 @@ class ProfileDetailScreen extends StatelessWidget {
     });
   }
 
+  // ─────────────────────────────────────────────
+  //  SLIVER GALERÍA
+  // ─────────────────────────────────────────────
+
   Widget _buildSliverAppBar(NearbyUsersController controller) {
-    return Obx(
-      () => SliverAppBar(
+    return Obx(() {
+      final user = controller.currentProfile.value;
+      if (user == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+      final gallery = controller.currentGallery;
+
+      return SliverAppBar(
         automaticallyImplyLeading: false,
         expandedHeight: 450,
         pinned: true,
@@ -152,13 +150,13 @@ class ProfileDetailScreen extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
+                  // ── Galería ──
                   PageView.builder(
                     controller: controller.pageController,
                     onPageChanged: controller.onPageChanged,
-                    itemCount: controller.profile.value.gallery.length,
+                    itemCount: gallery.length,
                     itemBuilder: (context, index) {
-                      final imageUrl = controller.profile.value.gallery[index];
-
+                      final imageUrl = gallery[index];
                       if (imageUrl.isEmpty) {
                         return Container(
                           color: ThemeColor.backgroundColorfondo,
@@ -169,79 +167,61 @@ class ProfileDetailScreen extends StatelessWidget {
                           ),
                         );
                       }
-
-                      return Image.network(
-                        imageUrl,
+                      return CachedNetworkImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: ThemeColor.backgroundColorfondo,
-                            child: Icon(
-                              Icons.person,
-                              size: 100,
-                              color: ThemeColor.textSecondaryColor,
-                            ),
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: ThemeColor.backgroundColorfondo,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value:
-                                    loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                    : null,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  ThemeColor.primaryColor,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-
-                  if (controller.profile.value.gallery.length > 1)
-                    Positioned(
-                      top: 16,
-                      left: 16,
-                      right: 16,
-                      child: Row(
-                        children: List.generate(
-                          controller.profile.value.gallery.length,
-                          (index) => Expanded(
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                right:
-                                    index <
-                                        controller
-                                                .profile
-                                                .value
-                                                .gallery
-                                                .length -
-                                            1
-                                    ? 4
-                                    : 0,
-                              ),
-                              height: 3,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(2),
-                                color:
-                                    controller.currentImageIndex.value == index
-                                    ? ThemeColor.cardColor
-                                    : ThemeColor.cardColor.withOpacity(0.4),
-                                boxShadow: [ThemeColor.lightShadow],
+                        placeholder: (_, __) => Container(
+                          color: ThemeColor.backgroundColorfondo,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ThemeColor.primaryColor,
                               ),
                             ),
                           ),
                         ),
+                        errorWidget: (_, __, ___) => Container(
+                          color: ThemeColor.backgroundColorfondo,
+                          child: Icon(
+                            Icons.person,
+                            size: 100,
+                            color: ThemeColor.textSecondaryColor,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // ── Indicadores ──
+                  if (gallery.length > 1)
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      right: 16,
+                      child: Obx(
+                        () => Row(
+                          children: List.generate(gallery.length, (index) {
+                            return Expanded(
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                  right: index < gallery.length - 1 ? 4 : 0,
+                                ),
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(2),
+                                  color: controller.currentImageIndex.value == index
+                                      ? ThemeColor.cardColor
+                                      : ThemeColor.cardColor.withOpacity(0.4),
+                                  boxShadow: [ThemeColor.lightShadow],
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
                       ),
                     ),
 
+                  // ── Banner nombre + distancia ──
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -264,7 +244,7 @@ class ProfileDetailScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${controller.profile.value.name}, ${controller.profile.value.age}',
+                                  '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
@@ -283,7 +263,7 @@ class ProfileDetailScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      controller.profile.value.distance,
+                                      controller.currentDistance,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: ThemeColor.textLightColor,
@@ -294,6 +274,8 @@ class ProfileDetailScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+
+                          // Botón favorito
                           Obx(
                             () => GestureDetector(
                               onTap: controller.toggleFavorite,
@@ -304,25 +286,20 @@ class ProfileDetailScreen extends StatelessWidget {
                                     colors: controller.isFavorite.value
                                         ? [
                                             ThemeColor.errorColor,
-                                            ThemeColor.errorColor.withOpacity(
-                                              0.8,
-                                            ),
+                                            ThemeColor.errorColor.withOpacity(0.8),
                                           ]
                                         : [
                                             ThemeColor.primaryColor,
-                                            ThemeColor.primaryColor.withOpacity(
-                                              0.8,
-                                            ),
+                                            ThemeColor.primaryColor.withOpacity(0.8),
                                           ],
                                   ),
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          (controller.isFavorite.value
-                                                  ? ThemeColor.errorColor
-                                                  : ThemeColor.primaryColor)
-                                              .withOpacity(0.4),
+                                      color: (controller.isFavorite.value
+                                              ? ThemeColor.errorColor
+                                              : ThemeColor.primaryColor)
+                                          .withOpacity(0.4),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
@@ -347,13 +324,21 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
+  // ─────────────────────────────────────────────
+  //  BIO
+  // ─────────────────────────────────────────────
+
   Widget _buildBioSection(NearbyUsersController controller) {
-    return Obx(
-      () => Container(
+    return Obx(() {
+      final bio = controller.currentProfile.value?.bio ?? '';
+      if (bio.isEmpty || double.tryParse(bio) != null) return const SizedBox.shrink();
+
+      return Container(
+        width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -374,7 +359,7 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              controller.profile.value.bio,
+              bio,
               style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
@@ -383,83 +368,26 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 
-  Widget _buildSobremiSection(NearbyUsersController controller) {
-    return Obx(
-      () => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
-          borderRadius: ThemeColor.mediumBorderRadius,
-          boxShadow: [ThemeColor.lightShadow],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sobre mí',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimaryColor,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.profile.value.interests.map((interest) {
-                return _buildChip(interest);
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInterestsSection(NearbyUsersController controller) {
-    return Obx(
-      () => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
-          borderRadius: ThemeColor.mediumBorderRadius,
-          boxShadow: [ThemeColor.lightShadow],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Intereses',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimaryColor,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.profile.value.interests.map((interest) {
-                return _buildChip(interest);
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // ─────────────────────────────────────────────
+  //  BUSCO
+  // ─────────────────────────────────────────────
 
   Widget _buildBuscoSection(NearbyUsersController controller) {
-    return Obx(
-      () => Container(
+    return Obx(() {
+      final pref = controller.currentProfile.value?.preferences;
+      if (pref == null) return const SizedBox.shrink();
+
+      final hasContent = (pref.connectiontype?.isNotEmpty == true) ||
+          (pref.searchgender?.isNotEmpty == true) ||
+          (pref.agemin != null && pref.agemax != null);
+      if (!hasContent) return const SizedBox.shrink();
+
+      return Container(
+        width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -482,14 +410,130 @@ class ProfileDetailScreen extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: controller.profile.value.qualities.map((quality) {
-                return _buildChip(quality);
-              }).toList(),
+              children: [
+                if (pref.connectiontype?.isNotEmpty == true)
+                  _buildPrefChip(Icons.favorite_border, pref.connectiontype!),
+                if (pref.searchgender?.isNotEmpty == true)
+                  _buildPrefChip(Icons.people_outline, pref.searchgender!),
+                if (pref.agemin != null && pref.agemax != null)
+                  _buildPrefChip(
+                    Icons.cake_outlined,
+                    '${pref.agemin} - ${pref.agemax} años',
+                  ),
+              ],
             ),
           ],
         ),
+      );
+    });
+  }
+
+  Widget _buildPrefChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: ThemeColor.primaryColor.withOpacity(0.5)),
+        color: ThemeColor.primaryColor.withOpacity(0.05),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: ThemeColor.primaryColor),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: ThemeColor.textPrimaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  // ─────────────────────────────────────────────
+  //  INTERESES
+  // ─────────────────────────────────────────────
+
+  Widget _buildInterestsSection(NearbyUsersController controller) {
+    return Obx(() {
+      final interests = controller.currentProfile.value?.interestsIds;
+      if (interests == null || interests.isEmpty) return const SizedBox.shrink();
+
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: ThemeColor.backgroundColor,
+          borderRadius: ThemeColor.mediumBorderRadius,
+          boxShadow: [ThemeColor.lightShadow],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Intereses',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: interests.map((i) => _buildChip(i.name)).toList(),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  //  CUALIDADES
+  // ─────────────────────────────────────────────
+
+  Widget _buildQualitiesSection(NearbyUsersController controller) {
+    return Obx(() {
+      final qualities = controller.currentProfile.value?.qualitiesIds;
+      if (qualities == null || qualities.isEmpty) return const SizedBox.shrink();
+
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: ThemeColor.backgroundColor,
+          borderRadius: ThemeColor.mediumBorderRadius,
+          boxShadow: [ThemeColor.lightShadow],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Mis cualidades',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: qualities.map((q) => _buildChip(q.name)).toList(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildChip(String text) {
@@ -510,155 +554,92 @@ class ProfileDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReporteButtons(NearbyUsersController controller) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: controller.skipUser,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    ThemeColor.textSecondaryColor,
-                    ThemeColor.textSecondaryColor.withOpacity(0.8),
-                  ],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: ThemeColor.textSecondaryColor.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.close_rounded,
-                color: ThemeColor.textLightColor,
-                size: 32,
-              ),
+  // ─────────────────────────────────────────────
+  //  BOTONES ACCIÓN (fijos abajo)
+  // ─────────────────────────────────────────────
+
+  Widget _buildActionButtons(NearbyUsersController controller) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        decoration: BoxDecoration(
+          color: ThemeColor.backgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
             ),
-          ),
-
-          const SizedBox(width: 16),
-
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ThemeColor.widgetButton(
-                    onPressed: controller.blockUser,
-                    text: 'Bloquear',
-                    backgroundColor: ThemeColor.backgroundColor,
-                    borderColor: ThemeColor.tertiaryColor,
-                    textColor: ThemeColor.tertiaryColor,
-                    fontSize: 15,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    borderRadius: ThemeColor.mediumRadius,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ThemeColor.widgetButton(
-                    onPressed: controller.reportUser,
-                    text: 'Reportar',
-                    backgroundColor: ThemeColor.backgroundColor,
-                    borderColor: ThemeColor.tertiaryColor,
-                    textColor: ThemeColor.errorColor,
-                    fontSize: 15,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    borderRadius: ThemeColor.mediumRadius,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 16),
-
-          Obx(
-            () => GestureDetector(
-              onTap: controller.toggleFavorite,
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Botón Skip
+            GestureDetector(
+              onTap: controller.skipUser,
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: controller.isFavorite.value
-                        ? [
-                            ThemeColor.errorColor,
-                            ThemeColor.errorColor.withOpacity(0.8),
-                          ]
-                        : [
-                            ThemeColor.primaryColor,
-                            ThemeColor.primaryColor.withOpacity(0.8),
-                          ],
+                    colors: [
+                      ThemeColor.textSecondaryColor,
+                      ThemeColor.textSecondaryColor.withOpacity(0.8),
+                    ],
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          (controller.isFavorite.value
-                                  ? ThemeColor.errorColor
-                                  : ThemeColor.primaryColor)
-                              .withOpacity(0.4),
+                      color: ThemeColor.textSecondaryColor.withOpacity(0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Icon(
-                  controller.isFavorite.value
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  color: ThemeColor.textLightColor,
-                  size: 32,
-                ),
+                child: Icon(Icons.close_rounded, color: ThemeColor.textLightColor, size: 32),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildActionButtons(NearbyUsersController controller) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: ThemeColor.backgroundColor,
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            Expanded(
-              child: ThemeColor.widgetButton(
-                onPressed: controller.sendSuperLike,
-                text: 'Super Like',
-                backgroundColor: ThemeColor.backgroundColor,
-                borderColor: ThemeColor.tertiaryColor,
-                textColor: ThemeColor.tertiaryColor,
-                fontSize: 16,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                borderRadius: ThemeColor.smallRadius,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 2,
-              child: ThemeColor.widgetButton(
-                onPressed: controller.sendMessage,
-                text: 'Me gusta',
-                backgroundColor: ThemeColor.tertiaryColor,
-                textColor: ThemeColor.textLightColor,
-                fontSize: 16,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                borderRadius: ThemeColor.smallRadius,
+            
+            // Botón Like
+            Obx(
+              () => GestureDetector(
+                onTap: controller.toggleFavorite,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: controller.isFavorite.value
+                          ? [
+                              ThemeColor.errorColor,
+                              ThemeColor.errorColor.withOpacity(0.8),
+                            ]
+                          : [
+                              ThemeColor.primaryColor,
+                              ThemeColor.primaryColor.withOpacity(0.8),
+                            ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (controller.isFavorite.value
+                                ? ThemeColor.errorColor
+                                : ThemeColor.primaryColor)
+                            .withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    controller.isFavorite.value
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
+                  ),
+                ),
               ),
             ),
           ],

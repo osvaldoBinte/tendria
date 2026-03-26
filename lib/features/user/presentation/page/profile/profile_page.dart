@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/settings/language_controller.dart';
@@ -397,42 +398,34 @@ class ProfilePage extends GetView<ProfileController> {
       return Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: ThemeColor.mediumBorderRadius,
-              border: Border.all(
-                  color: ThemeColor.dividerColor, width: 1),
-            ),
-            child: ClipRRect(
-              borderRadius: ThemeColor.mediumBorderRadius,
-              child: Image.network(
-                asset.url,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (context, error, stackTrace) =>
-                    Container(
-                  color: ThemeColor.backgroundColorfondo,
-                  child: Icon(Icons.broken_image,
-                      color: ThemeColor.textSecondaryColor),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: ThemeColor.mediumBorderRadius,
+            border: Border.all(color: ThemeColor.dividerColor, width: 1),
+          ),
+          child: ClipRRect(
+            borderRadius: ThemeColor.mediumBorderRadius,
+            child: CachedNetworkImage( // 👈 reemplaza Image.network
+              imageUrl: asset.url,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (context, url) => Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ThemeColor.primaryColor,
+                  ),
                 ),
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          ThemeColor.primaryColor),
-                    ),
-                  );
-                },
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: ThemeColor.backgroundColorfondo,
+                child: Icon(Icons.broken_image,
+                    color: ThemeColor.textSecondaryColor),
               ),
             ),
           ),
+        ),
 
           Positioned(
             top: 4,

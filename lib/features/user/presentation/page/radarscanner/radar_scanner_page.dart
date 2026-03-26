@@ -10,7 +10,6 @@ import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-
 class RadarScannerScreen extends StatefulWidget {
   const RadarScannerScreen({Key? key}) : super(key: key);
 
@@ -67,7 +66,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        
         Scaffold(
           backgroundColor: ThemeColor.backgroundColor,
           body: Stack(
@@ -94,94 +92,97 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                         SizedBox(height: ThemeColor.paddingSmall),
 
-                        Obx(() => Text(
-                              controller.isLoading.value
-                                  ? _l.t('searching')
-                                  : _l.t('nearby'),
-                              style: ThemeColor.bodyMedium.copyWith(
-                                color: ThemeColor.textSecondaryColor,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            )),
+                        Obx(
+                          () => Text(
+                            controller.isLoading.value
+                                ? _l.t('searching')
+                                : _l.t('nearby'),
+                            style: ThemeColor.bodyMedium.copyWith(
+                              color: ThemeColor.textSecondaryColor,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
 
                         SizedBox(height: ThemeColor.paddingLarge),
-
 
                         LayoutBuilder(
-  builder: (context, constraints) {
-    final size = math.min(constraints.maxWidth, 350.0);
-    return SizedBox(
-      key: tutorialCtrl.radarKey, 
-      width: size,
-      height: size,
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(
-            child: CircularProgressIndicator(
-              color: ThemeColor.radarScanner,
-            ),
-          );
-        }
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            _buildRippleEffect(),
-            _buildRadarCircles(),
-            _buildCrosshair(),
-            _buildRadarSweep(),
-            _buildRotatingScanLine(),
-            _buildCenterDot(),
-            _buildDetectedPoints(),
-          ],
-        );
-      }),
-    );
-  },
-),
+                          builder: (context, constraints) {
+                            final size = math.min(constraints.maxWidth, 350.0);
+                            return SizedBox(
+                              key: tutorialCtrl.radarKey,
+                              width: size,
+                              height: size,
+                              child: Obx(() {
+                                if (controller.isLoading.value) {
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      color: ThemeColor.radarScanner,
+                                    ),
+                                  );
+                                }
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    _buildRippleEffect(),
+                                    _buildRadarCircles(),
+                                    _buildCrosshair(),
+                                    _buildRadarSweep(),
+                                    _buildRotatingScanLine(),
+                                    _buildCenterDot(),
+                                    _buildDetectedPoints(),
+                                  ],
+                                );
+                              }),
+                            );
+                          },
+                        ),
 
                         SizedBox(height: ThemeColor.paddingLarge),
                         SizedBox(height: ThemeColor.paddingLarge),
                         SizedBox(height: ThemeColor.paddingLarge),
 
-
-                        Obx(() => SizedBox(
-                              key: tutorialCtrl.searchButtonKey,
-                              width: double.infinity,
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: controller.isLoading.value
-                                    ? null
-                                    : () async {
-                                        await controller.loadNextBatch();
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: ThemeColor.tertiaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        ThemeColor.circularBorderRadius,
-                                  ),
-                                  elevation: 0,
-                                  disabledBackgroundColor:
-                                      ThemeColor.tertiaryColor.withOpacity(0.5),
+                        Obx(
+                          () => SizedBox(
+                            key: tutorialCtrl.searchButtonKey,
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: controller.isLoading.value
+                                  ? null
+                                  : () async {
+                                      await controller.loadNextBatch();
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ThemeColor.tertiaryColor,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: ThemeColor.circularBorderRadius,
                                 ),
-                                child: controller.isLoading.value
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        _l.t('search_btn'),
-                                        style: ThemeColor.buttonText
-                                            .copyWith(fontSize: 16),
-                                      ),
+                                elevation: 0,
+                                disabledBackgroundColor: ThemeColor
+                                    .tertiaryColor
+                                    .withOpacity(0.5),
                               ),
-                            )),
+                              child: controller.isLoading.value
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      _l.t('search_btn'),
+                                      style: ThemeColor.buttonText.copyWith(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
 
                         SizedBox(height: ThemeColor.paddingMedium),
 
@@ -194,7 +195,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                             style: OutlinedButton.styleFrom(
                               foregroundColor: ThemeColor.tertiaryColor,
                               side: BorderSide(
-                                  color: ThemeColor.tertiaryColor, width: 2),
+                                color: ThemeColor.tertiaryColor,
+                                width: 2,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: ThemeColor.circularBorderRadius,
                               ),
@@ -221,12 +224,10 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           ),
         ),
 
-
         const TutorialOverlay(),
       ],
     );
   }
-
 
   Widget _buildGridBackground() {
     return CustomPaint(painter: GridPainter(), child: Container());
@@ -399,8 +400,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               color: ThemeColor.radarScanner,
               boxShadow: [
                 BoxShadow(
-                  color: ThemeColor.radarScanner
-                      .withOpacity(1 - _pulseController.value),
+                  color: ThemeColor.radarScanner.withOpacity(
+                    1 - _pulseController.value,
+                  ),
                   blurRadius: 20,
                   spreadRadius: 10,
                 ),
@@ -420,7 +422,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       final points = _calculateUserPositions(users);
 
       return SizedBox(
-        key: tutorialCtrl.detectedPointsKey, 
+        key: tutorialCtrl.detectedPointsKey,
         width: 350,
         height: 350,
         child: Stack(
@@ -476,8 +478,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     GetUserEntity user,
     int userIndex,
   ) {
-  
-  
     final bool isFirstProfile = userIndex == 0;
 
     return AnimatedBuilder(
@@ -487,9 +487,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           left: 175 + x - 35,
           top: 175 + y - 45,
           child: GestureDetector(
-            key: isFirstProfile
-                ? tutorialCtrl.profileDotKey 
-                : null,
+            key: isFirstProfile ? tutorialCtrl.profileDotKey : null,
             behavior: HitTestBehavior.translucent,
             onTap: () => controller.showUserPreviewDialog(user, userIndex),
             child: SizedBox(
@@ -499,13 +497,14 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  
                   if (user.status != null && user.status!.isNotEmpty)
                     Container(
                       constraints: const BoxConstraints(maxWidth: 70),
                       margin: const EdgeInsets.only(bottom: 3),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 2),
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: ThemeColor.backgroundColor.withOpacity(0.92),
                         borderRadius: const BorderRadius.only(
@@ -538,7 +537,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                       ),
                     ),
 
-
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -560,8 +558,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           ],
                         ),
                         child: ClipOval(
-                          child: user.fotoUrl != null &&
-                                  user.fotoUrl!.isNotEmpty
+                          child:
+                              user.fotoUrl != null && user.fotoUrl!.isNotEmpty
                               ? CachedNetworkImage(
                                   imageUrl: user.fotoUrl!,
                                   fit: BoxFit.cover,
@@ -573,7 +571,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                               : _avatarPlaceholder(),
                         ),
                       ),
-
 
                       if (isFirstProfile)
                         Obx(() {
@@ -594,12 +591,13 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                   const SizedBox(height: 4),
 
-
                   Flexible(
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 70),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 3),
+                        horizontal: 4,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: ThemeColor.backgroundColor.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
@@ -626,8 +624,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           Text(
                             '${user.age ?? 0} ${_l.t('years')}',
                             style: TextStyle(
-                              color:
-                                  ThemeColor.radarScanner.withOpacity(0.7),
+                              color: ThemeColor.radarScanner.withOpacity(0.7),
                               fontSize: 7,
                               fontWeight: FontWeight.w500,
                             ),
@@ -652,32 +649,31 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       child: Icon(Icons.person, color: ThemeColor.radarScanner, size: 20),
     );
   }
-Widget _buildSideIndicators() {
-  
-  final radarRect = tutorialCtrl.getTargetRect(tutorialCtrl.radarKey);
-  
-  
-  final double radarCenterY = radarRect != null
-      ? radarRect.top + (radarRect.height / 2)
-      : MediaQuery.of(context).size.height / 2;
-      
-  const double indicatorHeight = 220.0;
 
-  return Stack(
-    children: [
-      Positioned(
-        left: 20,
-        top: radarCenterY - (indicatorHeight / 2),
-        child: _buildVerticalIndicator(),
-      ),
-      Positioned(
-        right: 20,
-        top: radarCenterY - (indicatorHeight / 2),
-        child: _buildVerticalIndicator(),
-      ),
-    ],
-  );
-}
+  Widget _buildSideIndicators() {
+    final radarRect = tutorialCtrl.getTargetRect(tutorialCtrl.radarKey);
+
+    final double radarCenterY = radarRect != null
+        ? radarRect.top + (radarRect.height / 2)
+        : MediaQuery.of(context).size.height / 2;
+
+    const double indicatorHeight = 220.0;
+
+    return Stack(
+      children: [
+        Positioned(
+          left: 20,
+          top: radarCenterY - (indicatorHeight / 2),
+          child: _buildVerticalIndicator(),
+        ),
+        Positioned(
+          right: 20,
+          top: radarCenterY - (indicatorHeight / 2),
+          child: _buildVerticalIndicator(),
+        ),
+      ],
+    );
+  }
 
   Widget _buildVerticalIndicator() {
     return AnimatedBuilder(
@@ -714,8 +710,6 @@ Widget _buildSideIndicators() {
   }
 }
 
-
-
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
   const _PulsingTouchIcon({required this.color});
@@ -737,12 +731,14 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _scale   = Tween(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
-    _opacity = Tween(begin: 0.7, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween(
+      begin: 0.85,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _opacity = Tween(
+      begin: 0.7,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -784,8 +780,6 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
     );
   }
 }
-
-
 
 class GridPainter extends CustomPainter {
   @override
@@ -846,8 +840,7 @@ class RotatingScanLinePainter extends CustomPainter {
           ThemeColor.radarScanner,
         ],
         stops: const [0.0, 0.7, 1.0],
-      ).createShader(
-          Rect.fromLTWH(center.dx, center.dy - 1.5, radius, 3))
+      ).createShader(Rect.fromLTWH(center.dx, center.dy - 1.5, radius, 3))
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(center, Offset(center.dx + radius, center.dy), paint);

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/features/auth/presentation/page/home/start_page.dart';
 import 'package:tendria/features/user/domain/entities/preferences_step.dart';
 import 'package:tendria/features/user/presentation/controller/preferences_controller.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
+import 'package:tendria/features/user/presentation/profiledetail/profile_detail_page.dart';
 import 'package:tendria/features/user/presentation/widget/AgeWheelWidget.dart';
 import 'package:tendria/features/user/presentation/widget/DistanceWheelWidget.dart';
 
@@ -30,14 +32,24 @@ class PreferencesPage extends GetView<PreferencesController> {
           }
 
           if (controller.showSuccessScreen.value) {
-            return RadarScannerScreen();
+            // Navegamos en el próximo frame para no llamar durante build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
+            });
+            // Muestra loading mientras navega
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
           if (controller.availableSteps.isEmpty) {
-            return RadarScannerScreen();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
+            });
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
-
-          // ✅ Mostrar el paso actual
           switch (controller.currentStep.value) {
             case PreferencesStep.genderPreference:
               return _buildGenderPreferenceStep();
@@ -420,27 +432,27 @@ class PreferencesPage extends GetView<PreferencesController> {
                           children: [
                             // Edad mínima
                             Expanded(
-                              child:AgeWheelWidget(
-  initialAge: controller.minAge.value,
-  onChanged: (age) {
-    controller.updateMinAge(age);
-    if (age > controller.maxAge.value) {
-      controller.updateMaxAge(age);
-    }
-  },
-),
+                              child: AgeWheelWidget(
+                                initialAge: controller.minAge.value,
+                                onChanged: (age) {
+                                  controller.updateMinAge(age);
+                                  if (age > controller.maxAge.value) {
+                                    controller.updateMaxAge(age);
+                                  }
+                                },
+                              ),
                             ),
                             // Edad máxima
                             Expanded(
                               child: AgeWheelWidget(
-  initialAge: controller.maxAge.value,
-  onChanged: (age) {
-    controller.updateMaxAge(age);
-    if (age < controller.minAge.value) {
-      controller.updateMinAge(age);
-    }
-  },
-),
+                                initialAge: controller.maxAge.value,
+                                onChanged: (age) {
+                                  controller.updateMaxAge(age);
+                                  if (age < controller.minAge.value) {
+                                    controller.updateMinAge(age);
+                                  }
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -510,9 +522,9 @@ class PreferencesPage extends GetView<PreferencesController> {
                           ),
                         ),
                         DistanceWheelWidget(
-  initialDistance: controller.distanceKm.value,
-  onChanged: (km) => controller.updateDistance(km),
-),
+                          initialDistance: controller.distanceKm.value,
+                          onChanged: (km) => controller.updateDistance(km),
+                        ),
                       ],
                     ),
                   ),
@@ -574,175 +586,178 @@ class PreferencesPage extends GetView<PreferencesController> {
   }
 
   Widget _buildDistanceWheel({
-  required double initialDistance,
-  required void Function(double km) onChanged,
-}) {
-  // Calcular índice inicial
-  int initialIndex;
-  if (initialDistance < 1) {
-    initialIndex = ((initialDistance * 10).round() - 1).clamp(0, 8);
-  } else {
-    initialIndex = (9 + (initialDistance.toInt() - 1)).clamp(0, 308);
-  }
+    required double initialDistance,
+    required void Function(double km) onChanged,
+  }) {
+    // Calcular índice inicial
+    int initialIndex;
+    if (initialDistance < 1) {
+      initialIndex = ((initialDistance * 10).round() - 1).clamp(0, 8);
+    } else {
+      initialIndex = (9 + (initialDistance.toInt() - 1)).clamp(0, 308);
+    }
 
-  final scrollController = FixedExtentScrollController(initialItem: initialIndex);
-  final RxInt selected = initialIndex.obs;
+    final scrollController = FixedExtentScrollController(
+      initialItem: initialIndex,
+    );
+    final RxInt selected = initialIndex.obs;
 
-  String labelForIndex(int index) {
-    if (index < 9) return '${(index + 1) * 100} m';
-    final km = index - 9 + 1;
-    return km >= 300 ? '∞  Sin límite' : '$km km';
-  }
+    String labelForIndex(int index) {
+      if (index < 9) return '${(index + 1) * 100} m';
+      final km = index - 9 + 1;
+      return km >= 300 ? '∞  Sin límite' : '$km km';
+    }
 
-  double kmForIndex(int index) {
-    if (index < 9) return ((index + 1) * 100) / 1000.0;
-    return (index - 9 + 1).toDouble();
-  }
+    double kmForIndex(int index) {
+      if (index < 9) return ((index + 1) * 100) / 1000.0;
+      return (index - 9 + 1).toDouble();
+    }
 
-  return ListWheelScrollView.useDelegate(
-    controller: scrollController,
-    itemExtent: 60,
-    diameterRatio: 1.5,
-    perspective: 0.003,
-    physics: FixedExtentScrollPhysics(),
-    onSelectedItemChanged: (index) {
-      selected.value = index;
-      onChanged(kmForIndex(index));
-    },
-    childDelegate: ListWheelChildBuilderDelegate(
-      childCount: 309, // 9 metros + 300 km
-      builder: (context, index) {
-        return Obx(() {
-          final isSelected = index == selected.value;
-          return Container(
-            height: 60,
-            alignment: Alignment.center,
-            child: Text(
-              labelForIndex(index),
-              style: ThemeColor.bodyLarge.copyWith(
-                color: isSelected
-                    ? ThemeColor.textDarkColor
-                    : ThemeColor.textSecondaryColor,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                fontSize: isSelected ? 20 : 16,
-              ),
-            ),
-          );
-        });
+    return ListWheelScrollView.useDelegate(
+      controller: scrollController,
+      itemExtent: 60,
+      diameterRatio: 1.5,
+      perspective: 0.003,
+      physics: FixedExtentScrollPhysics(),
+      onSelectedItemChanged: (index) {
+        selected.value = index;
+        onChanged(kmForIndex(index));
       },
-    ),
-  );
-}
+      childDelegate: ListWheelChildBuilderDelegate(
+        childCount: 309, // 9 metros + 300 km
+        builder: (context, index) {
+          return Obx(() {
+            final isSelected = index == selected.value;
+            return Container(
+              height: 60,
+              alignment: Alignment.center,
+              child: Text(
+                labelForIndex(index),
+                style: ThemeColor.bodyLarge.copyWith(
+                  color: isSelected
+                      ? ThemeColor.textDarkColor
+                      : ThemeColor.textSecondaryColor,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontSize: isSelected ? 20 : 16,
+                ),
+              ),
+            );
+          });
+        },
+      ),
+    );
+  }
 
   // ==========================================
   // PASO 4: FOTOS
   // ==========================================
   Widget _buildPhotosStep() {
-  return Column(
-    children: [
-      Expanded(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(ThemeColor.paddingLarge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: ThemeColor.paddingExtraLarge),
-                Text(
-                  'Preséntate con fotos',
-                  style: ThemeColor.headingLarge.copyWith(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: ThemeColor.textDarkColor,
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(ThemeColor.paddingLarge),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: ThemeColor.paddingExtraLarge),
+                  Text(
+                    'Preséntate con fotos',
+                    style: ThemeColor.headingLarge.copyWith(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: ThemeColor.textDarkColor,
+                    ),
                   ),
-                ),
-                SizedBox(height: ThemeColor.paddingSmall),
-                Text(
-                  'Sube al menos 2 fotos que muestren tu esencia.\nLas mejores conexiones empiezan con buenas\nfotos.',
-                  style: ThemeColor.bodyMedium.copyWith(
-                    color: ThemeColor.textSecondaryColor,
-                    height: 1.4,
+                  SizedBox(height: ThemeColor.paddingSmall),
+                  Text(
+                    'Sube al menos 2 fotos que muestren tu esencia.\nLas mejores conexiones empiezan con buenas\nfotos.',
+                    style: ThemeColor.bodyMedium.copyWith(
+                      color: ThemeColor.textSecondaryColor,
+                      height: 1.4,
+                    ),
                   ),
-                ),
-                SizedBox(height: ThemeColor.paddingExtraLarge),
+                  SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                // Grid de fotos
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: ThemeColor.paddingSmall,
-                    mainAxisSpacing: ThemeColor.paddingSmall,
-                    childAspectRatio: 1,
+                  // Grid de fotos
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: ThemeColor.paddingSmall,
+                      mainAxisSpacing: ThemeColor.paddingSmall,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: controller.maxPhotos,
+                    itemBuilder: (context, index) {
+                      return Obx(() {
+                        final photos = controller.selectedPhotos;
+                        final isPicking = controller.isPickingPhotos.value;
+
+                        if (index < photos.length) {
+                          // Slot con foto ya cargada
+                          return _buildPhotoItem(photos[index], index);
+                        }
+
+                        // Todos los slots vacíos muestran loading mientras se selecciona
+                        if (isPicking) {
+                          return _buildLoadingPhotoSlot();
+                        }
+
+                        // Slots vacíos normales
+                        return _buildAddPhotoButton();
+                      });
+                    },
                   ),
-                  itemCount: controller.maxPhotos,
-                 itemBuilder: (context, index) {
-  return Obx(() {
-    final photos = controller.selectedPhotos;
-    final isPicking = controller.isPickingPhotos.value;
 
-    if (index < photos.length) {
-      // Slot con foto ya cargada
-      return _buildPhotoItem(photos[index], index);
-    }
+                  SizedBox(height: ThemeColor.paddingLarge),
 
-    // Todos los slots vacíos muestran loading mientras se selecciona
-    if (isPicking) {
-      return _buildLoadingPhotoSlot();
-    }
-
-    // Slots vacíos normales
-    return _buildAddPhotoButton();
-  });
-},
-                ),
-
-                SizedBox(height: ThemeColor.paddingLarge),
-
-                Obx(
-                  () => Center(
-                    child: Text(
-                      '${controller.selectedPhotos.length}/${controller.maxPhotos} fotos',
-                      style: ThemeColor.bodyMedium.copyWith(
-                        color: ThemeColor.textSecondaryColor,
+                  Obx(
+                    () => Center(
+                      child: Text(
+                        '${controller.selectedPhotos.length}/${controller.maxPhotos} fotos',
+                        style: ThemeColor.bodyMedium.copyWith(
+                          color: ThemeColor.textSecondaryColor,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      _buildNavigationButtons(),
-    ],
-  );
-}
+        _buildNavigationButtons(),
+      ],
+    );
+  }
 
-/// Slot con spinner mientras se procesan las fotos
-Widget _buildLoadingPhotoSlot() {
-  return Container(
-    decoration: BoxDecoration(
-      color: ThemeColor.primaryColor.withOpacity(0.05),
-      borderRadius: ThemeColor.mediumBorderRadius,
-      border: Border.all(
-        color: ThemeColor.primaryColor.withOpacity(0.3),
-        width: 1.5,
-      ),
-    ),
-    child: Center(
-      child: SizedBox(
-        width: 28,
-        height: 28,
-        child: CircularProgressIndicator(
-          strokeWidth: 2.5,
-          valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+  /// Slot con spinner mientras se procesan las fotos
+  Widget _buildLoadingPhotoSlot() {
+    return Container(
+      decoration: BoxDecoration(
+        color: ThemeColor.primaryColor.withOpacity(0.05),
+        borderRadius: ThemeColor.mediumBorderRadius,
+        border: Border.all(
+          color: ThemeColor.primaryColor.withOpacity(0.3),
+          width: 1.5,
         ),
       ),
-    ),
-  );
-}
+      child: Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPhotoItem(String photoPath, int index) {
     return Stack(
       children: [
@@ -1001,72 +1016,72 @@ Widget _buildLoadingPhotoSlot() {
     );
   }
 
-IconData _getInterestIcon(String interest) {
-  final icons = {
-    // Arte
-    'Pintura': Icons.brush,
-    'Fotografía': Icons.camera_alt,
-    'Arte': Icons.palette,
+  IconData _getInterestIcon(String interest) {
+    final icons = {
+      // Arte
+      'Pintura': Icons.brush,
+      'Fotografía': Icons.camera_alt,
+      'Arte': Icons.palette,
 
-    // Entretenimiento
-    'Cine': Icons.movie,
-    'Videojuegos': Icons.videogame_asset,
-    'Anime': Icons.auto_awesome,
-    
-    // Música
-    'Música en vivo': Icons.mic,
-    'Rock': Icons.music_note,
-    'Reggaetón': Icons.headphones,
-    'Conciertos': Icons.music_note,
-    'Festivales': Icons.festival,
-    'Bailar': Icons.music_note,
+      // Entretenimiento
+      'Cine': Icons.movie,
+      'Videojuegos': Icons.videogame_asset,
+      'Anime': Icons.auto_awesome,
 
-    // Fitness & bienestar
-    'Gimnasio': Icons.fitness_center,
-    'Correr': Icons.directions_run,
-    'Yoga': Icons.self_improvement,
-    'Meditación': Icons.spa,
-    'Deportes': Icons.sports_soccer,
+      // Música
+      'Música en vivo': Icons.mic,
+      'Rock': Icons.music_note,
+      'Reggaetón': Icons.headphones,
+      'Conciertos': Icons.music_note,
+      'Festivales': Icons.festival,
+      'Bailar': Icons.music_note,
 
-    // Aventura
-    'Senderismo': Icons.terrain,
-    'Viajar': Icons.flight_takeoff,
-    'Playa': Icons.beach_access,
+      // Fitness & bienestar
+      'Gimnasio': Icons.fitness_center,
+      'Correr': Icons.directions_run,
+      'Yoga': Icons.self_improvement,
+      'Meditación': Icons.spa,
+      'Deportes': Icons.sports_soccer,
 
-    // Gastronomía
-    'Café': Icons.coffee,
-    'Vino': Icons.wine_bar,
-    'Cocinar': Icons.restaurant_menu,
-    'Foodie': Icons.restaurant,
+      // Aventura
+      'Senderismo': Icons.terrain,
+      'Viajar': Icons.flight_takeoff,
+      'Playa': Icons.beach_access,
 
-    // Intelectual
-    'Lectura': Icons.menu_book,
-    'Libros': Icons.book,
-    'Psicología': Icons.psychology,
-    'Programación': Icons.code,
+      // Gastronomía
+      'Café': Icons.coffee,
+      'Vino': Icons.wine_bar,
+      'Cocinar': Icons.restaurant_menu,
+      'Foodie': Icons.restaurant,
 
-    // Lifestyle & negocios
-    'Emprendimiento': Icons.rocket_launch,
-    'Startups': Icons.trending_up,
-    'Criptomonedas': Icons.currency_bitcoin,
-    'Autos deportivos': Icons.directions_car,
-    'Nómada digital': Icons.laptop_mac,
+      // Intelectual
+      'Lectura': Icons.menu_book,
+      'Libros': Icons.book,
+      'Psicología': Icons.psychology,
+      'Programación': Icons.code,
 
-    // Mascotas
-    'Perros': Icons.pets,
-    'Gatos': Icons.pets,
+      // Lifestyle & negocios
+      'Emprendimiento': Icons.rocket_launch,
+      'Startups': Icons.trending_up,
+      'Criptomonedas': Icons.currency_bitcoin,
+      'Autos deportivos': Icons.directions_car,
+      'Nómada digital': Icons.laptop_mac,
 
-    // Romance
-    'Relación seria': Icons.favorite,
-    'Algo casual': Icons.sentiment_satisfied_alt,
+      // Mascotas
+      'Perros': Icons.pets,
+      'Gatos': Icons.pets,
 
-    // Otros
-    'Escribir': Icons.edit,
-    'Museos y galerías': Icons.museum,
-  };
+      // Romance
+      'Relación seria': Icons.favorite,
+      'Algo casual': Icons.sentiment_satisfied_alt,
 
-  return icons[interest] ?? Icons.favorite;
-}
+      // Otros
+      'Escribir': Icons.edit,
+      'Museos y galerías': Icons.museum,
+    };
+
+    return icons[interest] ?? Icons.favorite;
+  }
 
   // ==========================================
   // PASO 6: CUALIDADES

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 
@@ -83,10 +84,7 @@ class ProfileDetailScreen extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.search, color: ThemeColor.textDarkColor),
-                          onPressed: () {},
-                        ),
+                    
                       ],
                     ),
                   ),
@@ -263,7 +261,7 @@ class ProfileDetailScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      controller.currentDistance,
+                                      controller.currentCity,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: ThemeColor.textLightColor,

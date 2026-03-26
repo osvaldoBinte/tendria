@@ -52,14 +52,13 @@ class NearbyUsersController extends GetxController {
   // ── Helpers calculados desde currentProfile ──
   List<String> get currentGallery => _buildGallery(currentProfile.value);
 
-  String get currentDistance {
-    final user = currentProfile.value;
-    if (user == null) return '0 km';
-    if (user.bio != null && double.tryParse(user.bio!) != null) {
-      return '${double.parse(user.bio!).toStringAsFixed(2)} km cerca';
-    }
-    return '${2 + (currentUserIndex.value % 10)} km cerca';
+String get currentCity {
+  final profile = currentProfile.value;
+  if (profile == null || profile.city == null) {
+    return '';
   }
+  return profile.city!;
+}
 
   @override
   void onInit() {

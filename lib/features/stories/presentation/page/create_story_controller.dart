@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -16,19 +17,28 @@ import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:image_picker/image_picker.dart';
-// Modelo para textos
+
+import 'dart:ui' as ui;
+import 'package:camera/camera.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/return_code.dart';
+// ─────────────────────────────────────────────
+// StoryText
+// ─────────────────────────────────────────────
 class StoryText {
   final String text;
   final Color color;
   Offset position;
   double scale;
   final String id;
+  final String style;
 
   StoryText({
     required this.text,
     required this.color,
     required this.position,
     this.scale = 1.0,
+    this.style = 'none',
     String? id,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -37,17 +47,22 @@ class StoryText {
     Color? color,
     Offset? position,
     double? scale,
+    String? style,
   }) {
     return StoryText(
       text: text ?? this.text,
       color: color ?? this.color,
       position: position ?? this.position,
       scale: scale ?? this.scale,
+      style: style ?? this.style,
       id: id,
     );
   }
 }
 
+// ─────────────────────────────────────────────
+// CreateStoryController
+// ─────────────────────────────────────────────
 class CreateStoryController extends GetxController {
   // Camera
   Rx<CameraController?> cameraController = Rx<CameraController?>(null);
@@ -65,7 +80,7 @@ class CreateStoryController extends GetxController {
   final Rx<File?> capturedFile = Rx<File?>(null);
   final Rx<String?> contentType = Rx<String?>(null);
   VideoPlayerController? videoController;
-  
+
   // Video ready flag
   final RxBool isVideoReady = false.obs;
 
@@ -73,39 +88,40 @@ class CreateStoryController extends GetxController {
   final RxList<AssetEntity> galleryAssets = <AssetEntity>[].obs;
   final RxBool isLoadingGallery = false.obs;
 
-  // Textos sobre la historia
+  // Textos
   final RxList<StoryText> storyTexts = <StoryText>[].obs;
   final Rx<String?> selectedTextId = Rx<String?>(null);
 
   final GlobalKey repaintBoundaryKey = GlobalKey();
-
-  // Flag para indicar si se está procesando el video
   final RxBool isProcessingVideo = false.obs;
-// Agregar import al controller
 
-Future<void> selectFromImagePicker() async {
-  try {
-    final ImagePicker picker = ImagePicker();
-    
-    // Mostrar opciones: foto o video
-    final XFile? file = await picker.pickMedia();
-    if (file == null) return;
+  // Editor de texto
+  final RxBool isEditingText = false.obs;
+  final RxString editingTextId = ''.obs;
+  final RxString currentEditText = ''.obs;
+  final Rx<Color> currentEditColor = Colors.white.obs;
+  final RxString currentEditAlign = 'center'.obs;
+  final RxString currentEditStyle = 'none'.obs;
+  final RxBool _isDraggingText = false.obs;
 
-    final path = file.path.toLowerCase();
-    final isVideo = path.endsWith('.mp4') || path.endsWith('.mov') ||
-        path.endsWith('.avi') || path.endsWith('.mkv');
+  // ✅ Tamaño de pantalla capturado desde _buildPreviewScreen() en la UI.
+  // Necesario para calcular la escala correcta del texto en FFmpeg.
+  double previewScreenWidth  = 0;
+  double previewScreenHeight = 0;
 
-    capturedFile.value = File(file.path);
-    contentType.value = isVideo ? 'Video' : 'Foto';
+  // ─────────────────────────────────────────────
+  // Constantes de contentType
+  // ─────────────────────────────────────────────
+  static const String _kVideo  = 'Video';
+  static const String _kImagen = 'Foto';
 
-    if (contentType.value == 'Video') {
-      await initializeVideoController();
-    }
-  } catch (e) {
-    debugPrint('Error seleccionando de galería: $e');
-    showErrorSnackbar('No se pudo seleccionar el archivo');
-  }
-}
+  bool get _isVideo  => contentType.value == _kVideo;
+  bool get _isImagen => contentType.value == _kImagen;
+
+  // ─────────────────────────────────────────────
+  // Lifecycle
+  // ─────────────────────────────────────────────
+
   @override
   void onInit() {
     super.onInit();
@@ -121,18 +137,73 @@ Future<void> selectFromImagePicker() async {
     super.onClose();
   }
 
-  // Agregar texto
-  void addText(String text, Color color, Offset position, double scale) {
-    final newText = StoryText(
+  // ─────────────────────────────────────────────
+  // Text editor
+  // ─────────────────────────────────────────────
+
+  void openTextEditor({String? textId}) {
+    if (textId != null) {
+      final existing = storyTexts.firstWhereOrNull((t) => t.id == textId);
+      if (existing != null) {
+        editingTextId.value = textId;
+        currentEditText.value = existing.text;
+        currentEditColor.value = existing.color;
+        currentEditStyle.value = existing.style;
+        currentEditAlign.value = 'center';
+      }
+    } else {
+      editingTextId.value = '';
+      currentEditText.value = '';
+      currentEditColor.value = Colors.white;
+      currentEditAlign.value = 'center';
+      currentEditStyle.value = 'none';
+    }
+    isEditingText.value = true;
+  }
+
+  void confirmTextEdit(String text) {
+    if (text.trim().isEmpty) {
+      isEditingText.value = false;
+      return;
+    }
+    if (editingTextId.value.isNotEmpty) {
+      final idx = storyTexts.indexWhere((t) => t.id == editingTextId.value);
+      if (idx >= 0) {
+        storyTexts[idx] = storyTexts[idx].copyWith(
+          text: text,
+          color: currentEditColor.value,
+          style: currentEditStyle.value,
+        );
+        storyTexts.refresh();
+      }
+    } else {
+      addText(
+        text,
+        currentEditColor.value,
+        const Offset(0.5, 0.45),
+        1.0,
+        style: currentEditStyle.value,
+      );
+    }
+    isEditingText.value = false;
+  }
+
+  void addText(
+    String text,
+    Color color,
+    Offset position,
+    double scale, {
+    String style = 'none',
+  }) {
+    storyTexts.add(StoryText(
       text: text,
       color: color,
       position: position,
       scale: scale,
-    );
-    storyTexts.add(newText);
+      style: style,
+    ));
   }
 
-  // Actualizar posición de texto
   void updateTextPosition(String textId, Offset newPosition) {
     final index = storyTexts.indexWhere((t) => t.id == textId);
     if (index != -1) {
@@ -140,41 +211,7 @@ Future<void> selectFromImagePicker() async {
       storyTexts.refresh();
     }
   }
-Future<File?> convertToPng(File inputFile) async {
-  try {
-    // Si ya es PNG, no convertir
-    final ext = inputFile.path.toLowerCase().split('.').last;
-    if (ext == 'png') {
-      debugPrint('✅ Ya es PNG, no se convierte');
-      return inputFile;
-    }
 
-    debugPrint('🔄 Convirtiendo a PNG: ${inputFile.path}');
-
-    final directory = await getTemporaryDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final outputPath = '${directory.path}/story_$timestamp.png';
-
-    final command = '-i "${inputFile.path}" -y "$outputPath"';
-    final session = await FFmpegKit.execute(command);
-    final returnCode = await session.getReturnCode();
-
-    if (ReturnCode.isSuccess(returnCode)) {
-      final outputFile = File(outputPath);
-      if (await outputFile.exists()) {
-        debugPrint('✅ Convertido a PNG: $outputPath');
-        return outputFile;
-      }
-    }
-
-    debugPrint('⚠️ No se pudo convertir, usando original');
-    return inputFile;
-  } catch (e) {
-    debugPrint('💥 Error convirtiendo a PNG: $e');
-    return inputFile;
-  }
-}
-  // Actualizar escala de texto
   void updateTextScale(String textId, double newScale) {
     final index = storyTexts.indexWhere((t) => t.id == textId);
     if (index != -1) {
@@ -183,316 +220,350 @@ Future<File?> convertToPng(File inputFile) async {
     }
   }
 
-  // Eliminar texto
   void removeText(String textId) {
     storyTexts.removeWhere((t) => t.id == textId);
   }
 
-  // Seleccionar texto
   void selectText(String? textId) {
     selectedTextId.value = textId;
   }
 
-  Future<File?> captureStoryWithTexts() async {
-    try {
-      // Si no hay textos, devolver el archivo original
-      if (storyTexts.isEmpty) {
-        return capturedFile.value;
-      }
+  // ─────────────────────────────────────────────
+  // Captura con textos
+  // ─────────────────────────────────────────────
 
-      // Para videos, usar FFmpeg
-if (contentType.value == 'Video') {
-        return await processVideoWithTexts();
-      }
+Future<File?> captureStoryWithTexts() async {
+  debugPrint('═══════════════════════════════════');
+  debugPrint('📸 captureStoryWithTexts()');
+  debugPrint('   contentType   = ${contentType.value}');
+  debugPrint('   storyTexts    = ${storyTexts.length}');
+  debugPrint('   capturedFile  = ${capturedFile.value?.path}');
+  debugPrint('   previewScreen = ${previewScreenWidth}x$previewScreenHeight');
+  debugPrint('═══════════════════════════════════');
 
-      // Para imágenes, capturar el RepaintBoundary
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      RenderRepaintBoundary? boundary = repaintBoundaryKey.currentContext
-          ?.findRenderObject() as RenderRepaintBoundary?;
-
-      if (boundary == null) {
-        debugPrint('RepaintBoundary not found');
-        return capturedFile.value;
-      }
-
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      
-      if (byteData == null) {
-        debugPrint('Failed to convert image to bytes');
-        return capturedFile.value;
-      }
-
-      Uint8List pngBytes = byteData.buffer.asUint8List();
-
-      final directory = await getTemporaryDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final imagePath = '${directory.path}/story_with_text_$timestamp.png';
-      final imageFile = File(imagePath);
-      await imageFile.writeAsBytes(pngBytes);
-
-      debugPrint('Story with texts saved: $imagePath');
-      return imageFile;
-    } catch (e) {
-      debugPrint('Error capturing story with texts: $e');
+  try {
+    if (storyTexts.isEmpty) {
+      debugPrint('ℹ️ Sin textos, devolviendo original');
       return capturedFile.value;
     }
+
+    if (_isVideo) {
+      debugPrint('🎬 VIDEO → processVideoWithTexts()');
+      return await processVideoWithTexts(); // ← llama al método correcto con return
+    }
+
+    debugPrint('🖼️ IMAGEN → _captureImageWithTexts()');
+    return await _captureImageWithTexts();
+  } catch (e, st) {
+    debugPrint('💥 captureStoryWithTexts error: $e\n$st');
+    return capturedFile.value;
+  }
+}
+
+  Future<File?> _captureImageWithTexts() async {
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final boundary = repaintBoundaryKey.currentContext?.findRenderObject()
+        as RenderRepaintBoundary?;
+
+    if (boundary == null) {
+      debugPrint('❌ RepaintBoundary not found');
+      return capturedFile.value;
+    }
+
+    final image    = await boundary.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    if (byteData == null) {
+      debugPrint('❌ Failed to convert image to bytes');
+      return capturedFile.value;
+    }
+
+    final pngBytes  = byteData.buffer.asUint8List();
+    final directory = await getTemporaryDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final imagePath = '${directory.path}/story_with_text_$timestamp.png';
+    final imageFile = File(imagePath);
+    await imageFile.writeAsBytes(pngBytes);
+
+    debugPrint('✅ Story image saved: $imagePath');
+    return imageFile;
   }
 
-  // ✅ SOLUCIÓN FINAL: Procesar video con FUENTE especificada
+  // ─────────────────────────────────────────────
+  // FFmpeg — texto sobre video con escala correcta
+  // ─────────────────────────────────────────────
+
   Future<File?> processVideoWithTexts() async {
     if (capturedFile.value == null || storyTexts.isEmpty) {
-      debugPrint('❌ No file or no texts to process');
+      debugPrint('❌ processVideoWithTexts: no file or no texts');
       return capturedFile.value;
     }
 
     try {
       isProcessingVideo.value = true;
-      debugPrint('🎬 Starting video processing with ${storyTexts.length} texts');
+
+      final inputFile = capturedFile.value!;
+
+      if (!await inputFile.exists()) {
+        debugPrint('❌ Input file does not exist: ${inputFile.path}');
+        isProcessingVideo.value = false;
+        return capturedFile.value;
+      }
+
+      final inputSize = await inputFile.length();
+      debugPrint('📥 Input: ${inputFile.path}');
+      debugPrint('📦 Input: ${(inputSize / 1024 / 1024).toStringAsFixed(2)} MB');
 
       final directory = await getTemporaryDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final outputPath = '${directory.path}/story_video_$timestamp.mp4';
 
-      // Obtener resolución real del video
-      double videoWidth = 1080;
+      // ── Resolución real del video ─────────────
+      double videoWidth  = 1080;
       double videoHeight = 1920;
-      
+
       if (videoController != null && videoController!.value.isInitialized) {
-        videoWidth = videoController!.value.size.width;
+        videoWidth  = videoController!.value.size.width;
         videoHeight = videoController!.value.size.height;
-        debugPrint('📐 Video resolution: ${videoWidth}x$videoHeight');
+        debugPrint('📐 Video real: ${videoWidth}x$videoHeight');
+      } else {
+        debugPrint('⚠️ VideoController no inicializado, usando ${videoWidth}x$videoHeight por defecto');
       }
 
-      // ✅ CLAVE: Especificar fuente de Android
+      // ── Factor de escala pantalla → video ─────
+      //
+      // El texto se posicionó visualmente en Flutter sobre una pantalla
+      // de (previewScreenWidth x previewScreenHeight) píxeles LÓGICOS.
+      // El video tiene (videoWidth x videoHeight) píxeles REALES.
+      //
+      // Para que el texto tenga el mismo tamaño visual relativo en el
+      // video hay que multiplicar el fontSize por:
+      //   scaleX = videoWidth  / previewScreenWidth
+      //
+      // Ejemplo: pantalla 390px lógicos, video 1080px reales
+      //   scaleX = 1080 / 390 ≈ 2.77
+      //   fontSize en video = 28 * 2.77 ≈ 77px  ← se ve igual que en pantalla
+      //
+      final double screenW =
+          previewScreenWidth  > 0 ? previewScreenWidth  : 390.0;
+      final double screenH =
+          previewScreenHeight > 0 ? previewScreenHeight : 844.0;
+
+      final double scaleX = videoWidth  / screenW;
+      final double scaleY = videoHeight / screenH;
+
+      debugPrint('📐 Pantalla lógica : ${screenW}x$screenH');
+      debugPrint('📐 scaleX=$scaleX  scaleY=$scaleY');
+
+      // ── Construir filtros de texto ─────────────
       const fontPath = '/system/fonts/Roboto-Regular.ttf';
-      
-      // Construir filtros de texto
-      List<String> textFilters = [];
-      
+      final List<String> textFilters = [];
+
       for (int i = 0; i < storyTexts.length; i++) {
-        final storyText = storyTexts[i];
-        
-        // Calcular posición en píxeles
-        final xPos = (storyText.position.dx * videoWidth).toInt();
-        final yPos = (storyText.position.dy * videoHeight).toInt();
-        
-        // Convertir color a formato FFmpeg (RRGGBB sin alpha)
-        final colorHex = storyText.color.value.toRadixString(16).padLeft(8, '0').substring(2);
-        
-        // Calcular tamaño de fuente
-        final baseFontSize = (videoHeight / 1920) * 28;
-        final fontSize = (baseFontSize * storyText.scale).toInt();
-        
-        // Limpiar el texto
-        String cleanText = storyText.text
-            .replaceAll('\\', '')
-            .replaceAll("'", '')
-            .replaceAll('"', '')
-            .replaceAll(':', ' ')
-            .replaceAll('%', ' ')
-            .trim();
-        
-        debugPrint('📝 Text $i: "$cleanText" at ($xPos, $yPos) size:$fontSize color:$colorHex');
-        
-        // ✅ Filtro CON fuente especificada
-        final filter = "drawtext="
-    "fontfile=$fontPath:"
-    "text='$cleanText':"
-    "fontsize=$fontSize:"
-    "fontcolor=$colorHex:"
-    "x=$xPos:"
-    "y=$yPos:"
-    "shadowcolor=black@0.8:"      // Sombra más fuerte
-    "shadowx=2:"                   // Desplazamiento sombra X
-    "shadowy=2:"                   // Desplazamiento sombra Y
-    "borderw=3:"                   // Borde grueso
-    "bordercolor=black@0.9";
-        
-        textFilters.add(filter);
+        final st = storyTexts[i];
+
+        // Posición en píxeles de video
+        final int xPos = (st.position.dx * videoWidth).toInt();
+        final int yPos = (st.position.dy * videoHeight).toInt();
+
+        final String colorHex = st.color.value
+            .toRadixString(16)
+            .padLeft(8, '0')
+            .substring(2);
+
+        // ✅ Cálculo correcto del tamaño de fuente:
+        //   28.0   → fontSize base en Flutter (igual que en DraggableStoryText)
+        //   st.scale → zoom que el usuario aplicó con pinch gesture
+        //   scaleX  → factor de conversión de pantalla a video
+        final double fontSizeF = 28.0 * st.scale * scaleX;
+        final int    fontSize  = fontSizeF.clamp(10.0, 600.0).toInt();
+
+        debugPrint('  [texto $i] "${st.text}"  pos=(${st.position.dx.toStringAsFixed(2)},${st.position.dy.toStringAsFixed(2)})  scale=${st.scale}  → fontSize=$fontSize');
+
+        final List<String> lines = st.text.split('\n');
+
+        for (int li = 0; li < lines.length; li++) {
+          String cleanLine = lines[li]
+              .replaceAll('\\', '')
+              .replaceAll("'", '')
+              .replaceAll('"', '')
+              .replaceAll(':', ' ')
+              .replaceAll('%', ' ')
+              .trim();
+
+          if (cleanLine.isEmpty) continue;
+
+          final int lineYPos = yPos + (li * (fontSize + 4));
+
+          textFilters.add(
+            'drawtext='
+            'fontfile=$fontPath:'
+            "text='$cleanLine':"
+            'fontsize=$fontSize:'
+            'fontcolor=$colorHex:'
+            'x=$xPos:'
+            'y=$lineYPos:'
+            'shadowcolor=black@0.8:'
+            'shadowx=2:'
+            'shadowy=2:'
+            'borderw=3:'
+            'bordercolor=black@0.9',
+          );
+        }
       }
 
-      // Unir todos los filtros
-      final allFilters = textFilters.join(',');
-      
-      debugPrint('🔧 Filter chain: $allFilters');
+      if (textFilters.isEmpty) {
+        debugPrint('⚠️ No valid text filters, returning original');
+        isProcessingVideo.value = false;
+        return capturedFile.value;
+      }
 
-      // Comando FFmpeg
-      final inputPath = capturedFile.value!.path;
-      
-      final command = '-i "$inputPath" '
+      final String allFilters = textFilters.join(',');
+      debugPrint('🔧 ${textFilters.length} filtro(s) generados');
+
+      // ── Ejecutar FFmpeg ────────────────────────
+      final String command =
+          '-i "${inputFile.path}" '
           '-vf "$allFilters" '
           '-c:v libx264 '
           '-preset ultrafast '
           '-c:a copy '
           '-y "$outputPath"';
-      
-      debugPrint('🚀 Executing FFmpeg');
-      debugPrint('   Input: $inputPath');
-      debugPrint('   Output: $outputPath');
 
-      // Ejecutar FFmpeg
-      final session = await FFmpegKit.execute(command);
+      debugPrint('🚀 Ejecutando FFmpeg...');
+
+      FFmpegKitConfig.enableLogCallback((log) {
+        debugPrint('[FFmpeg] ${log.getMessage()}');
+      });
+
+      final session    = await FFmpegKit.execute(command);
       final returnCode = await session.getReturnCode();
-      final output = await session.getOutput();
+      final logs       = await session.getAllLogsAsString();
 
-      debugPrint('📊 FFmpeg Return Code: ${returnCode?.getValue()}');
-      
-      if (ReturnCode.isSuccess(returnCode)) {
-        debugPrint('✅ Video processing completed');
-        
-        final outputFile = File(outputPath);
-        if (await outputFile.exists()) {
-          final fileSize = await outputFile.length();
-          debugPrint('📦 File size: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
-          
-          isProcessingVideo.value = false;
-          return outputFile;
-        } else {
-          debugPrint('❌ Output file not found');
-          debugPrint('📋 Output: $output');
-          isProcessingVideo.value = false;
-          return capturedFile.value;
-        }
-      } else {
-        debugPrint('❌ FFmpeg failed: ${returnCode?.getValue()}');
-        debugPrint('📋 Output: $output');
-        
+      debugPrint('📊 FFmpeg return code: ${returnCode?.getValue()}');
+
+      if (!ReturnCode.isSuccess(returnCode)) {
+        debugPrint('❌ FFmpeg FAILED');
+        debugPrint('📋 Logs:\n$logs');
         isProcessingVideo.value = false;
         return capturedFile.value;
       }
-    } catch (e, stackTrace) {
-      debugPrint('💥 Error: $e');
-      debugPrint('📚 Stack: $stackTrace');
+
+      final outputFile = File(outputPath);
+      if (!await outputFile.exists()) {
+        debugPrint('❌ Output file not found');
+        isProcessingVideo.value = false;
+        return capturedFile.value;
+      }
+
+      final outputSize = await outputFile.length();
+      debugPrint('✅ FFmpeg completado');
+      debugPrint('📦 Output: $outputPath (${(outputSize / 1024 / 1024).toStringAsFixed(2)} MB)');
+
+      isProcessingVideo.value = false;
+      return outputFile;
+    } catch (e, st) {
+      debugPrint('💥 processVideoWithTexts error: $e\n$st');
       isProcessingVideo.value = false;
       return capturedFile.value;
     }
   }
 
-  
-Future<void> initializeCamera() async {
-  try {
-    isCameraInitialized.value = false;
+  // ─────────────────────────────────────────────
+  // Camera
+  // ─────────────────────────────────────────────
 
-    // ✅ Solicitar permisos ANTES de inicializar
-    final cameraStatus = await Permission.camera.request();
-    final micStatus = await Permission.microphone.request();
+  Future<void> initializeCamera() async {
+    try {
+      isCameraInitialized.value = false;
 
-    if (!cameraStatus.isGranted) {
-      debugPrint('❌ Permiso de cámara denegado');
-      showErrorSnackbar('Se necesita permiso de cámara para continuar');
-      return;
-    }
+      final cameraStatus = await Permission.camera.request();
+      final micStatus   = await Permission.microphone.request();
 
-    if (!micStatus.isGranted) {
-      debugPrint('⚠️ Permiso de micrófono denegado — solo foto disponible');
-      // No bloqueamos, solo advertimos (fotos no necesitan micrófono)
-    }
+      if (!cameraStatus.isGranted) {
+        debugPrint('❌ Permiso de cámara denegado');
+        showErrorSnackbar('Se necesita permiso de cámara para continuar');
+        return;
+      }
 
-    final availableCamerasList = await availableCameras();
-    if (availableCamerasList.isEmpty) {
-      debugPrint('❌ No se encontraron cámaras');
-      return;
-    }
+      if (!micStatus.isGranted) {
+        debugPrint('⚠️ Permiso de micrófono denegado');
+      }
 
-    cameras.value = availableCamerasList;
-    final camera = _getCamera();
+      final availableCamerasList = await availableCameras();
+      if (availableCamerasList.isEmpty) {
+        debugPrint('❌ No se encontraron cámaras');
+        return;
+      }
 
-    // ✅ enableAudio solo si tenemos permiso de micrófono
-    final newController = CameraController(
-      camera,
-      ResolutionPreset.high,
-      enableAudio: micStatus.isGranted,
-      imageFormatGroup: ImageFormatGroup.jpeg,
-    );
+      cameras.value = availableCamerasList;
+      final camera = _getCamera();
 
-    await newController.initialize();
-    await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
-    await Future.delayed(const Duration(milliseconds: 100));
-
-    if (newController.value.isInitialized) {
-      cameraController.value = newController;
-      await Future.delayed(const Duration(milliseconds: 50));
-      isCameraInitialized.value = true;
-      debugPrint('✅ Cámara inicializada correctamente');
-    }
-  } on CameraException catch (e) {
-    debugPrint('💥 CameraException: ${e.code} - ${e.description}');
-    isCameraInitialized.value = false;
-    showErrorSnackbar('Error al iniciar la cámara: ${e.description}');
-  } catch (e) {
-    debugPrint('💥 Error inicializando cámara: $e');
-    isCameraInitialized.value = false;
-  }
-}
-
-// ✅ Busca la cámara correcta por dirección, no por índice
-CameraDescription _getCamera() {
-  final direction = isFrontCamera.value 
-      ? CameraLensDirection.front 
-      : CameraLensDirection.back;
-  
-  // Buscar por lensDirection
-  final match = cameras.firstWhereOrNull((c) => c.lensDirection == direction);
-  
-  // Si no encontró la dirección deseada, usar la primera disponible
-  if (match == null) {
-    debugPrint('⚠️ No se encontró cámara $direction, usando primera disponible');
-    isFrontCamera.value = !isFrontCamera.value; // revertir el toggle
-    return cameras.first;
-  }
-  
-  debugPrint('📷 Usando cámara: ${match.name} - ${match.lensDirection}');
-  return match;
-}
-
-Future<void> switchCamera() async {
-  if (cameras.length < 2) {
-    debugPrint('⚠️ Solo hay ${cameras.length} cámara(s)');
-    return;
-  }
-
-  isFrontCamera.value = !isFrontCamera.value;
-  
-  final controller = cameraController.value;
-  cameraController.value = null;
-  await controller?.dispose();
-  
-  await initializeCamera();
-}
-  // Cargar assets de galería
-  Future<void> loadGalleryAssets() async {
-    isLoadingGallery.value = true;
-
-    final PermissionState permission = await PhotoManager.requestPermissionExtend();
-
-    if (permission.isAuth) {
-      final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.common,
-        onlyAll: true,
+      final newController = CameraController(
+        camera,
+        ResolutionPreset.high,
+        enableAudio: micStatus.isGranted,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
-      if (albums.isNotEmpty) {
-        final List<AssetEntity> media = await albums[0].getAssetListRange(
-          start: 0,
-          end: 20,
-        );
-        galleryAssets.value = media;
-      }
-    }
+      await newController.initialize();
+      await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
+      await Future.delayed(const Duration(milliseconds: 100));
 
-    isLoadingGallery.value = false;
+      if (newController.value.isInitialized) {
+        cameraController.value = newController;
+        await Future.delayed(const Duration(milliseconds: 50));
+        isCameraInitialized.value = true;
+        debugPrint('✅ Cámara inicializada');
+      }
+    } on CameraException catch (e) {
+      debugPrint('💥 CameraException: ${e.code} - ${e.description}');
+      isCameraInitialized.value = false;
+      showErrorSnackbar('Error al iniciar la cámara: ${e.description}');
+    } catch (e) {
+      debugPrint('💥 Error inicializando cámara: $e');
+      isCameraInitialized.value = false;
+    }
   }
 
-  // Iniciar grabación
+  CameraDescription _getCamera() {
+    final direction = isFrontCamera.value
+        ? CameraLensDirection.front
+        : CameraLensDirection.back;
+
+    final match =
+        cameras.firstWhereOrNull((c) => c.lensDirection == direction);
+
+    if (match == null) {
+      isFrontCamera.value = !isFrontCamera.value;
+      return cameras.first;
+    }
+
+    debugPrint('📷 Usando cámara: ${match.name} - ${match.lensDirection}');
+    return match;
+  }
+
+  Future<void> switchCamera() async {
+    if (cameras.length < 2) return;
+    isFrontCamera.value = !isFrontCamera.value;
+    final old = cameraController.value;
+    cameraController.value = null;
+    await old?.dispose();
+    await initializeCamera();
+  }
+
+  // ─────────────────────────────────────────────
+  // Recording
+  // ─────────────────────────────────────────────
+
   Future<void> startRecording() async {
-    if (cameraController.value == null || !cameraController.value!.value.isInitialized) return;
+    if (cameraController.value == null ||
+        !cameraController.value!.value.isInitialized) return;
     if (isRecording.value) return;
 
     try {
       await cameraController.value!.startVideoRecording();
-
       isRecording.value = true;
       recordingSeconds.value = 0;
 
@@ -507,193 +578,52 @@ Future<void> switchCamera() async {
       debugPrint('Error starting recording: $e');
     }
   }
-// Convertir video temporal a MP4
-Future<File?> convertToMp4(File inputFile) async {
-  try {
-    debugPrint('🔄 Convirtiendo video a MP4...');
-    debugPrint('📥 Input: ${inputFile.path}');
 
-    final directory = await getTemporaryDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final outputPath = '${directory.path}/video_$timestamp.mp4';
+  Future<void> stopRecording() async {
+    if (!isRecording.value) return;
 
-    debugPrint('📤 Output: $outputPath');
+    try {
+      recordingTimer?.cancel();
+      final XFile video = await cameraController.value!.stopVideoRecording();
 
-    // Comando FFmpeg para convertir a MP4
-    final command = '-i "${inputFile.path}" '
-        '-c:v libx264 '          // Codec de video H.264
-        '-preset ultrafast '      // Velocidad de conversión
-        '-c:a aac '              // Codec de audio AAC
-        '-strict experimental '   // Permitir codecs experimentales
-        '-y "$outputPath"';      // Sobrescribir si existe
+      debugPrint('📹 Video grabado: ${video.path}');
 
-    debugPrint('🚀 Ejecutando conversión FFmpeg');
+      final File tempFile = File(video.path);
+      showInfoSnackbar('Procesando video...');
 
-    final session = await FFmpegKit.execute(command);
-    final returnCode = await session.getReturnCode();
-    final output = await session.getOutput();
+      final File? mp4File = await convertToMp4(tempFile);
+      final File finalFile = mp4File ?? tempFile;
 
-    debugPrint('📊 FFmpeg Return Code: ${returnCode?.getValue()}');
-
-    if (ReturnCode.isSuccess(returnCode)) {
-      final outputFile = File(outputPath);
-      
-      if (await outputFile.exists()) {
-        final fileSize = await outputFile.length();
-        debugPrint('✅ Conversión exitosa');
-        debugPrint('📦 Tamaño: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
-        
-        return outputFile;
-      } else {
-        debugPrint('❌ Archivo de salida no encontrado');
-        debugPrint('📋 Output: $output');
-        return null;
-      }
-    } else {
-      debugPrint('❌ FFmpeg falló: ${returnCode?.getValue()}');
-      debugPrint('📋 Output: $output');
-      return null;
-    }
-  } catch (e, stackTrace) {
-    debugPrint('💥 Error convirtiendo a MP4: $e');
-    debugPrint('📚 Stack: $stackTrace');
-    return null;
-  }
-}
-
-// Detener grabación - ACTUALIZADO para convertir a MP4
-Future<void> stopRecording() async {
-  if (!isRecording.value) return;
-
-  try {
-    recordingTimer?.cancel();
-    final XFile video = await cameraController.value!.stopVideoRecording();
-
-    debugPrint('📹 Video grabado: ${video.path}');
-    
-    // ✅ Convertir a MP4
-    final File tempFile = File(video.path);
-    final fileSize = await tempFile.length();
-    debugPrint('📦 Tamaño original: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
-
-    // Mostrar indicador de conversión
-    showInfoSnackbar('Procesando video...');
-
-    final File? mp4File = await convertToMp4(tempFile);
-
-    if (mp4File != null) {
-      debugPrint('✅ Video convertido a MP4: ${mp4File.path}');
-      
       isRecording.value = false;
       recordingSeconds.value = 0;
-      capturedFile.value = mp4File;
-      contentType.value = 'Video';
+      capturedFile.value = finalFile;
+      contentType.value = _kVideo;
+
+      debugPrint('📌 contentType = ${contentType.value}');
+      debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
 
       await initializeVideoController();
-    } else {
-      debugPrint('⚠️ No se pudo convertir, usando archivo original');
-      
+    } catch (e) {
+      debugPrint('❌ Error deteniendo grabación: $e');
       isRecording.value = false;
-      recordingSeconds.value = 0;
-      capturedFile.value = tempFile;
-      contentType.value = 'Video';
-
-      await initializeVideoController();
+      showErrorSnackbar('Error al procesar el video');
     }
-  } catch (e) {
-    debugPrint('❌ Error deteniendo grabación: $e');
-    isRecording.value = false;
-    showErrorSnackbar('Error al procesar el video');
   }
-}
-// Inicializar video controller - MEJORADO
-Future<void> initializeVideoController() async {
-if (capturedFile.value == null || contentType.value != 'Video') return; // antes: 'video'
 
-  try {
-    isVideoReady.value = false;
-    
-    videoController?.dispose();
-    videoController = null;
+  Future<void> takePicture() async {
+    if (cameraController.value == null ||
+        !cameraController.value!.value.isInitialized) return;
 
-    debugPrint('🎬 Inicializando video: ${capturedFile.value!.path}');
-    
-    // Verificar que el archivo existe
-    if (!await capturedFile.value!.exists()) {
-      debugPrint('❌ El archivo de video no existe');
-      return;
+    try {
+      final XFile photo = await cameraController.value!.takePicture();
+      capturedFile.value = File(photo.path);
+      contentType.value = _kImagen;
+      debugPrint('📌 contentType = ${contentType.value}');
+    } catch (e) {
+      debugPrint('Error taking picture: $e');
     }
-
-    final fileSize = await capturedFile.value!.length();
-    debugPrint('📦 Tamaño del archivo: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
-
-    // Crear controller
-    videoController = VideoPlayerController.file(capturedFile.value!);
-
-    // Inicializar con timeout
-    await videoController!.initialize().timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {
-        debugPrint('⏱️ Timeout inicializando video');
-        throw TimeoutException('Video initialization timeout');
-      },
-    );
-    
-    if (videoController!.value.isInitialized) {
-      videoController!.setLooping(true);
-      await videoController!.play();
-      
-      isVideoReady.value = true;
-      
-      debugPrint('✅ Video inicializado correctamente');
-      debugPrint('   Duración: ${videoController!.value.duration}');
-      debugPrint('   Tamaño: ${videoController!.value.size}');
-      debugPrint('   Aspect Ratio: ${videoController!.value.aspectRatio}');
-    } else {
-      debugPrint('❌ Video no se pudo inicializar');
-    }
-  } catch (e, stackTrace) {
-    debugPrint('💥 Error inicializando video: $e');
-    debugPrint('📚 Stack trace: $stackTrace');
-    
-    videoController?.dispose();
-    videoController = null;
-    isVideoReady.value = false;
-    showErrorSnackbar('No se pudo cargar el video. Intenta de nuevo.');
   }
-}
 
-Future<void> selectFromGallery(AssetEntity asset) async {
-  try {
-    final File? file = await asset.file;
-    if (file == null) return;
-
-    capturedFile.value = file;
-contentType.value = asset.type == AssetType.image ? 'Foto' : 'Video'; // antes: 'image'/'video'
-
-if (contentType.value == 'Video') {
-      await initializeVideoController();
-    }
-  } catch (e) {
-    debugPrint('Error selecting from gallery: $e');
-  }
-}
-
-// Tomar foto
-Future<void> takePicture() async {
-  if (cameraController.value == null || !cameraController.value!.value.isInitialized) return;
-
-  try {
-    final XFile photo = await cameraController.value!.takePicture();
-
-    capturedFile.value = File(photo.path);
-    contentType.value = 'Foto'; 
-  } catch (e) {
-    debugPrint('Error taking picture: $e');
-  }
-}
-
-  // Limpiar captura
   void clearCapture() {
     capturedFile.value = null;
     contentType.value = null;
@@ -702,13 +632,223 @@ Future<void> takePicture() async {
     isVideoReady.value = false;
     storyTexts.clear();
     selectedTextId.value = null;
+    previewScreenWidth  = 0;
+    previewScreenHeight = 0;
   }
 
-  // Manejar ciclo de vida
-  void handleAppLifecycleState(AppLifecycleState state) {
-    if (cameraController.value == null || !cameraController.value!.value.isInitialized) {
-      return;
+  // ─────────────────────────────────────────────
+  // Gallery
+  // ─────────────────────────────────────────────
+
+  Future<void> loadGalleryAssets() async {
+    isLoadingGallery.value = true;
+
+    final permission = await PhotoManager.requestPermissionExtend();
+
+    if (permission.isAuth) {
+      final albums = await PhotoManager.getAssetPathList(
+        type: RequestType.common,
+        onlyAll: true,
+      );
+
+      if (albums.isNotEmpty) {
+        final media = await albums[0].getAssetListRange(start: 0, end: 20);
+        galleryAssets.value = media;
+      }
     }
+
+    isLoadingGallery.value = false;
+  }
+Future<void> selectFromGallery(AssetEntity asset) async {
+  try {
+    final File? file = await asset.file;
+    if (file == null) return;
+
+    contentType.value =
+        asset.type == AssetType.image ? _kImagen : _kVideo;
+
+    debugPrint('📌 contentType = ${contentType.value}');
+
+    if (contentType.value == _kVideo) {
+      // Primero asignar el archivo original para que exista
+      capturedFile.value = file;
+      showInfoSnackbar('Procesando video...');
+
+      // Convertir a MP4 antes de inicializar el player
+      final File? mp4File = await convertToMp4(file);
+      capturedFile.value = mp4File ?? file;
+
+      debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
+      await initializeVideoController();
+    } else {
+      // Imagen: convertir a PNG
+      final File? pngFile = await convertToPng(file);
+      capturedFile.value = pngFile ?? file;
+      debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
+    }
+  } catch (e) {
+    debugPrint('Error selecting from gallery: $e');
+    showErrorSnackbar('No se pudo seleccionar el archivo');
+  }
+}
+Future<void> selectFromImagePicker() async {
+  try {
+    final picker = ImagePicker();
+    final XFile? file = await picker.pickMedia();
+    if (file == null) return;
+
+    final path = file.path.toLowerCase();
+    final isVid = path.endsWith('.mp4') ||
+        path.endsWith('.mov') ||
+        path.endsWith('.avi') ||
+        path.endsWith('.mkv') ||
+        path.endsWith('.hevc');
+
+    contentType.value = isVid ? _kVideo : _kImagen;
+    debugPrint('📌 contentType = ${contentType.value}');
+
+    if (isVid) {
+      capturedFile.value = File(file.path);
+      showInfoSnackbar('Procesando video...');
+      final File? mp4File = await convertToMp4(File(file.path));
+      capturedFile.value = mp4File ?? File(file.path);
+      debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
+      await initializeVideoController();
+    } else {
+      final File? pngFile = await convertToPng(File(file.path));
+      capturedFile.value = pngFile ?? File(file.path);
+      debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
+    }
+  } catch (e) {
+    debugPrint('Error seleccionando de galería: $e');
+    showErrorSnackbar('No se pudo seleccionar el archivo');
+  }
+}
+
+  // ─────────────────────────────────────────────
+  // Video controller
+  // ─────────────────────────────────────────────
+
+  Future<void> initializeVideoController() async {
+    if (capturedFile.value == null || contentType.value != _kVideo) return;
+
+    try {
+      isVideoReady.value = false;
+      videoController?.dispose();
+      videoController = null;
+
+      debugPrint('🎬 Inicializando video: ${capturedFile.value!.path}');
+
+      if (!await capturedFile.value!.exists()) {
+        debugPrint('❌ El archivo de video no existe');
+        return;
+      }
+
+      final fileSize = await capturedFile.value!.length();
+      debugPrint(
+          '📦 Tamaño: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
+
+      videoController = VideoPlayerController.file(capturedFile.value!);
+
+      await videoController!.initialize().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          debugPrint('⏱️ Timeout inicializando video');
+          throw TimeoutException('Video initialization timeout');
+        },
+      );
+
+      if (videoController!.value.isInitialized) {
+        videoController!.setLooping(true);
+        await videoController!.play();
+        isVideoReady.value = true;
+
+        debugPrint('✅ Video inicializado');
+        debugPrint('   Duración:    ${videoController!.value.duration}');
+        debugPrint('   Tamaño:      ${videoController!.value.size}');
+        debugPrint('   AspectRatio: ${videoController!.value.aspectRatio}');
+      } else {
+        debugPrint('❌ Video no se pudo inicializar');
+      }
+    } catch (e, st) {
+      debugPrint('💥 Error inicializando video: $e\n$st');
+      videoController?.dispose();
+      videoController = null;
+      isVideoReady.value = false;
+      showErrorSnackbar('No se pudo cargar el video. Intenta de nuevo.');
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // FFmpeg helpers
+  // ─────────────────────────────────────────────
+
+  Future<File?> convertToMp4(File inputFile) async {
+    try {
+      debugPrint('🔄 Convirtiendo a MP4: ${inputFile.path}');
+
+      final directory = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final outputPath = '${directory.path}/video_$timestamp.mp4';
+
+      final command =
+          '-i "${inputFile.path}" '
+          '-c:v libx264 '
+          '-preset ultrafast '
+          '-c:a aac '
+          '-strict experimental '
+          '-y "$outputPath"';
+
+      final session    = await FFmpegKit.execute(command);
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        final outputFile = File(outputPath);
+        if (await outputFile.exists()) {
+          debugPrint('✅ Convertido a MP4: $outputPath');
+          return outputFile;
+        }
+      }
+
+      debugPrint('❌ convertToMp4 falló');
+      return null;
+    } catch (e) {
+      debugPrint('💥 convertToMp4 error: $e');
+      return null;
+    }
+  }
+
+  Future<File?> convertToPng(File inputFile) async {
+    try {
+      final ext = inputFile.path.toLowerCase().split('.').last;
+      if (ext == 'png') return inputFile;
+
+      final directory = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final outputPath = '${directory.path}/story_$timestamp.png';
+
+      final command    = '-i "${inputFile.path}" -y "$outputPath"';
+      final session    = await FFmpegKit.execute(command);
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        final outputFile = File(outputPath);
+        if (await outputFile.exists()) return outputFile;
+      }
+
+      return inputFile;
+    } catch (e) {
+      return inputFile;
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // App lifecycle
+  // ─────────────────────────────────────────────
+
+  void handleAppLifecycleState(AppLifecycleState state) {
+    if (cameraController.value == null ||
+        !cameraController.value!.value.isInitialized) return;
 
     if (state == AppLifecycleState.inactive) {
       cameraController.value?.dispose();

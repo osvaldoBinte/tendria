@@ -104,25 +104,32 @@ class _DraggableStoryTextState extends State<DraggableStoryText> {
                 ? Border.all(color: Colors.white, width: 2)
                 : null,
           ),
-          child: Transform.scale(
-            scale: scale,
-            child: Text(
-              widget.text,
-              style: GoogleFonts.rubik(
-                color: widget.color,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.5),
-                    offset: const Offset(2, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
+        child: Transform.scale(
+  scale: scale,
+  child: ConstrainedBox(
+    constraints: BoxConstraints(
+      maxWidth: MediaQuery.of(context).size.width * 0.75, // máx 75% del ancho
+    ),
+    child: Text(
+      widget.text,
+      style: GoogleFonts.rubik(
+        color: widget.color,
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        shadows: [
+          Shadow(
+            color: Colors.black.withOpacity(0.5),
+            offset: const Offset(2, 2),
+            blurRadius: 4,
           ),
+        ],
+      ),
+      textAlign: TextAlign.center,
+      softWrap: true,        // ✅ permite saltos de línea
+      overflow: TextOverflow.visible,
+    ),
+  ),
+),
         ),
       ),
     );
@@ -198,24 +205,26 @@ class _StoryTextEditorState extends State<StoryTextEditor> {
           ),
           const SizedBox(height: 20),
           TextField(
-            controller: textController,
-            autofocus: true,
-            style: GoogleFonts.rubik(
-              color: selectedColor,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: null,
-            decoration: InputDecoration(
-              hintText: 'Escribe algo...',
-              hintStyle: GoogleFonts.rubik(
-                color: Colors.grey[400],
-                fontSize: 24,
-              ),
-              border: InputBorder.none,
-            ),
-          ),
+  controller: textController,
+  autofocus: true,
+  maxLines: null,
+  keyboardType: TextInputType.multiline,  // ✅ permite Enter
+  textInputAction: TextInputAction.newline, // ✅ Enter = salto de línea
+  style: GoogleFonts.rubik(
+    color: selectedColor,
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  ),
+  textAlign: TextAlign.center,
+  decoration: InputDecoration(
+    hintText: 'Escribe algo...',
+    hintStyle: GoogleFonts.rubik(
+      color: Colors.grey[400],
+      fontSize: 24,
+    ),
+    border: InputBorder.none,
+  ),
+),
           const SizedBox(height: 20),
           SizedBox(
             height: 50,
@@ -757,6 +766,7 @@ Future<void> _publishStory() async {
     });
   }
 
+
  Widget _buildPreviewScreen() {
   return Scaffold(
     backgroundColor: Colors.black,
@@ -764,14 +774,14 @@ Future<void> _publishStory() async {
       onTap: () => controller.selectText(null),
       child: Stack(
         children: [
+          // ✅ 1. RepaintBoundary (contenido + textos draggables)
           RepaintBoundary(
             key: controller.repaintBoundaryKey,
             child: Stack(
               children: [
                 Positioned.fill(
                   child: Obx(() {
-                    // ✅ VERIFICAR contentType con minúsculas
-                    if (controller.contentType.value == 'Video') {
+                    if (controller.contentType.value == 'video') {
                       if (!controller.isVideoReady.value) {
                         return Container(
                           color: Colors.black,
@@ -781,16 +791,12 @@ Future<void> _publishStory() async {
                               children: [
                                 CircularProgressIndicator(color: Colors.white),
                                 SizedBox(height: 16),
-                                Text(
-                                  'Preparando video...',
-                                  style: TextStyle(color: Colors.white),
-                                ),
+                                Text('Preparando video...', style: TextStyle(color: Colors.white)),
                               ],
                             ),
                           ),
                         );
                       }
-
                       final videoCtrl = controller.videoController;
                       if (videoCtrl != null && videoCtrl.value.isInitialized) {
                         return Center(
@@ -800,34 +806,14 @@ Future<void> _publishStory() async {
                           ),
                         );
                       }
-
                       return Container(
                         color: Colors.black,
-                        child: const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        ),
+                        child: const Center(child: CircularProgressIndicator(color: Colors.white)),
                       );
                     }
-
-                    // ✅ Solo mostrar imagen si es 'image'
-                   if (controller.contentType.value == 'Foto') {
-                      return _buildImagePreview();
-                    }
-
-                    // ✅ Fallback si no hay tipo válido
-                    return Container(
-                      color: Colors.black,
-                      child: const Center(
-                        child: Text(
-                          'Contenido no disponible',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    );
+                    return _buildImagePreview();
                   }),
                 ),
-
-                // Textos draggables
                 ...controller.storyTexts.map((storyText) {
                   return Obx(() {
                     return DraggableStoryText(
@@ -842,12 +828,9 @@ Future<void> _publishStory() async {
                       onScaleChanged: (newScale) {
                         controller.updateTextScale(storyText.id, newScale);
                       },
-                      onTap: () {
-                        controller.selectText(storyText.id);
-                      },
-                      onLongPress: () {
-                        _showDeleteTextDialog(storyText.id);
-                      },
+                      onTap: () => controller.selectText(storyText.id),
+                      // ✅ LongPress ahora abre el editor en lugar del diálogo de eliminar
+                      onLongPress: () => controller.openTextEditor(textId: storyText.id),
                     );
                   });
                 }).toList(),
@@ -855,8 +838,16 @@ Future<void> _publishStory() async {
             ),
           ),
 
+          // ✅ 2. Header con botones (fuera del RepaintBoundary)
           _buildPreviewHeader(),
+
+          // ✅ 3. Botón agregar texto (fuera del RepaintBoundary)
           _buildAddTextButton(),
+
+          // ✅ 4. Overlay fullscreen del editor de texto ← AQUÍ VA
+          Obx(() => controller.isEditingText.value
+                ? _FullscreenTextEditorOverlay(controller: controller)
+                : const SizedBox.shrink()),
         ],
       ),
     ),
@@ -920,21 +911,30 @@ Widget _buildPreviewHeader() {
     ),
   );
 }
-
 Widget _buildAddTextButton() {
   return Positioned(
     bottom: 30,
-    left: 0,
-    right: 0,
+    right: 20,
     child: Obx(() {
       return Column(
         children: [
+          GestureDetector(
+            onTap: () => controller.openTextEditor(), // ✅ ya no llama _showTextEditor()
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: const Icon(Icons.text_fields, color: Colors.white, size: 28),
+            ),
+          ),
           if (controller.selectedTextId.value != null)
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(top: 12),
               child: GestureDetector(
                 onTap: () {
-                  debugPrint('🗑️ Eliminando texto: ${controller.selectedTextId.value}');
                   controller.removeText(controller.selectedTextId.value!);
                   controller.selectText(null);
                 },
@@ -949,61 +949,11 @@ Widget _buildAddTextButton() {
                 ),
               ),
             ),
-          
-          // ✅ Botón publicar - verificar contentType con minúsculas
-          if (controller.isVideoReady.value || controller.contentType.value == 'Foto')
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: storyController.isCreatingStory.value
-                  ? Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: ThemeColor.primaryColor.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: _publishStory,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 13),
-                        decoration: BoxDecoration(
-                          color: ThemeColor.tertiaryColor,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: ThemeColor.tertiaryColor.withOpacity(0.4),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Publicar Historia',
-                              style: GoogleFonts.rubik(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Icon(Icons.chevron_right, color: Colors.white, size: 24),
-                          ],
-                        ),
-                      ),
-                    ),
-            ),
         ],
       );
     }),
   );
 }
-
   Widget _buildImagePreview() {
     if (controller.capturedFile.value == null) return const SizedBox.shrink();
 
@@ -1049,3 +999,326 @@ Widget _buildAddTextButton() {
     );
   }
 }
+
+// ─────────────────────────────────────────────
+// _FullscreenTextEditorOverlay
+// ─────────────────────────────────────────────
+class _FullscreenTextEditorOverlay extends StatefulWidget {
+  final CreateStoryController controller;
+  const _FullscreenTextEditorOverlay({required this.controller});
+
+  @override
+  State<_FullscreenTextEditorOverlay> createState() =>
+      _FullscreenTextEditorOverlayState();
+}
+
+class _FullscreenTextEditorOverlayState
+    extends State<_FullscreenTextEditorOverlay> {
+  late final TextEditingController _textCtrl;
+
+  final List<Color> _colors = [
+    Colors.white,
+    Colors.black,
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.cyan,
+    Colors.blue,
+    Colors.purple,
+    Colors.pink,
+    Colors.deepPurple,
+    const Color(0xFFA2845E),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _textCtrl = TextEditingController(
+        text: widget.controller.currentEditText.value);
+    _textCtrl.selection =
+        TextSelection.collapsed(offset: _textCtrl.text.length);
+  }
+
+  @override
+  void dispose() {
+    _textCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          color: Colors.black.withOpacity(0.4),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // ── Top bar ──────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () =>
+                            widget.controller.isEditingText.value = false,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: Colors.black45,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text('Cancelar',
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 13)),
+                        ),
+                      ),
+                      const Spacer(),
+
+                      // Alineación
+                      ...['left', 'center', 'right'].map((a) {
+                        return Obx(() {
+                          final isActive =
+                              widget.controller.currentEditAlign.value == a;
+                          final icon = a == 'left'
+                              ? Icons.format_align_left
+                              : a == 'center'
+                                  ? Icons.format_align_center
+                                  : Icons.format_align_right;
+                          return GestureDetector(
+                            onTap: () =>
+                                widget.controller.currentEditAlign.value = a,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 6),
+                              width: 34, height: 34,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? Colors.white.withOpacity(0.35)
+                                    : Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isActive
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.25),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child:
+                                  Icon(icon, color: Colors.white, size: 16),
+                            ),
+                          );
+                        });
+                      }).toList(),
+
+                      const Spacer(),
+
+                      // Listo
+                      GestureDetector(
+                        onTap: () => widget.controller
+                            .confirmTextEdit(_textCtrl.text),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text('Listo',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── TextField ─────────────────────────────
+                Expanded(
+                  child: Center(
+                    child: Obx(() {
+                      final style =
+                          widget.controller.currentEditStyle.value;
+                      final color =
+                          widget.controller.currentEditColor.value;
+                      final align =
+                          widget.controller.currentEditAlign.value;
+
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: style != 'none'
+                            ? const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10)
+                            : EdgeInsets.zero,
+                        decoration: BoxDecoration(
+                          color: style == 'pill'
+                              ? Colors.black.withOpacity(0.6)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                          border: style == 'outline'
+                              ? Border.all(color: color, width: 2.5)
+                              : null,
+                        ),
+                        child: TextField(
+                          controller: _textCtrl,
+                          autofocus: true,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          textAlign: align == 'left'
+                              ? TextAlign.left
+                              : align == 'right'
+                                  ? TextAlign.right
+                                  : TextAlign.center,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            height: 1.3,
+                            shadows: style == 'outline'
+                                ? []
+                                : [
+                                    Shadow(
+                                      color: color == Colors.black
+                                          ? Colors.white.withOpacity(0.4)
+                                          : Colors.black.withOpacity(0.8),
+                                      offset: const Offset(1, 1),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Escribe algo...',
+                            hintStyle: TextStyle(
+                              color: Colors.white.withOpacity(0.35),
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: true,
+                            fillColor: Colors.transparent,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+
+                // ── Estilos ───────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      {'id': 'none',    'label': 'Sin fondo'},
+                      {'id': 'pill',    'label': 'Con fondo'},
+                      {'id': 'outline', 'label': 'Contorno'},
+                    ].map((s) {
+                      return Obx(() {
+                        final isActive =
+                            widget.controller.currentEditStyle.value ==
+                                s['id'];
+                        return GestureDetector(
+                          onTap: () =>
+                              widget.controller.currentEditStyle.value =
+                                  s['id']!,
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? Colors.white.withOpacity(0.25)
+                                  : Colors.white.withOpacity(0.07),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isActive
+                                    ? Colors.white
+                                    : Colors.white.withOpacity(0.25),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Text(
+                              s['label']!,
+                              style: TextStyle(
+                                color: isActive
+                                    ? Colors.white
+                                    : Colors.white.withOpacity(0.55),
+                                fontSize: 12,
+                                fontWeight: isActive
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        );
+                      });
+                    }).toList(),
+                  ),
+                ),
+
+                // ── Colores ───────────────────────────────
+                SizedBox(
+                  height: 52,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: _colors.length,
+                    itemBuilder: (ctx, i) {
+                      final c = _colors[i];
+                      return Obx(() {
+                        final isSelected =
+                            widget.controller.currentEditColor.value == c;
+                        return GestureDetector(
+                          onTap: () =>
+                              widget.controller.currentEditColor.value = c,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            width: isSelected ? 38 : 32,
+                            height: isSelected ? 38 : 32,
+                            margin: EdgeInsets.only(
+                                right: 10, top: isSelected ? 0 : 3),
+                            decoration: BoxDecoration(
+                              color: c,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.white38,
+                                width: isSelected ? 3 : 1.5,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: c.withOpacity(0.6),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                          ),
+                        );
+                      });
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+    }

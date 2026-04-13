@@ -72,21 +72,26 @@ class ProfileDetailScreen extends StatelessWidget {
                     backgroundColor: ThemeColor.backgroundColorfondo,
                     elevation: 4,
                     shadowColor: ThemeColor.shadowColor,
-                    pinned: true,
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'NUCLEO',
-                          style: GoogleFonts.lato(
-                            fontSize: 20,
-                            color: ThemeColor.textPrimaryColor,
-                            fontWeight: FontWeight.w700,
+                    pinned: true,       leading: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+
+                         Get.offAllNamed(
+                              RoutesNames.radarScannerPage,
+                              
+                            );
+                        },
+                      ),
+                 title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset(
+                            'assets/logo/logo.png',
+                            width: 100,
+                            height: 40,
                           ),
-                        ),
-                    
-                      ],
-                    ),
+                        ],
+                      ),
                   ),
 
                   _buildSliverAppBar(controller),
@@ -116,18 +121,115 @@ class ProfileDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            _buildActionButtons(controller),
+_buildReporteButtons(controller),
+         //   _buildActionButtons(controller),
           ],
         ),
       );
     });
   }
 
-  // ─────────────────────────────────────────────
-  //  SLIVER GALERÍA
-  // ─────────────────────────────────────────────
 
+
+  Widget _buildReporteButtons(NearbyUsersController controller) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Obx(
+              () => controller.showRejectButton
+                  ? GestureDetector(
+                      onTap: controller.rejectUser,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              ThemeColor.textSecondaryColor,
+                              ThemeColor.textSecondaryColor.withOpacity(0.8),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: ThemeColor.textSecondaryColor.withOpacity(
+                                0.3,
+                              ),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: ThemeColor.textLightColor,
+                          size: 32,
+                        ),
+                      ),
+                    )
+                  : const SizedBox(width: 64),
+            ),
+            GestureDetector(
+              onTap: controller.sendMensaje,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      ThemeColor.primaryColor,
+                      ThemeColor.primaryColor.withOpacity(0.8),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: ThemeColor.primaryColor.withOpacity(0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.message,
+                  color: ThemeColor.textLightColor,
+                  size: 32,
+                ),
+              ),
+            ),
+
+            GestureDetector(
+              onTap: controller.blockUser,
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade700, Colors.red.shade400],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.block_rounded,
+                  color: ThemeColor.textLightColor,
+                  size: 28,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   Widget _buildSliverAppBar(NearbyUsersController controller) {
     return Obx(() {
       final user = controller.currentProfile.value;
@@ -148,7 +250,7 @@ class ProfileDetailScreen extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // ── Galería ──
+                  
                   PageView.builder(
                     controller: controller.pageController,
                     onPageChanged: controller.onPageChanged,
@@ -190,7 +292,7 @@ class ProfileDetailScreen extends StatelessWidget {
                     },
                   ),
 
-                  // ── Indicadores ──
+
                   if (gallery.length > 1)
                     Positioned(
                       top: 16,
@@ -219,7 +321,7 @@ class ProfileDetailScreen extends StatelessWidget {
                       ),
                     ),
 
-                  // ── Banner nombre + distancia ──
+
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -273,46 +375,7 @@ class ProfileDetailScreen extends StatelessWidget {
                             ),
                           ),
 
-                          // Botón favorito
-                          Obx(
-                            () => GestureDetector(
-                              onTap: controller.toggleFavorite,
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: controller.isFavorite.value
-                                        ? [
-                                            ThemeColor.errorColor,
-                                            ThemeColor.errorColor.withOpacity(0.8),
-                                          ]
-                                        : [
-                                            ThemeColor.primaryColor,
-                                            ThemeColor.primaryColor.withOpacity(0.8),
-                                          ],
-                                  ),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: (controller.isFavorite.value
-                                              ? ThemeColor.errorColor
-                                              : ThemeColor.primaryColor)
-                                          .withOpacity(0.4),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  controller.isFavorite.value
-                                      ? Icons.favorite_rounded
-                                      : Icons.favorite_border_rounded,
-                                  color: ThemeColor.textLightColor,
-                                  size: 24,
-                                ),
-                              ),
-                            ),
-                          ),
+                         
                         ],
                       ),
                     ),
@@ -326,9 +389,7 @@ class ProfileDetailScreen extends StatelessWidget {
     });
   }
 
-  // ─────────────────────────────────────────────
-  //  BIO
-  // ─────────────────────────────────────────────
+
 
   Widget _buildBioSection(NearbyUsersController controller) {
     return Obx(() {
@@ -370,9 +431,7 @@ class ProfileDetailScreen extends StatelessWidget {
     });
   }
 
-  // ─────────────────────────────────────────────
-  //  BUSCO
-  // ─────────────────────────────────────────────
+
 
   Widget _buildBuscoSection(NearbyUsersController controller) {
     return Obx(() {
@@ -452,9 +511,7 @@ class ProfileDetailScreen extends StatelessWidget {
     );
   }
 
-  // ─────────────────────────────────────────────
-  //  INTERESES
-  // ─────────────────────────────────────────────
+
 
   Widget _buildInterestsSection(NearbyUsersController controller) {
     return Obx(() {
@@ -493,9 +550,7 @@ class ProfileDetailScreen extends StatelessWidget {
     });
   }
 
-  // ─────────────────────────────────────────────
-  //  CUALIDADES
-  // ─────────────────────────────────────────────
+
 
   Widget _buildQualitiesSection(NearbyUsersController controller) {
     return Obx(() {
@@ -552,9 +607,7 @@ class ProfileDetailScreen extends StatelessWidget {
     );
   }
 
-  // ─────────────────────────────────────────────
-  //  BOTONES ACCIÓN (fijos abajo)
-  // ─────────────────────────────────────────────
+
 
   Widget _buildActionButtons(NearbyUsersController controller) {
     return SafeArea(
@@ -574,7 +627,7 @@ class ProfileDetailScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Botón Skip
+            
             GestureDetector(
               onTap: controller.skipUser,
               child: Container(
@@ -600,7 +653,7 @@ class ProfileDetailScreen extends StatelessWidget {
             ),
 
             
-            // Botón Like
+            
             Obx(
               () => GestureDetector(
                 onTap: controller.toggleFavorite,

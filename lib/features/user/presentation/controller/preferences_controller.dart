@@ -210,16 +210,16 @@ class PreferencesController extends GetxController {
 
   Future<void> _initializeController() async {
     try {
-      // Cargar catálogos
+      
       await _loadCatalogs();
 
-      // Cargar datos del usuario desde ProfileController
+
       await _loadUserData();
 
-      // Determinar qué pasos mostrar
+
       _determineAvailableSteps();
 
-      // Establecer el paso inicial
+
       if (availableSteps.isNotEmpty) {
         currentStep.value = availableSteps.first;
         currentStepIndex.value = 0;
@@ -232,9 +232,7 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ==========================================
-  // CARGAR DATOS DEL USUARIO
-  // ==========================================
+
 
   Future<void> _loadUserData() async {
     try {
@@ -258,7 +256,7 @@ class PreferencesController extends GetxController {
   }
 
   void _preloadExistingData(GetUserEntity user) {
-    // ← preferences ya es un objeto directo, no lista
+    
     if (user.preferences != null) {
       final prefs = user.preferences!;
 
@@ -291,16 +289,14 @@ class PreferencesController extends GetxController {
       selectedQualities.value = user.qualitiesIds!.map((q) => q.id).toList();
     }
   }
-  // ==========================================
-  // DETERMINAR PASOS DISPONIBLES
-  // ==========================================
+  
 
   void _determineAvailableSteps() {
     availableSteps.clear();
 
     final user = _profileController?.userEntity.value;
 
-    // ← preferences es objeto directo
+
     final hasPreferences =
         user?.preferences != null && user!.preferences!.searchgender != null;
 
@@ -334,9 +330,7 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ==========================================
-  // CARGAR CATÁLOGOS
-  // ==========================================
+
 
   Future<void> _loadCatalogs() async {
     await Future.wait([_loadInterests(), _loadQualities()]);
@@ -366,9 +360,7 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ==========================================
-  // NAVEGACIÓN ENTRE PASOS
-  // ==========================================
+
 
   void nextStep() {
     if (validateCurrentStep()) {
@@ -441,9 +433,7 @@ class PreferencesController extends GetxController {
     return true;
   }
 
-  // ==========================================
-  // SELECCIÓN DE PREFERENCIAS
-  // ==========================================
+
 
   void selectGenderPreference(String gender) {
     selectedGenderPreference.value = gender;
@@ -461,7 +451,7 @@ class PreferencesController extends GetxController {
     maxAge.value = age;
   }
 
-  // ❌ ELIMINADO: void updateDistance(int distance)
+
 
   void toggleInterest(int interestId) {
     if (selectedInterests.contains(interestId)) {
@@ -493,9 +483,7 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ==========================================
-  // MANEJO DE FOTOS
-  // ==========================================
+
 
   Future<void> pickImage() async {
     if (selectedPhotos.length >= maxPhotos) {
@@ -551,7 +539,7 @@ class PreferencesController extends GetxController {
       );
 
       if (photo != null) {
-        // Las fotos de cámara normalmente ya son jpg, pero convertimos por si acaso
+        
         final converted = await _ensureValidImageFormat(photo.path);
         selectedPhotos.add(converted);
       }
@@ -583,7 +571,7 @@ class PreferencesController extends GetxController {
       customWidget: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
+          
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -626,7 +614,7 @@ class PreferencesController extends GetxController {
             ),
           ),
 
-          // Opciones
+
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(

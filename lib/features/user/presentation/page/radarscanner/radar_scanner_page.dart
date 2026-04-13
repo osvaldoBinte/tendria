@@ -70,7 +70,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           backgroundColor: ThemeColor.backgroundColor,
           body: Stack(
             children: [
-              _buildGridBackground(),
+             //_buildGridBackground(),
 
               SafeArea(
                 child: SingleChildScrollView(
@@ -123,17 +123,17 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                                   );
                                 }
                                 return Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    _buildRippleEffect(),
-                                    _buildRadarCircles(),
-                                    _buildCrosshair(),
-                                    _buildRadarSweep(),
-                                    _buildRotatingScanLine(),
-                                    _buildCenterDot(),
-                                    _buildDetectedPoints(),
-                                  ],
-                                );
+  alignment: Alignment.center,
+  children: [
+    Image.asset(
+      'assets/gift/gitf.gif',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+    ),
+    _buildDetectedPoints(),
+  ],
+);
                               }),
                             );
                           },
@@ -219,7 +219,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                 ),
               ),
 
-              _buildSideIndicators(),
+         //     _buildSideIndicators(),
             ],
           ),
         ),

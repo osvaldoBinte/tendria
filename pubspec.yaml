@@ -131,6 +131,9 @@ flutter:
    - assets/i18n/es.json
    - assets/i18n/en.json
    - assets/clik.png
+   - assets/gift/radart.gif
+   - assets/gift/gitf.gif
+   - assets/gift/radart.mp4
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

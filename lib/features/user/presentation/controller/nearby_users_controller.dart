@@ -6,6 +6,8 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
+import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
+import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/stories/presentation/page/target_user_story_modal.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
@@ -39,7 +41,7 @@ class NearbyUsersController extends GetxController {
 
   late PageController pageController;
 
-  // ── Perfil actual directo como GetUserEntity ──
+
   final Rx<GetUserEntity?> currentProfile = Rx<GetUserEntity?>(null);
 
   GetUserEntity? get currentUser {
@@ -49,7 +51,7 @@ class NearbyUsersController extends GetxController {
     return nearbyUsers[currentUserIndex.value];
   }
 
-  // ── Helpers calculados desde currentProfile ──
+
   List<String> get currentGallery => _buildGallery(currentProfile.value);
 
 String get currentCity {
@@ -73,9 +75,7 @@ String get currentCity {
     super.onClose();
   }
 
-  // ─────────────────────────────────────────────
-  //  CARGA DE USUARIOS
-  // ─────────────────────────────────────────────
+
 
   Future<void> loadNearbyUsers() async {
     try {
@@ -126,9 +126,7 @@ String get currentCity {
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  PERFIL ACTUAL
-  // ─────────────────────────────────────────────
+
 
   void updateCurrentProfile() {
     if (nearbyUsers.isEmpty || currentUserIndex.value >= nearbyUsers.length) {
@@ -176,9 +174,7 @@ String get currentCity {
     }
   }
 
-  // ─────────────────────────────────────────────
-  //  ACCIONES
-  // ─────────────────────────────────────────────
+
 
   Future<void> toggleFavorite() async {
     if (currentUser == null || isProcessingLike.value) return;
@@ -238,7 +234,61 @@ String get currentCity {
 
   void sendMessage() => sendLike();
   void skipUser() => rejectUser();
+  
 
+void sendMensaje() {
+  final user = currentProfile.value;
+  if (user == null) return;
+
+  final chat = user.chat;
+
+
+  if (chat != null && chat.pendingAcepted) {
+    final likedByController = Get.find<LikedByUsersController>();
+    likedByController.unlockChat(
+      PendingChatEntity(
+        chatId: chat.id,
+        userId: user.id ?? 0,
+        name: user.name ?? 'Usuario',
+        photoUrl: user.fotoUrl,
+        age: user.age,
+        hiddenMessage: null,
+        createdAt: DateTime.now(),
+        unlockCost: 0,
+      ),
+    );
+    return;
+  }
+
+
+  if (chat == null || chat.id == 0) {
+    Get.toNamed(
+      RoutesNames.chatPage,
+      arguments: {
+        'userid': user.id,
+        'name': user.name ?? 'Usuario',
+        'goHomeIndex': 2,
+      },
+    );
+    return;
+  }
+
+
+  Get.toNamed(
+    RoutesNames.chatPage,
+    arguments: {
+      'chatId': chat.id,
+      'name': user.name ?? 'Usuario',
+      'goHomeIndex': 2,
+    },
+  );
+}
+
+bool get showRejectButton {
+  final chat = currentProfile.value?.chat;
+  if (chat != null && chat.id != 0) return false;
+  return true;
+}
   void sendSuperLike() {
     showInfoSnackbar(
       'Le has enviado un Super Like a ${currentProfile.value?.name}',
@@ -299,9 +349,7 @@ String get currentCity {
     );
   }
 
-  // ─────────────────────────────────────────────
-  //  PREVIEW DIALOG
-  // ─────────────────────────────────────────────
+
 
   void showUserPreviewDialog(GetUserEntity user, int userIndex) {
     currentUserIndex.value = userIndex;
@@ -332,7 +380,7 @@ String get currentCity {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── Galería ──
+                
                 SizedBox(
                   height: 320,
                   child: Stack(
@@ -376,7 +424,7 @@ String get currentCity {
                         },
                       ),
 
-                      // Indicadores
+
                       if (gallery.length > 1)
                         Positioned(
                           top: 12,
@@ -404,7 +452,7 @@ String get currentCity {
                           ),
                         ),
 
-                      // Gradiente + info
+
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -460,7 +508,7 @@ String get currentCity {
                                 ),
                               ),
 
-                              // Botón historia
+
                               Obx(() {
                                 if (!hasStories.value) {
                                   return const SizedBox.shrink();
@@ -558,7 +606,7 @@ String get currentCity {
                         ),
                       ),
 
-                      // Botón cerrar
+
                       Positioned(
                         top: 12,
                         right: 12,
@@ -582,13 +630,13 @@ String get currentCity {
                   ),
                 ),
 
-                // ── Info + botones ──
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Bio
+                      
                       if (user.bio != null &&
                           user.bio!.isNotEmpty &&
                           double.tryParse(user.bio!) == null) ...[
@@ -603,7 +651,7 @@ String get currentCity {
                         const SizedBox(height: 12),
                       ],
 
-                      // Status
+
                       if (user.status != null && user.status!.isNotEmpty)
                         Container(
                           constraints: const BoxConstraints(maxWidth: 70),
@@ -645,7 +693,7 @@ String get currentCity {
                           ),
                         ),
 
-                      // Intereses (máx 3)
+
                       if (user.interestsIds != null &&
                           user.interestsIds!.isNotEmpty) ...[
                         Wrap(
@@ -680,7 +728,7 @@ String get currentCity {
                         const SizedBox(height: 16),
                       ],
 
-                      // Botón chat
+
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -722,7 +770,7 @@ String get currentCity {
 
                       const SizedBox(height: 8),
 
-                      // Botón perfil completo
+
                       SizedBox(
                         width: double.infinity,
                         height: 44,
@@ -763,9 +811,7 @@ String get currentCity {
     );
   }
 
-  // ─────────────────────────────────────────────
-  //  AVATAR DEL RADAR CON ANILLO DE HISTORIA
-  // ─────────────────────────────────────────────
+
 
   Widget buildUserAvatarWithStory({
     required GetUserEntity user,

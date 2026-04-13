@@ -37,7 +37,7 @@ class UserProfileController extends GetxController {
   final RxInt userId = 0.obs;
   late PageController pageController;
 
-  // Getters directos desde currentUser
+
   String get userName => currentUser.value?.name ?? 'Usuario';
   int get userAge => currentUser.value?.age ?? 0;
   String get userBio => currentUser.value?.bio ?? '';
@@ -167,7 +167,8 @@ if (index is RxInt) {
       isProcessingLike.value = true;
       await toggleLikeUsecase.execute(userId.value, false);
       showInfoSnackbar('Usuario rechazado');
-      Future.delayed(Duration(milliseconds: 500), () => Get.back());
+            Get.offAllNamed(RoutesNames.profileDetailPage);
+
     } catch (e) {
       showErrorSnackbar('Error al rechazar: ${cleanExceptionMessage(e)}');
     } finally {
@@ -254,7 +255,7 @@ void sendMensaje() {
   }
 bool get showRejectButton {
   final chat = currentUser.value?.chat;
-  //&& !chat.pendingAcepted
+  
   if (chat != null && chat.id != 0 ) return false;
   return true;
 }

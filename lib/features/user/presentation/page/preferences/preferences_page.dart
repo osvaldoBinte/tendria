@@ -1,4 +1,5 @@
-// lib/features/user/presentation/page/preferences/preferences_page.dart
+
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,14 +32,25 @@ class PreferencesPage extends GetView<PreferencesController> {
             );
           }
 
-           if (controller.showSuccessScreen.value) {
-            return RadarScannerScreen();
+          if (controller.showSuccessScreen.value) {
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
+            });
+
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
           if (controller.availableSteps.isEmpty) {
-            return RadarScannerScreen();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
+            });
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
-
           switch (controller.currentStep.value) {
             case PreferencesStep.genderPreference:
               return _buildGenderPreferenceStep();
@@ -58,9 +70,8 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ==========================================
-  // PASO 1: PREFERENCIA DE GÉNERO
-  // ==========================================
+
+
   Widget _buildGenderPreferenceStep() {
     return Column(
       children: [
@@ -73,7 +84,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Header
+
                   Text(
                     '¿Qué tipo de personas te\ngustaría conocer?',
                     style: ThemeColor.headingLarge.copyWith(
@@ -94,15 +105,17 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Opciones de género
-                  // Opciones de género
+
                   ...controller.genderOptions.map((option) {
                     return Column(
                       children: [
                         _buildGenderPreferenceOption(
-                          option['icon'] as IconData, // ← icon primero
-                          option['label'], // ← label segundo
-                          option['value'], // ← value tercero
+                          option['icon'] as IconData, 
+                          
+                          option['label'], 
+                          
+                          option['value'], 
+                          
                           hasCustomInput: option['hasCustomInput'] ?? false,
                         ),
                         SizedBox(height: ThemeColor.paddingSmall),
@@ -111,7 +124,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   }).toList(),
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                  // Nota informativa
+
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -192,9 +205,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     });
   }
 
-  // ==========================================
-  // PASO 2: TIPO DE CONEXIÓN
-  // ==========================================
+
   Widget _buildConnectionTypeStep() {
     return Column(
       children: [
@@ -207,7 +218,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Header
+
                   Text(
                     '¿Qué tipo de conexión\nquieres?',
                     style: ThemeColor.headingLarge.copyWith(
@@ -228,7 +239,7 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Opciones de conexión
+
                   ...controller.connectionOptions.map((option) {
                     return Column(
                       children: [
@@ -243,7 +254,7 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                  // Nota informativa
+
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -328,9 +339,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     });
   }
 
-  // ==========================================
-  // PASO 3: RANGO DE EDAD Y DISTANCIA
-  // ==========================================
+
 
   Widget _buildAgeRangeStep() {
     return Column(
@@ -363,7 +372,7 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Labels
+
                   Row(
                     children: [
                       Expanded(
@@ -392,7 +401,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
 
-                  // Ruedas de edad
+
                   SizedBox(
                     height: 200,
                     child: Stack(
@@ -419,7 +428,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                         ),
                         Row(
                           children: [
-                            // Edad mínima
+                            
                             Expanded(
                               child: AgeWheelWidget(
                                 initialAge: controller.minAge.value,
@@ -431,7 +440,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                                 },
                               ),
                             ),
-                            // Edad máxima
+                            
                             Expanded(
                               child: AgeWheelWidget(
                                 initialAge: controller.maxAge.value,
@@ -449,7 +458,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     ),
                   ),
 
-                  // Label selección actual
+
                   Obx(
                     () => Center(
                       child: Text(
@@ -463,7 +472,7 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Distancia
+
                   Text(
                     'Distancia máxima',
                     style: ThemeColor.headingSmall.copyWith(
@@ -485,7 +494,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingMedium),
 
-                  // Rueda de distancia
+
                   SizedBox(
                     height: 200,
                     child: Stack(
@@ -529,7 +538,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // Rueda de edad reutilizable
   Widget _buildAgeWheel({
     required int initialAge,
     required void Function(int age) onChanged,
@@ -550,7 +558,7 @@ class PreferencesPage extends GetView<PreferencesController> {
         onChanged(18 + index);
       },
       childDelegate: ListWheelChildBuilderDelegate(
-        childCount: 63, // 18 a 80
+        childCount: 63,
         builder: (context, index) {
           return Obx(() {
             final isSelected = index == selected.value - 18;
@@ -578,7 +586,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     required double initialDistance,
     required void Function(double km) onChanged,
   }) {
-    // Calcular índice inicial
     int initialIndex;
     if (initialDistance < 1) {
       initialIndex = ((initialDistance * 10).round() - 1).clamp(0, 8);
@@ -613,7 +620,7 @@ class PreferencesPage extends GetView<PreferencesController> {
         onChanged(kmForIndex(index));
       },
       childDelegate: ListWheelChildBuilderDelegate(
-        childCount: 309, // 9 metros + 300 km
+        childCount: 309, 
         builder: (context, index) {
           return Obx(() {
             final isSelected = index == selected.value;
@@ -637,9 +644,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ==========================================
-  // PASO 4: FOTOS
-  // ==========================================
   Widget _buildPhotosStep() {
     return Column(
       children: [
@@ -669,7 +673,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Grid de fotos
                   GridView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -686,16 +689,13 @@ class PreferencesPage extends GetView<PreferencesController> {
                         final isPicking = controller.isPickingPhotos.value;
 
                         if (index < photos.length) {
-                          // Slot con foto ya cargada
                           return _buildPhotoItem(photos[index], index);
                         }
 
-                        // Todos los slots vacíos muestran loading mientras se selecciona
                         if (isPicking) {
                           return _buildLoadingPhotoSlot();
                         }
 
-                        // Slots vacíos normales
                         return _buildAddPhotoButton();
                       });
                     },
@@ -723,7 +723,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  /// Slot con spinner mientras se procesan las fotos
   Widget _buildLoadingPhotoSlot() {
     return Container(
       decoration: BoxDecoration(
@@ -799,9 +798,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ==========================================
-  // PASO 5: INTERESES
-  // ==========================================
   Widget _buildInterestsStep() {
     return Column(
       children: [
@@ -814,7 +810,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Header
                   Text(
                     'Elige tus intereses\nprincipales',
                     style: ThemeColor.headingLarge.copyWith(
@@ -835,7 +830,6 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Buscador
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: ThemeColor.paddingLarge,
@@ -870,7 +864,6 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                  // Contador y título
                   Obx(
                     () => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -894,7 +887,6 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingMedium),
 
-                  // Lista de intereses
                   Obx(() {
                     if (controller.isLoadingInterests.value) {
                       return Center(
@@ -938,7 +930,6 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                  // Mensaje de búsqueda
                   Center(
                     child: Text(
                       'si no se encuentran tus resultados escríbelos...',
@@ -1007,17 +998,14 @@ class PreferencesPage extends GetView<PreferencesController> {
 
   IconData _getInterestIcon(String interest) {
     final icons = {
-      // Arte
       'Pintura': Icons.brush,
       'Fotografía': Icons.camera_alt,
       'Arte': Icons.palette,
 
-      // Entretenimiento
       'Cine': Icons.movie,
       'Videojuegos': Icons.videogame_asset,
       'Anime': Icons.auto_awesome,
 
-      // Música
       'Música en vivo': Icons.mic,
       'Rock': Icons.music_note,
       'Reggaetón': Icons.headphones,
@@ -1025,46 +1013,38 @@ class PreferencesPage extends GetView<PreferencesController> {
       'Festivales': Icons.festival,
       'Bailar': Icons.music_note,
 
-      // Fitness & bienestar
       'Gimnasio': Icons.fitness_center,
       'Correr': Icons.directions_run,
       'Yoga': Icons.self_improvement,
       'Meditación': Icons.spa,
       'Deportes': Icons.sports_soccer,
 
-      // Aventura
       'Senderismo': Icons.terrain,
       'Viajar': Icons.flight_takeoff,
       'Playa': Icons.beach_access,
 
-      // Gastronomía
       'Café': Icons.coffee,
       'Vino': Icons.wine_bar,
       'Cocinar': Icons.restaurant_menu,
       'Foodie': Icons.restaurant,
 
-      // Intelectual
       'Lectura': Icons.menu_book,
       'Libros': Icons.book,
       'Psicología': Icons.psychology,
       'Programación': Icons.code,
 
-      // Lifestyle & negocios
       'Emprendimiento': Icons.rocket_launch,
       'Startups': Icons.trending_up,
       'Criptomonedas': Icons.currency_bitcoin,
       'Autos deportivos': Icons.directions_car,
       'Nómada digital': Icons.laptop_mac,
 
-      // Mascotas
       'Perros': Icons.pets,
       'Gatos': Icons.pets,
 
-      // Romance
       'Relación seria': Icons.favorite,
       'Algo casual': Icons.sentiment_satisfied_alt,
 
-      // Otros
       'Escribir': Icons.edit,
       'Museos y galerías': Icons.museum,
     };
@@ -1072,9 +1052,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     return icons[interest] ?? Icons.favorite;
   }
 
-  // ==========================================
-  // PASO 6: CUALIDADES
-  // ==========================================
+
   Widget _buildQualitiesStep() {
     return Column(
       children: [
@@ -1087,7 +1065,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Header
+
                   Text(
                     'Lo que más aprecias en una\npersona',
                     style: ThemeColor.headingLarge.copyWith(
@@ -1108,7 +1086,7 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
 
-                  // Contador
+
                   Obx(
                     () => Text(
                       'Lo que buscas en alguien        ${controller.selectedQualities.length}/${controller.maxQualities} seleccionados',
@@ -1121,7 +1099,7 @@ class PreferencesPage extends GetView<PreferencesController> {
 
                   SizedBox(height: ThemeColor.paddingMedium),
 
-                  // Lista de cualidades
+
                   Obx(() {
                     if (controller.isLoadingQualities.value) {
                       return Center(
@@ -1200,9 +1178,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ==========================================
-  // NAVEGACIÓN INFERIOR
-  // ==========================================
+
   Widget _buildNavigationButtons() {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
@@ -1276,13 +1252,14 @@ class PreferencesPage extends GetView<PreferencesController> {
             )
           : SizedBox(width: 56),
     );
-  } // En PreferencesPage, actualizar _buildNextButton:
+  }
+  
 
   Widget _buildNextButton() {
     return Obx(() {
       final isSaving = controller.isLoading.value;
 
-      // Verificar si es el último paso
+
       final isLastStep =
           controller.currentStepIndex.value >=
           controller.availableSteps.length - 1;
@@ -1291,17 +1268,16 @@ class PreferencesPage extends GetView<PreferencesController> {
         onTap: isSaving
             ? null
             : () {
-                // Validar el paso actual primero
+              
                 if (!controller.validateCurrentStep()) {
-                  return; // Si no es válido, no continuar
+                  return;
                 }
 
-                // Si NO es el último paso, guardar y avanzar
+
                 if (!isLastStep) {
                   controller
-                      .submitPreferences(); // Guarda y avanza automáticamente
+                      .submitPreferences(); 
                 } else {
-                  // ✅ SI ES el último paso, ejecutar submitPreferences para enviar todo
                   controller.submitPreferences();
                 }
               },
@@ -1326,7 +1302,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                 )
               : Icon(
-                  // Mostrar check si es el último paso, flecha si no
                   isLastStep ? Icons.check : Icons.arrow_forward,
                   color: Colors.white,
                 ),

@@ -31,25 +31,14 @@ class PreferencesPage extends GetView<PreferencesController> {
             );
           }
 
-          if (controller.showSuccessScreen.value) {
-            // Navegamos en el próximo frame para no llamar durante build
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
-            });
-            // Muestra loading mientras navega
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+           if (controller.showSuccessScreen.value) {
+            return RadarScannerScreen();
           }
 
           if (controller.availableSteps.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
-            });
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+            return RadarScannerScreen();
           }
+
           switch (controller.currentStep.value) {
             case PreferencesStep.genderPreference:
               return _buildGenderPreferenceStep();

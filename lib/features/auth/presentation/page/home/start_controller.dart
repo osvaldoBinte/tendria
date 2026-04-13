@@ -14,8 +14,7 @@ import 'package:tendria/features/user/presentation/profiledetail/profile_detail_
 class StartController extends GetxController {
   final List<Widget> pages = [
     ProfilePage(),
-    
-    ProfileDetailScreen(),
+    RadarScannerScreen(),
     LikedByUsersView(),
     MyMatchView(),
   ];

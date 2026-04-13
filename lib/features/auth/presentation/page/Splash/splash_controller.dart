@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -142,16 +143,34 @@ class SplashController extends GetxController {
     }
   }
 
-  Future<void> _requestCameraPermission() async {
-    final status = await Permission.camera.request();
+  
+Future<void> _requestCameraPermission() async {
+  try {
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) {
+      print('❌ No hay cámaras disponibles');
+      return;
+    }
 
-    if (status.isGranted) {
-      print('✅ Permiso de cámara concedido');
-    } else if (status.isDenied) {
-      print('❌ Permiso de cámara denegado');
-    } else if (status.isPermanentlyDenied) {
-      print('🚫 Permiso de cámara permanentemente denegado');
-      // await openAppSettings();
+    final controller = CameraController(
+      cameras.first,
+      ResolutionPreset.medium,
+      enableAudio: true, // ← pide cámara Y micrófono juntos
+    );
+
+    await controller.initialize();
+    print('✅ Permiso de cámara concedido');
+    print('✅ Permiso de micrófono concedido');
+    await controller.dispose();
+
+  } on CameraException catch (e) {
+    if (e.code == 'CameraAccessDenied') {
+      print('🚫 Permiso de cámara denegado');
+    } else if (e.code == 'AudioAccessDenied') {
+      print('🚫 Permiso de micrófono denegado');
+    } else {
+      print('❌ Error: ${e.description}');
     }
   }
+}
 }

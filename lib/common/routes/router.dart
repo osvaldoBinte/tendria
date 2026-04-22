@@ -13,6 +13,7 @@ import 'package:tendria/features/like/presentation/page/start_conversations_page
 import 'package:tendria/features/notification/presentation/page/notificasiones/notification_page.dart';
 import 'package:tendria/features/page/nearbyprofiles/nearby_profiles_page.dart';
 import 'package:tendria/features/page/parami/for_you_page.dart';
+import 'package:tendria/features/purchase/presentation/page/purchase_page.dart';
 import 'package:tendria/features/unlock/presentation/page/blocked_users_page.dart';
 import 'package:tendria/features/user/presentation/page/profile/update_profile_page.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
@@ -38,6 +39,7 @@ class AppPages {
         GetPage(name: RoutesNames.updateProfilePage, page: () => UpdateProfilePage()),
         GetPage(name: RoutesNames.tutorialPage, page: () => TutorialPage()),
         GetPage (name: RoutesNames.notificationPage, page: () => NotificationPage()),
+        GetPage(name: RoutesNames.purchasePage, page: () =>PurchasePage())
   ];
 
   static final unknownRoute = GetPage(

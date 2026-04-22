@@ -16,6 +16,7 @@ import 'package:tendria/features/like/presentation/controller/liked_by_users_con
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/like/presentation/controller/start_conversations_controller.dart';
 import 'package:tendria/features/notification/presentation/page/notification_controller.dart';
+import 'package:tendria/features/purchase/presentation/controller/purchase_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/unlock/presentation/controller/blocked_users_controller.dart';
 import 'package:tendria/features/user/presentation/controller/balance_controller.dart';
@@ -98,6 +99,10 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.getnotificationUsecase!, permanent: true);
         Get.put(usecaseConfig.markAllNotificationsAsReadUsecase!, permanent: true);
         Get.put(usecaseConfig.saveTokenFcmUsecase!, permanent: true);
+        Get.put(usecaseConfig.purchaseAppleUsecase!,permanent: true);
+        Get.put(usecaseConfig.purchaseGoogleUsecase!,permanent: true);
+        Get.put(usecaseConfig.purchaseAppleUsecase!,permanent: true);
+        Get.put(usecaseConfig.getPurchasesUsecase!, permanent: true);
 
         Get.lazyPut(() => LoginController(loginUsecase: Get.find(), saveTokenFcmUsecase: Get.find(), ), fenix: true);
         Get.put( SignalRService( connectSignalRUsecase: Get.find(), disconnectSignalRUsecase: Get.find(), joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(),setupMessageListenerUsecase: Get.find(), setOnDisconnectedCallbackUsecase: Get.find(), onMensajesLeidosUsecase: Get.find(), marcarMensajesLeidosUsecase: Get.find(),), permanent: true,);   
@@ -106,7 +111,7 @@ class App extends StatelessWidget {
         Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find()),  fenix: true);
         Get.lazyPut(() => ProfileController(getUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find(), deleteMediaUsecase: Get.find()), fenix: true);
         Get.lazyPut(() => StoryController(fetchStoriesUsecase:  Get.find(), addLikeToStoryUsecase:  Get.find(), fetchStoriesByIdUsecase: Get.find(), removeStoryUsecase: Get.find(), createStroryUsecase: Get.find(), setStoryAsSeenUsecase:  Get.find()), fenix:  true);
-       //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
+        //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
          Get.lazyPut(()=>NearbyUsersController(fetchNearbyUsersUsecase: Get.find(), toggleLikeUsecase: Get.find()) ,fenix: true);
          Get.lazyPut(() => MyMatchController(getMyChatsUsecase:  Get.find()), fenix:true);
          Get.lazyPut(() => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find(),  authService: Get.find(), startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
@@ -120,6 +125,7 @@ class App extends StatelessWidget {
           Get.lazyPut(() => LanguageController(),fenix:true);
           Get.put(TranslationService());
           Get.lazyPut(() => TutorialController(),fenix:true);
+          Get.lazyPut(() => PurchaseController(getPurchasesUsecase: Get.find(), purchaseAppleUsecase: Get.find(), purchaseGoogleUsecase: Get.find()), fenix:true);
 
 
       }),

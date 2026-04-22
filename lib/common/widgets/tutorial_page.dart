@@ -33,7 +33,7 @@ class _TutorialPageState extends State<TutorialPage> {
         curve: Curves.easeInOut,
       );
     } else {
-      await _markTutorialAsSeen(); // 👈
+      await _markTutorialAsSeen(); 
       Get.offAllNamed(RoutesNames.welcomePage);
     }
   }

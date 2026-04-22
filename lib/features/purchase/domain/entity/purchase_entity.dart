@@ -2,9 +2,9 @@ class PurchaseEntity {
   final int ordenId;
   final String productId;
   final String? name;
-  final String? credits;
+  final num? credits;
   final String ?descripcion;
-  final String ?price;
+  final num ?price;
   PurchaseEntity({
     required this.ordenId,
     required this.productId,

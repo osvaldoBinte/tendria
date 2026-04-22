@@ -248,16 +248,19 @@ class ProfilePage extends GetView<ProfileController> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,
                         ),
-                        Text(
-                          '\$ ${_balanceController.currentBalance} MXN',
-                        style: ThemeColor.headingMedium.copyWith(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: ThemeColor.textDarkColor,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                        ),
+                        GestureDetector(
+  onTap: () => Get.offAllNamed(RoutesNames.purchasePage),
+  child: Text(
+    '\$ ${_balanceController.currentBalance} MXN',
+    style: ThemeColor.headingMedium.copyWith(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+      color: ThemeColor.textDarkColor,
+    ),
+    overflow: TextOverflow.ellipsis,
+    maxLines: 2,
+  ),
+),
                       ],
                     );
                   }),

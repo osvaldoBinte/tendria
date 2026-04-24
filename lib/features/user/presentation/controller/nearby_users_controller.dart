@@ -693,40 +693,7 @@ bool get showRejectButton {
                           ),
                         ),
 
-
-                      if (user.interestsIds != null &&
-                          user.interestsIds!.isNotEmpty) ...[
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: user.interestsIds!
-                              .take(3)
-                              .map(
-                                (i) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: ThemeColor.primaryColor
-                                          .withOpacity(0.5),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    i.name,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: ThemeColor.textPrimaryColor,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+ 
 
 
                       SizedBox(

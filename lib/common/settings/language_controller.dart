@@ -53,7 +53,7 @@ class LanguageController extends GetxController {
       'add_status': 'Agregar estado',
 
       // ── LikedByUsersView ───────────────────────────
-      'pending_chats': 'Chats Pendientes',
+      'pending_chats': 'Match Pendientes',
       'unlock_hint': 'Desbloquea los chats para comenzar a conversar.',
       'unlock': 'Desbloquear',
       'connect': 'Conectar',
@@ -191,7 +191,7 @@ class LanguageController extends GetxController {
       'retry': 'REINTENTAR',
       'empty_title_chats': 'No tienes chats aún',
       'empty_subtitle_chats': 'Comienza a dar likes para encontrar tu match perfecto',
-      'empty_title_pending': 'No tienes chats pendientes',
+      'empty_title_pending': 'No tienes match pendientes',
       'empty_subtitle_pending': 'Cuando alguien te escriba, aparecerá aquí',
       'explore': 'EXPLORAR PERFILES',
       'save': 'Guardar',
@@ -221,7 +221,7 @@ class LanguageController extends GetxController {
       'add_status': 'Add status',
 
       // ── LikedByUsersView ───────────────────────────
-      'pending_chats': 'Pending Chats',
+      'pending_chats': 'Pending Match',
       'unlock_hint': 'Unlock chats to start chatting.',
       'unlock': 'Unlock',
       'connect': 'Connect',
@@ -359,7 +359,7 @@ class LanguageController extends GetxController {
       'retry': 'RETRY',
       'empty_title_chats': 'No chats yet',
       'empty_subtitle_chats': 'Start liking profiles to find your perfect match',
-      'empty_title_pending': 'No pending chats',
+      'empty_title_pending': 'No pending match',
       'empty_subtitle_pending': 'When someone writes to you, it will appear here',
       'explore': 'EXPLORE PROFILES',
       'save': 'Save',

@@ -271,8 +271,17 @@ class RegisterController extends GetxController {
     }
 
     return true;
-  }
+  } 
+void skipStep() {
+  if (currentStepIndex.value < 4) {
+    currentStepIndex.value++;
+    currentStep.value = RegistrationStep.values[currentStepIndex.value];
 
+    if (currentStep.value == RegistrationStep.personalInfo) {
+      _autoGetLocation();
+    }
+  }
+}
   bool _validatePhysicalInfo() {
     if (heightController.text.isEmpty) {
       showErrorSnackbar('Ingresa tu altura');
@@ -467,14 +476,7 @@ void toggleQuality(int qualityId) {
       showErrorSnackbar('Selecciona al menos una cualidad');
       return;
     }
-
-    if (!locationObtained.value) {
-      showErrorSnackbar(
-        'Necesitamos tu ubicación para completar el registro. Por favor, habilita los permisos de ubicación.',
-      );
-      return;
-    }
-
+ 
     try {
       isLoading.value = true;
 

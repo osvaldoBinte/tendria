@@ -72,14 +72,11 @@ BalanceController get balanceController => Get.find<BalanceController>();
 @override
 void onInit() {
   super.onInit();
-
-  // ✅ 1. Asignar PRIMERO
+ 
   _signalRService = Get.find<SignalRService>();
-
-  // ✅ 2. Cargar argumentos (necesario para saber chatId, otroUsuario, etc.)
+ 
   _loadArguments();
-
-  // ✅ 3. Registrar listener de "leídos"
+ 
   _signalRService.escucharMensajesLeidos(_onMensajesLeidos);
 
   messageController.addListener(_onMessageChanged);
@@ -97,12 +94,10 @@ void onInit() {
       if (reconnecting) isRetrying.value = true;
     });
 
-    _subscribeToChat();
-    // ✅ 4. Cargar mensajes y marcar leídos después (cuando otroUsuario ya esté disponible)
+    _subscribeToChat(); 
     loadChatMessages().then((_) => _marcarComoLeidos());
   }
-}
-// Métodos nuevos:
+} 
 Future<void> _marcarComoLeidos() async {
   if (chatId == null) return;
   final otroId = otroUsuario.value?.id ?? 0;
@@ -110,8 +105,7 @@ Future<void> _marcarComoLeidos() async {
   await _signalRService.marcarMensajesLeidos(chatId!, otroId);
 }
 
-void _onMensajesLeidos(DateTime leidoEn) {
-  // Actualizar todos los mensajes propios que aún no tienen leidoEn
+void _onMensajesLeidos(DateTime leidoEn) { 
   mensajes.value = mensajes.map((m) {
     if (m.esPropio && m.leidoEn == null) {
       return MensajeEntity(

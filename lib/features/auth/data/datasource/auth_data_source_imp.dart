@@ -46,32 +46,45 @@ class AuthDataSourceImp {
     }
   }
 
-  Future<void> createuser(CreateUserEntity entity) async {
-    try {
-      Uri url = Uri.parse('$defaultApiServer/Auth/registrar');
+Future<void> createuser(CreateUserEntity entity) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/Auth/registrar');
+    print('➡️ URL: $url');
 
-      final response = await http.post(
-        url,
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(CreateUserModel.fromEntity(entity).toJson()),
-      );
+    final body = jsonEncode(CreateUserModel.fromEntity(entity).toJson());
+    print('📦 Body enviado: $body');
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return;
-      }
+    final response = await http.post(
+      url,
+      headers: <String, String>{'Content-Type': 'application/json'},
+      body: body,
+    );
 
-      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-      exception.validateMesage();
-      throw exception;
-    } catch (e, stackTrace) {
-      if (e is SocketException ||
-          e is http.ClientException ||
-          e is TimeoutException) {
-        print('🌐 Error de red detectado');
-        throw Exception(convertMessageException(error: e));
-      }
+    print('📡 Status code: ${response.statusCode}');
+    print('📨 Response body: ${response.body}');
 
-      throw Exception('$e');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('✅ Usuario creado correctamente');
+      return;
     }
+
+    print('❌ Error en la respuesta');
+    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+    exception.validateMesage();
+    throw exception;
+
+  } catch (e, stackTrace) {
+    print('🔥 Error capturado: $e');
+    print('📍 StackTrace: $stackTrace');
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+      print('🌐 Error de red detectado');
+      throw Exception(convertMessageException(error: e));
+    }
+
+    throw Exception('$e');
   }
+}
 }

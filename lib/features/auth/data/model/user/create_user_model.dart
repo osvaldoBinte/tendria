@@ -34,21 +34,21 @@ class CreateUserModel extends CreateUserEntity {
       qualitiesIds: entity.qualitiesIds,
     );
   }
-  Map<String, dynamic> toJson() {
-    return {
-      'nombre': name,
-      'email': email,
-      'password': password,
-      'fecha_nacimiento': dateofbirth,
-      'genero': gender,
-      'bio': bio,
-      'altura_cm': heightcm,
-      'idioma_principal': primarylanguage,
-      'ciudad': city,
-      'lat': lat,
-      'lng': lng,
-      'interesesIds': interestsIds,
-      'cualidadesIds': qualitiesIds,
-    };
-  }
+Map<String, dynamic> toJson() {
+  return {
+    'nombre': name,
+    'email': email,
+    'password': password,
+    'fecha_nacimiento': dateofbirth,
+    'genero': gender,
+    'bio': bio,
+    'altura_cm': heightcm.isNotEmpty ? heightcm : null,
+    'idioma_principal': primarylanguage,
+    'ciudad': city,
+    'lat': lat.isNotEmpty ? lat : null,
+    'lng': lng.isNotEmpty ? lng : null,
+    'interesesIds': interestsIds,
+    'cualidadesIds': qualitiesIds,
+  };
+}
 }

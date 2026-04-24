@@ -143,12 +143,12 @@ class ChatPage extends GetView<ChatController> {
                     if (isExisting)
                       Text(
                         controller.isSignalRConnected.value
-                            ? 'Todo listo para empezar a conectar'
+                            ? 'Todo listo'
                             : '',
                         style: ThemeColor.caption.copyWith(
                           color: controller.isSignalRConnected.value
-                              ? ThemeColor.secondaryColor
-                              : ThemeColor.primaryColor,
+                              ? ThemeColor.radarScanner
+                              : ThemeColor.secondaryColor,
                         ),
                       ),
                   ],
@@ -444,8 +444,8 @@ Widget _buildMessageStatus(DateTime? leidoEn) {
         const SizedBox(width: 8),
         Expanded(
           child: Obx(() => Text(
-            'Este tendra tiene un costo de \$${controller.balanceController.chatCost.toStringAsFixed(0)} MXN. '
-            'Tu  saldo actual es de \$${controller.balanceController.currentBalance.toStringAsFixed(0)}  El mensaje se cobrara solo cuando se envie el primer mensaje.',
+            'Este mensaje tiene un costo de \$${controller.balanceController.chatCost.toStringAsFixed(0)} MXN. '
+            'Tu  saldo actual es de \$${controller.balanceController.currentBalance.toStringAsFixed(0)}  El mensaje se cobrara solo cuando se envie.',
             style: ThemeColor.caption.copyWith(
               color: ThemeColor.primaryColor,
               fontWeight: FontWeight.w500,

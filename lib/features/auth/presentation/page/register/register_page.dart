@@ -917,7 +917,8 @@ IconData _getInterestIcon(String interest) {
   // NAVEGACIÓN INFERIOR
   Widget _buildNavigationButtons({
     bool showSkip = false,
-    bool isLastStep = false,
+    bool isLastStep = false,  VoidCallback? onSkip,       
+
   }) {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
@@ -942,17 +943,17 @@ IconData _getInterestIcon(String interest) {
                 : SizedBox(width: 56),
           ),
 
-          if (showSkip)
-            GestureDetector(
-              onTap: isLastStep ? null : controller.nextStep,
-              child: Text(
-                'Omitir',
-                style: ThemeColor.bodyMedium.copyWith(
-                  color: ThemeColor.textSecondaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+         if (showSkip)
+          GestureDetector(
+            onTap: onSkip ?? controller.skipStep, // 👈 usa onSkip si se pasa
+            child: Text(
+              'Omitir',
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondaryColor,
+                fontWeight: FontWeight.w600,
               ),
-            )
+            ),
+          )
           else
             SizedBox(),
 

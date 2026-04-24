@@ -943,17 +943,19 @@ IconData _getInterestIcon(String interest) {
                 : SizedBox(width: 56),
           ),
 
-         if (showSkip)
-          GestureDetector(
-            onTap: onSkip ?? controller.skipStep, // 👈 usa onSkip si se pasa
-            child: Text(
-              'Omitir',
-              style: ThemeColor.bodyMedium.copyWith(
+        if (showSkip)
+  GestureDetector(
+    onTap: isLastStep 
+        ? controller.onRegisterTap  
+        : (onSkip ?? controller.skipStep),
+    child: Text(
+      'Omitir',
+      style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textSecondaryColor,
                 fontWeight: FontWeight.w600,
               ),
-            ),
-          )
+    ),
+  )
           else
             SizedBox(),
 

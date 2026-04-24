@@ -472,10 +472,7 @@ void toggleQuality(int qualityId) {
 }
 
   Future<void> onRegisterTap() async {
-    if (selectedQualities.isEmpty) {
-      showErrorSnackbar('Selecciona al menos una cualidad');
-      return;
-    }
+   
  
     try {
       isLoading.value = true;

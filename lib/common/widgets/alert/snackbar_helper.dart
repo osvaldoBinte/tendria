@@ -4,9 +4,12 @@ import 'package:get/get.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 
 void showSnackBar(String message, Color color) {
-  ScaffoldMessenger.of(Get.context!).clearSnackBars();
-  
-  ScaffoldMessenger.of(Get.context!).showSnackBar(
+  final context = Get.context!;
+  final topPadding = MediaQuery.of(context).padding.top;
+
+  ScaffoldMessenger.of(context).clearSnackBars();
+
+  ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Row(
         children: [
@@ -33,7 +36,14 @@ void showSnackBar(String message, Color color) {
       backgroundColor: color,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: EdgeInsets.all(16),
+      // 👇 Margen para posicionarla arriba
+      margin: EdgeInsets.only(
+        top: topPadding + 8,
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).size.height - topPadding - 100,
+      ),
+      dismissDirection: DismissDirection.up,
     ),
   );
 }

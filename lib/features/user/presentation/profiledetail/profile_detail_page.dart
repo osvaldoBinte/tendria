@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
@@ -78,7 +79,8 @@ class NearbyUsersPage extends StatelessWidget {
 return Scaffold(
   backgroundColor: ThemeColor.backgroundColorfondo,
   body: Obx(() {
-    if (controller.noMoreUsers.value) {
+  if (controller.noMoreUsers.value || 
+    (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
       return _buildNoMoreUsersState(controller);
     }
 
@@ -147,100 +149,97 @@ return Scaffold(
     });
   }
 
-  Widget _buildNoMoreUsersState(NearbyUsersController controller) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: ThemeColor.primaryColor.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.search_off_rounded,
-                size: 72,
-                color: ThemeColor.primaryColor,
-              ),
+Widget _buildNoMoreUsersState(NearbyUsersController controller) {
+  final l = Get.find<LanguageController>();
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: ThemeColor.primaryColor.withOpacity(0.08),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 24),
-            Text(
-              'No hay más perfiles',
-              style: ThemeColor.headingMedium.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            child: Icon(
+              Icons.search_off_rounded,
+              size: 72,
+              color: ThemeColor.primaryColor,
             ),
-            const SizedBox(height: 12),
-            Text(
-              'No encontramos perfiles que coincidan con tus filtros actuales. Amplía tu rango de búsqueda para ver más personas.',
-              style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            l.t('no_more_profiles'),
+            style: ThemeColor.headingMedium.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
-                icon: const Icon(Icons.tune_rounded, color: Colors.white),
-                label: const Text(
-                  'Modificar preferencias',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ThemeColor.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l.t('no_more_profiles_desc'),
+            style: ThemeColor.bodyMedium.copyWith(
+              color: ThemeColor.textSecondaryColor,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
+              icon: const Icon(Icons.tune_rounded, color: Colors.white),
+              label: Text(
+                l.t('modify_preferences'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
               ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ThemeColor.primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 0,
+              ),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  controller.noMoreUsers.value = false;
-                  controller.loadNearbyUsers();
-                },
-                icon: Icon(
-                  Icons.refresh_rounded,
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                controller.noMoreUsers.value = false;
+                controller.loadNearbyUsers();
+              },
+              icon: Icon(Icons.refresh_rounded, color: ThemeColor.primaryColor),
+              label: Text(
+                l.t('try_again'),
+                style: TextStyle(
                   color: ThemeColor.primaryColor,
+                  fontSize: 15,
                 ),
-                label: Text(
-                  'Intentar de nuevo',
-                  style: TextStyle(
-                    color: ThemeColor.primaryColor,
-                    fontSize: 15,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: BorderSide(color: ThemeColor.primaryColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: BorderSide(color: ThemeColor.primaryColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
+    ),
+  );
+}
   Widget _buildReporteButtons(NearbyUsersController controller) {
     return SafeArea(
       top: false,

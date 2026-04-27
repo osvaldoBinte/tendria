@@ -198,6 +198,11 @@ class LanguageController extends GetxController {
       'cancel': 'Cancelar',
       'error': 'Error',
       'accept': 'Aceptar',
+
+'no_more_profiles': 'No hay más perfiles',
+'no_more_profiles_desc': 'No encontramos perfiles que coincidan con tus filtros actuales. Amplía tu rango de búsqueda para ver más personas.',
+'modify_preferences': 'Modificar preferencias',
+'try_again': 'Intentar de nuevo',
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -366,6 +371,10 @@ class LanguageController extends GetxController {
       'cancel': 'Cancel',
       'error': 'Error',
       'accept': 'Accept',
+      'no_more_profiles': 'No more profiles',
+'no_more_profiles_desc': 'We couldn\'t find profiles matching your current filters. Expand your search range to see more people.',
+'modify_preferences': 'Modify preferences',
+'try_again': 'Try again',
     },
   };
 }

@@ -62,16 +62,23 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+ @override
+Widget build(BuildContext context) {
+  return Obx(() {
+   if (controller.noMoreUsers.value || 
+    (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
+      return Scaffold(
+        backgroundColor: ThemeColor.backgroundColor,
+        body: _buildNoMoreUsersState(controller),
+      );
+    }
+
     return Stack(
       children: [
         Scaffold(
           backgroundColor: ThemeColor.backgroundColor,
           body: Stack(
             children: [
-             //_buildGridBackground(),
-
               SafeArea(
                 child: SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
@@ -123,17 +130,17 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                                   );
                                 }
                                 return Stack(
-  alignment: Alignment.center,
-  children: [
-    Image.asset(
-      'assets/gift/gitf.gif',
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
-    ),
-    _buildDetectedPoints(),
-  ],
-);
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/gift/gitf.gif',
+                                      width: size,
+                                      height: size,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    _buildDetectedPoints(),
+                                  ],
+                                );
                               }),
                             );
                           },
@@ -161,9 +168,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                                   borderRadius: ThemeColor.circularBorderRadius,
                                 ),
                                 elevation: 0,
-                                disabledBackgroundColor: ThemeColor
-                                    .tertiaryColor
-                                    .withOpacity(0.5),
+                                disabledBackgroundColor:
+                                    ThemeColor.tertiaryColor.withOpacity(0.5),
                               ),
                               child: controller.isLoading.value
                                   ? const SizedBox(
@@ -218,8 +224,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                   ),
                 ),
               ),
-
-         //     _buildSideIndicators(),
             ],
           ),
         ),
@@ -227,7 +231,100 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
         const TutorialOverlay(),
       ],
     );
-  }
+  });
+}
+
+ Widget _buildNoMoreUsersState(NearbyUsersController controller) {
+  final l = Get.find<LanguageController>();
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: ThemeColor.primaryColor.withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.search_off_rounded,
+              size: 72,
+              color: ThemeColor.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            l.t('no_more_profiles'),
+            style: ThemeColor.headingMedium.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l.t('no_more_profiles_desc'),
+            style: ThemeColor.bodyMedium.copyWith(
+              color: ThemeColor.textSecondaryColor,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
+              icon: const Icon(Icons.tune_rounded, color: Colors.white),
+              label: Text(
+                l.t('modify_preferences'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ThemeColor.primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                controller.noMoreUsers.value = false;
+                controller.loadNearbyUsers();
+              },
+              icon: Icon(Icons.refresh_rounded, color: ThemeColor.primaryColor),
+              label: Text(
+                l.t('try_again'),
+                style: TextStyle(
+                  color: ThemeColor.primaryColor,
+                  fontSize: 15,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: BorderSide(color: ThemeColor.primaryColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   Widget _buildGridBackground() {
     return CustomPaint(painter: GridPainter(), child: Container());
@@ -296,7 +393,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             : null,
       ),
     );
-  } 
+  }
 
   Widget _buildDetectedPoints() {
     return Obx(() {

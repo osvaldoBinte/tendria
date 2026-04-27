@@ -59,6 +59,7 @@ dependencies:
   in_app_purchase: ^3.1.13
   in_app_purchase_storekit: ^0.3.6+7
   in_app_purchase_android: ^0.3.0+18
+  flutter_local_notifications: ^20.1.0
 flutter_native_splash:
   color: "#000000"
   image: assets/logo/icon.jpeg

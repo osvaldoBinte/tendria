@@ -13,6 +13,7 @@ import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/unlock/domain/usecase/block_user_usecase.dart';
+import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 
 
 
@@ -160,21 +161,25 @@ if (index is RxInt) {
     }
   }
 
-  Future<void> rejectUser() async {
-    if (isProcessingLike.value) return;
+Future<void> rejectUser() async {
+  if (isProcessingLike.value) return;
 
-    try {
-      isProcessingLike.value = true;
-      await toggleLikeUsecase.execute(userId.value, false);
-      showInfoSnackbar('Usuario rechazado');
-            Get.offAllNamed(RoutesNames.profileDetailPage);
+  try {
+    isProcessingLike.value = true;
+    await toggleLikeUsecase.execute(userId.value, false);
+    showInfoSnackbar('Usuario rechazado');
+ 
+    final nearbyController = Get.find<NearbyUsersController>();
+    nearbyController.noMoreUsers.value = false;
+    await nearbyController.loadNearbyUsers();
 
-    } catch (e) {
-      showErrorSnackbar('Error al rechazar: ${cleanExceptionMessage(e)}');
-    } finally {
-      isProcessingLike.value = false;
-    }
+    Get.offAllNamed(RoutesNames.nearbyProfilesPage);
+  } catch (e) {
+    showErrorSnackbar('Error al rechazar: ${cleanExceptionMessage(e)}');
+  } finally {
+    isProcessingLike.value = false;
   }
+}
 void sendMensaje() {
   final chat = currentUser.value?.chat;
 

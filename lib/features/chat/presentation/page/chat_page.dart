@@ -248,7 +248,7 @@ class ChatPage extends GetView<ChatController> {
       child: ListView.builder(
         controller: controller.scrollController,
         keyboardDismissBehavior:
-            ScrollViewKeyboardDismissBehavior.manual, // 👈 manual
+            ScrollViewKeyboardDismissBehavior.manual,  
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: controller.mensajes.length,
         itemBuilder: (_, index) {
@@ -523,9 +523,7 @@ class ChatPage extends GetView<ChatController> {
                             maxLines: null,
                             textCapitalization: TextCapitalization.sentences,
                             textInputAction: TextInputAction.done,
-                            style: ThemeColor.bodyMedium,
-                            // Al abrir el teclado, esperar que termine
-                            // de animarse y hacer scroll al último mensaje
+                            style: ThemeColor.bodyMedium, 
                             onTap: blocked
                                 ? null
                                 : () {

@@ -34,6 +34,7 @@ class NearbyUsersController extends GetxController {
   final RxInt currentUserIndex = 0.obs;
   final RxInt currentPage = 1.obs;
   final RxInt pageSize = 6.obs;
+final RxBool noMoreUsers = false.obs;
 
   final RxMap<int, bool> userHasStories = <int, bool>{}.obs;
 
@@ -163,16 +164,16 @@ String get currentCity {
   void onPageChanged(int index) {
     currentImageIndex.value = index;
   }
+ 
 
-  void nextUser() {
-    if (currentUserIndex.value < nearbyUsers.length - 1) {
-      currentUserIndex.value++;
-      updateCurrentProfile();
-    } else {
-      showInfoSnackbar('No hay más personas disponibles');
-      loadNextBatch();
-    }
+void nextUser() {
+  if (currentUserIndex.value < nearbyUsers.length - 1) {
+    currentUserIndex.value++;
+    updateCurrentProfile();
+  } else {
+    noMoreUsers.value = true; // ← activa el estado vacío
   }
+}
 
 
 

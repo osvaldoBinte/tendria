@@ -6,8 +6,8 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 
-class ProfileDetailScreen extends StatelessWidget {
-  const ProfileDetailScreen({Key? key}) : super(key: key);
+class NearbyUsersPage extends StatelessWidget {
+  const NearbyUsersPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,9 @@ class ProfileDetailScreen extends StatelessWidget {
           backgroundColor: ThemeColor.backgroundColorfondo,
           body: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                ThemeColor.primaryColor,
+              ),
             ),
           ),
         );
@@ -36,13 +38,22 @@ class ProfileDetailScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.people_outline, size: 80, color: ThemeColor.textSecondaryColor),
+                Icon(
+                  Icons.people_outline,
+                  size: 80,
+                  color: ThemeColor.textSecondaryColor,
+                ),
                 const SizedBox(height: 16),
-                Text('No hay usuarios disponibles', style: ThemeColor.headingMedium),
+                Text(
+                  'No hay usuarios disponibles',
+                  style: ThemeColor.headingMedium,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Intenta más tarde',
-                  style: ThemeColor.bodyMedium.copyWith(color: ThemeColor.textSecondaryColor),
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textSecondaryColor,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
@@ -52,7 +63,10 @@ class ProfileDetailScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ThemeColor.primaryColor,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                 ),
               ],
@@ -61,75 +75,171 @@ class ProfileDetailScreen extends StatelessWidget {
         );
       }
 
-      return Scaffold(
-        backgroundColor: ThemeColor.backgroundColorfondo,
-        body: Column(
-          children: [
-            Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    backgroundColor: ThemeColor.backgroundColorfondo,
-                    elevation: 4,
-                    shadowColor: ThemeColor.shadowColor,
-                    pinned: true,       leading: IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () {
+return Scaffold(
+  backgroundColor: ThemeColor.backgroundColorfondo,
+  body: Obx(() {
+    if (controller.noMoreUsers.value) {
+      return _buildNoMoreUsersState(controller);
+    }
 
-                         Get.offAllNamed(
-                              RoutesNames.radarScannerPage,
-                              
-                            );
-                        },
-                      ),
-                 title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Image.asset(
-                            'assets/logo/logo.png',
-                           width: 100,
-                          height: 100,
-                          ),
-                        ],
-                      ),
-                  ),
-
-                  _buildSliverAppBar(controller),
-
-                  SliverToBoxAdapter(
-                    child: Obx(() {
-                      final user = controller.currentProfile.value;
-                      if (user == null) return const SizedBox.shrink();
-
-                      return Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          _buildBioSection(controller),
-                          const SizedBox(height: 16),
-                          _buildBuscoSection(controller),
-                          const SizedBox(height: 16),
-                          if (user.qualitiesIds != null && user.qualitiesIds!.isNotEmpty)
-                            _buildQualitiesSection(controller),
-                          const SizedBox(height: 16),
-                          if (user.interestsIds != null && user.interestsIds!.isNotEmpty)
-                            _buildInterestsSection(controller),
-                          const SizedBox(height: 20),
-                        ],
-                      );
-                    }),
-                  ),
-                ],
+    return Column(
+      children: [
+        Expanded(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                backgroundColor: ThemeColor.backgroundColorfondo,
+                elevation: 4,
+                shadowColor: ThemeColor.shadowColor,
+                pinned: true,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Get.offAllNamed(
+                      RoutesNames.radarScannerPage,
+                    );
+                  },
+                ),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Image.asset(
+                      'assets/logo/logo.png',
+                      width: 100,
+                      height: 100,
+                    ),
+                  ],
+                ),
               ),
-            ),
-_buildReporteButtons(controller),
-         //   _buildActionButtons(controller),
-          ],
+              _buildSliverAppBar(controller),
+              SliverToBoxAdapter(
+                child: Obx(() {
+                  final user = controller.currentProfile.value;
+                  if (user == null) return const SizedBox.shrink();
+
+                  return Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      _buildBioSection(controller),
+                      const SizedBox(height: 16),
+                      _buildBuscoSection(controller),
+                      const SizedBox(height: 16),
+                      if (user.qualitiesIds != null &&
+                          user.qualitiesIds!.isNotEmpty)
+                        _buildQualitiesSection(controller),
+                      const SizedBox(height: 16),
+                      if (user.interestsIds != null &&
+                          user.interestsIds!.isNotEmpty)
+                        _buildInterestsSection(controller),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
-      );
+        _buildReporteButtons(controller),
+      ],
+    );
+  }),
+);
     });
   }
 
-
+  Widget _buildNoMoreUsersState(NearbyUsersController controller) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: ThemeColor.primaryColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 72,
+                color: ThemeColor.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No hay más perfiles',
+              style: ThemeColor.headingMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'No encontramos perfiles que coincidan con tus filtros actuales. Amplía tu rango de búsqueda para ver más personas.',
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondaryColor,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
+                icon: const Icon(Icons.tune_rounded, color: Colors.white),
+                label: const Text(
+                  'Modificar preferencias',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColor.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  controller.noMoreUsers.value = false;
+                  controller.loadNearbyUsers();
+                },
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: ThemeColor.primaryColor,
+                ),
+                label: Text(
+                  'Intentar de nuevo',
+                  style: TextStyle(
+                    color: ThemeColor.primaryColor,
+                    fontSize: 15,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: BorderSide(color: ThemeColor.primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildReporteButtons(NearbyUsersController controller) {
     return SafeArea(
@@ -230,10 +340,12 @@ _buildReporteButtons(controller),
       ),
     );
   }
+
   Widget _buildSliverAppBar(NearbyUsersController controller) {
     return Obx(() {
       final user = controller.currentProfile.value;
-      if (user == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+      if (user == null)
+        return const SliverToBoxAdapter(child: SizedBox.shrink());
 
       final gallery = controller.currentGallery;
 
@@ -250,7 +362,6 @@ _buildReporteButtons(controller),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  
                   PageView.builder(
                     controller: controller.pageController,
                     onPageChanged: controller.onPageChanged,
@@ -292,7 +403,6 @@ _buildReporteButtons(controller),
                     },
                   ),
 
-
                   if (gallery.length > 1)
                     Positioned(
                       top: 16,
@@ -309,7 +419,9 @@ _buildReporteButtons(controller),
                                 height: 3,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(2),
-                                  color: controller.currentImageIndex.value == index
+                                  color:
+                                      controller.currentImageIndex.value ==
+                                          index
                                       ? ThemeColor.cardColor
                                       : ThemeColor.cardColor.withOpacity(0.4),
                                   boxShadow: [ThemeColor.lightShadow],
@@ -320,7 +432,6 @@ _buildReporteButtons(controller),
                         ),
                       ),
                     ),
-
 
                   Positioned(
                     bottom: 0,
@@ -374,8 +485,6 @@ _buildReporteButtons(controller),
                               ],
                             ),
                           ),
-
-                         
                         ],
                       ),
                     ),
@@ -389,12 +498,11 @@ _buildReporteButtons(controller),
     });
   }
 
-
-
   Widget _buildBioSection(NearbyUsersController controller) {
     return Obx(() {
       final bio = controller.currentProfile.value?.bio ?? '';
-      if (bio.isEmpty || double.tryParse(bio) != null) return const SizedBox.shrink();
+      if (bio.isEmpty || double.tryParse(bio) != null)
+        return const SizedBox.shrink();
 
       return Container(
         width: double.infinity,
@@ -431,14 +539,13 @@ _buildReporteButtons(controller),
     });
   }
 
-
-
   Widget _buildBuscoSection(NearbyUsersController controller) {
     return Obx(() {
       final pref = controller.currentProfile.value?.preferences;
       if (pref == null) return const SizedBox.shrink();
 
-      final hasContent = (pref.connectiontype?.isNotEmpty == true) ||
+      final hasContent =
+          (pref.connectiontype?.isNotEmpty == true) ||
           (pref.searchgender?.isNotEmpty == true) ||
           (pref.agemin != null && pref.agemax != null);
       if (!hasContent) return const SizedBox.shrink();
@@ -511,12 +618,11 @@ _buildReporteButtons(controller),
     );
   }
 
-
-
   Widget _buildInterestsSection(NearbyUsersController controller) {
     return Obx(() {
       final interests = controller.currentProfile.value?.interestsIds;
-      if (interests == null || interests.isEmpty) return const SizedBox.shrink();
+      if (interests == null || interests.isEmpty)
+        return const SizedBox.shrink();
 
       return Container(
         width: double.infinity,
@@ -550,12 +656,11 @@ _buildReporteButtons(controller),
     });
   }
 
-
-
   Widget _buildQualitiesSection(NearbyUsersController controller) {
     return Obx(() {
       final qualities = controller.currentProfile.value?.qualitiesIds;
-      if (qualities == null || qualities.isEmpty) return const SizedBox.shrink();
+      if (qualities == null || qualities.isEmpty)
+        return const SizedBox.shrink();
 
       return Container(
         width: double.infinity,
@@ -607,8 +712,6 @@ _buildReporteButtons(controller),
     );
   }
 
-
-
   Widget _buildActionButtons(NearbyUsersController controller) {
     return SafeArea(
       top: false,
@@ -627,7 +730,6 @@ _buildReporteButtons(controller),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            
             GestureDetector(
               onTap: controller.skipUser,
               child: Container(
@@ -648,12 +750,14 @@ _buildReporteButtons(controller),
                     ),
                   ],
                 ),
-                child: Icon(Icons.close_rounded, color: ThemeColor.textLightColor, size: 32),
+                child: Icon(
+                  Icons.close_rounded,
+                  color: ThemeColor.textLightColor,
+                  size: 32,
+                ),
               ),
             ),
 
-            
-            
             Obx(
               () => GestureDetector(
                 onTap: controller.toggleFavorite,
@@ -674,10 +778,11 @@ _buildReporteButtons(controller),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: (controller.isFavorite.value
-                                ? ThemeColor.errorColor
-                                : ThemeColor.primaryColor)
-                            .withOpacity(0.4),
+                        color:
+                            (controller.isFavorite.value
+                                    ? ThemeColor.errorColor
+                                    : ThemeColor.primaryColor)
+                                .withOpacity(0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),

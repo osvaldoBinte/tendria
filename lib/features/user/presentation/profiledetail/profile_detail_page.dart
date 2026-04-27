@@ -87,8 +87,8 @@ class ProfileDetailScreen extends StatelessWidget {
                         children: [
                           Image.asset(
                             'assets/logo/logo.png',
-                            width: 100,
-                            height: 40,
+                           width: 100,
+                          height: 100,
                           ),
                         ],
                       ),

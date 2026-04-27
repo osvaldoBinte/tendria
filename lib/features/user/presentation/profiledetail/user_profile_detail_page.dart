@@ -117,7 +117,7 @@ class UserProfileDetailPage extends StatelessWidget {
                           Image.asset(
                             'assets/logo/logo.png',
                             width: 100,
-                            height: 40,
+                          height: 100,
                           ),
                         ],
                       ),
@@ -575,37 +575,41 @@ class UserProfileDetailPage extends StatelessWidget {
                   ],
                 ),
                 child: Icon(
-                  Icons.message,
+                  Icons.favorite_rounded,
                   color: ThemeColor.textLightColor,
                   size: 32,
                 ),
               ),
             ),
 
-            GestureDetector(
-              onTap: controller.blockUser,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade700, Colors.red.shade400],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.block_rounded,
-                  color: ThemeColor.textLightColor,
-                  size: 28,
-                ),
+            Obx(
+  () => controller.showRejectButton
+      ? const SizedBox(width: 56)
+      : GestureDetector(
+          onTap: controller.blockUser,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.red.shade700, Colors.red.shade400],
               ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
+            child: Icon(
+              Icons.block_rounded,
+              color: ThemeColor.textLightColor,
+              size: 28,
+            ),
+          ),
+        ),
+),
           ],
         ),
       ),

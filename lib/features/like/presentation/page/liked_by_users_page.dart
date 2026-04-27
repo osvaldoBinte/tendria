@@ -83,7 +83,8 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
           Row(
             children: [
               const SizedBox(width: 8),
-              Image.asset('assets/logo/logo.png', width: 70, height: 70),
+              Image.asset('assets/logo/logo.png',width: 100,
+                          height: 100,),
               const SizedBox(width: 8),
               Container(
                 width: 8,

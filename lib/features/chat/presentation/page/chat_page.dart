@@ -70,14 +70,17 @@ class ChatPage extends GetView<ChatController> {
         onPressed: () {
           FocusScope.of(Get.context!).unfocus();
           if (controller.goHomeIndex.value >= 0) {
-            mycontroller.loadChats();
+            mycontroller.loadChats(silent: true);
             Get.offAllNamed(
               RoutesNames.homePage,
               arguments: {'tab': controller.goHomeIndex.value},
             );
+            
+            print('silencio homePage');
           } else {
             Get.back();
-            mycontroller.loadChats();
+            print('silencio');
+            mycontroller.loadChats(silent: true);
           }
         },
       ),
@@ -142,9 +145,7 @@ class ChatPage extends GetView<ChatController> {
                     ),
                     if (isExisting)
                       Text(
-                        controller.isSignalRConnected.value
-                            ? 'Todo listo'
-                            : '',
+                        controller.isSignalRConnected.value ? 'Todo listo' : '',
                         style: ThemeColor.caption.copyWith(
                           color: controller.isSignalRConnected.value
                               ? ThemeColor.radarScanner
@@ -239,29 +240,30 @@ class ChatPage extends GetView<ChatController> {
     );
   }
 
- Widget _buildMessagesList() {
-  return RefreshIndicator(
-    onRefresh: controller.refreshChat,
-    color: ThemeColor.primaryColor,
-    backgroundColor: ThemeColor.surfaceColor,
-    child: ListView.builder(
-      controller: controller.scrollController,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual, // 👈 manual
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: controller.mensajes.length,
-      itemBuilder: (_, index) {
-        final msg = controller.mensajes[index];
-        return Column(
-          children: [
-            if (controller.shouldShowDateSeparator(index))
-              _buildDateSeparator(msg.enviadoEn),
-            _buildMessageBubble(msg),
-          ],
-        );
-      },
-    ),
-  );
-}
+  Widget _buildMessagesList() {
+    return RefreshIndicator(
+      onRefresh: controller.refreshChat,
+      color: ThemeColor.primaryColor,
+      backgroundColor: ThemeColor.surfaceColor,
+      child: ListView.builder(
+        controller: controller.scrollController,
+        keyboardDismissBehavior:
+            ScrollViewKeyboardDismissBehavior.manual, // 👈 manual
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: controller.mensajes.length,
+        itemBuilder: (_, index) {
+          final msg = controller.mensajes[index];
+          return Column(
+            children: [
+              if (controller.shouldShowDateSeparator(index))
+                _buildDateSeparator(msg.enviadoEn),
+              _buildMessageBubble(msg),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildDateSeparator(DateTime dt) {
     return Padding(
@@ -330,28 +332,28 @@ class ChatPage extends GetView<ChatController> {
                       ),
                     ),
                   const SizedBox(height: 4),
-                 Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    Flexible(
-      child: Text(
-        controller.formatMessageTime(mensaje.enviadoEn),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: ThemeColor.caption.copyWith(
-          color: isOwn
-              ? ThemeColor.textLightColor.withOpacity(0.7)
-              : ThemeColor.textSecondaryColor,
-          fontSize: 10,
-        ),
-      ),
-    ),
-    if (isOwn) ...[
-      const SizedBox(width: 4),
-      _buildMessageStatus(mensaje.leidoEn),
-    ],
-  ],
-)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          controller.formatMessageTime(mensaje.enviadoEn),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ThemeColor.caption.copyWith(
+                            color: isOwn
+                                ? ThemeColor.textLightColor.withOpacity(0.7)
+                                : ThemeColor.textSecondaryColor,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      if (isOwn) ...[
+                        const SizedBox(width: 4),
+                        _buildMessageStatus(mensaje.leidoEn),
+                      ],
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -364,18 +366,20 @@ class ChatPage extends GetView<ChatController> {
       ),
     );
   }
-Widget _buildMessageStatus(DateTime? leidoEn) {
-  final isRead = leidoEn != null;
-  return AnimatedSwitcher(
-    duration: const Duration(milliseconds: 300),
-    child: Icon(
-      isRead ? Icons.done_all : Icons.done,
-      key: ValueKey(isRead),
-      size: 14,
-      color: isRead ? Colors.blue[200] : Colors.white54,
-    ),
-  );
-}
+
+  Widget _buildMessageStatus(DateTime? leidoEn) {
+    final isRead = leidoEn != null;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Icon(
+        isRead ? Icons.done_all : Icons.done,
+        key: ValueKey(isRead),
+        size: 14,
+        color: isRead ? Colors.blue[200] : Colors.white54,
+      ),
+    );
+  }
+
   Widget _buildMessageAvatar(String? photoUrl) {
     return Container(
       width: 32,
@@ -426,62 +430,81 @@ Widget _buildMessageStatus(DateTime? leidoEn) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (controller.isNewConversation.value && !controller.firstMessageSent.value)
-  Container(
-    width: double.infinity,
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: ThemeColor.primaryColor.withOpacity(0.1),
-      borderRadius: ThemeColor.smallBorderRadius,
-      border: Border.all(
-        color: ThemeColor.primaryColor.withOpacity(0.3),
-      ),
-    ),
-    child: Row(
-      children: [
-        Icon(Icons.info_outline, size: 18, color: ThemeColor.primaryColor),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Obx(() => Text(
-            'Este mensaje tiene un costo de \$${controller.balanceController.chatCost.toStringAsFixed(0)} MXN. '
-            'Tu  saldo actual es de \$${controller.balanceController.currentBalance.toStringAsFixed(0)}  El mensaje se cobrara solo cuando se envie.',
-            style: ThemeColor.caption.copyWith(
-              color: ThemeColor.primaryColor,
-              fontWeight: FontWeight.w500,
-            ),
-          )),
-        ),
-      ],
-    ),
-  ),
+                if (controller.isNewConversation.value &&
+                    !controller.firstMessageSent.value)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ThemeColor.primaryColor.withOpacity(0.1),
+                      borderRadius: ThemeColor.smallBorderRadius,
+                      border: Border.all(
+                        color: ThemeColor.primaryColor.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: ThemeColor.primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Obx(
+                            () => Text(
+                              'Este mensaje tiene un costo de \$${controller.balanceController.chatCost.toStringAsFixed(0)} MXN. '
+                              'Tu  saldo actual es de \$${controller.balanceController.currentBalance.toStringAsFixed(0)}  El mensaje se cobrara solo cuando se envie.',
+                              style: ThemeColor.caption.copyWith(
+                                color: ThemeColor.primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-if (blocked)
-  Container(
-    width: double.infinity,
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: ThemeColor.primaryColor.withOpacity(0.1),
-      borderRadius: ThemeColor.smallBorderRadius,
-      border: Border.all(color: ThemeColor.primaryColor.withOpacity(0.3)),
-    ),
-    child: Row(
-      children: [
-        Icon(Icons.info_outline, size: 18, color: ThemeColor.primaryColor),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            'Primer mensaje enviado. Espera la respuesta.',
-            style: ThemeColor.caption.copyWith(
-              color: ThemeColor.primaryColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    ),
-  ),
+                if (blocked)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ThemeColor.primaryColor.withOpacity(0.1),
+                      borderRadius: ThemeColor.smallBorderRadius,
+                      border: Border.all(
+                        color: ThemeColor.primaryColor.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: ThemeColor.primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Primer mensaje enviado. Espera la respuesta.',
+                            style: ThemeColor.caption.copyWith(
+                              color: ThemeColor.primaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 Row(
                   children: [
                     Expanded(

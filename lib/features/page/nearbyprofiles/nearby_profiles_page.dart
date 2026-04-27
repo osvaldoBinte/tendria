@@ -73,7 +73,8 @@ class NearbyProfilesPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset('assets/logo/logo.png', width: 200, height: 50),
+              Image.asset('assets/logo/logo.png', width: 100,
+                          height: 100,),
             ],
           ),
         ],

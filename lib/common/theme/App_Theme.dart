@@ -680,18 +680,22 @@ static Widget createMainScaffold({
   required int currentIndex,
   required Function(int) onNavigationTap,
   required List<String> iconPaths,
-  List<String>? labels, // ← nuevo
+  List<String>? labels,
   Color? backgroundColor,
   Color? bottomNavBackgroundColor,
+  Widget? floatingActionButton,           // ← nuevo
+  FloatingActionButtonLocation? floatingActionButtonLocation, // ← nuevo
 }) {
   return Scaffold(
     backgroundColor: backgroundColor ?? bottomNavBackgroundColor,
     body: body,
+    floatingActionButton: floatingActionButton,          // ← nuevo
+    floatingActionButtonLocation: floatingActionButtonLocation, // ← nuevo
     bottomNavigationBar: createBottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onNavigationTap,
       iconPaths: iconPaths,
-      labels: labels, // ← nuevo
+      labels: labels,
       backgroundColor: bottomNavBackgroundColor,
     ),
   );

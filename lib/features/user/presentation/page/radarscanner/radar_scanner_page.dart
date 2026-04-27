@@ -86,8 +86,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                         Image.asset(
                           'assets/logo/logo.png',
-                          width: 100,
-                          height: 100,
+                          width: 150,
+                          height: 150,
                         ),
 
                         SizedBox(height: ThemeColor.paddingSmall),

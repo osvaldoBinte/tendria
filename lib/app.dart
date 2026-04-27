@@ -113,7 +113,11 @@ class App extends StatelessWidget {
         Get.lazyPut(() => StoryController(fetchStoriesUsecase:  Get.find(), addLikeToStoryUsecase:  Get.find(), fetchStoriesByIdUsecase: Get.find(), removeStoryUsecase: Get.find(), createStroryUsecase: Get.find(), setStoryAsSeenUsecase:  Get.find()), fenix:  true);
         //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
          Get.lazyPut(()=>NearbyUsersController(fetchNearbyUsersUsecase: Get.find(), toggleLikeUsecase: Get.find()) ,fenix: true);
-         Get.lazyPut(() => MyMatchController(getMyChatsUsecase:  Get.find()), fenix:true);
+        Get.put(
+  MyMatchController(getMyChatsUsecase: Get.find()),
+  permanent: true,
+);
+
          Get.lazyPut(() => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find(),  authService: Get.find(), startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
          Get.lazyPut(()=> LikedByUsersController(  getPendingLikedChatsUsecase: Get.find(), unlockChatUsecase: Get.find(), ), fenix:true);
      //    Get.lazyPut(() => StartConversationsController(startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);

@@ -3,9 +3,7 @@ import 'package:get/get.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
-import 'package:tendria/features/chat/domain/entities/chat_entity.dart';
-import 'package:intl/intl.dart';
-import 'package:tendria/features/chat/domain/entities/mensaje_entity.dart';
+import 'package:tendria/features/chat/domain/entities/chat_entity.dart'; 
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/stories/presentation/page/storyring/my_story_ring_widget.dart';
 import 'package:tendria/features/stories/presentation/page/storyring/story_ring_widget.dart';
@@ -96,39 +94,55 @@ class MyMatchView extends GetView<MyMatchController> {
       ),
     );
   }
-
-  // ==========================================
-  // HEADER
-  // ==========================================
+ 
 
   Widget _buildHeader() {
-    return Obx(
-      () => AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(
-          horizontal: ThemeColor.paddingMedium,
-          vertical: ThemeColor.paddingSmall,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (!controller.isSearching.value)
-              Image.asset('assets/logo/logo.png', width: 100, height: 50)
-            else
-              const SizedBox.shrink(),
-            IconButton(
-              icon: Icon(
-                controller.isSearching.value ? Icons.close : Icons.search,
-                color: ThemeColor.textPrimaryColor,
-                size: 28,
-              ),
-              onPressed: controller.toggleSearch,
-            ),
-          ],
-        ),
+  return Obx(
+    () => AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.symmetric(
+        horizontal: ThemeColor.paddingMedium,
+        vertical: ThemeColor.paddingSmall,
       ),
-    );
-  }
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (!controller.isSearching.value)
+            Image.asset('assets/logo/logo.png', width: 100, height: 100)
+          else
+            const SizedBox.shrink(),
+          Row(
+            children: [
+              // ← Indicador silencioso
+              if (controller.isSilentLoading.value)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        ThemeColor.primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              IconButton(
+                icon: Icon(
+                  controller.isSearching.value ? Icons.close : Icons.search,
+                  color: ThemeColor.textPrimaryColor,
+                  size: 28,
+                ),
+                onPressed: controller.toggleSearch,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   // ==========================================
   // SEARCH BAR

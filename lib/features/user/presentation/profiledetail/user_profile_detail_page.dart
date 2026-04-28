@@ -523,8 +523,7 @@ Widget _buildReporteButtons(UserProfileController controller) {
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Izquierda: close (cuando showReject) o favorite (cuando !showReject)
+          children: [ 
             if (showReject)
               GestureDetector(
                 onTap: controller.rejectUser,
@@ -581,8 +580,7 @@ Widget _buildReporteButtons(UserProfileController controller) {
                   ),
                 ),
               ),
-
-            // Derecha: favorite (cuando showReject) o block (cuando !showReject)
+ 
             if (showReject)
               GestureDetector(
                 onTap: controller.sendMensaje,

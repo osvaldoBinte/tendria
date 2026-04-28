@@ -76,11 +76,7 @@ class UpdateProfilePage extends GetView<ProfileController> {
       ),
     );
   }
-
-  // ==========================================
-  // DELETE ACCOUNT BUTTON
-  // ==========================================
-
+ 
   Widget _buildDeleteAccountButton() {
     return Obx(() {
       final isLoading = _updater.isUpdating.value;
@@ -119,10 +115,7 @@ class UpdateProfilePage extends GetView<ProfileController> {
       );
     });
   }
-
-  // ==========================================
-  // EDIT SECTION
-  // ==========================================
+ 
 
   Widget _buildEditSection() {
     return Column(
@@ -200,11 +193,7 @@ class UpdateProfilePage extends GetView<ProfileController> {
         ),
       ],
     );
-  }
-
-  // ==========================================
-  // BUILD ITEM
-  // ==========================================
+  } 
 
   Widget _buildItem(
     String title,

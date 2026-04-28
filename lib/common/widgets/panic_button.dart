@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
- class PanicButton extends StatefulWidget {
+
+class PanicButton extends StatefulWidget {
   final String phoneNumber;
   final int holdDurationSeconds;
 
@@ -20,7 +21,9 @@ class _PanicButtonState extends State<PanicButton>
     with SingleTickerProviderStateMixin {
   bool _holding = false;
   double _progress = 0.0;
+  int _secondsLeft = 0;
   Timer? _progressTimer;
+  OverlayEntry? _overlayEntry;
 
   late AnimationController _pulseController;
   late Animation<double> _pulseAnim;
@@ -41,7 +44,26 @@ class _PanicButtonState extends State<PanicButton>
   void dispose() {
     _progressTimer?.cancel();
     _pulseController.dispose();
+    _removeOverlay();
     super.dispose();
+  }
+
+  void _showOverlay() {
+    _removeOverlay();
+    _overlayEntry = OverlayEntry(
+      builder: (_) => _CountdownOverlay(
+        holdDurationSeconds: widget.holdDurationSeconds,
+        progressGetter: () => _progress,
+        secondsLeftGetter: () => _secondsLeft,
+        onCancel: _cancelHold,
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
   }
 
   void _startHold() {
@@ -49,7 +71,9 @@ class _PanicButtonState extends State<PanicButton>
     setState(() {
       _holding = true;
       _progress = 0.0;
+      _secondsLeft = widget.holdDurationSeconds;
     });
+    _showOverlay();
 
     const step = 50;
     final total = widget.holdDurationSeconds * 1000;
@@ -57,7 +81,11 @@ class _PanicButtonState extends State<PanicButton>
 
     _progressTimer = Timer.periodic(const Duration(milliseconds: step), (timer) {
       elapsed += step;
-      setState(() => _progress = elapsed / total);
+      setState(() {
+        _progress = elapsed / total;
+        _secondsLeft = ((total - elapsed) / 1000).ceil();
+      });
+      _overlayEntry?.markNeedsBuild();
 
       if (elapsed >= total) {
         timer.cancel();
@@ -69,22 +97,27 @@ class _PanicButtonState extends State<PanicButton>
   void _cancelHold() {
     if (!_holding) return;
     _progressTimer?.cancel();
+    _removeOverlay();
+    HapticFeedback.lightImpact();
     setState(() {
       _holding = false;
       _progress = 0.0;
+      _secondsLeft = 0;
     });
   }
 
-void _triggerCall() async {
-  HapticFeedback.heavyImpact();
-  setState(() {
-    _holding = false;
-    _progress = 0.0;
-  });
+  Future<void> _triggerCall() async {
+    HapticFeedback.heavyImpact();
+    _removeOverlay();
+    setState(() {
+      _holding = false;
+      _progress = 0.0;
+      _secondsLeft = 0;
+    });
 
-  final uri = Uri.parse('tel:${widget.phoneNumber}');
-  await launchUrl(uri, mode: LaunchMode.externalApplication);
-}
+    final uri = Uri.parse('tel:${widget.phoneNumber}');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +137,6 @@ void _triggerCall() async {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Progress ring
               if (_holding)
                 SizedBox.expand(
                   child: CircularProgressIndicator(
@@ -114,7 +146,6 @@ void _triggerCall() async {
                     valueColor: const AlwaysStoppedAnimation(Colors.green),
                   ),
                 ),
-              // FAB
               Container(
                 width: 50,
                 height: 50,
@@ -126,11 +157,137 @@ void _triggerCall() async {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: const Icon(Icons.warning_rounded, color: Colors.white, size: 22),
+                child: const Icon(
+                  Icons.warning_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── Overlay widget ────────────────────────────────────────────────────────────
+
+class _CountdownOverlay extends StatelessWidget {
+  final int holdDurationSeconds;
+  final double Function() progressGetter;
+  final int Function() secondsLeftGetter;
+  final VoidCallback onCancel;
+
+  const _CountdownOverlay({
+    required this.holdDurationSeconds,
+    required this.progressGetter,
+    required this.secondsLeftGetter,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = progressGetter();
+    final secondsLeft = secondsLeftGetter();
+
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          // Fondo oscuro semitransparente
+          GestureDetector(
+            onTap: onCancel,
+            child: Container(color: Colors.black.withOpacity(0.6)),
+          ),
+
+          // Contenido central
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Texto superior
+                const Text(
+                  '¡LLAMADA DE EMERGENCIA!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // Círculo de progreso con countdown
+                SizedBox(
+                  width: 160,
+                  height: 160,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Anillo de progreso (regresivo: 1 - progress)
+                      SizedBox.expand(
+                        child: CircularProgressIndicator(
+                          value: 1.0 - progress,
+                          strokeWidth: 8,
+                          backgroundColor: Colors.white12,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            secondsLeft <= 1
+                                ? Colors.redAccent
+                                : Colors.greenAccent,
+                          ),
+                        ),
+                      ),
+
+                      // Número de segundos
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$secondsLeft',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 64,
+                              fontWeight: FontWeight.bold,
+                              height: 1.0,
+                            ),
+                          ),
+                          const Text(
+                            'seg',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Suelta para cancelar
+                const Text(
+                  'Suelta para cancelar',
+                  style: TextStyle(color: Colors.white54, fontSize: 14),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Botón cancelar manual
+                TextButton.icon(
+                  onPressed: onCancel,
+                  icon: const Icon(Icons.close, color: Colors.white70),
+                  label: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

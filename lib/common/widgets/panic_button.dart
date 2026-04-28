@@ -9,7 +9,7 @@ class PanicButton extends StatefulWidget {
 
   const PanicButton({
     super.key,
-    this.phoneNumber = '961',
+    this.phoneNumber = '911',
     this.holdDurationSeconds = 3,
   });
 
@@ -170,8 +170,7 @@ class _PanicButtonState extends State<PanicButton>
     );
   }
 }
-
-// ─── Overlay widget ────────────────────────────────────────────────────────────
+ 
 
 class _CountdownOverlay extends StatelessWidget {
   final int holdDurationSeconds;
@@ -194,19 +193,16 @@ class _CountdownOverlay extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Stack(
-        children: [
-          // Fondo oscuro semitransparente
+        children: [ 
           GestureDetector(
             onTap: onCancel,
             child: Container(color: Colors.black.withOpacity(0.6)),
           ),
-
-          // Contenido central
+ 
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                // Texto superior
+              children: [ 
                 const Text(
                   '¡LLAMADA DE EMERGENCIA!',
                   style: TextStyle(
@@ -217,15 +213,13 @@ class _CountdownOverlay extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // Círculo de progreso con countdown
+ 
                 SizedBox(
                   width: 160,
                   height: 160,
                   child: Stack(
                     alignment: Alignment.center,
-                    children: [
-                      // Anillo de progreso (regresivo: 1 - progress)
+                    children: [ 
                       SizedBox.expand(
                         child: CircularProgressIndicator(
                           value: 1.0 - progress,
@@ -238,8 +232,7 @@ class _CountdownOverlay extends StatelessWidget {
                           ),
                         ),
                       ),
-
-                      // Número de segundos
+ 
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -266,16 +259,14 @@ class _CountdownOverlay extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 32),
-
-                // Suelta para cancelar
+ 
                 const Text(
                   'Suelta para cancelar',
                   style: TextStyle(color: Colors.white54, fontSize: 14),
                 ),
 
                 const SizedBox(height: 24),
-
-                // Botón cancelar manual
+ 
                 TextButton.icon(
                   onPressed: onCancel,
                   icon: const Icon(Icons.close, color: Colors.white70),

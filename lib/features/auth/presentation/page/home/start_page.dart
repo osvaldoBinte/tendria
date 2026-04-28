@@ -20,7 +20,7 @@ class StartPage extends StatelessWidget {
       labels: controller.labels,
       backgroundColor: ThemeColor.backgroundColorfondo,
       bottomNavBackgroundColor: Colors.white,
-      floatingActionButton: const PanicButton(phoneNumber: '1465'),
+      floatingActionButton: const PanicButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }

@@ -65,6 +65,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
  @override
 Widget build(BuildContext context) {
   return Obx(() {
+    
    if (controller.noMoreUsers.value || 
     (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
       return Scaffold(

@@ -101,32 +101,32 @@ class _DraggableStoryTextState extends State<DraggableStoryText> {
                 ? Border.all(color: Colors.white, width: 2)
                 : null,
           ),
-        child: Transform.scale(
-  scale: scale,
-  child: ConstrainedBox(
-    constraints: BoxConstraints(
-      maxWidth: MediaQuery.of(context).size.width * 0.75, 
-    ),
-    child: Text(
-      widget.text,
-      style: GoogleFonts.rubik(
-        color: widget.color,
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        shadows: [
-          Shadow(
-            color: Colors.black.withOpacity(0.5),
-            offset: const Offset(2, 2),
-            blurRadius: 4,
+          child: Transform.scale(
+            scale: scale,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+              ),
+              child: Text(
+                widget.text,
+                style: GoogleFonts.rubik(
+                  color: widget.color,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(2, 2),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+              ),
+            ),
           ),
-        ],
-      ),
-      textAlign: TextAlign.center,
-      softWrap: true,     
-      overflow: TextOverflow.visible,
-    ),
-  ),
-),
         ),
       ),
     );
@@ -162,104 +162,103 @@ class _CreateStoryScreenState extends State<CreateStoryScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     controller.handleAppLifecycleState(state);
   }
-Future<void> _publishStory() async {
-  if (controller.capturedFile.value == null ||
-      controller.contentType.value == null) {
-    return;
-  }
 
-  File? finalFile = controller.capturedFile.value;
+  Future<void> _publishStory() async {
+    if (controller.capturedFile.value == null ||
+        controller.contentType.value == null) {
+      return;
+    }
 
-  if (controller.contentType.value == 'Foto') {
-    showCustomAlert(
-      context: context,
-      title: '',
-      message: 'Preparando imagen...',
-      confirmText: '',
-      type: CustomAlertType.warning,
-      customWidget: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CircularProgressIndicator(color: Colors.white),
-          const SizedBox(height: 12),
-          Text(
-            'Preparando imagen...',
-            style: GoogleFonts.rubik(color: Colors.white, fontSize: 16),
+    File? finalFile = controller.capturedFile.value;
+
+    if (controller.contentType.value ==CreateStoryController.kImagen) {
+      showCustomAlert(
+        context: context,
+        title: '',
+        message: 'Preparando imagen...',
+        confirmText: '',
+        type: CustomAlertType.warning,
+        customWidget: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 12),
+            Text(
+              'Preparando imagen...',
+              style: GoogleFonts.rubik(color: Colors.white, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+
+      if (controller.storyTexts.isNotEmpty) {
+        finalFile = await controller.captureStoryWithTexts();
+      } else {
+        finalFile = await controller.convertToPng(finalFile!);
+      }
+
+      Get.back();
+    }
+
+    if (controller.contentType.value == CreateStoryController.kVideo) {
+      final filePath = finalFile!.path;
+
+      if (!filePath.endsWith('.mp4')) {
+        showCustomAlert(
+          context: context,
+          title: '',
+          message: '',
+          confirmText: '',
+          type: CustomAlertType.warning,
+          customWidget: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: Colors.white),
+              const SizedBox(height: 12),
+              Text(
+                'Convirtiendo video a MP4...',
+                style: GoogleFonts.rubik(color: Colors.white, fontSize: 16),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
 
-    if (controller.storyTexts.isNotEmpty) {
-      finalFile = await controller.captureStoryWithTexts();
-    } else {
-      finalFile = await controller.convertToPng(finalFile!);
+        final File? mp4File = await controller.convertToMp4(finalFile);
+        Get.back();
+        if (mp4File != null) finalFile = mp4File;
+      } else if (controller.storyTexts.isNotEmpty) {
+        showCustomAlert(
+          context: context,
+          title: '',
+          message: '',
+          confirmText: '',
+          type: CustomAlertType.warning,
+          customWidget: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: Colors.white),
+              const SizedBox(height: 12),
+              Text(
+                'Procesando video con textos...',
+                style: GoogleFonts.rubik(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+        );
+
+        finalFile = await controller.captureStoryWithTexts();
+        Get.back();
+      }
     }
 
-    Get.back();
-  }
-
-  if (controller.contentType.value == 'Video') {
-    final filePath = finalFile!.path;
-
-    if (!filePath.endsWith('.mp4')) {
-      showCustomAlert(
-        context: context,
-        title: '',
-        message: '',
-        confirmText: '',
-        type: CustomAlertType.warning,
-        customWidget: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(color: Colors.white),
-            const SizedBox(height: 12),
-            Text(
-              'Convirtiendo video a MP4...',
-              style: GoogleFonts.rubik(color: Colors.white, fontSize: 16),
-            ),
-          ],
-        ),
-      );
-
-      final File? mp4File = await controller.convertToMp4(finalFile);
-      Get.back();
-      if (mp4File != null) finalFile = mp4File;
-
-    } else if (controller.storyTexts.isNotEmpty) {
-      showCustomAlert(
-        context: context,
-        title: '',
-        message: '',
-        confirmText: '',
-        type: CustomAlertType.warning,
-        customWidget: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(color: Colors.white),
-            const SizedBox(height: 12),
-            Text(
-              'Procesando video con textos...',
-              style: GoogleFonts.rubik(color: Colors.white, fontSize: 16),
-            ),
-          ],
-        ),
-      );
-
-      finalFile = await controller.captureStoryWithTexts();
-      Get.back();
+    if (finalFile == null || !await finalFile.exists()) {
+      showErrorSnackbar('No se pudo procesar la historia');
+      return;
     }
+
+    debugPrint('✅ Publicando: ${finalFile.path}');
+    await storyController.createStory(finalFile, controller.contentType.value!);
   }
-
-  if (finalFile == null || !await finalFile.exists()) {
-    showErrorSnackbar('No se pudo procesar la historia');
-    return;
-  }
-
-  debugPrint('✅ Publicando: ${finalFile.path}');
-  await storyController.createStory(finalFile, controller.contentType.value!);
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -455,12 +454,12 @@ Future<void> _publishStory() async {
             itemCount: controller.galleryAssets.length + 1,
             itemBuilder: (context, index) {
               if (index == 0) {
-                return  ThemeColor.widgetButton(
-          onPressed: () => controller.selectFromImagePicker(),
-          borderRadius: 50,
-          backgroundColor: ThemeColor.tertiaryColor,
-          text: 'Subir foto de galería',
-        );
+                return ThemeColor.widgetButton(
+                  onPressed: () => controller.selectFromImagePicker(),
+                  borderRadius: 50,
+                  backgroundColor: ThemeColor.tertiaryColor,
+                  text: 'Subir foto de galería',
+                );
               }
             },
           );
@@ -550,94 +549,107 @@ Future<void> _publishStory() async {
     });
   }
 
-
- Widget _buildPreviewScreen() {
-  return Scaffold(
-    backgroundColor: Colors.black,
-    body: GestureDetector(
-      onTap: () => controller.selectText(null),
-      child: Stack(
-        children: [
-          RepaintBoundary(
-            key: controller.repaintBoundaryKey,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Obx(() {
-                    if (controller.contentType.value == 'Video') {
-                      if (!controller.isVideoReady.value) {
+  Widget _buildPreviewScreen() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => controller.selectText(null),
+        child: Stack(
+          children: [
+            RepaintBoundary(
+              key: controller.repaintBoundaryKey,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Obx(() {
+                      if (controller.contentType.value == CreateStoryController.kVideo) {
+                        if (!controller.isVideoReady.value) {
+                          return Container(
+                            color: Colors.black,
+                            child: const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'Preparando video...',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        final videoCtrl = controller.videoController;
+                        if (videoCtrl != null &&
+                            videoCtrl.value.isInitialized) {
+                          return Center(
+                            child: AspectRatio(
+                              aspectRatio: videoCtrl.value.aspectRatio,
+                              child: VideoPlayer(videoCtrl),
+                            ),
+                          );
+                        }
                         return Container(
                           color: Colors.black,
                           child: const Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircularProgressIndicator(color: Colors.white),
-                                SizedBox(height: 16),
-                                Text('Preparando video...', style: TextStyle(color: Colors.white)),
-                              ],
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
                             ),
                           ),
                         );
                       }
-                      final videoCtrl = controller.videoController;
-                      if (videoCtrl != null && videoCtrl.value.isInitialized) {
-                        return Center(
-                          child: AspectRatio(
-                            aspectRatio: videoCtrl.value.aspectRatio,
-                            child: VideoPlayer(videoCtrl),
-                          ),
-                        );
-                      }
-                      return Container(
-                        color: Colors.black,
-                        child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+                      return _buildImagePreview();
+                    }),
+                  ),
+                  ...controller.storyTexts.map((storyText) {
+                    return Obx(() {
+                      return DraggableStoryText(
+                        text: storyText.text,
+                        color: storyText.color,
+                        position: storyText.position,
+                        scale: storyText.scale,
+                        isSelected:
+                            controller.selectedTextId.value == storyText.id,
+                        onPositionChanged: (newPosition) {
+                          controller.updateTextPosition(
+                            storyText.id,
+                            newPosition,
+                          );
+                        },
+                        onScaleChanged: (newScale) {
+                          controller.updateTextScale(storyText.id, newScale);
+                        },
+                        onTap: () => controller.selectText(storyText.id),
+                        onLongPress: () =>
+                            controller.openTextEditor(textId: storyText.id),
                       );
-                    }
-                    return _buildImagePreview();
-                  }),
-                ),
-                ...controller.storyTexts.map((storyText) {
-                  return Obx(() {
-                    return DraggableStoryText(
-                      text: storyText.text,
-                      color: storyText.color,
-                      position: storyText.position,
-                      scale: storyText.scale,
-                      isSelected: controller.selectedTextId.value == storyText.id,
-                      onPositionChanged: (newPosition) {
-                        controller.updateTextPosition(storyText.id, newPosition);
-                      },
-                      onScaleChanged: (newScale) {
-                        controller.updateTextScale(storyText.id, newScale);
-                      },
-                      onTap: () => controller.selectText(storyText.id),
-                      onLongPress: () => controller.openTextEditor(textId: storyText.id),
-                    );
-                  });
-                }).toList(),
-              ],
+                    });
+                  }).toList(),
+                ],
+              ),
             ),
-          ),
 
-          _buildPreviewHeader(),
+            _buildPreviewHeader(),
 
-          _buildAddTextButton(),
+            _buildAddTextButton(),
 
-          Obx(() => controller.isEditingText.value
-                ? _FullscreenTextEditorOverlay(controller: controller)
-                : const SizedBox.shrink()),
-        ],
+            Obx(
+              () => controller.isEditingText.value
+                  ? _FullscreenTextEditorOverlay(controller: controller)
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 Widget _buildPreviewHeader() {
   return Positioned(
-    top: 0,
-    left: 0,
-    right: 0,
+    top: 0, left: 0, right: 0,
     child: SafeArea(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -662,56 +674,100 @@ Widget _buildPreviewHeader() {
                 child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
               ),
             ),
-           
+            Obx(() {
+              // ✅ Usar la constante correcta del controller
+              final isPhoto = controller.contentType.value == CreateStoryController.kImagen;
+              final isVideoReady = controller.isVideoReady.value;
+              final showPublish = isPhoto || isVideoReady;
+
+              if (!showPublish) return const SizedBox.shrink();
+
+              if (storyController.isCreatingStory.value) {
+                return const CircularProgressIndicator(color: Colors.white);
+              }
+
+              return GestureDetector(
+                onTap: _publishStory,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: ThemeColor.primaryColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.send, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Publicar',
+                        style: GoogleFonts.rubik(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ],
         ),
       ),
     ),
   );
 }
-Widget _buildAddTextButton() {
-  return Positioned(
-    bottom: 30,
-    right: 20,
-    child: Obx(() {
-      return Column(
-        children: [
-          GestureDetector(
-            onTap: () => controller.openTextEditor(), 
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(Icons.text_fields, color: Colors.white, size: 28),
-            ),
-          ),
-          if (controller.selectedTextId.value != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: GestureDetector(
-                onTap: () {
-                  controller.removeText(controller.selectedTextId.value!);
-                  controller.selectText(null);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.8),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(Icons.delete, color: Colors.white, size: 28),
+  Widget _buildAddTextButton() {
+    return Positioned(
+      bottom: 30,
+      right: 20,
+      child: Obx(() {
+        return Column(
+          children: [
+            GestureDetector(
+              onTap: () => controller.openTextEditor(),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(
+                  Icons.text_fields,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
             ),
-        ],
-      );
-    }),
-  );
-}
+            if (controller.selectedTextId.value != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    controller.removeText(controller.selectedTextId.value!);
+                    controller.selectText(null);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.8),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      }),
+    );
+  }
+
   Widget _buildImagePreview() {
     if (controller.capturedFile.value == null) return const SizedBox.shrink();
 
@@ -757,7 +813,6 @@ Widget _buildAddTextButton() {
   }
 }
 
-
 class _FullscreenTextEditorOverlay extends StatefulWidget {
   final CreateStoryController controller;
   const _FullscreenTextEditorOverlay({required this.controller});
@@ -790,9 +845,11 @@ class _FullscreenTextEditorOverlayState
   void initState() {
     super.initState();
     _textCtrl = TextEditingController(
-        text: widget.controller.currentEditText.value);
-    _textCtrl.selection =
-        TextSelection.collapsed(offset: _textCtrl.text.length);
+      text: widget.controller.currentEditText.value,
+    );
+    _textCtrl.selection = TextSelection.collapsed(
+      offset: _textCtrl.text.length,
+    );
   }
 
   @override
@@ -813,7 +870,9 @@ class _FullscreenTextEditorOverlayState
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       GestureDetector(
@@ -821,14 +880,17 @@ class _FullscreenTextEditorOverlayState
                             widget.controller.isEditingText.value = false,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 7),
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black45,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text('Cancelar',
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 13)),
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(color: Colors.white, fontSize: 13),
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -840,14 +902,15 @@ class _FullscreenTextEditorOverlayState
                           final icon = a == 'left'
                               ? Icons.format_align_left
                               : a == 'center'
-                                  ? Icons.format_align_center
-                                  : Icons.format_align_right;
+                              ? Icons.format_align_center
+                              : Icons.format_align_right;
                           return GestureDetector(
                             onTap: () =>
                                 widget.controller.currentEditAlign.value = a,
                             child: Container(
                               margin: const EdgeInsets.only(left: 6),
-                              width: 34, height: 34,
+                              width: 34,
+                              height: 34,
                               decoration: BoxDecoration(
                                 color: isActive
                                     ? Colors.white.withOpacity(0.35)
@@ -860,8 +923,7 @@ class _FullscreenTextEditorOverlayState
                                   width: 1.5,
                                 ),
                               ),
-                              child:
-                                  Icon(icon, color: Colors.white, size: 16),
+                              child: Icon(icon, color: Colors.white, size: 16),
                             ),
                           );
                         });
@@ -870,20 +932,25 @@ class _FullscreenTextEditorOverlayState
                       const Spacer(),
 
                       GestureDetector(
-                        onTap: () => widget.controller
-                            .confirmTextEdit(_textCtrl.text),
+                        onTap: () =>
+                            widget.controller.confirmTextEdit(_textCtrl.text),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 7),
+                            horizontal: 16,
+                            vertical: 7,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text('Listo',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700)),
+                          child: const Text(
+                            'Listo',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -893,18 +960,17 @@ class _FullscreenTextEditorOverlayState
                 Expanded(
                   child: Center(
                     child: Obx(() {
-                      final style =
-                          widget.controller.currentEditStyle.value;
-                      final color =
-                          widget.controller.currentEditColor.value;
-                      final align =
-                          widget.controller.currentEditAlign.value;
+                      final style = widget.controller.currentEditStyle.value;
+                      final color = widget.controller.currentEditColor.value;
+                      final align = widget.controller.currentEditAlign.value;
 
                       return Container(
                         margin: const EdgeInsets.symmetric(horizontal: 24),
                         padding: style != 'none'
                             ? const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10)
+                                horizontal: 16,
+                                vertical: 10,
+                              )
                             : EdgeInsets.zero,
                         decoration: BoxDecoration(
                           color: style == 'pill'
@@ -924,8 +990,8 @@ class _FullscreenTextEditorOverlayState
                           textAlign: align == 'left'
                               ? TextAlign.left
                               : align == 'right'
-                                  ? TextAlign.right
-                                  : TextAlign.center,
+                              ? TextAlign.right
+                              : TextAlign.center,
                           style: TextStyle(
                             color: color,
                             fontSize: 28,
@@ -968,51 +1034,54 @@ class _FullscreenTextEditorOverlayState
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      {'id': 'none',    'label': 'Sin fondo'},
-                      {'id': 'pill',    'label': 'Con fondo'},
-                      {'id': 'outline', 'label': 'Contorno'},
-                    ].map((s) {
-                      return Obx(() {
-                        final isActive =
-                            widget.controller.currentEditStyle.value ==
+                    children:
+                        [
+                          {'id': 'none', 'label': 'Sin fondo'},
+                          {'id': 'pill', 'label': 'Con fondo'},
+                          {'id': 'outline', 'label': 'Contorno'},
+                        ].map((s) {
+                          return Obx(() {
+                            final isActive =
+                                widget.controller.currentEditStyle.value ==
                                 s['id'];
-                        return GestureDetector(
-                          onTap: () =>
-                              widget.controller.currentEditStyle.value =
-                                  s['id']!,
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isActive
-                                  ? Colors.white.withOpacity(0.25)
-                                  : Colors.white.withOpacity(0.07),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isActive
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.25),
-                                width: 1.5,
+                            return GestureDetector(
+                              onTap: () =>
+                                  widget.controller.currentEditStyle.value =
+                                      s['id']!,
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? Colors.white.withOpacity(0.25)
+                                      : Colors.white.withOpacity(0.07),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isActive
+                                        ? Colors.white
+                                        : Colors.white.withOpacity(0.25),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  s['label']!,
+                                  style: TextStyle(
+                                    color: isActive
+                                        ? Colors.white
+                                        : Colors.white.withOpacity(0.55),
+                                    fontSize: 12,
+                                    fontWeight: isActive
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              s['label']!,
-                              style: TextStyle(
-                                color: isActive
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.55),
-                                fontSize: 12,
-                                fontWeight: isActive
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ),
-                        );
-                      });
-                    }).toList(),
+                            );
+                          });
+                        }).toList(),
                   ),
                 ),
 
@@ -1035,7 +1104,9 @@ class _FullscreenTextEditorOverlayState
                             width: isSelected ? 38 : 32,
                             height: isSelected ? 38 : 32,
                             margin: EdgeInsets.only(
-                                right: 10, top: isSelected ? 0 : 3),
+                              right: 10,
+                              top: isSelected ? 0 : 3,
+                            ),
                             decoration: BoxDecoration(
                               color: c,
                               shape: BoxShape.circle,
@@ -1070,4 +1141,4 @@ class _FullscreenTextEditorOverlayState
       ),
     );
   }
-    }
+}

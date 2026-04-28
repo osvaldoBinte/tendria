@@ -54,7 +54,7 @@ class LoginPage extends GetView<LoginController> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.asset('assets/logo/logo.png', width: 100,
+          child: Image.asset('assets/logo/logo.png', width: 250,
                           height: 100,),
         ),
         SizedBox(height: ThemeColor.paddingLarge),

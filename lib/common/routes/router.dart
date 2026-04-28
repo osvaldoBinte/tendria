@@ -8,10 +8,8 @@ import 'package:tendria/features/auth/presentation/page/Splash/splash_page.dart'
 import 'package:tendria/features/auth/presentation/page/home/start_page.dart';
 import 'package:tendria/features/auth/presentation/page/login/login_page.dart';
 import 'package:tendria/features/auth/presentation/page/register/register_page.dart';
-import 'package:tendria/features/chat/presentation/page/chat_page.dart';
-import 'package:tendria/features/like/presentation/page/start_conversations_page.dart';
-import 'package:tendria/features/notification/presentation/page/notificasiones/notification_page.dart';
-import 'package:tendria/features/page/nearbyprofiles/nearby_profiles_page.dart';
+import 'package:tendria/features/chat/presentation/page/chat_page.dart'; 
+import 'package:tendria/features/notification/presentation/page/notificasiones/notification_page.dart'; 
 import 'package:tendria/features/page/parami/for_you_page.dart';
 import 'package:tendria/features/purchase/presentation/page/purchase_page.dart';
 import 'package:tendria/features/unlock/presentation/page/blocked_users_page.dart';

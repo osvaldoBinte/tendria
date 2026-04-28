@@ -17,11 +17,7 @@ import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:image_picker/image_picker.dart';
-
-import 'dart:ui' as ui;
-import 'package:camera/camera.dart';
-import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_new/return_code.dart';
+ 
 // ─────────────────────────────────────────────
 // StoryText
 // ─────────────────────────────────────────────
@@ -112,11 +108,11 @@ class CreateStoryController extends GetxController {
   // ─────────────────────────────────────────────
   // Constantes de contentType
   // ─────────────────────────────────────────────
-  static const String _kVideo  = 'Video';
-  static const String _kImagen = 'Foto';
+  static const String kVideo  = 'Video';
+  static const String kImagen = 'Foto';
 
-  bool get _isVideo  => contentType.value == _kVideo;
-  bool get _isImagen => contentType.value == _kImagen;
+  bool get _isVideo  => contentType.value == kVideo;
+  bool get _isImagen => contentType.value == kImagen;
 
   // ─────────────────────────────────────────────
   // Lifecycle
@@ -597,7 +593,7 @@ Future<File?> captureStoryWithTexts() async {
       isRecording.value = false;
       recordingSeconds.value = 0;
       capturedFile.value = finalFile;
-      contentType.value = _kVideo;
+      contentType.value = kVideo;
 
       debugPrint('📌 contentType = ${contentType.value}');
       debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
@@ -617,7 +613,7 @@ Future<File?> captureStoryWithTexts() async {
     try {
       final XFile photo = await cameraController.value!.takePicture();
       capturedFile.value = File(photo.path);
-      contentType.value = _kImagen;
+      contentType.value = kImagen;
       debugPrint('📌 contentType = ${contentType.value}');
     } catch (e) {
       debugPrint('Error taking picture: $e');
@@ -665,11 +661,11 @@ Future<void> selectFromGallery(AssetEntity asset) async {
     if (file == null) return;
 
     contentType.value =
-        asset.type == AssetType.image ? _kImagen : _kVideo;
+        asset.type == AssetType.image ? kImagen : kVideo;
 
     debugPrint('📌 contentType = ${contentType.value}');
 
-    if (contentType.value == _kVideo) {
+    if (contentType.value == kVideo) {
       // Primero asignar el archivo original para que exista
       capturedFile.value = file;
       showInfoSnackbar('Procesando video...');
@@ -704,7 +700,7 @@ Future<void> selectFromImagePicker() async {
         path.endsWith('.mkv') ||
         path.endsWith('.hevc');
 
-    contentType.value = isVid ? _kVideo : _kImagen;
+    contentType.value = isVid ? kVideo : kImagen;
     debugPrint('📌 contentType = ${contentType.value}');
 
     if (isVid) {
@@ -730,7 +726,7 @@ Future<void> selectFromImagePicker() async {
   // ─────────────────────────────────────────────
 
   Future<void> initializeVideoController() async {
-    if (capturedFile.value == null || contentType.value != _kVideo) return;
+    if (capturedFile.value == null || contentType.value != kVideo) return;
 
     try {
       isVideoReady.value = false;

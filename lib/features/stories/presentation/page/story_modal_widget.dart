@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:tendria/common/services/auth_service.dart';
+import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/features/stories/domain/entities/getstories/story_entity.dart';
@@ -121,7 +123,6 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        
                         if (isViewingMyStory) ...[
                           Row(
                             children: List.generate(
@@ -213,51 +214,64 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                                   width: 2,
                                 ),
                               ),
-child: _buildStoryUserAvatar(),
+                              child: _buildStoryUserAvatar(),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    isViewingMyStory
-                                        ? "Mi historia"
-                                        : controller.currentUser!.nombreUsuario,
-                                    style: GoogleFonts.rubik(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      shadows: [
-                                        Shadow(
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 3,
-                                          color: Colors.black.withOpacity(0.5),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // ✅ NUEVO: Mostrar tiempo transcurrido
-                                  Text(
-                                    controller.getTimeAgo(
-                                      currentStory.fechaCreacion,
-                                    ),
-                                    style: GoogleFonts.rubik(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      shadows: [
-                                        Shadow(
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 3,
-                                          color: Colors.black.withOpacity(0.5),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+  child: GestureDetector(
+    onTap: () async {
+      if (isViewingMyStory) return;
+
+      final senderId = controller.currentUser?.usuarioId;
+      if (senderId == null) return;
+
+      final myId = await AuthService().getUserId();
+      if (myId != null && senderId == myId) return;
+
+      Get.toNamed(
+        RoutesNames.userProfileDetailPage,
+        arguments: {'userId': senderId},
+      );
+    },
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isViewingMyStory
+              ? "Mi historia"
+              : controller.currentUser!.nombreUsuario,
+          style: GoogleFonts.rubik(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            shadows: [
+              Shadow(
+                offset: const Offset(0, 1),
+                blurRadius: 3,
+                color: Colors.black.withOpacity(0.5),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          controller.getTimeAgo(currentStory.fechaCreacion),
+          style: GoogleFonts.rubik(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            shadows: [
+              Shadow(
+                offset: const Offset(0, 1),
+                blurRadius: 3,
+                color: Colors.black.withOpacity(0.5),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  ),
+),
 
                             GestureDetector(
                               onTap: () {
@@ -367,51 +381,65 @@ child: _buildStoryUserAvatar(),
     );
   }
 
-// ✅ Ícono de fallback real (sin foto, sin recursión)
-Widget _buildDefaultAvatar() {
-  return Container(
-    color: Colors.grey[800],
-    child: const Icon(Icons.person, color: Colors.white54, size: 24),
-  );
-}
+  Widget _buildDefaultAvatar() {
+    return Container(
+      color: Colors.grey[800],
+      child: const Icon(Icons.person, color: Colors.white54, size: 24),
+    );
+  }
 
-// ✅ Avatar del usuario de la historia actual
-Widget _buildStoryUserAvatar() {
-  final isMyStory = controller.isViewingMyStory.value;
+  Widget _buildStoryUserAvatar() {
+    final isMyStory = controller.isViewingMyStory.value;
+    final String? photoUrl = isMyStory
+        ? _userController.profilePhotoUrl
+        : controller.currentUser?.fotoPerfilUrl;
 
-  // Foto a mostrar según si es mi historia o la de otro
-  final String? photoUrl = isMyStory
-      ? _userController.profilePhotoUrl
-      : controller.currentUser?.fotoPerfilUrl;
+    final int? senderId = isMyStory ? null : controller.currentUser?.usuarioId;
 
-  return ClipOval(
-    child: photoUrl != null && photoUrl.isNotEmpty
-        ? CachedNetworkImage(
-            imageUrl: photoUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            placeholder: (context, url) => _buildDefaultAvatar(),
-            errorWidget: (context, url, error) => _buildDefaultAvatar(),
-          )
-        : _buildDefaultAvatar(),
-  );
-}
-// Reemplaza el método _buildStoryContent completo:
-Widget _buildStoryContent(StoryEntity story) {
-  final isVideo = story.tipoContenido.toLowerCase() == 'video';
+    return GestureDetector(
+      onTap: () async {
+        if (isMyStory || senderId == null) return;
+
+        final myId = await AuthService().getUserId();
+        if (myId != null && senderId == myId) return;
+
+        Get.toNamed(
+          RoutesNames.userProfileDetailPage,
+          arguments: {'userId': senderId},
+        );
+      },
+      child: ClipOval(
+        child: photoUrl != null && photoUrl.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: photoUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                placeholder: (context, url) => _buildDefaultAvatar(),
+                errorWidget: (context, url, error) => _buildDefaultAvatar(),
+              )
+            : _buildDefaultAvatar(),
+      ),
+    );
+  }
+
+ Widget _buildStoryContent(StoryEntity story) {
+  final isVideo = story.tipoContenido.toLowerCase() == StoryController.kVideo;
 
   if (isVideo) {
-    // ✅ Asegura que isVideoInitialized.value siempre se lea dentro del Obx
     return Obx(() {
-      final initialized = controller.isVideoInitialized.value; // ✅ observable leído primero
+      final initialized = controller.isVideoInitialized.value;
       final videoCtrl = controller.videoController;
 
       if (initialized && videoCtrl != null && videoCtrl.value.isInitialized) {
-        return Center(
-          child: AspectRatio(
-            aspectRatio: videoCtrl.value.aspectRatio,
-            child: VideoPlayer(videoCtrl),
+        return SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: SizedBox(
+              width: videoCtrl.value.size.width,
+              height: videoCtrl.value.size.height,
+              child: VideoPlayer(videoCtrl),
+            ),
           ),
         );
       }
@@ -436,7 +464,7 @@ Widget _buildStoryContent(StoryEntity story) {
   } else {
     return CachedNetworkImage(
       imageUrl: story.urlContenido,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,    
       width: double.infinity,
       height: double.infinity,
       fadeInDuration: Duration.zero,
@@ -598,19 +626,20 @@ Widget _buildStoryContent(StoryEntity story) {
     );
   }
 
-void _confirmDeleteStory(BuildContext context) {
-  showCustomAlert(
-    context: context,
-    title: 'Eliminar historia',
-    message: '¿Estás seguro de que deseas eliminar tu historia? Esta acción no se puede deshacer.',
-    confirmText: 'Eliminar',
-    cancelText: 'Cancelar',
-    type: CustomAlertType.warning,
-    onConfirm: () async {
-      Get.back();
-      await controller.deleteMyStory();
-    },
-    onCancel: () => Get.back(),
-  );
-}
+  void _confirmDeleteStory(BuildContext context) {
+    showCustomAlert(
+      context: context,
+      title: 'Eliminar historia',
+      message:
+          '¿Estás seguro de que deseas eliminar tu historia? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      type: CustomAlertType.warning,
+      onConfirm: () async {
+        Get.back();
+        await controller.deleteMyStory();
+      },
+      onCancel: () => Get.back(),
+    );
+  }
 }

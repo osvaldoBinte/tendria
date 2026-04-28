@@ -837,10 +837,7 @@ Future<void> selectFromImagePicker() async {
       return inputFile;
     }
   }
-
-  // ─────────────────────────────────────────────
-  // App lifecycle
-  // ─────────────────────────────────────────────
+ 
 
   void handleAppLifecycleState(AppLifecycleState state) {
     if (cameraController.value == null ||

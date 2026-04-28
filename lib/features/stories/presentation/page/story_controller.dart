@@ -60,6 +60,8 @@ final Map<String, bool> _preloadedUrls = {}; // url -> está inicializado
   VideoPlayerController? videoController;
   final RxBool isVideoInitialized = false.obs;
 
+static const String kVideo  = 'video';
+static const String kImagen = 'Foto';
   AnimationController? progressController;
   Animation<double>? progressAnimation;
 
@@ -130,8 +132,7 @@ void onClose() {
 }
 
 Future<void> preloadStoriesContent() async {
-  for (final userStory in allStories) {
-    // Precarga foto de perfil
+  for (final userStory in allStories) { 
     if (userStory.fotoPerfilUrl.isNotEmpty) {
       CachedNetworkImageProvider(userStory.fotoPerfilUrl)
           .resolve(const ImageConfiguration());
@@ -139,7 +140,7 @@ Future<void> preloadStoriesContent() async {
 
     // ✅ Precarga TODAS las historias, no solo la primera
     for (final story in userStory.historias) {
-      if (story.tipoContenido.toLowerCase() != 'video') {
+      if (story.tipoContenido.toLowerCase() != StoryController.kVideo) {
         CachedNetworkImageProvider(story.urlContenido)
             .resolve(const ImageConfiguration());
       } else {
@@ -150,7 +151,7 @@ Future<void> preloadStoriesContent() async {
 
   // Precarga mis historias
   for (final story in myStories) {
-    if (story.tipoContenido.toLowerCase() != 'video') {
+    if (story.tipoContenido.toLowerCase() != StoryController.kVideo) {
       CachedNetworkImageProvider(story.urlContenido)
           .resolve(const ImageConfiguration());
     } else {
@@ -165,8 +166,7 @@ Future<void> _preloadVideo(String url) async {
   try {
     final ctrl = VideoPlayerController.networkUrl(Uri.parse(url));
     await ctrl.initialize();
-    ctrl.dispose(); // ✅ Solo verificamos que se puede cargar, luego lo soltamos
-    // El cache de red del sistema operativo ya guardó los datos
+    ctrl.dispose();  
     _preloadedUrls[url] = true;
   } catch (e) {
     debugPrint('Preload video error: $e');
@@ -210,7 +210,7 @@ Future<void> _preloadVideo(String url) async {
     final story = currentTargetStory;
     if (story == null) return;
 
-    if (story.tipoContenido.toLowerCase() == 'video') {
+    if (story.tipoContenido.toLowerCase() == StoryController.kVideo) {
       pauseStory();
       await _initializeVideo(story.urlContenido);
     } else {
@@ -236,7 +236,7 @@ Future<void> _preloadVideo(String url) async {
   }
 
   Future<void> checkAndUpdateVideoForTarget(StoryEntity story) async {
-    final isVideo = story.tipoContenido.toLowerCase() == 'video';
+    final isVideo = story.tipoContenido.toLowerCase() == StoryController.kVideo;
     if (isVideo) {
       if (videoController == null ||
           videoController!.dataSource != story.urlContenido) {
@@ -272,7 +272,7 @@ Future<void> _preloadVideo(String url) async {
 
     if (story == null) return;
 
-    if (story.tipoContenido.toLowerCase() == 'video') {
+    if (story.tipoContenido.toLowerCase() ==StoryController.kVideo) {
       pauseStory();
       await _initializeVideo(story.urlContenido);
     } else {
@@ -337,7 +337,7 @@ void disposeVideo() {
 }
 
   Future<void> checkAndUpdateVideo(StoryEntity newStory) async {
-    final isVideo = newStory.tipoContenido.toLowerCase() == 'video';
+    final isVideo = newStory.tipoContenido.toLowerCase() ==StoryController.kVideo;
 
     if (isVideo) {
       if (videoController == null ||
@@ -787,7 +787,7 @@ void disposeStoryModal() {
 
     if (['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm', '3gp']
         .contains(extension)) {
-      return 'Video';
+      return StoryController.kVideo;
     }
 
     return 'Foto';

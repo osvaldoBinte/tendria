@@ -126,7 +126,7 @@ void _triggerCall() async {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: const Icon(Icons.phone, color: Colors.white, size: 22),
+                child: const Icon(Icons.warning_rounded, color: Colors.white, size: 22),
               ),
             ],
           ),

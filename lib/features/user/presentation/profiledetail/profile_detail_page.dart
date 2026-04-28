@@ -303,37 +303,42 @@ Widget _buildNoMoreUsersState(NearbyUsersController controller) {
                   ],
                 ),
                 child: Icon(
-                  Icons.message,
+                  Icons.favorite_rounded,
                   color: ThemeColor.textLightColor,
                   size: 32,
                 ),
               ),
             ),
 
-            GestureDetector(
-              onTap: controller.blockUser,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade700, Colors.red.shade400],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.block_rounded,
-                  color: ThemeColor.textLightColor,
-                  size: 28,
-                ),
+            
+     Obx(
+  () => controller.showRejectButton
+      ? const SizedBox(width: 56)
+      : GestureDetector(
+          onTap: controller.blockUser,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.red.shade700, Colors.red.shade400],
               ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
+            child: Icon(
+              Icons.block_rounded,
+              color: ThemeColor.textLightColor,
+              size: 28,
+            ),
+          ),
+        ),
+),
           ],
         ),
       ),
@@ -711,95 +716,4 @@ Widget _buildNoMoreUsersState(NearbyUsersController controller) {
     );
   }
 
-  Widget _buildActionButtons(NearbyUsersController controller) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: controller.skipUser,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      ThemeColor.textSecondaryColor,
-                      ThemeColor.textSecondaryColor.withOpacity(0.8),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: ThemeColor.textSecondaryColor.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.close_rounded,
-                  color: ThemeColor.textLightColor,
-                  size: 32,
-                ),
-              ),
-            ),
-
-            Obx(
-              () => GestureDetector(
-                onTap: controller.toggleFavorite,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: controller.isFavorite.value
-                          ? [
-                              ThemeColor.errorColor,
-                              ThemeColor.errorColor.withOpacity(0.8),
-                            ]
-                          : [
-                              ThemeColor.primaryColor,
-                              ThemeColor.primaryColor.withOpacity(0.8),
-                            ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                            (controller.isFavorite.value
-                                    ? ThemeColor.errorColor
-                                    : ThemeColor.primaryColor)
-                                .withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    controller.isFavorite.value
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

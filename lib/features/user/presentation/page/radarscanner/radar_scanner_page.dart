@@ -93,8 +93,8 @@ Widget build(BuildContext context) {
 
                         Image.asset(
                           'assets/logo/logo.png',
-                          width: 150,
-                          height: 150,
+                          width: 100,
+                          height: 100,
                         ),
 
                         SizedBox(height: ThemeColor.paddingSmall),

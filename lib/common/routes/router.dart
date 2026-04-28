@@ -17,7 +17,7 @@ import 'package:tendria/features/purchase/presentation/page/purchase_page.dart';
 import 'package:tendria/features/unlock/presentation/page/blocked_users_page.dart';
 import 'package:tendria/features/user/presentation/page/profile/update_profile_page.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
-import 'package:tendria/features/user/presentation/profiledetail/profile_detail_page.dart';
+import 'package:tendria/features/user/presentation/profiledetail/nearby_users_page.dart';
 import 'package:tendria/features/user/presentation/page/preferences/preferences_page.dart';
 import 'package:tendria/features/user/presentation/profiledetail/user_profile_detail_page.dart';
 class AppPages {

@@ -512,107 +512,134 @@ class UserProfileDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReporteButtons(UserProfileController controller) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        child: Row(
+Widget _buildReporteButtons(UserProfileController controller) {
+  return SafeArea(
+    top: false,
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      child: Obx(() {
+        final showReject = controller.showRejectButton;
+
+        return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Obx(
-              () => controller.showRejectButton
-                  ? GestureDetector(
-                      onTap: controller.rejectUser,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              ThemeColor.textSecondaryColor,
-                              ThemeColor.textSecondaryColor.withOpacity(0.8),
-                            ],
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: ThemeColor.textSecondaryColor.withOpacity(
-                                0.3,
-                              ),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.close_rounded,
-                          color: ThemeColor.textLightColor,
-                          size: 32,
-                        ),
+            // Izquierda: close (cuando showReject) o favorite (cuando !showReject)
+            if (showReject)
+              GestureDetector(
+                onTap: controller.rejectUser,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColor.textSecondaryColor,
+                        ThemeColor.textSecondaryColor.withOpacity(0.8),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColor.textSecondaryColor.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
-                    )
-                  : const SizedBox(width: 64),
-            ),
-            GestureDetector(
-              onTap: controller.sendMensaje,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      ThemeColor.primaryColor,
-                      ThemeColor.primaryColor.withOpacity(0.8),
                     ],
                   ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: ThemeColor.primaryColor.withOpacity(0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
+                  ),
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: controller.sendMensaje,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColor.primaryColor,
+                        ThemeColor.primaryColor.withOpacity(0.8),
+                      ],
                     ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.favorite_rounded,
-                  color: ThemeColor.textLightColor,
-                  size: 32,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColor.primaryColor.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
+                  ),
                 ),
               ),
-            ),
 
-            Obx(
-  () => controller.showRejectButton
-      ? const SizedBox(width: 56)
-      : GestureDetector(
-          onTap: controller.blockUser,
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.red.shade700, Colors.red.shade400],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.red.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+            // Derecha: favorite (cuando showReject) o block (cuando !showReject)
+            if (showReject)
+              GestureDetector(
+                onTap: controller.sendMensaje,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColor.primaryColor,
+                        ThemeColor.primaryColor.withOpacity(0.8),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColor.primaryColor.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
+                  ),
                 ),
-              ],
-            ),
-            child: Icon(
-              Icons.block_rounded,
-              color: ThemeColor.textLightColor,
-              size: 28,
-            ),
-          ),
-        ),
-),
+              )
+            else
+              GestureDetector(
+                onTap: controller.blockUser,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.red.shade700, Colors.red.shade400],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.block_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 28,
+                  ),
+                ),
+              ),
           ],
-        ),
-      ),
-    );
-  }
+        );
+      }),
+    ),
+  );
+}
 }

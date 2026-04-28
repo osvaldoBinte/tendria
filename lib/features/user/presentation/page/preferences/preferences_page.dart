@@ -9,7 +9,7 @@ import 'package:tendria/features/auth/presentation/page/home/start_page.dart';
 import 'package:tendria/features/user/domain/entities/preferences_step.dart';
 import 'package:tendria/features/user/presentation/controller/preferences_controller.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
-import 'package:tendria/features/user/presentation/profiledetail/profile_detail_page.dart';
+import 'package:tendria/features/user/presentation/profiledetail/nearby_users_page.dart';
 import 'package:tendria/features/user/presentation/widget/AgeWheelWidget.dart';
 import 'package:tendria/features/user/presentation/widget/DistanceWheelWidget.dart';
 

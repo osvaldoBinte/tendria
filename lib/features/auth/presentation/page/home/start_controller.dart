@@ -9,7 +9,7 @@ import 'package:tendria/features/page/parami/for_you_page.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/page/profile/profile_page.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
-import 'package:tendria/features/user/presentation/profiledetail/profile_detail_page.dart';
+import 'package:tendria/features/user/presentation/profiledetail/nearby_users_page.dart';
 
 class StartController extends GetxController {
   final List<Widget> pages = [

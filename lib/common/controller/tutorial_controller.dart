@@ -31,12 +31,13 @@ class TutorialController extends GetxController {
   VoidCallback? onScrollToTarget;
 
   // ─── Claves globales para posicionar los tooltips ─────────────────────────
-  final GlobalKey radarKey          = GlobalKey();
+  final GlobalKey distanceSliderKey = GlobalKey();
   final GlobalKey detectedPointsKey = GlobalKey();
   final GlobalKey searchButtonKey   = GlobalKey();
   final GlobalKey profileDotKey     = GlobalKey();
 
-   late final List<TutorialStep> steps;
+  // ─── Pasos del tutorial ───────────────────────────────────────────────────
+  late final List<TutorialStep> steps;
 
   @override
   void onInit() {
@@ -44,8 +45,8 @@ class TutorialController extends GetxController {
 
     steps = [
       TutorialStep(
-        message: 'Aquí puedes ver quién está cerca de ti en tiempo real',
-        targetKey: radarKey,
+        message: 'Ajusta el radio de búsqueda para encontrar personas más cerca o más lejos de ti',
+        targetKey: distanceSliderKey,
         anchor: TutorialAnchor.bottom,
         icon: Icons.radar,
       ),
@@ -72,7 +73,9 @@ class TutorialController extends GetxController {
 
     _checkAndShowTutorial();
   }
- 
+
+  // ─── Lógica ───────────────────────────────────────────────────────────────
+
   Future<void> _checkAndShowTutorial() async {
     final prefs = await SharedPreferences.getInstance();
     final seen  = prefs.getBool(AppConstants.tutorialKey) ?? false;
@@ -87,7 +90,8 @@ class TutorialController extends GetxController {
     isAnimatingOut.value = false;
     isVisible.value      = true;
 
-     Future.delayed(const Duration(milliseconds: 300), () {
+    // Scroll al primer target al mostrar el tutorial
+    Future.delayed(const Duration(milliseconds: 300), () {
       onScrollToTarget?.call();
     });
   }
@@ -98,7 +102,8 @@ class TutorialController extends GetxController {
       Future.delayed(const Duration(milliseconds: 250), () {
         currentStep.value++;
         isAnimatingOut.value = false;
- 
+
+        // Scroll al nuevo target después de cambiar de paso
         onScrollToTarget?.call();
       });
     } else {
@@ -117,17 +122,20 @@ class TutorialController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.tutorialKey, true);
   }
- 
+
+  /// Permite resetear el tutorial desde ajustes (útil en desarrollo)
   Future<void> resetTutorial() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.tutorialKey);
   }
- 
+
+  // ─── Helpers de UI ────────────────────────────────────────────────────────
 
   TutorialStep get currentStepData => steps[currentStep.value];
 
   bool get isLastStep => currentStep.value == steps.length - 1;
- 
+
+  /// Devuelve el Rect del widget apuntado (null si no se encontró)
   Rect? getTargetRect(GlobalKey key) {
     final ctx = key.currentContext;
     if (ctx == null) return null;

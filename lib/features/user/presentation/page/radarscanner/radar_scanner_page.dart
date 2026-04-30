@@ -103,174 +103,176 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
         children: [
           Scaffold(
             backgroundColor: ThemeColor.backgroundColor,
-            body: Stack(
-              children: [
-                SafeArea(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: const ClampingScrollPhysics(),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: ThemeColor.paddingLarge,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const ClampingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ThemeColor.paddingLarge,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: ThemeColor.paddingLarge),
+
+                      // ── Logo ─────────────────────────────────────────────
+                      Image.asset(
+                        'assets/logo/logo.png',
+                        width: 100,
+                        height: 100,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(height: ThemeColor.paddingLarge),
 
-                          Image.asset(
-                            'assets/logo/logo.png',
-                            width: 100,
-                            height: 100,
+                      SizedBox(height: ThemeColor.paddingSmall),
+
+                      // ── Slider de distancia ───────────────────────────────
+                      Obx(() {
+                        final profileCtrl = Get.find<ProfileController>();
+                        final km = profileCtrl
+                                .userEntity
+                                .value
+                                ?.preferences
+                                ?.distancekm ??
+                            50;
+                        return KeyedSubtree(
+                          key: tutorialCtrl.distanceSliderKey,
+                          child: _DistanceSlider(
+                            initialKm: km,
+                            updater: _updater,
+                            l: _l,
                           ),
+                        );
+                      }),
 
-                          // ── Slider de distancia ──────────────────────────
-                          Obx(() {
-                            final profileCtrl = Get.find<ProfileController>();
-                            final km = profileCtrl
-                                    .userEntity
-                                    .value
-                                    ?.preferences
-                                    ?.distancekm ??
-                                50;
-                            return _DistanceSlider(
-                              initialKm: km,
-                              updater: _updater,
-                              l: _l,
-                            );
-                          }),
+                      SizedBox(height: ThemeColor.paddingSmall),
 
-                          SizedBox(height: ThemeColor.paddingSmall),
-
-                          Obx(
-                            () => Text(
-                              controller.isLoading.value
-                                  ? _l.t('searching')
-                                  : _l.t('nearby'),
-                              style: ThemeColor.bodyMedium.copyWith(
-                                color: ThemeColor.textSecondaryColor,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
+                      // ── Texto buscando / cerca ────────────────────────────
+                      Obx(
+                        () => Text(
+                          controller.isLoading.value
+                              ? _l.t('searching')
+                              : _l.t('nearby'),
+                          style: ThemeColor.bodyMedium.copyWith(
+                            color: ThemeColor.textSecondaryColor,
+                            fontSize: 16,
                           ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
 
-                          SizedBox(height: ThemeColor.paddingLarge),
+                      SizedBox(height: ThemeColor.paddingLarge),
 
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final size =
-                                  math.min(constraints.maxWidth, 350.0);
-                              return SizedBox(
-                                key: tutorialCtrl.radarKey,
-                                width: size,
-                                height: size,
-                                child: Obx(() {
-                                  if (controller.isLoading.value) {
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        color: ThemeColor.radarScanner,
-                                      ),
-                                    );
-                                  }
-                                  return Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/gift/gitf.gif',
-                                        width: size,
-                                        height: size,
-                                        fit: BoxFit.contain,
-                                      ),
-                                      _buildDetectedPoints(),
-                                    ],
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          SizedBox(height: ThemeColor.paddingLarge),
-
-                          Obx(
-                            () => SizedBox(
-                              key: tutorialCtrl.searchButtonKey,
-                              width: double.infinity,
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: controller.isLoading.value
-                                    ? null
-                                    : () async {
-                                        await controller.loadNextBatch();
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: ThemeColor.tertiaryColor,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        ThemeColor.circularBorderRadius,
+                      // ── Radar / GIF ───────────────────────────────────────
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final size = math.min(constraints.maxWidth, 350.0);
+                          return SizedBox(
+                            width: size,
+                            height: size,
+                            child: Obx(() {
+                              if (controller.isLoading.value) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: ThemeColor.radarScanner,
                                   ),
-                                  elevation: 0,
-                                  disabledBackgroundColor: ThemeColor
-                                      .tertiaryColor
-                                      .withOpacity(0.5),
-                                ),
-                                child: controller.isLoading.value
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        _l.t('search_btn'),
-                                        style: ThemeColor.buttonText.copyWith(
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: ThemeColor.paddingMedium),
-
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: OutlinedButton(
-                              onPressed: () =>
-                                  Get.offAllNamed(RoutesNames.homePage),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: ThemeColor.tertiaryColor,
-                                side: BorderSide(
-                                  color: ThemeColor.tertiaryColor,
-                                  width: 2,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: ThemeColor.circularBorderRadius,
-                                ),
-                              ),
-                              child: Text(
-                                _l.t('view_profile'),
-                                style: ThemeColor.buttonText.copyWith(
-                                  fontSize: 16,
-                                  color: ThemeColor.tertiaryColor,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: ThemeColor.paddingLarge),
-                        ],
+                                );
+                              }
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/gift/gitf.gif',
+                                    width: size,
+                                    height: size,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  _buildDetectedPoints(),
+                                ],
+                              );
+                            }),
+                          );
+                        },
                       ),
-                    ),
+
+                      SizedBox(height: ThemeColor.paddingLarge),
+                      SizedBox(height: ThemeColor.paddingLarge),
+                      SizedBox(height: ThemeColor.paddingLarge),
+
+                      // ── Botón buscar más perfiles ─────────────────────────
+                      Obx(
+                        () => SizedBox(
+                          key: tutorialCtrl.searchButtonKey,
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: controller.isLoading.value
+                                ? null
+                                : () async {
+                                    await controller.loadNextBatch();
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ThemeColor.tertiaryColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: ThemeColor.circularBorderRadius,
+                              ),
+                              elevation: 0,
+                              disabledBackgroundColor:
+                                  ThemeColor.tertiaryColor.withOpacity(0.5),
+                            ),
+                            child: controller.isLoading.value
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    _l.t('search_btn'),
+                                    style: ThemeColor.buttonText.copyWith(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: ThemeColor.paddingMedium),
+
+                      // ── Botón ver perfil ──────────────────────────────────
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              Get.offAllNamed(RoutesNames.homePage),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: ThemeColor.tertiaryColor,
+                            side: BorderSide(
+                              color: ThemeColor.tertiaryColor,
+                              width: 2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: ThemeColor.circularBorderRadius,
+                            ),
+                          ),
+                          child: Text(
+                            _l.t('view_profile'),
+                            style: ThemeColor.buttonText.copyWith(
+                              fontSize: 16,
+                              color: ThemeColor.tertiaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: ThemeColor.paddingLarge),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
 
@@ -279,6 +281,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       );
     });
   }
+
+  // ── No more users ──────────────────────────────────────────────────────────
 
   Widget _buildNoMoreUsersState(NearbyUsersController controller) {
     final l = Get.find<LanguageController>();
@@ -374,6 +378,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
+
+  // ── Radar points ───────────────────────────────────────────────────────────
 
   Widget _buildDetectedPoints() {
     return Obx(() {
@@ -613,7 +619,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  SLIDER DE DISTANCIA (con estado local para drag fluido)
+//  SLIDER DE DISTANCIA
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _DistanceSlider extends StatefulWidget {
@@ -637,15 +643,15 @@ class _DistanceSliderState extends State<_DistanceSlider> {
   @override
   void initState() {
     super.initState();
-    _current =
-        (widget.initialKm >= 300 ? 300.0 : widget.initialKm).clamp(1.0, 300.0);
+    _current = (widget.initialKm >= 300 ? 300.0 : widget.initialKm)
+        .clamp(1.0, 300.0);
   }
 
   @override
   void didUpdateWidget(_DistanceSlider old) {
     super.didUpdateWidget(old);
-    final newKm =
-        (widget.initialKm >= 300 ? 300.0 : widget.initialKm).clamp(1.0, 300.0);
+    final newKm = (widget.initialKm >= 300 ? 300.0 : widget.initialKm)
+        .clamp(1.0, 300.0);
     if ((newKm - _current).abs() > 1) {
       setState(() => _current = newKm);
     }
@@ -680,7 +686,11 @@ class _DistanceSliderState extends State<_DistanceSlider> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.radar, size: 16, color: ThemeColor.radarScanner),
+                  Icon(
+                    Icons.radar,
+                    size: 16,
+                    color: ThemeColor.radarScanner,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     widget.l.t('max_distance'),
@@ -707,9 +717,11 @@ class _DistanceSliderState extends State<_DistanceSlider> {
               inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
               thumbColor: ThemeColor.radarScanner,
               overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              thumbShape:
+                  const RoundSliderThumbShape(enabledThumbRadius: 8),
               trackHeight: 3,
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+              overlayShape:
+                  const RoundSliderOverlayShape(overlayRadius: 16),
             ),
             child: Slider(
               value: _current,

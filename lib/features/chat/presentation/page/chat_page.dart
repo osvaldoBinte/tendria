@@ -143,15 +143,7 @@ class ChatPage extends GetView<ChatController> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (isExisting)
-                      Text(
-                        controller.isSignalRConnected.value ? 'Todo listo' : '',
-                        style: ThemeColor.caption.copyWith(
-                          color: controller.isSignalRConnected.value
-                              ? ThemeColor.radarScanner
-                              : ThemeColor.secondaryColor,
-                        ),
-                      ),
+                    
                   ],
                 ),
               ),

@@ -8,6 +8,7 @@ import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
 import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
+import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart';
@@ -33,6 +34,7 @@ class UserProfileController extends GetxController {
   final RxInt currentImageIndex = 0.obs;
   final RxBool isProcessingLike = false.obs;
   final RxBool isProcessingBlock = false.obs;
+final RxBool hasStories = false.obs;
 
   final Rxn<GetUserEntity> currentUser = Rxn<GetUserEntity>();
   final RxInt userId = 0.obs;
@@ -77,24 +79,27 @@ if (index is RxInt) {
     super.onClose();
   }
 
-  Future<void> loadUserProfile(int idUser) async {
-    try {
-      isLoading.value = true;
-      final user = await getUserByIdUsecase.execute(idUser);
-      currentUser.value = user;
-      currentImageIndex.value = 0;
-      if (pageController.hasClients) {
-        pageController.jumpToPage(0);
-      }
-      isFavorite.value = false;
-    } catch (e) {
-      print('Error cargando perfil de usuario: $e');
-     
-    } finally {
-      isLoading.value = false;
+Future<void> loadUserProfile(int idUser) async {
+  try {
+    isLoading.value = true;
+    final user = await getUserByIdUsecase.execute(idUser);
+    currentUser.value = user;
+    currentImageIndex.value = 0;
+    if (pageController.hasClients) {
+      pageController.jumpToPage(0);
     }
-  }
+    isFavorite.value = false;
+ 
+    final storyController = Get.find<StoryController>();
+    final result = await storyController.fetchStoriesForUser(idUser);
+    hasStories.value = result;
 
+  } catch (e) {
+    print('Error cargando perfil de usuario: $e');
+  } finally {
+    isLoading.value = false;
+  }
+}
   List<String> _buildGallery(GetUserEntity? user) {
     if (user == null) return [''];
     final gallery = <String>[];

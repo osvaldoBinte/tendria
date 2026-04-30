@@ -102,52 +102,33 @@ class StoriesDataSourcesImp {
       throw Exception('$e');
     }
   }
-Future<List<StoryEntity>> fetchStoriesbyid(int id, String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/Historias/user/$id');
 
-    print('➡️ URL: $url');
-    print('➡️ Token: $token');
+  Future<List<StoryEntity>> fetchStoriesbyid(int id, String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/Historias/user/$id');
+      final response = await http.get(url, headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      });
+if (response.statusCode == 200) {
+        final dataUTF8 = utf8.decode(response.bodyBytes);
+        final responseDecode = jsonDecode(dataUTF8);
 
-    final response = await http.get(url, headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
+        final List data = responseDecode;
+        return data.map((json) => StoryModel.fromJson(json)).toList();
+      }
+     
 
-    print('⬅️ Status Code: ${response.statusCode}');
-    print('⬅️ Body (raw): ${response.body}');
-
-    if (response.statusCode == 200) {
-      final dataUTF8 = utf8.decode(response.bodyBytes);
-      print('⬅️ Body (UTF8): $dataUTF8');
-
-      final responseDecode = jsonDecode(dataUTF8);
-      print('⬅️ JSON Decodificado: $responseDecode');
-
-      final List data = responseDecode;
-      print('⬅️ Lista parseada: $data');
-
-      return data.map((json) {
-        print('🔄 Procesando item: $json');
-        return StoryModel.fromJson(json);
-      }).toList();
+      throw ApiExceptionCustom(response: response);
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        throw Exception(convertMessageException(error: e));
+      }
+      throw Exception('$e');
     }
-
-    print('❌ Error: ${response.statusCode} - ${response.body}');
-    throw ApiExceptionCustom(response: response);
-
-  } catch (e) {
-    print('🔥 Excepción capturada: $e');
-
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      throw Exception(convertMessageException(error: e));
-    }
-
-    throw Exception('$e');
   }
-}
 
   Future<void> removeStory(int id, String token) async {
     try {

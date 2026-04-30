@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/features/stories/presentation/page/target_user_story_modal.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 
 class NearbyUsersPage extends StatelessWidget {
@@ -461,62 +462,148 @@ Widget _buildNoMoreUsersState(NearbyUsersController controller) {
                       ),
                     ),
 
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: ThemeColor.tertiaryColor,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(ThemeColor.largeRadius),
-                          bottomRight: Radius.circular(ThemeColor.largeRadius),
-                        ),
-                        boxShadow: [ThemeColor.lightShadow],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: ThemeColor.textLightColor,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_on,
-                                      size: 16,
-                                      color: ThemeColor.textLightColor,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      controller.currentCity,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: ThemeColor.textLightColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+Positioned(
+  bottom: 0,
+  left: 0,
+  right: 0,
+  child: Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: ThemeColor.tertiaryColor,
+      borderRadius: BorderRadius.only(
+        bottomLeft: Radius.circular(ThemeColor.largeRadius),
+        bottomRight: Radius.circular(ThemeColor.largeRadius),
+      ),
+      boxShadow: [ThemeColor.lightShadow],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Nombre y ciudad (existente)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: ThemeColor.textLightColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: ThemeColor.textLightColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    controller.currentCity,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ThemeColor.textLightColor,
                     ),
                   ),
+                ],
+              ),
+            ],
+          ),
+        ),
+ 
+        Obx(() {
+          final hasStory = controller.userHasStories[user.id] == true;
+          if (!hasStory) return const SizedBox.shrink();
+
+          return GestureDetector(
+            onTap: () {
+              if (Get.context != null) {
+                showTargetUserStoryModal(
+                  Get.context!,
+                  userId: user.id!,
+                  userName: user.name ?? 'Usuario',
+                  userPhoto: user.fotoUrl,
+                );
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFE040FB), Color(0xFFFF6D00)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(2.5),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                    ),
+                    padding: const EdgeInsets.all(1.5),
+                    child: ClipOval(
+                      child: user.fotoUrl != null && user.fotoUrl!.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: user.fotoUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              placeholder: (_, __) => Container(
+                                color: Colors.grey[800],
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white54,
+                                  size: 24,
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => Container(
+                                color: Colors.grey[800],
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white54,
+                                  size: 24,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              color: Colors.grey[800],
+                              child: const Icon(
+                                Icons.person,
+                                color: Colors.white54,
+                                size: 24,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Historia',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    ),
+  ),
+),
                 ],
               ),
             ),

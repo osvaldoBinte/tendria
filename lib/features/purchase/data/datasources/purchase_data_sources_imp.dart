@@ -52,36 +52,54 @@ class PurchaseDataSourcesImp {
   }
 
 
-  Future<void> purchaseApple(PurchaseAppleEntity entity,String token) async {
-    try {
-      Uri url = Uri.parse('$defaultApiServer/Compras/verificar/apple');
+Future<void> purchaseApple(PurchaseAppleEntity entity, String token) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/Compras/verificar/apple');
+    print('➡️ URL: $url');
 
-      final response = await http.post(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(PurchaseAppleModel.fromEntity(entity).toJson()),
-      );
+    final body = jsonEncode(PurchaseAppleModel.fromEntity(entity).toJson());
+    print('📦 Body: $body');
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return;
-      }
+    print('🔐 Token: $token');
 
-      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-      exception.validateMesage();
-      throw exception;
-    } catch (e) {
-      if (e is SocketException ||
-          e is http.ClientException ||
-          e is TimeoutException) {
-        throw Exception(convertMessageException(error: e));
-      }
-      throw Exception('$e');
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    print('📡 Status Code: ${response.statusCode}');
+    print('📨 Response Body: ${response.body}');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('✅ Compra verificada correctamente');
+      return;
     }
-  }
 
+    print('❌ Error en la respuesta');
+    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+    exception.validateMesage();
+    throw exception;
+
+  } catch (e) {
+    print('🔥 Exception capturada: $e');
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+
+      final message = convertMessageException(error: e);
+      print('⚠️ Error de red: $message');
+
+      throw Exception(message);
+    }
+
+    throw Exception('$e');
+  }
+}
   Future<void> purchaseGoogle(PurchaseGoogleEntity entity ,String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/Compras/verificar/google');

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/stories/domain/entities/getstories/story_entity.dart';
@@ -20,10 +21,7 @@ void showTargetUserStoryModal(
     PageRouteBuilder(
       opaque: false,
       pageBuilder: (BuildContext context, _, __) {
-        return TargetUserStoryModal(
-          userName: userName,
-          userPhoto: userPhoto,
-        );
+        return TargetUserStoryModal(userName: userName, userPhoto: userPhoto);
       },
       transitionsBuilder: (_, animation, __, child) {
         return FadeTransition(opacity: animation, child: child);
@@ -36,11 +34,8 @@ class TargetUserStoryModal extends StatefulWidget {
   final String userName;
   final String? userPhoto;
 
-  const TargetUserStoryModal({
-    Key? key,
-    required this.userName,
-    this.userPhoto,
-  }) : super(key: key);
+  const TargetUserStoryModal({Key? key, required this.userName, this.userPhoto})
+    : super(key: key);
 
   @override
   _TargetUserStoryModalState createState() => _TargetUserStoryModalState();
@@ -59,13 +54,12 @@ class _TargetUserStoryModalState extends State<TargetUserStoryModal>
     super.initState();
     controller.initializeTargetUserStoryModal(this);
     controller.progressAnimation?.addListener(_onAnimationTick);
-
-    // ✅ Escuchar cambios de observables con ever() en vez de Obx
+ 
     _modalActiveWorker = ever(controller.isModalActive, (_) {
       if (mounted) setState(() {});
     });
     _storyIndexWorker = ever(controller.currentTargetStoryIndex, (_) {
-      // Re-enganchar listener cuando cambia la historia
+      
       controller.progressAnimation?.removeListener(_onAnimationTick);
       controller.progressAnimation?.addListener(_onAnimationTick);
       if (mounted) setState(() {});
@@ -88,8 +82,7 @@ class _TargetUserStoryModalState extends State<TargetUserStoryModal>
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // ✅ Sin ningún Obx aquí — todo por setState
+ 
     if (!controller.isModalActive.value) {
       return const Scaffold(body: SizedBox.shrink());
     }
@@ -238,7 +231,8 @@ class _TargetUserStoryModalState extends State<TargetUserStoryModal>
                   border: Border.all(color: Colors.white, width: 2),
                 ),
                 child: ClipOval(
-                  child: widget.userPhoto != null && widget.userPhoto!.isNotEmpty
+                  child:
+                      widget.userPhoto != null && widget.userPhoto!.isNotEmpty
                       ? Image.network(
                           widget.userPhoto!,
                           fit: BoxFit.cover,
@@ -341,21 +335,22 @@ class _TargetUserStoryModalState extends State<TargetUserStoryModal>
   }
 
   Widget _buildStoryContent(StoryEntity story) {
-    final isVideo = story.tipoContenido.toLowerCase() == 'video';
+    final isVideo = story.tipoContenido == 'Video';
 
     if (isVideo) {
-      // ✅ Este Obx sí es válido: isVideoInitialized es .obs y está directamente en el builder
       return Obx(() {
         final initialized = controller.isVideoInitialized.value;
-        final hasController = controller.videoController != null;
-        if (hasController && initialized) {
+        final videoCtrl = controller.videoController;
+
+        if (initialized && videoCtrl != null && videoCtrl.value.isInitialized) {
           return Center(
             child: AspectRatio(
-              aspectRatio: controller.videoController!.value.aspectRatio,
-              child: VideoPlayer(controller.videoController!),
+              aspectRatio: videoCtrl.value.aspectRatio,
+              child: VideoPlayer(videoCtrl),
             ),
           );
         }
+
         return Container(
           color: Colors.grey[900],
           child: const Center(
@@ -364,28 +359,35 @@ class _TargetUserStoryModalState extends State<TargetUserStoryModal>
               children: [
                 CircularProgressIndicator(color: Colors.white),
                 SizedBox(height: 16),
-                Text('Cargando video...', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                Text(
+                  'Cargando video...',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
               ],
             ),
           ),
         );
       });
-    }
-
-    return Image.network(
-      story.urlContenido,
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Container(
-        color: Colors.grey[800],
-        child: const Center(child: Icon(Icons.error_outline, color: Colors.white, size: 50)),
-      ),
-      loadingBuilder: (_, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
+    } else {
+      return CachedNetworkImage(
+        imageUrl: story.urlContenido,
+        fit: BoxFit.contain,  
+        width: double.infinity,
+        height: double.infinity,
+        fadeInDuration: Duration.zero,
+        placeholder: (context, url) => Container(
           color: Colors.grey[900],
-          child: const Center(child: CircularProgressIndicator(color: Colors.white)),
-        );
-      },
-    );
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[800],
+          child: const Center(
+            child: Icon(Icons.error_outline, color: Colors.white, size: 50),
+          ),
+        ),
+      );
+    }
   }
 }

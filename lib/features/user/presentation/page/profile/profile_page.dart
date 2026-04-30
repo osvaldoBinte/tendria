@@ -16,8 +16,7 @@ import 'package:tendria/features/user/presentation/widget/qualities_section_widg
 class ProfilePage extends GetView<ProfileController> {
   const ProfilePage({Key? key}) : super(key: key);
 
-  UpdateProfileController get _updater =>
-      Get.find<UpdateProfileController>();
+  UpdateProfileController get _updater => Get.find<UpdateProfileController>();
   BalanceController get _balanceController => Get.find<BalanceController>();
 
   LanguageController get _l => Get.find<LanguageController>();
@@ -48,7 +47,7 @@ class ProfilePage extends GetView<ProfileController> {
                 children: [
                   _buildHeader(),
                   SizedBox(height: ThemeColor.paddingLarge),
-              //    _buildNearbyProfilesButton(),
+                  //    _buildNearbyProfilesButton(),
                   SizedBox(height: ThemeColor.paddingLarge),
                   _buildPhotosSection(),
                   SizedBox(height: ThemeColor.paddingLarge),
@@ -66,7 +65,6 @@ class ProfilePage extends GetView<ProfileController> {
       ),
     );
   }
-  
 
   Widget _buildHeader() {
     return Container(
@@ -91,23 +89,28 @@ class ProfilePage extends GetView<ProfileController> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.person_off,
-                        color: ThemeColor.textDarkColor),
+                    icon: Icon(
+                      Icons.person_off,
+                      color: ThemeColor.textDarkColor,
+                    ),
                     onPressed: controller.onViewBlockedUsers,
                   ),
                   IconButton(
-                    icon: Icon(Icons.notifications_none,
-                        color: ThemeColor.textDarkColor),
+                    icon: Icon(
+                      Icons.notifications_none,
+                      color: ThemeColor.textDarkColor,
+                    ),
                     onPressed: controller.onViewNotifications,
                   ),
                   IconButton(
-                    icon: Icon(Icons.edit,
-                        color: ThemeColor.textDarkColor),
+                    icon: Icon(Icons.edit, color: ThemeColor.textDarkColor),
                     onPressed: controller.onHelpTap,
                   ),
                   IconButton(
-                    icon: Icon(Icons.settings_outlined,
-                        color: ThemeColor.textDarkColor),
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: ThemeColor.textDarkColor,
+                    ),
                     onPressed: controller.onSettingsTap,
                   ),
                 ],
@@ -131,27 +134,25 @@ class ProfilePage extends GetView<ProfileController> {
 
               Expanded(
                 child: Padding(
-                  padding:
-                      EdgeInsets.only(top: ThemeColor.paddingSmall),
+                  padding: EdgeInsets.only(top: ThemeColor.paddingSmall),
                   child: Obx(() {
-                    final status =
-                        controller.userEntity.value?.status ?? '';
+                    final status = controller.userEntity.value?.status ?? '';
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        
                         if (status.isNotEmpty)
                           GestureDetector(
-                            onTap: () =>
-                                _updater.showEditStatus(status),
+                            onTap: () => _updater.showEditStatus(status),
                             child: Container(
-                              margin:
-                                  const EdgeInsets.only(bottom: 6),
+                              margin: const EdgeInsets.only(bottom: 6),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: ThemeColor.primaryColor
-                                    .withOpacity(0.12),
+                                color: ThemeColor.primaryColor.withOpacity(
+                                  0.12,
+                                ),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(12),
                                   topRight: Radius.circular(12),
@@ -159,8 +160,9 @@ class ProfilePage extends GetView<ProfileController> {
                                   bottomLeft: Radius.circular(4),
                                 ),
                                 border: Border.all(
-                                  color: ThemeColor.primaryColor
-                                      .withOpacity(0.3),
+                                  color: ThemeColor.primaryColor.withOpacity(
+                                    0.3,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -170,8 +172,7 @@ class ProfilePage extends GetView<ProfileController> {
                                   Flexible(
                                     child: Text(
                                       status,
-                                      style:
-                                          ThemeColor.bodySmall.copyWith(
+                                      style: ThemeColor.bodySmall.copyWith(
                                         color: ThemeColor.primaryColor,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -183,24 +184,24 @@ class ProfilePage extends GetView<ProfileController> {
                                   Icon(
                                     Icons.edit,
                                     size: 12,
-                                    color: ThemeColor.primaryColor
-                                        .withOpacity(0.6),
+                                    color: ThemeColor.primaryColor.withOpacity(
+                                      0.6,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
 
-
                         if (status.isEmpty)
                           GestureDetector(
-                            onTap: () =>
-                                _updater.showEditStatus(''),
+                            onTap: () => _updater.showEditStatus(''),
                             child: Container(
-                              margin:
-                                  const EdgeInsets.only(bottom: 6),
+                              margin: const EdgeInsets.only(bottom: 6),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 5),
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade100,
                                 borderRadius: const BorderRadius.only(
@@ -220,23 +221,19 @@ class ProfilePage extends GetView<ProfileController> {
                                   Icon(
                                     Icons.add,
                                     size: 13,
-                                    color:
-                                        ThemeColor.textSecondaryColor,
+                                    color: ThemeColor.textSecondaryColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     _l.t('add_status'),
-                                    style:
-                                        ThemeColor.bodySmall.copyWith(
-                                      color:
-                                          ThemeColor.textSecondaryColor,
+                                    style: ThemeColor.bodySmall.copyWith(
+                                      color: ThemeColor.textSecondaryColor,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                      
 
                         Text(
                           '${controller.userName}, ${controller.userAge}',
@@ -249,18 +246,19 @@ class ProfilePage extends GetView<ProfileController> {
                           maxLines: 2,
                         ),
                         GestureDetector(
-  onTap: () => Get.offAllNamed(RoutesNames.purchasePage),
-  child: Text(
-    '\$ ${_balanceController.currentBalance} MXN',
-    style: ThemeColor.headingMedium.copyWith(
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-      color: ThemeColor.textDarkColor,
-    ),
-    overflow: TextOverflow.ellipsis,
-    maxLines: 2,
-  ),
-),
+                          onTap: () =>
+                              Get.offAllNamed(RoutesNames.purchasePage),
+                          child: Text(
+                            '\$ ${_balanceController.currentBalance} MXN',
+                            style: ThemeColor.headingMedium.copyWith(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: ThemeColor.textDarkColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                        ),
                       ],
                     );
                   }),
@@ -273,17 +271,13 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-
-
   Widget _buildNearbyProfilesButton() {
     return Container(
-      margin:
-          EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
+      margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () => Get.offAllNamed(RoutesNames.preferencesPage),
-        icon: Icon(Icons.radar,
-            size: 24, color: ThemeColor.textLightColor),
+        icon: Icon(Icons.radar, size: 24, color: ThemeColor.textLightColor),
         label: Text(
           _l.t('discover'),
           style: ThemeColor.buttonText.copyWith(
@@ -309,12 +303,9 @@ class ProfilePage extends GetView<ProfileController> {
     );
   }
 
-
-
   Widget _buildPhotosSection() {
     return Container(
-      margin:
-          EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
+      margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -339,7 +330,9 @@ class ProfilePage extends GetView<ProfileController> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: count < max
                         ? ThemeColor.primaryColor.withOpacity(0.1)
@@ -401,34 +394,37 @@ class ProfilePage extends GetView<ProfileController> {
       return Stack(
         children: [
           Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: ThemeColor.mediumBorderRadius,
-            border: Border.all(color: ThemeColor.dividerColor, width: 1),
-          ),
-          child: ClipRRect(
-            borderRadius: ThemeColor.mediumBorderRadius,
-            child: CachedNetworkImage( // 👈 reemplaza Image.network
-              imageUrl: asset.url,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              placeholder: (context, url) => Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    ThemeColor.primaryColor,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: ThemeColor.mediumBorderRadius,
+              border: Border.all(color: ThemeColor.dividerColor, width: 1),
+            ),
+            child: ClipRRect(
+              borderRadius: ThemeColor.mediumBorderRadius,
+              child: CachedNetworkImage(
+                // 👈 reemplaza Image.network
+                imageUrl: asset.url,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                placeholder: (context, url) => Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColor.primaryColor,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: ThemeColor.backgroundColorfondo,
+                  child: Icon(
+                    Icons.broken_image,
+                    color: ThemeColor.textSecondaryColor,
                   ),
                 ),
               ),
-              errorWidget: (context, url, error) => Container(
-                color: ThemeColor.backgroundColorfondo,
-                child: Icon(Icons.broken_image,
-                    color: ThemeColor.textSecondaryColor),
-              ),
             ),
           ),
-        ),
 
           Positioned(
             top: 4,
@@ -450,11 +446,11 @@ class ProfilePage extends GetView<ProfileController> {
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white),
+                            Colors.white,
+                          ),
                         ),
                       )
-                    : const Icon(Icons.close,
-                        color: Colors.white, size: 14),
+                    : const Icon(Icons.close, color: Colors.white, size: 14),
               ),
             ),
           ),
@@ -473,8 +469,7 @@ class ProfilePage extends GetView<ProfileController> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: ThemeColor.mediumBorderRadius,
-            border:
-                Border.all(color: ThemeColor.dividerColor, width: 1),
+            border: Border.all(color: ThemeColor.dividerColor, width: 1),
           ),
           child: isUploading
               ? Center(
@@ -484,18 +479,16 @@ class ProfilePage extends GetView<ProfileController> {
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                          ThemeColor.primaryColor),
+                        ThemeColor.primaryColor,
+                      ),
                     ),
                   ),
                 )
-              : Icon(Icons.add,
-                  color: ThemeColor.textSecondaryColor, size: 32),
+              : Icon(Icons.add, color: ThemeColor.textSecondaryColor, size: 32),
         ),
       );
     });
   }
-
-
 
   Widget _buildBiographySection() {
     return Obx(() {
@@ -506,8 +499,7 @@ class ProfilePage extends GetView<ProfileController> {
       return GestureDetector(
         onTap: () => _updater.showEditBio(bio),
         child: Container(
-          margin: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingLarge),
+          margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
           padding: EdgeInsets.all(ThemeColor.paddingLarge),
           decoration: BoxDecoration(
             color: Colors.white,

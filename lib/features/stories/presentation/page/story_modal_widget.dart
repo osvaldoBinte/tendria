@@ -98,7 +98,6 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
               children: [
                 Positioned.fill(child: _buildStoryContent(currentStory)),
 
-                // Header
                 Positioned(
                   top: -30,
                   left: 0,
@@ -200,7 +199,6 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                         ],
                         const SizedBox(height: 16),
 
-                        // Info del usuario con tiempo transcurrido
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -218,60 +216,69 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-  child: GestureDetector(
-    onTap: () async {
-      if (isViewingMyStory) return;
+                              child: GestureDetector(
+                                onTap: () async {
+                                  if (isViewingMyStory) return;
 
-      final senderId = controller.currentUser?.usuarioId;
-      if (senderId == null) return;
+                                  final senderId =
+                                      controller.currentUser?.usuarioId;
+                                  if (senderId == null) return;
 
-      final myId = await AuthService().getUserId();
-      if (myId != null && senderId == myId) return;
+                                  final myId = await AuthService().getUserId();
+                                  if (myId != null && senderId == myId) return;
 
-      Get.toNamed(
-        RoutesNames.userProfileDetailPage,
-        arguments: {'userId': senderId},
-      );
-    },
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          isViewingMyStory
-              ? "Mi historia"
-              : controller.currentUser!.nombreUsuario,
-          style: GoogleFonts.rubik(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            shadows: [
-              Shadow(
-                offset: const Offset(0, 1),
-                blurRadius: 3,
-                color: Colors.black.withOpacity(0.5),
-              ),
-            ],
-          ),
-        ),
-        Text(
-          controller.getTimeAgo(currentStory.fechaCreacion),
-          style: GoogleFonts.rubik(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            shadows: [
-              Shadow(
-                offset: const Offset(0, 1),
-                blurRadius: 3,
-                color: Colors.black.withOpacity(0.5),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  ),
-),
+                                  Get.toNamed(
+                                    RoutesNames.userProfileDetailPage,
+                                    arguments: {'userId': senderId},
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isViewingMyStory
+                                          ? "Mi historia"
+                                          : controller
+                                                .currentUser!
+                                                .nombreUsuario,
+                                      style: GoogleFonts.rubik(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        shadows: [
+                                          Shadow(
+                                            offset: const Offset(0, 1),
+                                            blurRadius: 3,
+                                            color: Colors.black.withOpacity(
+                                              0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      controller.getTimeAgo(
+                                        currentStory.fechaCreacion,
+                                      ),
+                                      style: GoogleFonts.rubik(
+                                        color: Colors.white.withOpacity(0.8),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        shadows: [
+                                          Shadow(
+                                            offset: const Offset(0, 1),
+                                            blurRadius: 3,
+                                            color: Colors.black.withOpacity(
+                                              0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
 
                             GestureDetector(
                               onTap: () {
@@ -323,7 +330,6 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
                   ),
                 ),
 
-                // Áreas de navegación
                 Positioned(
                   top: 110,
                   bottom: 76 + MediaQuery.of(context).padding.bottom,
@@ -423,66 +429,67 @@ class _StoryModalWidgetState extends State<StoryModalWidget>
     );
   }
 
- Widget _buildStoryContent(StoryEntity story) {
-  final isVideo = story.tipoContenido.toLowerCase() == StoryController.kVideo;
+  Widget _buildStoryContent(StoryEntity story) {
+    final isVideo = story.tipoContenido.toLowerCase() == StoryController.kVideo;
 
-  if (isVideo) {
-    return Obx(() {
-      final initialized = controller.isVideoInitialized.value;
-      final videoCtrl = controller.videoController;
+    if (isVideo) {
+      return Obx(() {
+        final initialized = controller.isVideoInitialized.value;
+        final videoCtrl = controller.videoController;
 
-      if (initialized && videoCtrl != null && videoCtrl.value.isInitialized) {
-        return SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              width: videoCtrl.value.size.width,
-              height: videoCtrl.value.size.height,
-              child: VideoPlayer(videoCtrl),
+        if (initialized && videoCtrl != null && videoCtrl.value.isInitialized) {
+          return SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: SizedBox(
+                width: videoCtrl.value.size.width,
+                height: videoCtrl.value.size.height,
+                child: VideoPlayer(videoCtrl),
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          color: Colors.grey[900],
+          child: const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: Colors.white),
+                SizedBox(height: 16),
+                Text(
+                  'Cargando video...',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
             ),
           ),
         );
-      }
-
-      return Container(
-        color: Colors.grey[900],
-        child: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 16),
-              Text(
-                'Cargando video...',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-            ],
+      });
+    } else {
+      return CachedNetworkImage(
+        imageUrl: story.urlContenido,
+        fit: BoxFit.contain,
+        width: double.infinity,
+        height: double.infinity,
+        fadeInDuration: Duration.zero,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[900],
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[800],
+          child: const Center(
+            child: Icon(Icons.error_outline, color: Colors.white, size: 50),
           ),
         ),
       );
-    });
-  } else {
-    return CachedNetworkImage(
-      imageUrl: story.urlContenido,
-      fit: BoxFit.contain,    
-      width: double.infinity,
-      height: double.infinity,
-      fadeInDuration: Duration.zero,
-      placeholder: (context, url) => Container(
-        color: Colors.grey[900],
-        child: const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
-      ),
-      errorWidget: (context, url, error) => Container(
-        color: Colors.grey[800],
-        child: const Center(
-          child: Icon(Icons.error_outline, color: Colors.white, size: 50),
-        ),
-      ),
-    );
+    }
   }
-}
+
   Widget _buildMyStoryFooter(StoryEntity story) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PanicButton extends StatefulWidget {
@@ -152,7 +153,7 @@ class _PanicButtonState extends State<PanicButton>
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Color(0xFF8B2C4B), Color(0xFF4A141E)],
+                    colors: [ThemeColor.warningColor, ThemeColor.errorColor],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),

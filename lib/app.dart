@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/controller/tutorial_controller.dart';
@@ -28,6 +27,7 @@ import 'package:tendria/features/user/presentation/controller/user_profile_contr
 import 'package:tendria/usecase_config.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 UsecaseConfig usecaseConfig = UsecaseConfig();
 
 class App extends StatelessWidget {
@@ -36,17 +36,15 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-     locale: const Locale('es', 'ES'),
-      supportedLocales: [
-        const Locale('es', 'ES'),
-      ],
+      locale: const Locale('es', 'ES'),
+      supportedLocales: [const Locale('es', 'ES')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       debugShowCheckedModeBanner: false,
-      theme: ThemeColor.themeData, 
+      theme: ThemeColor.themeData,
       initialBinding: BindingsBuilder(() {
         Get.put(AuthService(), permanent: true);
         Get.put(usecaseConfig.loginUsecase!, permanent: true);
@@ -66,7 +64,7 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.putPreferencesUserUsecase!, permanent: true);
         Get.put(usecaseConfig.deleteMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadMediaUsecase!, permanent: true);
-        Get.put(usecaseConfig.uploadPicturePerfileUsecase!, permanent:  true);
+        Get.put(usecaseConfig.uploadPicturePerfileUsecase!, permanent: true);
         Get.put(usecaseConfig.addLikeToStoryUsecase!, permanent: true);
         Get.put(usecaseConfig.createStroryUsecase!, permanent: true);
         Get.put(usecaseConfig.fetchStoriesByIdUsecase!, permanent: true);
@@ -74,19 +72,22 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.removeStoryUsecase!, permanent: true);
         Get.put(usecaseConfig.setStoryAsSeenUsecase!, permanent: true);
         Get.put(usecaseConfig.fetchNearbyUsersUsecase!, permanent: true);
-        Get.put(usecaseConfig.getChatMensajeUsecase!,permanent: true);
-        Get.put(usecaseConfig.getMyChatsUsecase!,permanent: true);
-        Get.put(usecaseConfig.connectSignalRUsecase!,permanent: true);
-        Get.put(usecaseConfig.disconnectSignalRUsecase!,permanent: true);
-        Get.put(usecaseConfig.joinChatUsecase!,permanent: true);
+        Get.put(usecaseConfig.getChatMensajeUsecase!, permanent: true);
+        Get.put(usecaseConfig.getMyChatsUsecase!, permanent: true);
+        Get.put(usecaseConfig.connectSignalRUsecase!, permanent: true);
+        Get.put(usecaseConfig.disconnectSignalRUsecase!, permanent: true);
+        Get.put(usecaseConfig.joinChatUsecase!, permanent: true);
         Get.put(usecaseConfig.onMensajesLeidosUsecase!, permanent: true);
         Get.put(usecaseConfig.marcarMensajesLeidosUsecase!, permanent: true);
-        Get.put(usecaseConfig.leaveChatUsecase!,permanent: true);
-        Get.put(usecaseConfig.setOnDisconnectedCallbackUsecase!, permanent:  true);
-        Get.put(usecaseConfig.setMessageCallbackUsecase!,permanent: true);
-        Get.put(usecaseConfig.startConversationsUsecase!,permanent: true);
-        Get.put(usecaseConfig.paymentsChatUsecase!,permanent: true);
-        Get.put(usecaseConfig.sendMessageUsecase!,permanent: true);
+        Get.put(usecaseConfig.leaveChatUsecase!, permanent: true);
+        Get.put(
+          usecaseConfig.setOnDisconnectedCallbackUsecase!,
+          permanent: true,
+        );
+        Get.put(usecaseConfig.setMessageCallbackUsecase!, permanent: true);
+        Get.put(usecaseConfig.startConversationsUsecase!, permanent: true);
+        Get.put(usecaseConfig.paymentsChatUsecase!, permanent: true);
+        Get.put(usecaseConfig.sendMessageUsecase!, permanent: true);
         Get.put(usecaseConfig.getLikeByUsersUsecase!, permanent: true);
         Get.put(usecaseConfig.getPendingLikedChatsUsecase!, permanent: true);
         Get.put(usecaseConfig.toggleLikeUsecase!, permanent: true);
@@ -97,45 +98,169 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.updateLocationUsecase!, permanent: true);
 
         Get.put(usecaseConfig.getnotificationUsecase!, permanent: true);
-        Get.put(usecaseConfig.markAllNotificationsAsReadUsecase!, permanent: true);
+        Get.put(
+          usecaseConfig.markAllNotificationsAsReadUsecase!,
+          permanent: true,
+        );
         Get.put(usecaseConfig.saveTokenFcmUsecase!, permanent: true);
-        Get.put(usecaseConfig.purchaseAppleUsecase!,permanent: true);
-        Get.put(usecaseConfig.purchaseGoogleUsecase!,permanent: true);
-        Get.put(usecaseConfig.purchaseAppleUsecase!,permanent: true);
+        Get.put(usecaseConfig.purchaseAppleUsecase!, permanent: true);
+        Get.put(usecaseConfig.purchaseGoogleUsecase!, permanent: true);
+        Get.put(usecaseConfig.purchaseAppleUsecase!, permanent: true);
         Get.put(usecaseConfig.getPurchasesUsecase!, permanent: true);
 
-        Get.lazyPut(() => LoginController(loginUsecase: Get.find(), saveTokenFcmUsecase: Get.find(), ), fenix: true);
-        Get.put( SignalRService( connectSignalRUsecase: Get.find(), disconnectSignalRUsecase: Get.find(), joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(),setupMessageListenerUsecase: Get.find(), setOnDisconnectedCallbackUsecase: Get.find(), onMensajesLeidosUsecase: Get.find(), marcarMensajesLeidosUsecase: Get.find(),), permanent: true,);   
-        Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(),fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find(), ), fenix: true);
-        Get.lazyPut(()=> SplashController(getUserUsecase: Get.find(), updateLocationUsecase: Get.find(),), fenix: true);
-        Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find()),  fenix: true);
-        Get.lazyPut(() => ProfileController(getUserUsecase: Get.find(), uploadMediaUsecase: Get.find(), uploadPicturePerfileUsecase: Get.find(), deleteMediaUsecase: Get.find()), fenix: true);
-        Get.lazyPut(() => StoryController(fetchStoriesUsecase:  Get.find(), addLikeToStoryUsecase:  Get.find(), fetchStoriesByIdUsecase: Get.find(), removeStoryUsecase: Get.find(), createStroryUsecase: Get.find(), setStoryAsSeenUsecase:  Get.find()), fenix:  true);
-        //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
-         Get.lazyPut(()=>NearbyUsersController(fetchNearbyUsersUsecase: Get.find(), toggleLikeUsecase: Get.find()) ,fenix: true);
+        Get.lazyPut(
+          () => LoginController(
+            loginUsecase: Get.find(),
+            saveTokenFcmUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
         Get.put(
-  MyMatchController(getMyChatsUsecase: Get.find()),
-  permanent: true,
-);
+          SignalRService(
+            connectSignalRUsecase: Get.find(),
+            disconnectSignalRUsecase: Get.find(),
+            joinChatUsecase: Get.find(),
+            leaveChatUsecase: Get.find(),
+            setupMessageListenerUsecase: Get.find(),
+            setOnDisconnectedCallbackUsecase: Get.find(),
+            onMensajesLeidosUsecase: Get.find(),
+            marcarMensajesLeidosUsecase: Get.find(),
+          ),
+          permanent: true,
+        );
+        Get.lazyPut(
+          () => RegisterController(
+            createUserUsecase: Get.find(),
+            fetchQualitiesUsecase: Get.find(),
+            fetchInterestsUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => SplashController(
+            getUserUsecase: Get.find(),
+            updateLocationUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => PreferencesController(
+            preferencesUserUsecase: Get.find(),
+            uploadMediaUsecase: Get.find(),
+            fetchInterestsUsecase: Get.find(),
+            fetchQualitiesUsecase: Get.find(),
+            postInterestsUsecase: Get.find(),
+            postQualitiesUsecase: Get.find(),
+            uploadPicturePerfileUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => ProfileController(
+            getUserUsecase: Get.find(),
+            uploadMediaUsecase: Get.find(),
+            uploadPicturePerfileUsecase: Get.find(),
+            deleteMediaUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => StoryController(
+            fetchStoriesUsecase: Get.find(),
+            addLikeToStoryUsecase: Get.find(),
+            fetchStoriesByIdUsecase: Get.find(),
+            removeStoryUsecase: Get.find(),
+            createStroryUsecase: Get.find(),
+            setStoryAsSeenUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
+        Get.lazyPut(
+          () => NearbyUsersController(
+            fetchNearbyUsersUsecase: Get.find(),
+            toggleLikeUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.put(
+          MyMatchController(getMyChatsUsecase: Get.find()),
+          permanent: true,
+        );
 
-         Get.lazyPut(() => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find(),  authService: Get.find(), startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
-         Get.lazyPut(()=> LikedByUsersController(  getPendingLikedChatsUsecase: Get.find(), unlockChatUsecase: Get.find(), ), fenix:true);
-     //    Get.lazyPut(() => StartConversationsController(startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
-         Get.lazyPut(()=> UserProfileController(getUserByIdUsecase: Get.find(), toggleLikeUsecase: Get.find(), blockUserUsecase:  Get.find()),fenix:true);
-         Get.lazyPut(() => BlockedUsersController(fetchBlockedUsersUsecase: Get.find(), unblockUserUsecase: Get.find()), fenix:true);
-         Get.lazyPut(() => UpdateProfileController(deleteInterestsUsecase: Get.find(), deleteQualitiesUsecase: Get.find(), updateUserUsecase: Get.find(), fetchInterestsUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), postInterestsUsecase: Get.find(), postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(), deleteUserUsecase: Get.find()), fenix:true);
-         Get.lazyPut(() => NotificationController(getNotificationUsecase: Get.find(), markAllNotificationsAsReadUsecase: Get.find()), fenix:true);
-         Get.lazyPut(() => BalanceController(getBalanceUsecase: Get.find()), fenix:true);
-          Get.lazyPut(() => LanguageController(),fenix:true);
-          Get.put(TranslationService());
-          Get.lazyPut(() => TutorialController(),fenix:true);
-          Get.lazyPut(() => PurchaseController(getPurchasesUsecase: Get.find(), purchaseAppleUsecase: Get.find(), purchaseGoogleUsecase: Get.find()), fenix:true);
-
-
+        Get.lazyPut(
+          () => ChatController(
+            getChatMensajeUsecase: Get.find(),
+            sendMessageUsecase: Get.find(),
+            authService: Get.find(),
+            startConversationsUsecase: Get.find(),
+            paymentsChatUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => LikedByUsersController(
+            getPendingLikedChatsUsecase: Get.find(),
+            unlockChatUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        //    Get.lazyPut(() => StartConversationsController(startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
+        Get.lazyPut(
+          () => UserProfileController(
+            getUserByIdUsecase: Get.find(),
+            toggleLikeUsecase: Get.find(),
+            blockUserUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => BlockedUsersController(
+            fetchBlockedUsersUsecase: Get.find(),
+            unblockUserUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => UpdateProfileController(
+            deleteInterestsUsecase: Get.find(),
+            deleteQualitiesUsecase: Get.find(),
+            updateUserUsecase: Get.find(),
+            fetchInterestsUsecase: Get.find(),
+            fetchQualitiesUsecase: Get.find(),
+            postInterestsUsecase: Get.find(),
+            postQualitiesUsecase: Get.find(),
+            putPreferencesUserUsecase: Get.find(),
+            deleteUserUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => NotificationController(
+            getNotificationUsecase: Get.find(),
+            markAllNotificationsAsReadUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
+        Get.lazyPut(
+          () => BalanceController(getBalanceUsecase: Get.find()),
+          fenix: true,
+        );
+        Get.lazyPut(() => LanguageController(), fenix: true);
+        Get.put(TranslationService());
+        Get.lazyPut(() => TutorialController(), fenix: true);
+        Get.lazyPut(
+          () => PurchaseController(
+            getPurchasesUsecase: Get.find(),
+            purchaseAppleUsecase: Get.find(),
+            purchaseGoogleUsecase: Get.find(),
+          ),
+          fenix: true,
+        );
       }),
 
-      getPages: AppPages.routes, 
-      unknownRoute: AppPages.unknownRoute, 
+      getPages: AppPages.routes,
+      unknownRoute: AppPages.unknownRoute,
     );
   }
-} 
+}

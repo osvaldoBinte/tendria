@@ -2,8 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:tendria/common/settings/routes_names.dart';
-import 'package:tendria/common/widgets/tutorial_page.dart';
+import 'package:tendria/common/settings/routes_names.dart'; 
 import 'package:tendria/features/auth/presentation/page/Splash/splash_page.dart';
 import 'package:tendria/features/auth/presentation/page/home/start_page.dart';
 import 'package:tendria/features/auth/presentation/page/login/login_page.dart';
@@ -34,8 +33,7 @@ class AppPages {
         GetPage(name: RoutesNames.profileDetailPage, page: () => NearbyUsersPage()),
         GetPage(name: RoutesNames.userProfileDetailPage, page: () => UserProfileDetailPage()),
         GetPage(name: RoutesNames.blockedUsersPage, page: () => BlockedUsersPage()),
-        GetPage(name: RoutesNames.updateProfilePage, page: () => UpdateProfilePage()),
-        GetPage(name: RoutesNames.tutorialPage, page: () => TutorialPage()),
+        GetPage(name: RoutesNames.updateProfilePage, page: () => UpdateProfilePage()), 
         GetPage (name: RoutesNames.notificationPage, page: () => NotificationPage()),
         GetPage(name: RoutesNames.purchasePage, page: () =>PurchasePage())
   ];

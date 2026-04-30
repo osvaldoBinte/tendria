@@ -1,3 +1,5 @@
+// lib/features/chat/presentation/page/chat_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
@@ -32,12 +34,12 @@ class ChatController extends GetxController {
     required this.authService,
   });
 
-  final RxBool isRetrying = false.obs;
-
+  // ── UI ──
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
-BalanceController get balanceController => Get.find<BalanceController>();
+  // ── Estado ──
+  BalanceController get balanceController => Get.find<BalanceController>();
   final mensajes = RxList<MensajeEntity>([]);
   final Rx<UsuarioChatEntity?> otroUsuario = Rx<UsuarioChatEntity?>(null);
   final Rx<ChatEntity?> chat = Rx<ChatEntity?>(null);
@@ -48,6 +50,7 @@ BalanceController get balanceController => Get.find<BalanceController>();
   final RxString errorMessage = ''.obs;
   final RxBool isTyping = false.obs;
   final RxBool isSignalRConnected = false.obs;
+  final RxBool isRetrying = false.obs;
 
   final RxBool isNewConversation = true.obs;
   final RxBool firstMessageSent = false.obs;
@@ -60,69 +63,27 @@ BalanceController get balanceController => Get.find<BalanceController>();
   final RxInt goHomeIndex = (-1).obs;
   final RxInt goPerfilIndex = (-1).obs;
 
-  // Usado por el Listener en ChatPage para distinguir tap vs scroll
   Offset pointerDown = Offset.zero;
-
-  void setPointerDown(Offset position) {
-    pointerDown = position;
-  }
+  DateTime pointerDownTime = DateTime.now();
 
   late final SignalRService _signalRService;
 
-@override
-void onInit() {
-  super.onInit();
- 
-  _signalRService = Get.find<SignalRService>();
- 
-  _loadArguments();
- 
-  _signalRService.escucharMensajesLeidos(_onMensajesLeidos);
+  // ─────────────────────────────────────────
+  //  LIFECYCLE
+  // ─────────────────────────────────────────
 
-  messageController.addListener(_onMessageChanged);
+  @override
+  void onInit() {
+    super.onInit();
+    _signalRService = Get.find<SignalRService>();
+    _loadArguments();
 
-  if (!isNewConversation.value) {
-    isSignalRConnected.value = _signalRService.isConnected.value;
-
-    ever(_signalRService.isConnected, (bool connected) {
-      isSignalRConnected.value = connected;
-      if (connected) isRetrying.value = false;
-      if (!connected) _autoReconnect();
-    });
-
-    ever(_signalRService.isReconnecting, (bool reconnecting) {
-      if (reconnecting) isRetrying.value = true;
-    });
-
-    _subscribeToChat(); 
-    loadChatMessages().then((_) => _marcarComoLeidos());
-  }
-} 
-Future<void> _marcarComoLeidos() async {
-  if (chatId == null) return;
-  final otroId = otroUsuario.value?.id ?? 0;
-  if (otroId == 0) return;
-  await _signalRService.marcarMensajesLeidos(chatId!, otroId);
-}
-
-void _onMensajesLeidos(DateTime leidoEn) { 
-  mensajes.value = mensajes.map((m) {
-    if (m.esPropio && m.leidoEn == null) {
-      return MensajeEntity(
-        id: m.id,
-        chatId: m.chatId,
-        senderId: m.senderId,
-        senderNombre: m.senderNombre,
-        senderFoto: m.senderFoto,
-        mensaje: m.mensaje,
-        enviadoEn: m.enviadoEn,
-        esPropio: m.esPropio,
-        leidoEn: leidoEn, // ✅ marcar como leído
-      );
+    if (!isNewConversation.value) {
+      _setupSignalR();
+      loadChatMessages().then((_) => _marcarComoLeidos());
     }
-    return m;
-  }).toList();
-}
+  }
+
   @override
   void onClose() {
     messageController.removeListener(_onMessageChanged);
@@ -136,9 +97,55 @@ void _onMensajesLeidos(DateTime leidoEn) {
     super.onClose();
   }
 
+  // ─────────────────────────────────────────
+  //  SETUP SIGNALR
+  // ─────────────────────────────────────────
+
+  void _setupSignalR() {
+    isSignalRConnected.value = _signalRService.isConnected.value;
+
+    ever(_signalRService.isConnected, (bool connected) {
+      isSignalRConnected.value = connected;
+      if (connected) {
+        isRetrying.value = false;
+        _resubscribeIfNeeded();
+      }
+    });
+
+    ever(_signalRService.isReconnecting, (bool reconnecting) {
+      if (reconnecting) isRetrying.value = true;
+    });
+
+    _signalRService.escucharMensajesLeidos(_onMensajesLeidos);
+    _subscribeToChat();
+    messageController.addListener(_onMessageChanged);
+  }
+
+  Future<void> _subscribeToChat() async {
+    if (chatId == null) return;
+    try {
+      await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
+    } catch (e) {
+      print('⚠️ Error suscribiéndose al chat: $e');
+    }
+  }
+
+  Future<void> _resubscribeIfNeeded() async {
+    if (chatId == null) return;
+    try {
+      await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
+      print('🔄 Re-suscripción al chat #$chatId tras reconexión');
+    } catch (e) {
+      print('⚠️ Error re-suscribiéndose al chat #$chatId: $e');
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  ARGUMENTS
+  // ─────────────────────────────────────────
+
   void _loadArguments() {
     final args = Get.arguments as Map<String, dynamic>?;
-
     chatId = args?['chatId'] as int?;
     targetUserId = args?['userid'] ?? args?['userId'] ?? 0;
     userName = args?['name'];
@@ -153,40 +160,42 @@ void _onMensajesLeidos(DateTime leidoEn) {
     }
   }
 
-  Future<void> _subscribeToChat() async {
-    try {
-      await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
-    } catch (e) {
-      print('Error suscribiéndose al chat: $e');
-      _autoReconnect();
-    }
+  // ─────────────────────────────────────────
+  //  MENSAJES LEÍDOS
+  // ─────────────────────────────────────────
+
+  Future<void> _marcarComoLeidos() async {
+    if (chatId == null) return;
+    final otroId = otroUsuario.value?.id ?? 0;
+    if (otroId == 0) return;
+    await _signalRService.marcarMensajesLeidos(chatId!, otroId);
   }
 
-  Future<void> _autoReconnect() async {
-    if (isRetrying.value || isSignalRConnected.value) return;
-
-    print('🔄 Auto-reconectando SignalR desde ChatController...');
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (_signalRService.isConnected.value) {
-      try {
-        if (chatId != null) {
-          await _signalRService.subscribeToChat(
-              chatId!, _handleIncomingMessage);
-        }
-      } catch (e) {
-        print('❌ Error re-suscribiéndose: $e');
+  void _onMensajesLeidos(DateTime leidoEn) {
+    mensajes.value = mensajes.map((m) {
+      if (m.esPropio && m.leidoEn == null) {
+        return MensajeEntity(
+          id: m.id,
+          chatId: m.chatId,
+          senderId: m.senderId,
+          senderNombre: m.senderNombre,
+          senderFoto: m.senderFoto,
+          mensaje: m.mensaje,
+          enviadoEn: m.enviadoEn,
+          esPropio: m.esPropio,
+          leidoEn: leidoEn,
+        );
       }
-      return;
-    }
-
-    await retrySignalRConnection();
+      return m;
+    }).toList();
   }
+
+  // ─────────────────────────────────────────
+  //  MENSAJES ENTRANTES
+  // ─────────────────────────────────────────
 
   void _handleIncomingMessage(MensajeEntity mensaje) {
     if (mensajes.any((m) => m.id == mensaje.id)) return;
-
     mensajes.value = [
       ...mensajes,
       MensajeEntity(
@@ -200,7 +209,6 @@ void _onMensajesLeidos(DateTime leidoEn) {
         esPropio: mensaje.esPropio,
       ),
     ];
-
     if (mensaje.esPropio || _isNearBottom()) {
       Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
     }
@@ -213,49 +221,31 @@ void _onMensajesLeidos(DateTime leidoEn) {
         100;
   }
 
-  Future<void> retrySignalRConnection() async {
-    if (isSignalRConnected.value || isRetrying.value) return;
-    try {
-      isRetrying.value = true;
-      final token = await authService.getToken();
-      if (token == null) return;
-      await _signalRService.connect(token);
-      if (_signalRService.isConnected.value && chatId != null) {
-        await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
-      }
-    } catch (e) {
-      print('❌ Error reconectando: $e');
-    } finally {
-      isRetrying.value = false;
-    }
-  }
+  // ─────────────────────────────────────────
+  //  CARGAR MENSAJES
+  // ─────────────────────────────────────────
 
   Future<void> loadChatMessages() async {
     if (chatId == null) return;
     try {
       isLoading.value = true;
       hasError.value = false;
-
       final result = await getChatMensajeUsecase.execute(chatId!);
       chat.value = result;
-
-     final lista = (result.mensajes ?? [])
-    .map((m) => MensajeEntity(
-          id: m.id,
-          chatId: m.chatId,
-          senderId: m.senderId,
-          senderNombre: m.senderNombre,
-          senderFoto: m.senderFoto,
-          mensaje: m.mensaje,
-          enviadoEn: m.enviadoEn,
-          esPropio: m.esPropio,
-          leidoEn: m.leidoEn, // ✅ no olvides mapear este campo
-        ))
-    .toList();
-
-      mensajes.value = lista;
+      mensajes.value = (result.mensajes ?? [])
+          .map((m) => MensajeEntity(
+                id: m.id,
+                chatId: m.chatId,
+                senderId: m.senderId,
+                senderNombre: m.senderNombre,
+                senderFoto: m.senderFoto,
+                mensaje: m.mensaje,
+                enviadoEn: m.enviadoEn,
+                esPropio: m.esPropio,
+                leidoEn: m.leidoEn,
+              ))
+          .toList();
       otroUsuario.value = result.otroUsuario;
-
       Future.delayed(const Duration(milliseconds: 300), scrollToBottom);
     } catch (e) {
       hasError.value = true;
@@ -266,6 +256,10 @@ void _onMensajesLeidos(DateTime leidoEn) {
   }
 
   Future<void> refreshChat() => loadChatMessages();
+
+  // ─────────────────────────────────────────
+  //  ENVIAR MENSAJES
+  // ─────────────────────────────────────────
 
   void _onMessageChanged() {
     if (isNewConversation.value && firstMessageSent.value) {
@@ -283,68 +277,72 @@ void _onMensajesLeidos(DateTime leidoEn) {
       await _sendRegularMessage();
     }
   }
-Future<void> _sendFirstMessage() async {
-  if (firstMessageSent.value || isSending.value) return;
 
-  final message = messageController.text.trim();
-  if (message.isEmpty) return;
-
-  try {
-    isSending.value = true;
-    messageController.clear();
-
-    final postEntity = PostChatEntity(
-      chatId: targetUserId,
-      menssage: message,
-    );
-
-    await startConversationsUsecase.execute(postEntity);
-
-    _addLocalMessage(message);
-    firstMessageSent.value = true;
-    isTyping.value = false;
-
-    // ✅ Recargar balance después de descontar el costo
-    if (Get.isRegistered<BalanceController>()) {
-      await Get.find<BalanceController>().fetchBalance();
-    }
-
-    if (Get.isRegistered<NearbyUsersController>()) {
-      Get.find<NearbyUsersController>().loadNearbyUsers();
-    }
-
-    showSuccessSnackbar('Mensaje enviado. Espera la respuesta.');
-    Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
-  } catch (e) {
-    messageController.text = message;
-    showErrorSnackbar('No se pudo enviar: ${cleanExceptionMessage(e)}');
-  } finally {
-    isSending.value = false;
-  }
-}
-
-  Future<void> _sendRegularMessage() async {
+  Future<void> _sendFirstMessage() async {
+    if (firstMessageSent.value || isSending.value) return;
     final message = messageController.text.trim();
-    if (message.isEmpty || isSending.value) return;
-
-    final tempId = DateTime.now().millisecondsSinceEpoch;
-    final haySignalR = isSignalRConnected.value;
+    if (message.isEmpty) return;
 
     try {
       isSending.value = true;
       messageController.clear();
 
-      if (!haySignalR) {
-        _addLocalMessage(message, tempId: tempId);
-        Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
+      final postEntity = PostChatEntity(chatId: targetUserId, menssage: message);
+      await startConversationsUsecase.execute(postEntity);
+
+      _addLocalMessage(message);
+      firstMessageSent.value = true;
+      isTyping.value = false;
+
+      if (Get.isRegistered<BalanceController>()) {
+        await Get.find<BalanceController>().fetchBalance();
+      }
+      if (Get.isRegistered<NearbyUsersController>()) {
+        Get.find<NearbyUsersController>().loadNearbyUsers();
       }
 
+      showSuccessSnackbar('Mensaje enviado. Espera la respuesta.');
+      Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
+    } catch (e) {
+      messageController.text = message;
+      showErrorSnackbar('No se pudo enviar: ${cleanExceptionMessage(e)}');
+    } finally {
+      isSending.value = false;
+    }
+  }
+
+  Future<void> _sendRegularMessage() async {
+    final message = messageController.text.trim();
+    if (message.isEmpty || isSending.value) return;
+
+    try {
+      isSending.value = true;
+      messageController.clear();
+
+      // ── Paso 1: verificar conexión ────────────────────────────────────
+      // Si no está conectado, intentar reconectar antes de enviar.
+      // El botón de enviar ya muestra un spinner mientras isSending = true,
+      // así que el usuario ve feedback inmediato.
+      if (!_signalRService.isConnected.value) {
+        print('📡 Sin conexión — esperando antes de enviar...');
+        try {
+          await _signalRService.waitUntilConnected(
+            timeout: const Duration(seconds: 15),
+          );
+        } catch (e) {
+          // No se pudo conectar: devolver el texto y mostrar error
+          messageController.text = message;
+          isSending.value = false;
+          showErrorSnackbar('Sin conexión. Verifica tu internet e inténtalo de nuevo.');
+          return;
+        }
+      }
+
+      // ── Paso 2: enviar ────────────────────────────────────────────────
       final postEntity = PostChatEntity(chatId: chatId!, menssage: message);
       await sendMessageUsecase.execute(postEntity);
+      // El mensaje real llegará por SignalR via _handleIncomingMessage
     } catch (e) {
-      if (!haySignalR) {
-        mensajes.removeWhere((m) => m.id == tempId);
-      }
       messageController.text = message;
       print('Error enviando mensaje: $e');
       showErrorSnackbar('No se pudo enviar el mensaje');
@@ -364,9 +362,31 @@ Future<void> _sendFirstMessage() async {
       enviadoEn: DateTime.now(),
       esPropio: true,
     );
-
-    mensajes.value = [...mensajes.map((m) => m as MensajeEntity), nuevo];
+    mensajes.value = [...mensajes, nuevo];
   }
+
+  // ─────────────────────────────────────────
+  //  RECONEXIÓN MANUAL (botón UI)
+  // ─────────────────────────────────────────
+
+  Future<void> retrySignalRConnection() async {
+    if (isSignalRConnected.value || isRetrying.value) return;
+    isRetrying.value = true;
+    try {
+      await _signalRService.retryConnection();
+      if (_signalRService.isConnected.value && chatId != null) {
+        await _signalRService.subscribeToChat(chatId!, _handleIncomingMessage);
+      }
+    } catch (e) {
+      print('❌ Error en retry manual: $e');
+    } finally {
+      isRetrying.value = false;
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  UTILIDADES
+  // ─────────────────────────────────────────
 
   void scrollToBottom() {
     if (scrollController.hasClients) {
@@ -380,59 +400,52 @@ Future<void> _sendFirstMessage() async {
 
   void navigateToProfile() {
     final uid = otroUsuario.value?.id ?? targetUserId;
-    Get.toNamed(RoutesNames.userProfileDetailPage, arguments: {'userId': uid,'goPerfilIndex':goPerfilIndex,});
+    Get.toNamed(
+      RoutesNames.userProfileDetailPage,
+      arguments: {'userId': uid, 'goPerfilIndex': goPerfilIndex},
+    );
   }
 
-String formatMessageTime(DateTime dt) {
-  // ✅ Convertir de UTC a hora local del dispositivo
-  final local = dt.toLocal();
-  final now = DateTime.now();
-  final diff = now.difference(local);
-
-  final hh = local.hour.toString().padLeft(2, '0');
-  final mm = local.minute.toString().padLeft(2, '0');
-
-  if (diff.inDays == 0) return '$hh:$mm';
-  if (diff.inDays == 1) return 'Ayer $hh:$mm';
-  if (diff.inDays < 7) {
-    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    return '${days[local.weekday - 1]} $hh:$mm';
+  String formatMessageTime(DateTime dt) {
+    final local = dt.toLocal();
+    final now = DateTime.now();
+    final diff = now.difference(local);
+    final hh = local.hour.toString().padLeft(2, '0');
+    final mm = local.minute.toString().padLeft(2, '0');
+    if (diff.inDays == 0) return '$hh:$mm';
+    if (diff.inDays == 1) return 'Ayer $hh:$mm';
+    if (diff.inDays < 7) {
+      const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      return '${days[local.weekday - 1]} $hh:$mm';
+    }
+    return '${local.day}/${local.month}/${local.year}';
   }
-  return '${local.day}/${local.month}/${local.year}';
-}
 
-String formatDateSeparator(DateTime dt) {
-  // ✅ Convertir de UTC a hora local del dispositivo
-  final local = dt.toLocal();
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final msg = DateTime(local.year, local.month, local.day);
-
-  if (msg == today) return 'Hoy';
-  if (msg == today.subtract(const Duration(days: 1))) return 'Ayer';
-  if (now.difference(msg).inDays < 7) {
-    const days = [
-      'Lunes', 'Martes', 'Miércoles', 'Jueves',
-      'Viernes', 'Sábado', 'Domingo'
-    ];
-    return days[local.weekday - 1];
+  String formatDateSeparator(DateTime dt) {
+    final local = dt.toLocal();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final msg = DateTime(local.year, local.month, local.day);
+    if (msg == today) return 'Hoy';
+    if (msg == today.subtract(const Duration(days: 1))) return 'Ayer';
+    if (now.difference(msg).inDays < 7) {
+      const days = [
+        'Lunes', 'Martes', 'Miércoles', 'Jueves',
+        'Viernes', 'Sábado', 'Domingo'
+      ];
+      return days[local.weekday - 1];
+    }
+    return '${local.day}/${local.month}/${local.year}';
   }
-  return '${local.day}/${local.month}/${local.year}';
-}
 
-bool shouldShowDateSeparator(int index) {
-  if (index == 0) return true;
-  final cur = mensajes[index].enviadoEn.toLocal();
-  final prev = mensajes[index - 1].enviadoEn.toLocal();
-  return DateTime(cur.year, cur.month, cur.day) !=
-      DateTime(prev.year, prev.month, prev.day);
-}
+  bool shouldShowDateSeparator(int index) {
+    if (index == 0) return true;
+    final cur = mensajes[index].enviadoEn.toLocal();
+    final prev = mensajes[index - 1].enviadoEn.toLocal();
+    return DateTime(cur.year, cur.month, cur.day) !=
+        DateTime(prev.year, prev.month, prev.day);
+  }
 
-
-
-  DateTime pointerDownTime = DateTime.now();
-
-void setPointerDownTime(DateTime time) {
-  pointerDownTime = time;
-}
+  void setPointerDown(Offset position) => pointerDown = position;
+  void setPointerDownTime(DateTime time) => pointerDownTime = time;
 }

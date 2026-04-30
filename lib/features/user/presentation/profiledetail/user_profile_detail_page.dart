@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/features/stories/presentation/page/target_user_story_modal.dart';
 import 'package:tendria/features/user/presentation/controller/user_profile_controller.dart';
 
 class UserProfileDetailPage extends StatelessWidget {
@@ -248,57 +250,151 @@ class UserProfileDetailPage extends StatelessWidget {
                       ),
                     ),
 
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: ThemeColor.tertiaryColor,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(ThemeColor.largeRadius),
-                          bottomRight: Radius.circular(ThemeColor.largeRadius),
-                        ),
-                        boxShadow: [ThemeColor.lightShadow],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${controller.userName}, ${controller.userAge}',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: ThemeColor.textLightColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.location_on,
-                                size: 16,
-                                color: ThemeColor.textLightColor,
-                              ),
-                              const SizedBox(width: 4),
-
-                              Text(
-                                controller.currentUser.value?.city ??
-                                    'Cerca de ti',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: ThemeColor.textLightColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                 Positioned(
+  bottom: 0,
+  left: 0,
+  right: 0,
+  child: Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: ThemeColor.tertiaryColor,
+      borderRadius: BorderRadius.only(
+        bottomLeft: Radius.circular(ThemeColor.largeRadius),
+        bottomRight: Radius.circular(ThemeColor.largeRadius),
+      ),
+      boxShadow: [ThemeColor.lightShadow],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Nombre y ciudad (existente)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${controller.userName}, ${controller.userAge}',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: ThemeColor.textLightColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: ThemeColor.textLightColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    controller.currentUser.value?.city ?? 'Cerca de ti',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ThemeColor.textLightColor,
                     ),
                   ),
+                ],
+              ),
+            ],
+          ),
+        ),
+ 
+        Obx(() {
+          if (!controller.hasStories.value) return const SizedBox.shrink();
+
+          final user = controller.currentUser.value;
+          if (user == null) return const SizedBox.shrink();
+
+          return GestureDetector(
+            onTap: () {
+              if (Get.context != null) {
+                print('showTargetUserStoryModal in ${user.id}');
+                showTargetUserStoryModal(
+                  Get.context!,
+                  userId:  controller.userId.value,
+                  userName: user.name ?? 'Usuario',
+                  userPhoto: user.fotoUrl,
+                );
+              }
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFE040FB), Color(0xFFFF6D00)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(2.5),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                    ),
+                    padding: const EdgeInsets.all(1.5),
+                    child: ClipOval(
+                      child: user.fotoUrl != null && user.fotoUrl!.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: user.fotoUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              placeholder: (_, __) => Container(
+                                color: Colors.grey[800],
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white54,
+                                  size: 24,
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => Container(
+                                color: Colors.grey[800],
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white54,
+                                  size: 24,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              color: Colors.grey[800],
+                              child: const Icon(
+                                Icons.person,
+                                color: Colors.white54,
+                                size: 24,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Historia',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    ),
+  ),
+),
                 ],
               ),
             ),

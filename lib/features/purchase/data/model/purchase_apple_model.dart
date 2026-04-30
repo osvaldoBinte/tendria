@@ -9,7 +9,8 @@ class PurchaseAppleModel extends PurchaseAppleEntity{
   Map<String, dynamic> toJson() {
     return {
       'productoId':productoId,
-      'receiptData':receiptData
+      'receiptData':receiptData,
+       'sandbox': true
     };
   }
 }

@@ -2,12 +2,7 @@ import 'package:get/get.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class LanguageController extends GetxController {
-
-  // ==========================================
-  // HELPERS PÚBLICOS
-  // ==========================================
-
-  /// Idioma actual del usuario. Fallback: 'Español'
+ 
   String get lang {
     try {
       return Get.find<ProfileController>().primarylanguage;
@@ -15,21 +10,15 @@ class LanguageController extends GetxController {
       return 'Español';
     }
   }
-
-  /// Traduce una key al idioma actual del usuario
+ 
   String t(String key) => translate(key, lang);
-
-  /// Traduce una key a un idioma específico
+ 
   String translate(String key, String language) {
     return _translations[language]?[key] ??
         _translations['Español']?[key] ??
         key;
   }
-
-  // ==========================================
-  // TRADUCCIONES
-  // ==========================================
-
+ 
   static const Map<String, Map<String, String>> _translations = {
     'Español': {
       // ── UpdateProfilePage ──────────────────────────

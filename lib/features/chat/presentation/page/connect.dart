@@ -1,5 +1,6 @@
-import 'dart:async';
+// lib/features/chat/presentation/page/connect.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/services/auth_service.dart';
@@ -14,7 +15,6 @@ import 'package:tendria/features/chat/domain/usecase/setup_message_listener_usec
 import 'package:tendria/features/chat/domain/usecase/set_on_disconnected_callback_usecase.dart';
 
 class SignalRService extends GetxService with WidgetsBindingObserver {
-  // ── Usecases ──
   final ConnectSignalRUsecase connectSignalRUsecase;
   final DisconnectSignalRUsecase disconnectSignalRUsecase;
   final JoinChatUsecase joinChatUsecase;
@@ -23,7 +23,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
   final SetOnDisconnectedCallbackUsecase setOnDisconnectedCallbackUsecase;
   final OnMensajesLeidosUsecase onMensajesLeidosUsecase;
   final MarcarMensajesLeidosUsecase marcarMensajesLeidosUsecase;
-   AuthService authService = AuthService();
+  AuthService authService = AuthService();
 
   SignalRService({
     required this.connectSignalRUsecase,
@@ -35,23 +35,23 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
     required this.onMensajesLeidosUsecase,
     required this.marcarMensajesLeidosUsecase,
   });
-bool _isConnecting = false; 
-Completer<void>? _connectionCompleter;
 
   final RxBool isConnected = false.obs;
+  final RxBool isReconnecting = false.obs;
 
-  // ── Listeners ──
   final Map<int, Function(MensajeEntity)> _chatListeners = {};
   Function(MensajeEntity)? _globalListener;
 
-  // ── Reconexión ──
   int _reconnectAttempts = 0;
-  static const int _maxReconnectAttempts = 5;
-final RxBool isReconnecting = false.obs; // 👈 público y reactivo
+  static const int _maxReconnectAttempts = 8;
 
+  bool _isConnecting = false;
+  // Completer activo SOLO mientras hay una conexión en curso.
+  // Se crea justo antes de conectar y se nullea al terminar.
+  Completer<void>? _connectCompleter;
 
   // ─────────────────────────────────────────
-  //  CICLO DE VIDA
+  //  LIFECYCLE
   // ─────────────────────────────────────────
 
   @override
@@ -69,29 +69,20 @@ final RxBool isReconnecting = false.obs; // 👈 público y reactivo
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        _onAppResumed();
-        break;
-      case AppLifecycleState.paused:
-        print('📱 App en segundo plano');
-        break;
-      default:
-        break;
-    }
+    if (state == AppLifecycleState.resumed) _onAppResumed();
   }
 
-Future<void> _onAppResumed() async {
-  print('📱 App en primer plano - verificando SignalR...');
-  
-  // 👇 Si el proceso de reconexión anterior murió (app en bg agotó reintentos)
-  // resetear para dar una oportunidad fresca
-  if (!isConnected.value) {
-    isReconnecting.value = false;
+  Future<void> _onAppResumed() async {
+    print('📱 App en primer plano');
+    if (isConnected.value) {
+      print('✅ SignalR sigue conectado, sin acción necesaria');
+      return;
+    }
     _reconnectAttempts = 0;
+    isReconnecting.value = false;
+    print('🔄 Reconectando tras volver al primer plano...');
     await _reconnect();
   }
-}
 
   // ─────────────────────────────────────────
   //  CONEXIÓN
@@ -99,155 +90,248 @@ Future<void> _onAppResumed() async {
 
   Future<void> _connectIfAuthenticated() async {
     final token = await authService.getToken();
-    if (token != null) {
-      await connect(token);
+    if (token != null) await connect(token);
+  }
+
+  Future<void> connect(String token) async {
+    if (isConnected.value) return;
+    if (_isConnecting) {
+      print('⏳ Conexión en curso, esperando...');
+      await _awaitCompleter();
+      return;
+    }
+    await _doConnect(token);
+  }
+
+  /// Lógica de conexión pura. Siempre crea y completa _connectCompleter.
+  Future<void> _doConnect(String token) async {
+    _isConnecting = true;
+    _connectCompleter = Completer<void>();
+
+    try {
+      await connectSignalRUsecase.execute(token);
+      setupMessageListenerUsecase.execute(_routeMessage);
+      setOnDisconnectedCallbackUsecase.execute(_onUnexpectedDisconnect);
+      onMensajesLeidosUsecase.execute(_noop);
+
+      isConnected.value = true;
+      isReconnecting.value = false;
+      _reconnectAttempts = 0;
+
+      _connectCompleter!.complete();
+      print('✅ SignalR conectado');
+    } catch (e) {
+      isConnected.value = false;
+      print('❌ Error conectando SignalR: $e');
+      _connectCompleter!.completeError(e);
+    } finally {
+      _isConnecting = false;
+      _connectCompleter = null;
     }
   }
-Future<void> connect(String token) async {
-  if (isConnected.value || _isConnecting) return; // 👈 evitar doble llamada
-  _isConnecting = true;
-  try {
-    await connectSignalRUsecase.execute(token);
-    setupMessageListenerUsecase.execute(_routeMessage);
-    setOnDisconnectedCallbackUsecase.execute(_onUnexpectedDisconnect);
-    isConnected.value = true;
-    _reconnectAttempts = 0;
-    print('✅ SignalR conectado');
-  } catch (e) {
-    isConnected.value = false;
-    print('❌ Error conectando SignalR: $e');
-  } finally {
-    _isConnecting = false; // 👈 siempre liberar
+
+  /// Espera al completer activo con timeout de 20 s.
+  Future<void> _awaitCompleter() async {
+    final c = _connectCompleter;
+    if (c == null || c.isCompleted) return;
+    try {
+      await c.future.timeout(const Duration(seconds: 20));
+    } catch (_) {}
   }
-}
 
   // ─────────────────────────────────────────
-  //  DESCONEXIÓN INESPERADA
+  //  RECONEXIÓN
   // ─────────────────────────────────────────
 
   void _onUnexpectedDisconnect() {
-    if (isReconnecting.value) return; // evitar múltiples reconexiones simultáneas
+    if (isReconnecting.value || _isConnecting) return;
     print('⚠️ SignalR desconectado inesperadamente');
     isConnected.value = false;
     _scheduleReconnect();
   }
 
   Future<void> _scheduleReconnect() async {
-  if (_reconnectAttempts >= _maxReconnectAttempts) {
-    _reconnectAttempts = 0;
-    isReconnecting.value = false; // 👈
-    return;
-  }
-  isReconnecting.value = true; // 👈
-  final delay = Duration(seconds: (2 << _reconnectAttempts));
-  _reconnectAttempts++;
-  await Future.delayed(delay);
-  await _reconnect();
-}
-
-
-  Future<void> _reconnect() async {
-      if (isConnected.value || _isConnecting) return; // 👈 mismo guard
-
-    final token = await authService.getToken();
-    if (token == null) {
-      print('⚠️ No hay token disponible para reconectar');
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      print('❌ Máximo de reintentos alcanzado');
+      _reconnectAttempts = 0;
       isReconnecting.value = false;
       return;
     }
+
+    isReconnecting.value = true;
+    final seconds = _reconnectAttempts < 4 ? (2 << _reconnectAttempts) : 30;
+    _reconnectAttempts++;
+
+    print('⏳ Reintento $_reconnectAttempts en ${seconds}s...');
+    await Future.delayed(Duration(seconds: seconds));
+    await _reconnect();
+  }
+
+  Future<void> _reconnect() async {
+    if (isConnected.value || _isConnecting) return;
+
+    final token = await authService.getToken();
+    if (token == null) {
+      print('⚠️ No hay token para reconectar');
+      isReconnecting.value = false;
+      return;
+    }
+
+    _isConnecting = true;
+    // ✅ Crear SIEMPRE un completer nuevo antes de usarlo
+    _connectCompleter = Completer<void>();
 
     try {
       await connectSignalRUsecase.execute(token);
       setupMessageListenerUsecase.execute(_routeMessage);
       setOnDisconnectedCallbackUsecase.execute(_onUnexpectedDisconnect);
+      onMensajesLeidosUsecase.execute(_noop);
+
       isConnected.value = true;
-      _reconnectAttempts = 0;
       isReconnecting.value = false;
+      _reconnectAttempts = 0;
 
-      // Rejoinear todos los chats que estaban activos
-      for (final chatId in _chatListeners.keys) {
-        try {
-          await joinChatUsecase.execute(chatId);
-          print('✅ Re-unido al chat #$chatId');
-        } catch (e) {
-          print('❌ Error re-uniéndose al chat #$chatId: $e');
-        }
-      }
+      // ✅ Completar ANTES de cualquier await posterior
+      _connectCompleter!.complete();
 
+      await _rejoinActiveChats();
       print('✅ SignalR reconectado con ${_chatListeners.length} chats activos');
     } catch (e) {
       isConnected.value = false;
       print('❌ Reintento $_reconnectAttempts falló: $e');
-      await _scheduleReconnect(); // volver a intentar con más delay
+
+      // ✅ Completar con error y limpiar ANTES de llamar _scheduleReconnect
+      //    para evitar que el próximo intento encuentre un completer viejo.
+      if (!_connectCompleter!.isCompleted) {
+        _connectCompleter!.completeError(e);
+      }
+      _connectCompleter = null;
+      _isConnecting = false;
+
+      await _scheduleReconnect();
+      return;
     }
+
+    // Path feliz: limpiar al final
+    _connectCompleter = null;
+    _isConnecting = false;
+  }
+
+  Future<void> _rejoinActiveChats() async {
+    for (final chatId in List<int>.from(_chatListeners.keys)) {
+      try {
+        await joinChatUsecase.execute(chatId);
+        print('✅ Re-unido al chat #$chatId');
+      } catch (e) {
+        print('❌ Error re-uniéndose al chat #$chatId: $e');
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────
+  //  waitUntilConnected — usado por ChatController al enviar mensajes
+  // ─────────────────────────────────────────
+
+  /// Espera hasta que SignalR esté conectado o lanza excepción por timeout.
+  /// Orden de prioridad:
+  ///   1. Ya conectado → retorna inmediatamente.
+  ///   2. Hay conexión en curso → espera a que termine.
+  ///   3. No hay conexión → intenta activamente.
+  ///   4. Espera cambio reactivo en isConnected.
+  Future<void> waitUntilConnected({
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
+    if (isConnected.value) return;
+
+    if (_isConnecting) {
+      await _awaitCompleter();
+      if (isConnected.value) return;
+    }
+
+    if (!isConnected.value && !_isConnecting) {
+      final token = await authService.getToken();
+      if (token != null) await _doConnect(token);
+      if (isConnected.value) return;
+    }
+
+    // Espera reactiva como último recurso
+    final waiter = Completer<void>();
+    ever(isConnected, (bool connected) {
+      if (connected && !waiter.isCompleted) waiter.complete();
+    });
+
+    await waiter.future.timeout(
+      timeout,
+      onTimeout: () =>
+          throw Exception('Timeout: no se pudo conectar a SignalR'),
+    );
   }
 
   // ─────────────────────────────────────────
   //  SUSCRIPCIONES
   // ─────────────────────────────────────────
 
-Future<void> subscribeToChat(int chatId, Function(MensajeEntity) callback) async {
-  // Si está en proceso de conexión, esperar a que termine
-  if (_isConnecting && _connectionCompleter != null) {
-    print('⏳ Esperando conexión en curso...');
-    try {
-      await _connectionCompleter!.future.timeout(
-        const Duration(seconds: 15),
-        onTimeout: () => throw Exception('Timeout esperando SignalR'),
-      );
-    } catch (e) {
-      print('❌ Error esperando conexión: $e');
+  Future<void> subscribeToChat(
+      int chatId, Function(MensajeEntity) callback) async {
+    if (_isConnecting) {
+      print('⏳ Esperando conexión para suscribirse al chat #$chatId...');
+      await _awaitCompleter();
     }
-  }
 
-  // Si aún no conectó, intentar una vez más
-  if (!isConnected.value) {
-    await _reconnect();
     if (!isConnected.value) {
-      throw Exception('SignalR no está disponible');
+      await _reconnect();
+      if (!isConnected.value) {
+        throw Exception('SignalR no disponible para chat #$chatId');
+      }
     }
+
+    _chatListeners[chatId] = callback;
+    await joinChatUsecase.execute(chatId);
+    print('✅ Suscrito al chat #$chatId');
   }
 
-  _chatListeners[chatId] = callback;
-  await joinChatUsecase.execute(chatId);
-  print('✅ Suscrito al chat #$chatId');
-}
   Future<void> unsubscribeFromChat(int chatId) async {
     _chatListeners.remove(chatId);
     try {
       await leaveChatUsecase.execute(chatId);
       print('👋 Desuscrito del chat #$chatId');
     } catch (e) {
-      print('❌ Error desuscribiéndose del chat #$chatId: $e');
+      print('⚠️ Error desuscribiéndose del chat #$chatId: $e');
     }
   }
 
-  void setGlobalListener(Function(MensajeEntity) callback) {
-    _globalListener = callback;
-  }
+  void setGlobalListener(Function(MensajeEntity) callback) =>
+      _globalListener = callback;
 
-  void removeGlobalListener() {
-    _globalListener = null;
-  }
+  void removeGlobalListener() => _globalListener = null;
 
   // ─────────────────────────────────────────
-  //  ENRUTAMIENTO DE MENSAJES
+  //  ENRUTAMIENTO
   // ─────────────────────────────────────────
 
   void _routeMessage(MensajeEntity mensaje) {
-    // Mandar al chat específico si está abierto
     _chatListeners[mensaje.chatId]?.call(mensaje);
-    // Siempre notificar al listener global (badges, lista de chats)
     _globalListener?.call(mensaje);
   }
-  // En SignalRService
-Future<void> disconnect() async {
-  try {
+
+  // Callback vacío para onMensajesLeidos en connect/reconnect
+  // (el usecase ya enruta al datasource directamente)
+  void _noop(DateTime _) {}
+
+  // ─────────────────────────────────────────
+  //  LOGOUT
+  // ─────────────────────────────────────────
+
+  Future<void> disconnect() async {
+    _reconnectAttempts = _maxReconnectAttempts;
     isReconnecting.value = false;
-    _reconnectAttempts = _maxReconnectAttempts; // evitar auto-reconexión
-    
-    // Salir de todos los chats activos
-    for (final chatId in _chatListeners.keys.toList()) {
+    _isConnecting = false;
+    if (_connectCompleter != null && !_connectCompleter!.isCompleted) {
+      _connectCompleter!.completeError('logout');
+    }
+    _connectCompleter = null;
+
+    for (final chatId in List<int>.from(_chatListeners.keys)) {
       try {
         await leaveChatUsecase.execute(chatId);
       } catch (_) {}
@@ -258,20 +342,29 @@ Future<void> disconnect() async {
     await disconnectSignalRUsecase.execute();
     isConnected.value = false;
     print('✅ SignalR desconectado por logout');
-  } catch (e) {
-    print('❌ Error desconectando SignalR: $e');
   }
-}
- Future<void> marcarMensajesLeidos(int chatId, int otroUserId) async {
+
+  // ─────────────────────────────────────────
+  //  MENSAJES LEÍDOS
+  // ─────────────────────────────────────────
+
+  Future<void> marcarMensajesLeidos(int chatId, int otroUserId) async {
     if (!isConnected.value) return;
     await marcarMensajesLeidosUsecase.execute(chatId, otroUserId);
   }
 
-  // ✅ Registrar listener del evento MensajesLeidos
   void escucharMensajesLeidos(Function(DateTime) callback) {
-    print('👂 Registrando listener para mensajes leídos');
     onMensajesLeidosUsecase.execute(callback);
   }
 
+  // ─────────────────────────────────────────
+  //  RETRY MANUAL (UI)
+  // ─────────────────────────────────────────
 
+  Future<void> retryConnection() async {
+    if (isConnected.value || _isConnecting) return;
+    _reconnectAttempts = 0;
+    isReconnecting.value = false;
+    await _reconnect();
+  }
 }

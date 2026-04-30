@@ -34,14 +34,13 @@ class NearbyUsersController extends GetxController {
   final RxInt currentUserIndex = 0.obs;
   final RxInt currentPage = 1.obs;
   final RxInt pageSize = 6.obs;
-final RxBool noMoreUsers = false.obs;
+  final RxBool noMoreUsers = false.obs;
 
   final RxMap<int, bool> userHasStories = <int, bool>{}.obs;
 
   ProfileController get myProfileController => Get.find<ProfileController>();
 
   late PageController pageController;
-
 
   final Rx<GetUserEntity?> currentProfile = Rx<GetUserEntity?>(null);
 
@@ -52,16 +51,15 @@ final RxBool noMoreUsers = false.obs;
     return nearbyUsers[currentUserIndex.value];
   }
 
-
   List<String> get currentGallery => _buildGallery(currentProfile.value);
 
-String get currentCity {
-  final profile = currentProfile.value;
-  if (profile == null || profile.city == null) {
-    return '';
+  String get currentCity {
+    final profile = currentProfile.value;
+    if (profile == null || profile.city == null) {
+      return '';
+    }
+    return profile.city!;
   }
-  return profile.city!;
-}
 
   @override
   void onInit() {
@@ -75,8 +73,6 @@ String get currentCity {
     pageController.dispose();
     super.onClose();
   }
-
-
 
   Future<void> loadNearbyUsers() async {
     try {
@@ -127,8 +123,6 @@ String get currentCity {
     }
   }
 
-
-
   void updateCurrentProfile() {
     if (nearbyUsers.isEmpty || currentUserIndex.value >= nearbyUsers.length) {
       return;
@@ -164,18 +158,15 @@ String get currentCity {
   void onPageChanged(int index) {
     currentImageIndex.value = index;
   }
- 
 
-void nextUser() {
-  if (currentUserIndex.value < nearbyUsers.length - 1) {
-    currentUserIndex.value++;
-    updateCurrentProfile();
-  } else {
-    noMoreUsers.value = true; // ← activa el estado vacío
+  void nextUser() {
+    if (currentUserIndex.value < nearbyUsers.length - 1) {
+      currentUserIndex.value++;
+      updateCurrentProfile();
+    } else {
+      noMoreUsers.value = true; // ← activa el estado vacío
+    }
   }
-}
-
-
 
   Future<void> toggleFavorite() async {
     if (currentUser == null || isProcessingLike.value) return;
@@ -185,15 +176,13 @@ void nextUser() {
 
     try {
       isProcessingLike.value = true;
-      await toggleLikeUsecase.execute(currentUser!.id ?? 0, isFavorite.value);
+      //  await toggleLikeUsecase.execute(currentUser!.id ?? 0, isFavorite.value);
 
       if (isFavorite.value) {
         showSuccessSnackbar('¡Te gusta ${currentProfile.value?.name}!');
         Future.delayed(const Duration(milliseconds: 1000), nextUser);
       } else {
-        showInfoSnackbar(
-          '${currentProfile.value?.name} removido de favoritos',
-        );
+        showInfoSnackbar('${currentProfile.value?.name} removido de favoritos');
       }
     } catch (e) {
       isFavorite.value = previousState;
@@ -208,7 +197,7 @@ void nextUser() {
 
     try {
       isProcessingLike.value = true;
-      await toggleLikeUsecase.execute(currentUser!.id ?? 0, true);
+      //  await toggleLikeUsecase.execute(currentUser!.id ?? 0, true);
       showSuccessSnackbar('¡Le diste like a ${currentProfile.value?.name}!');
       Future.delayed(const Duration(milliseconds: 1000), nextUser);
     } catch (e) {
@@ -223,7 +212,7 @@ void nextUser() {
 
     try {
       isProcessingLike.value = true;
-      await toggleLikeUsecase.execute(currentUser!.id ?? 0, false);
+      //  await toggleLikeUsecase.execute(currentUser!.id ?? 0, false);
       showInfoSnackbar('Pasando al siguiente perfil');
       nextUser();
     } catch (e) {
@@ -235,61 +224,58 @@ void nextUser() {
 
   void sendMessage() => sendLike();
   void skipUser() => rejectUser();
-  
 
-void sendMensaje() {
-  final user = currentProfile.value;
-  if (user == null) return;
+  void sendMensaje() {
+    final user = currentProfile.value;
+    if (user == null) return;
 
-  final chat = user.chat;
+    final chat = user.chat;
 
+    if (chat != null && chat.pendingAcepted) {
+      final likedByController = Get.find<LikedByUsersController>();
+      likedByController.unlockChat(
+        PendingChatEntity(
+          chatId: chat.id,
+          userId: user.id ?? 0,
+          name: user.name ?? 'Usuario',
+          photoUrl: user.fotoUrl,
+          age: user.age,
+          hiddenMessage: null,
+          createdAt: DateTime.now(),
+          unlockCost: 0,
+        ),
+      );
+      return;
+    }
 
-  if (chat != null && chat.pendingAcepted) {
-    final likedByController = Get.find<LikedByUsersController>();
-    likedByController.unlockChat(
-      PendingChatEntity(
-        chatId: chat.id,
-        userId: user.id ?? 0,
-        name: user.name ?? 'Usuario',
-        photoUrl: user.fotoUrl,
-        age: user.age,
-        hiddenMessage: null,
-        createdAt: DateTime.now(),
-        unlockCost: 0,
-      ),
-    );
-    return;
-  }
+    if (chat == null || chat.id == 0) {
+      Get.toNamed(
+        RoutesNames.chatPage,
+        arguments: {
+          'userid': user.id,
+          'name': user.name ?? 'Usuario',
+          'goHomeIndex': 2,
+        },
+      );
+      return;
+    }
 
-
-  if (chat == null || chat.id == 0) {
     Get.toNamed(
       RoutesNames.chatPage,
       arguments: {
-        'userid': user.id,
+        'chatId': chat.id,
         'name': user.name ?? 'Usuario',
         'goHomeIndex': 2,
       },
     );
-    return;
   }
 
+  bool get showRejectButton {
+    final chat = currentProfile.value?.chat;
+    if (chat != null && chat.id != 0) return false;
+    return true;
+  }
 
-  Get.toNamed(
-    RoutesNames.chatPage,
-    arguments: {
-      'chatId': chat.id,
-      'name': user.name ?? 'Usuario',
-      'goHomeIndex': 2,
-    },
-  );
-}
-
-bool get showRejectButton {
-  final chat = currentProfile.value?.chat;
-  if (chat != null && chat.id != 0) return false;
-  return true;
-}
   void sendSuperLike() {
     showInfoSnackbar(
       'Le has enviado un Super Like a ${currentProfile.value?.name}',
@@ -335,8 +321,7 @@ bool get showRejectButton {
     showCustomAlert(
       context: Get.context!,
       title: 'Reportar usuario',
-      message:
-          '¿Por qué quieres reportar a ${currentProfile.value?.name}?',
+      message: '¿Por qué quieres reportar a ${currentProfile.value?.name}?',
       confirmText: 'Reportar',
       cancelText: 'Cancelar',
       type: CustomAlertType.warning,
@@ -349,8 +334,6 @@ bool get showRejectButton {
       'Gracias por tu reporte. Revisaremos el perfil de ${currentProfile.value?.name}',
     );
   }
-
-
 
   void showUserPreviewDialog(GetUserEntity user, int userIndex) {
     currentUserIndex.value = userIndex;
@@ -381,7 +364,6 @@ bool get showRejectButton {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                
                 SizedBox(
                   height: 320,
                   child: Stack(
@@ -404,7 +386,7 @@ bool get showRejectButton {
                           }
                           return CachedNetworkImage(
                             imageUrl: url,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                             placeholder: (_, __) => Container(
                               color: ThemeColor.backgroundColorfondo,
                               child: Center(
@@ -424,7 +406,6 @@ bool get showRejectButton {
                           );
                         },
                       ),
-
 
                       if (gallery.length > 1)
                         Positioned(
@@ -453,7 +434,6 @@ bool get showRejectButton {
                           ),
                         ),
 
-
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -475,8 +455,7 @@ bool get showRejectButton {
                             children: [
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
@@ -508,7 +487,6 @@ bool get showRejectButton {
                                   ],
                                 ),
                               ),
-
 
                               Obx(() {
                                 if (!hasStories.value) {
@@ -551,7 +529,8 @@ bool get showRejectButton {
                                           ),
                                           padding: const EdgeInsets.all(1.5),
                                           child: ClipOval(
-                                            child: user.fotoUrl != null &&
+                                            child:
+                                                user.fotoUrl != null &&
                                                     user.fotoUrl!.isNotEmpty
                                                 ? CachedNetworkImage(
                                                     imageUrl: user.fotoUrl!,
@@ -560,23 +539,26 @@ bool get showRejectButton {
                                                     height: double.infinity,
                                                     placeholder: (_, __) =>
                                                         Container(
-                                                      color: Colors.grey[800],
-                                                      child: const Icon(
-                                                        Icons.person,
-                                                        color: Colors.white54,
-                                                        size: 24,
-                                                      ),
-                                                    ),
-                                                    errorWidget:
-                                                        (_, __, ___) =>
-                                                            Container(
-                                                      color: Colors.grey[800],
-                                                      child: const Icon(
-                                                        Icons.person,
-                                                        color: Colors.white54,
-                                                        size: 24,
-                                                      ),
-                                                    ),
+                                                          color:
+                                                              Colors.grey[800],
+                                                          child: const Icon(
+                                                            Icons.person,
+                                                            color:
+                                                                Colors.white54,
+                                                            size: 24,
+                                                          ),
+                                                        ),
+                                                    errorWidget: (_, __, ___) =>
+                                                        Container(
+                                                          color:
+                                                              Colors.grey[800],
+                                                          child: const Icon(
+                                                            Icons.person,
+                                                            color:
+                                                                Colors.white54,
+                                                            size: 24,
+                                                          ),
+                                                        ),
                                                   )
                                                 : Container(
                                                     color: Colors.grey[800],
@@ -607,7 +589,6 @@ bool get showRejectButton {
                         ),
                       ),
 
-
                       Positioned(
                         top: 12,
                         right: 12,
@@ -631,13 +612,11 @@ bool get showRejectButton {
                   ),
                 ),
 
-
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      
                       if (user.bio != null &&
                           user.bio!.isNotEmpty &&
                           double.tryParse(user.bio!) == null) ...[
@@ -651,7 +630,6 @@ bool get showRejectButton {
                         ),
                         const SizedBox(height: 12),
                       ],
-
 
                       if (user.status != null && user.status!.isNotEmpty)
                         Container(
@@ -675,8 +653,7 @@ bool get showRejectButton {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    ThemeColor.radarScanner.withOpacity(0.2),
+                                color: ThemeColor.radarScanner.withOpacity(0.2),
                                 blurRadius: 4,
                               ),
                             ],
@@ -693,9 +670,6 @@ bool get showRejectButton {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-
- 
-
 
                       SizedBox(
                         width: double.infinity,
@@ -738,7 +712,6 @@ bool get showRejectButton {
 
                       const SizedBox(height: 8),
 
-
                       SizedBox(
                         width: double.infinity,
                         height: 44,
@@ -779,8 +752,6 @@ bool get showRejectButton {
     );
   }
 
-
-
   Widget buildUserAvatarWithStory({
     required GetUserEntity user,
     required VoidCallback onTapAvatar,
@@ -809,10 +780,7 @@ bool get showRejectButton {
         padding: const EdgeInsets.all(2),
         child: ClipOval(
           child: user.fotoUrl != null && user.fotoUrl!.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: user.fotoUrl!,
-                  fit: BoxFit.cover,
-                )
+              ? CachedNetworkImage(imageUrl: user.fotoUrl!, fit: BoxFit.cover)
               : Container(
                   color: Colors.grey,
                   child: const Icon(Icons.person, color: Colors.white),

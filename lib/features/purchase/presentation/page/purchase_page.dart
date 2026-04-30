@@ -17,7 +17,7 @@ class PurchasePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: ThemeColor.backgroundColor,
       appBar: AppBar(
-        backgroundColor: ThemeColor.surfaceColor,
+        backgroundColor: ThemeColor.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -25,255 +25,245 @@ class PurchasePage extends StatelessWidget {
             color: ThemeColor.textPrimaryColor,
             size: 20,
           ),
-          onPressed: () => Get.offNamed(RoutesNames.homePage)
+          onPressed: () => Get.offNamed(RoutesNames.homePage),
         ),
-        title: Text('Adquirir Créditos', style: ThemeColor.headingSmall),
-        centerTitle: true,
       ),
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: Obx(() { 
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (controller.errorMessage.isNotEmpty) {
-                  _showSnackbar(
-                    context,
-                    controller.errorMessage.value,
-                    isError: true,
-                  );
-                  controller.clearMessages();
-                }
-                if (controller.successMessage.isNotEmpty) {
-                  _showSnackbar(
-                    context,
-                    controller.successMessage.value,
-                    isError: false,
-                  );
-                  controller.clearMessages();
-                }
-              });
+      body: Obx(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (controller.errorMessage.isNotEmpty) {
+            _showSnackbar(context, controller.errorMessage.value, isError: true);
+            controller.clearMessages();
+          }
+          if (controller.successMessage.isNotEmpty) {
+            _showSnackbar(context, controller.successMessage.value, isError: false);
+            controller.clearMessages();
+          }
+        });
 
-              if (controller.isLoadingProducts.value) {
-                return const Center(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Título ───────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
+              child: Text(
+                'Adquirir Créditos',
+                style: ThemeColor.headingLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 28,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+              child: Text(
+                'Agrega créditos a tu cuenta y desbloquea más conexiones.',
+                style: ThemeColor.bodyMedium.copyWith(
+                  color: ThemeColor.textSecondaryColor,
+                ),
+              ),
+            ),
+
+            // ── Contenido principal ──────────────────────────────────
+            if (controller.isLoadingProducts.value)
+              const Expanded(
+                child: Center(
                   child: CircularProgressIndicator(
                     color: ThemeColor.primaryColor,
                   ),
+                ),
+              )
+            else if (controller.products.isEmpty)
+              Expanded(child: _buildEmptyState(controller))
+            else
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.4,
+                    ),
+                    itemCount: controller.products.length,
+                    itemBuilder: (_, index) {
+                      final product = controller.products[index];
+                      return _buildProductTile(controller, product);
+                    },
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 8),
+
+            // ── Método de pago ───────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+              child: Text(
+                'Método de pago:',
+                style: ThemeColor.bodyMedium.copyWith(
+                  color: ThemeColor.textPrimaryColor,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _buildPlatformBadge(),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Botón comprar ────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+              child: Obx(() {
+                final isPurchasing = controller.isPurchasing.value;
+                final hasSelection =
+                    controller.selectedProductId.value.isNotEmpty;
+
+                return SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: (isPurchasing || !hasSelection)
+                        ? null
+                        : () {
+                            final product = controller.products.firstWhere(
+                              (p) =>
+                                  p.productId ==
+                                  controller.selectedProductId.value,
+                            );
+                            controller.buyProduct(product);
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ThemeColor.primaryColor,
+                      disabledBackgroundColor:
+                          ThemeColor.primaryColor.withOpacity(0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isPurchasing
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Comprar',
+                            style: ThemeColor.buttonText.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                  ),
                 );
-              }
-
-              if (controller.products.isEmpty) {
-                return _buildEmptyState(controller);
-              }
-
-              return _buildProductList(controller);
-            }),
-          ),
-          _buildPlatformBadge(),
-        ],
-      ),
-    );
-  }
- 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: ThemeColor.paddingLarge,
-        vertical: ThemeColor.paddingLarge,
-      ),
-      decoration: BoxDecoration(
-        color: ThemeColor.primaryColor,
-        boxShadow: [ThemeColor.darkShadow],
-      ),
-      child: Column(
-        children: [
-          const Icon(Icons.bolt_rounded, color: Colors.amber, size: 40),
-          const SizedBox(height: 8),
-          Text(
-            'Potencia tu experiencia',
-            style: ThemeColor.headingMedium.copyWith(
-              color: ThemeColor.textLightColor,
+              }),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Selecciona el paquete de créditos que más te convenga',
-            style: ThemeColor.bodyMedium.copyWith(
-              color: ThemeColor.textLightColor.withOpacity(0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
- 
-  Widget _buildProductList(PurchaseController controller) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(ThemeColor.paddingLarge),
-      itemCount: controller.products.length,
-      itemBuilder: (_, index) {
-        final product = controller.products[index];
-        return _buildProductCard(controller, product);
-      },
-    );
-  }
- 
-  Widget _buildProductCard(
-    PurchaseController controller,
-    PurchaseEntity product,
-  ) {
+
+  // ── Tile de producto ────────────────────────────────────────────────────
+  Widget _buildProductTile(
+      PurchaseController controller, PurchaseEntity product) {
     return Obx(() {
       final isSelected =
           controller.selectedProductId.value == product.productId;
-      final isPurchasing = controller.isPurchasing.value && isSelected;
+
+      // displayPrice() devuelve precio real de la tienda si se conectó,
+      // o product.price del backend como fallback.
+      final priceLabel = controller.displayPrice(product);
 
       return GestureDetector(
         onTap: controller.isPurchasing.value
             ? null
-            : () => controller.buyProduct(product),
+            : () => controller.selectedProductId.value = product.productId,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.only(bottom: ThemeColor.paddingMedium),
-          padding: const EdgeInsets.all(ThemeColor.paddingMedium),
+          duration: const Duration(milliseconds: 180),
           decoration: BoxDecoration(
             color: isSelected
-                ? ThemeColor.primaryColor
+                ? ThemeColor.primaryColor.withOpacity(0.08)
                 : ThemeColor.surfaceColor,
-            borderRadius: ThemeColor.largeBorderRadius,
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isSelected
-                  ? ThemeColor.accentColor
+                  ? ThemeColor.primaryColor
                   : ThemeColor.dividerColor,
               width: isSelected ? 2 : 1,
             ),
-            boxShadow: [
-              isSelected ? ThemeColor.darkShadow : ThemeColor.lightShadow,
-            ],
           ),
-          child: Row(
-            children: [ 
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.amber.withOpacity(0.2)
-                      : ThemeColor.primaryColor.withOpacity(0.08),
-                  borderRadius: ThemeColor.mediumBorderRadius,
-                ),
-                child: Center(
-                  child: Text(
-                    _creditEmoji(product.credits),
-                    style: const TextStyle(fontSize: 26),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  priceLabel,
+                  style: ThemeColor.subtitleLarge.copyWith(
+                    color: isSelected
+                        ? ThemeColor.primaryColor
+                        : ThemeColor.textPrimaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
                   ),
                 ),
-              ),
-              const SizedBox(width: ThemeColor.paddingMedium),
- 
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name ?? product.productId,
-                      style: ThemeColor.subtitleLarge.copyWith(
-                        color: isSelected
-                            ? ThemeColor.textLightColor
-                            : ThemeColor.textPrimaryColor,
-                      ),
-                    ),
-                    if (product.descripcion != null) ...[
-                      const SizedBox(height: 2),
+                if (product.credits != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.bolt_rounded,
+                          color: Colors.amber, size: 12),
+                      const SizedBox(width: 2),
                       Text(
-                        product.descripcion!,
-                        style: ThemeColor.bodySmall.copyWith(
-                          color: isSelected
-                              ? ThemeColor.textLightColor.withOpacity(0.75)
-                              : ThemeColor.textSecondaryColor,
+                        '${product.credits} créditos',
+                        style: ThemeColor.caption.copyWith(
+                          color: ThemeColor.textSecondaryColor,
+                          fontSize: 11,
                         ),
                       ),
                     ],
-                    if (product.credits != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.bolt_rounded,
-                            color: Colors.amber,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${product.credits} créditos',
-                            style: ThemeColor.caption.copyWith(
-                              color: Colors.amber,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
- 
-              isPurchasing
-                  ? const SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.amber,
-                      ),
-                    )
-                  : Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.amber
-                            : ThemeColor.primaryColor,
-                        borderRadius: ThemeColor.circularBorderRadius,
-                      ),
-                      child: Text(
-                        product.price != null
-                            ? '\$${product.price}'
-                            : 'Comprar',
-                        style: ThemeColor.buttonText.copyWith(
-                          color: isSelected
-                              ? ThemeColor.primaryColor
-                              : ThemeColor.textLightColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-            ],
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       );
     });
   }
- 
+
+  // ── Badge plataforma ────────────────────────────────────────────────────
+  Widget _buildPlatformBadge() {
+    final isIOS = Platform.isIOS;
+    return _PaymentChip(
+      icon: isIOS ? Icons.apple : Icons.android,
+      label: isIOS ? 'App Store' : 'Google Play',
+      selected: true,
+    );
+  }
+
+  // ── Empty state ─────────────────────────────────────────────────────────
   Widget _buildEmptyState(PurchaseController controller) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.shopping_bag_outlined,
-            size: 64,
-            color: ThemeColor.disabledColor,
-          ),
+          Icon(Icons.shopping_bag_outlined,
+              size: 64, color: ThemeColor.disabledColor),
           const SizedBox(height: ThemeColor.paddingMedium),
           Text(
             'Sin productos disponibles',
-            style: ThemeColor.subtitleMedium.copyWith(
-              color: ThemeColor.textSecondaryColor,
-            ),
+            style: ThemeColor.subtitleMedium
+                .copyWith(color: ThemeColor.textSecondaryColor),
           ),
           const SizedBox(height: ThemeColor.paddingLarge),
           ThemeColor.widgetButton(
@@ -288,60 +278,68 @@ class PurchasePage extends StatelessWidget {
       ),
     );
   }
- 
-  Widget _buildPlatformBadge() {
-    final isIOS = Platform.isIOS;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: ThemeColor.paddingMedium),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isIOS ? Icons.apple : Icons.android,
-            size: 16,
-            color: ThemeColor.textSecondaryColor,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            isIOS
-                ? 'Pago procesado por App Store'
-                : 'Pago procesado por Google Play',
-            style: ThemeColor.caption,
-          ),
-        ],
-      ),
-    );
-  }
 
-  String _creditEmoji(num? credits) {
-    final n = credits?.toInt() ?? 0;
-    if (n >= 1000) return '💎';
-    if (n >= 500) return '🔥';
-    if (n >= 100) return '⭐';
-    return '✨';
-  }
-
-  void _showSnackbar(
-    BuildContext context,
-    String message, {
-    required bool isError,
-  }) {
+  // ── Snackbar ────────────────────────────────────────────────────────────
+  void _showSnackbar(BuildContext context, String message,
+      {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,
-          style: ThemeColor.bodyMedium.copyWith(
-            color: ThemeColor.textLightColor,
-          ),
+          style:
+              ThemeColor.bodyMedium.copyWith(color: ThemeColor.textLightColor),
         ),
-        backgroundColor: isError
-            ? ThemeColor.errorColor
-            : ThemeColor.successColor,
+        backgroundColor:
+            isError ? ThemeColor.errorColor : ThemeColor.successColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: ThemeColor.mediumBorderRadius,
-        ),
+            borderRadius: ThemeColor.mediumBorderRadius),
         margin: const EdgeInsets.all(ThemeColor.paddingMedium),
+      ),
+    );
+  }
+}
+
+// ── Chip de método de pago ──────────────────────────────────────────────────
+class _PaymentChip extends StatelessWidget {
+  const _PaymentChip({
+    required this.icon,
+    required this.label,
+    this.selected = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: selected
+            ? ThemeColor.primaryColor.withOpacity(0.08)
+            : ThemeColor.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: selected ? ThemeColor.primaryColor : ThemeColor.dividerColor,
+          width: selected ? 2 : 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: ThemeColor.textPrimaryColor),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: ThemeColor.bodyMedium.copyWith(
+              fontWeight: FontWeight.w500,
+              color: ThemeColor.textPrimaryColor,
+            ),
+          ),
+        ],
       ),
     );
   }

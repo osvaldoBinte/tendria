@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
-import 'package:in_app_purchase_storekit/store_kit_wrappers.dart'; 
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_apple_entity.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_entity.dart';
@@ -33,6 +32,11 @@ class PurchaseController extends GetxController {
   final RxList<PurchaseEntity> products = <PurchaseEntity>[].obs;
   final RxString selectedProductId = ''.obs;
 
+  // productId → { 'price': '$100', 'currency': 'MXN' }
+  // currency viene directo del SDK de Apple/Google, nunca del locale del dispositivo
+  final RxMap<String, Map<String, String>> storePrices =
+      <String, Map<String, String>>{}.obs;
+
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   bool _iapAvailable = false;
@@ -51,7 +55,7 @@ class PurchaseController extends GetxController {
   }
 
   // ─────────────────────────────────────────────
-  // INIT
+  // INIT IAP
   // ─────────────────────────────────────────────
 
   Future<void> _initIAP() async {
@@ -60,8 +64,7 @@ class PurchaseController extends GetxController {
     print('📦 IAP disponible: $_iapAvailable');
 
     if (!_iapAvailable) {
-      errorMessage.value = 'Las compras no están disponibles en este dispositivo';
-      showErrorSnackbar('Las compras no están disponibles en este dispositivo');
+      print('⚠️ IAP no disponible, se usarán precios del backend');
       return;
     }
 
@@ -98,15 +101,15 @@ class PurchaseController extends GetxController {
 
   Future<void> loadProducts() async {
     try {
-      print('🛒 Cargando productos...');
+      print('🛒 Cargando productos del backend...');
       isLoadingProducts.value = true;
       errorMessage.value = '';
+
       final result = await getPurchasesUsecase.call();
       products.assignAll(result);
-      print('✅ Productos cargados: ${result.length}');
-      for (final p in result) {
-        print('   → ${p.productId}');
-      }
+      print('✅ Productos del backend: ${result.length}');
+
+      await _fetchStorePrices(result);
     } catch (e) {
       print('❌ Error al cargar productos: $e');
       errorMessage.value = 'Error al cargar los productos';
@@ -114,6 +117,112 @@ class PurchaseController extends GetxController {
     } finally {
       isLoadingProducts.value = false;
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // FETCH PRECIOS DE TIENDA
+  // ─────────────────────────────────────────────
+
+  Future<void> _fetchStorePrices(List<PurchaseEntity> productList) async {
+    if (!_iapAvailable || productList.isEmpty) {
+      print('⚠️ IAP no disponible: se usarán precios del backend');
+      return;
+    }
+
+    try {
+      final ids = productList.map((p) => p.productId).toSet();
+      print('🔍 Consultando precios en tienda para: $ids');
+
+      final ProductDetailsResponse response =
+          await _iap.queryProductDetails(ids);
+
+      if (response.error != null) {
+        print('❌ Error al consultar precios: ${response.error}');
+        return;
+      }
+
+      if (response.notFoundIDs.isNotEmpty) {
+        print('⚠️ IDs no encontrados en tienda: ${response.notFoundIDs}');
+      }
+
+      final Map<String, Map<String, String>> prices = {};
+
+      for (final detail in response.productDetails) {
+        String currency = '';
+
+        // Obtener el currencyCode real desde el SDK, NO del locale del dispositivo
+        if (Platform.isIOS && detail is AppStoreProductDetails) {
+          currency =
+              detail.skProduct.priceLocale.currencyCode ?? '';
+          print(
+              '🍎 iOS currencyCode [${detail.id}]: $currency | priceLocale: ${detail.skProduct.priceLocale.currencyCode}');
+        } else if (Platform.isAndroid &&
+            detail is GooglePlayProductDetails) {
+          currency = detail
+                  .productDetails
+                  .oneTimePurchaseOfferDetails
+                  ?.priceCurrencyCode ??
+              '';
+          print(
+              '🤖 Android currencyCode [${detail.id}]: $currency');
+        }
+
+        prices[detail.id] = {
+          'price': detail.price,     // ej: "$100"
+          'currency': currency,      // ej: "MXN"
+        };
+
+        print(
+            '💰 [${detail.id}] price: ${detail.price} | currency: $currency');
+      }
+
+      storePrices.assignAll(prices);
+      print(
+          '✅ Precios de tienda cargados: ${prices.length}/${productList.length}');
+    } catch (e) {
+      print('🔥 Excepción al consultar precios de tienda: $e');
+      // No lanzar — la UI usará product.price como fallback
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // DISPLAY PRICE
+  // ─────────────────────────────────────────────
+
+  /// Devuelve el precio formateado para mostrar en la UI.
+  ///
+  /// Prioridad:
+  ///   1. Precio real de la tienda con currency del SDK → "$100 MXN"
+  ///   2. Fallback: precio del backend sin currency → "$100"
+  ///   3. Sin precio → "—"
+  String displayPrice(PurchaseEntity product) {
+    final data = storePrices[product.productId];
+    print('🏷️ displayPrice [${product.productId}] → data: $data');
+
+    if (data != null) {
+      final price = data['price'] ?? '';
+      final currency = data['currency'] ?? '';
+
+      if (price.isNotEmpty) {
+        // Si el precio ya incluye el código (ej: "MX$100.00"), devolver tal cual
+        // Si no, agregar el código al final: "$100 MXN"
+        final result = currency.isNotEmpty && !price.contains(currency)
+            ? '$price $currency'
+            : price;
+        print('   ✅ Precio final: $result');
+        return result;
+      }
+    }
+
+    // Fallback: precio del backend
+    if (product.price != null) {
+      final fallback = '\$${product.price}';
+      print('   ⚠️ Usando fallback backend: $fallback');
+      return fallback;
+    }
+
+    print('   ❌ Sin precio disponible');
+    return '—';
   }
 
   // ─────────────────────────────────────────────
@@ -148,7 +257,8 @@ class PurchaseController extends GetxController {
       final ProductDetailsResponse response =
           await _iap.queryProductDetails(ids);
 
-      print('📊 Productos encontrados: ${response.productDetails.length}');
+      print(
+          '📊 Productos encontrados: ${response.productDetails.length}');
       print('❓ IDs no encontrados: ${response.notFoundIDs}');
 
       if (response.error != null) {
@@ -168,7 +278,8 @@ class PurchaseController extends GetxController {
       }
 
       final productDetails = response.productDetails.first;
-      print('✅ Producto listo: ${productDetails.id} | Precio: ${productDetails.price}');
+      print(
+          '✅ Producto listo: ${productDetails.id} | Precio: ${productDetails.price}');
 
       final purchaseParam = PurchaseParam(productDetails: productDetails);
       await _iap.buyConsumable(purchaseParam: purchaseParam);
@@ -189,7 +300,8 @@ class PurchaseController extends GetxController {
     print('🔔 _onPurchaseUpdate con ${purchases.length} compra(s)');
 
     for (final purchase in purchases) {
-      print('📋 ProductID: ${purchase.productID} | Status: ${purchase.status} | Type: ${purchase.runtimeType}');
+      print(
+          '📋 ProductID: ${purchase.productID} | Status: ${purchase.status}');
 
       switch (purchase.status) {
         case PurchaseStatus.pending:
@@ -199,16 +311,18 @@ class PurchaseController extends GetxController {
 
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          print('✅ Estado purchased/restored → llamando _verifyAndDeliver');
+          print('✅ purchased/restored → _verifyAndDeliver');
           await _verifyAndDeliver(purchase);
           break;
 
         case PurchaseStatus.error:
-          print('❌ Error: ${purchase.error?.message} | Code: ${purchase.error?.code}');
+          print('❌ Error: ${purchase.error?.message}');
           isPurchasing.value = false;
           selectedProductId.value = '';
-          errorMessage.value = purchase.error?.message ?? 'Error en la compra';
-          showErrorSnackbar(purchase.error?.message ?? 'Error en la compra');
+          errorMessage.value =
+              purchase.error?.message ?? 'Error en la compra';
+          showErrorSnackbar(
+              purchase.error?.message ?? 'Error en la compra');
           break;
 
         case PurchaseStatus.canceled:
@@ -220,7 +334,7 @@ class PurchaseController extends GetxController {
       }
 
       if (purchase.pendingCompletePurchase) {
-        print('🔄 Completando compra pendiente: ${purchase.productID}');
+        print('🔄 Completando compra: ${purchase.productID}');
         await _iap.completePurchase(purchase);
         print('✅ completePurchase ejecutado');
       }
@@ -232,73 +346,53 @@ class PurchaseController extends GetxController {
   // ─────────────────────────────────────────────
 
   Future<void> _verifyAndDeliver(PurchaseDetails purchase) async {
-    print('🔍 _verifyAndDeliver | iOS: ${Platform.isIOS} | Android: ${Platform.isAndroid}');
-    print('🔍 Purchase runtimeType: ${purchase.runtimeType}');
+    print(
+        '🔍 _verifyAndDeliver | iOS: ${Platform.isIOS} | Android: ${Platform.isAndroid}');
 
     try {
       if (Platform.isAndroid) {
-        print('🤖 Verificando compra Android...');
-
         if (purchase is! GooglePlayPurchaseDetails) {
-          print('❌ NO es GooglePlayPurchaseDetails: ${purchase.runtimeType}');
           errorMessage.value = 'Error interno al procesar la compra';
           showErrorSnackbar('Error interno al procesar la compra');
           return;
         }
-
-        print('📦 purchaseToken: ${purchase.billingClientPurchase.purchaseToken}');
-        print('📦 packageName: ${purchase.billingClientPurchase.packageName}');
-
         await purchaseGoogleUsecase.call(
           PurchaseGoogleEntity(
             productoId: purchase.productID,
-            purchaseToken: purchase.billingClientPurchase.purchaseToken,
-            packageName: purchase.billingClientPurchase.packageName,
+            purchaseToken:
+                purchase.billingClientPurchase.purchaseToken,
+            packageName:
+                purchase.billingClientPurchase.packageName,
           ),
         );
-        print('✅ purchaseGoogleUsecase ejecutado');
       } else if (Platform.isIOS) {
-        print('🍎 Verificando compra iOS...');
-
         if (purchase is! AppStorePurchaseDetails) {
-          print('❌ NO es AppStorePurchaseDetails: ${purchase.runtimeType}');
           errorMessage.value = 'Error interno al procesar la compra';
           showErrorSnackbar('Error interno al procesar la compra');
           return;
         }
-
-        final skPaymentTransaction = purchase.skPaymentTransaction;
-        final transactionId = skPaymentTransaction.transactionIdentifier;
-        final originalTransactionId =
-            skPaymentTransaction.originalTransaction?.transactionIdentifier;
-
-        print('📝 transactionIdentifier: $transactionId');
-        print('📝 originalTransactionIdentifier: $originalTransactionId');
-
-        final receiptData = originalTransactionId ?? transactionId ?? '';
-        print('🎫 receiptData a enviar: $receiptData');
-
+        final receiptData =
+            purchase.verificationData.localVerificationData;
         await purchaseAppleUsecase.call(
           PurchaseAppleEntity(
             productoId: purchase.productID,
             receiptData: receiptData,
           ),
         );
-        print('✅ purchaseAppleUsecase ejecutado');
       }
 
       successMessage.value = '¡Compra completada exitosamente!';
       showSuccessSnackbar('¡Compra completada exitosamente!');
       print('🎉 Compra completada');
     } catch (e, stackTrace) {
-      print('🔥 Error en _verifyAndDeliver: $e');
-      print('📚 StackTrace: $stackTrace');
-      errorMessage.value = 'Error al verificar la compra con el servidor';
-      showErrorSnackbar('Error al verificar la compra con el servidor');
+      print('🔥 Error en _verifyAndDeliver: $e\n$stackTrace');
+      errorMessage.value =
+          'Error al verificar la compra con el servidor';
+      showErrorSnackbar(
+          'Error al verificar la compra con el servidor');
     } finally {
       isPurchasing.value = false;
       selectedProductId.value = '';
-      print('🏁 _verifyAndDeliver finalizado');
     }
   }
 

@@ -470,58 +470,45 @@ Future<File?> captureStoryWithTexts() async {
   // Camera
   // ─────────────────────────────────────────────
 
-  Future<void> initializeCamera() async {
-    try {
-      isCameraInitialized.value = false;
+Future<void> initializeCamera() async {
+  try {
+    isCameraInitialized.value = false;
 
-      final cameraStatus = await Permission.camera.request();
-      final micStatus   = await Permission.microphone.request();
-
-      if (!cameraStatus.isGranted) {
-        debugPrint('❌ Permiso de cámara denegado');
-        showErrorSnackbar('Se necesita permiso de cámara para continuar');
-        return;
-      }
-
-      if (!micStatus.isGranted) {
-        debugPrint('⚠️ Permiso de micrófono denegado');
-      }
-
-      final availableCamerasList = await availableCameras();
-      if (availableCamerasList.isEmpty) {
-        debugPrint('❌ No se encontraron cámaras');
-        return;
-      }
-
-      cameras.value = availableCamerasList;
-      final camera = _getCamera();
-
-      final newController = CameraController(
-        camera,
-        ResolutionPreset.high,
-        enableAudio: micStatus.isGranted,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
-
-      await newController.initialize();
-      await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      if (newController.value.isInitialized) {
-        cameraController.value = newController;
-        await Future.delayed(const Duration(milliseconds: 50));
-        isCameraInitialized.value = true;
-        debugPrint('✅ Cámara inicializada');
-      }
-    } on CameraException catch (e) {
-      debugPrint('💥 CameraException: ${e.code} - ${e.description}');
-      isCameraInitialized.value = false;
-      showErrorSnackbar('Error al iniciar la cámara: ${e.description}');
-    } catch (e) {
-      debugPrint('💥 Error inicializando cámara: $e');
-      isCameraInitialized.value = false;
+    final availableCamerasList = await availableCameras();
+    if (availableCamerasList.isEmpty) {
+      debugPrint('❌ No se encontraron cámaras');
+      return;
     }
+
+    cameras.value = availableCamerasList;
+    final camera = _getCamera();
+
+    final newController = CameraController(
+      camera,
+      ResolutionPreset.high,
+      enableAudio: true,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
+
+    await newController.initialize();
+    await newController.lockCaptureOrientation(DeviceOrientation.portraitUp);
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (newController.value.isInitialized) {
+      cameraController.value = newController;
+      await Future.delayed(const Duration(milliseconds: 50));
+      isCameraInitialized.value = true;
+      debugPrint('✅ Cámara inicializada');
+    }
+  } on CameraException catch (e) {
+    debugPrint('💥 CameraException: ${e.code} - ${e.description}');
+    isCameraInitialized.value = false;
+    showErrorSnackbar('Error al iniciar la cámara: ${e.description}');
+  } catch (e) {
+    debugPrint('💥 Error: $e');
+    isCameraInitialized.value = false;
   }
+}
 
   CameraDescription _getCamera() {
     final direction = isFrontCamera.value

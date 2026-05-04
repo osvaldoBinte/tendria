@@ -30,7 +30,7 @@ class SplashController extends GetxController {
     await requestLocationPermission();
     await _requestNotificationPermission();
     await _requestCameraPermission();
-    await _requestMicrophonePermission();
+   
   }
 
   Future<void> requestLocationPermission() async {
@@ -95,17 +95,7 @@ class SplashController extends GetxController {
     }
   }
 
-  Future<void> _requestMicrophonePermission() async {
-    final status = await Permission.microphone.request();
-
-    if (status.isGranted) {
-      print('✅ Permiso de micrófono concedido');
-    } else if (status.isDenied) {
-      print('❌ Permiso de micrófono denegado');
-    } else if (status.isPermanentlyDenied) {
-      print('🚫 Permiso de micrófono permanentemente denegado');
-    }
-  }
+  
 
   Future<void> checkUserSession() async {
     try {

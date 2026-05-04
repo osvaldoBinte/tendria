@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/services/notification_service.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/features/auth/domain/usecase/login_usecase.dart';
@@ -21,6 +22,8 @@ class LoginController extends GetxController {
   final LoginUsecase loginUsecase;
   final SaveTokenFcmUsecase saveTokenFcmUsecase;
 
+  // ← único cambio estructural
+  LanguageController get _l => Get.find<LanguageController>();
 
   LoginController({
     required this.loginUsecase,
@@ -68,17 +71,15 @@ class LoginController extends GetxController {
       );
 
       await _authService.saveLoginResponse(loginResponse);
-     await _saveDeviceToken();
-      
+      await _saveDeviceToken();
+
       _clearFields();
       await _resetControllersForNewSession();
-      
-      
-   
-        Get.offAllNamed( RoutesNames.homePage);
+
+      Get.offAllNamed(RoutesNames.homePage);
     } catch (e) {
       _showErrorAlert(
-        'ACCESO INCORRECTO',
+        _l.t('login_error_title'),
         cleanExceptionMessage(e),
       );
       print(e);
@@ -86,7 +87,6 @@ class LoginController extends GetxController {
       isLoading.value = false;
     }
   }
-
 
   Future<void> _saveDeviceToken() async {
     try {
@@ -115,52 +115,41 @@ class LoginController extends GetxController {
       print('❌ Error al guardar token FCM: $e');
     }
   }
+
   String _getDeviceType() {
-    if (GetPlatform.isAndroid) {
-      return 'Android';
-    } else if (GetPlatform.isIOS) {
-      return 'iOS';
-    } else if (GetPlatform.isMacOS) {
-      return 'macOS';
-    } else if (GetPlatform.isWindows) {
-      return 'Windows';
-    } else if (GetPlatform.isLinux) {
-      return 'Linux';
-    } else if (GetPlatform.isWeb) {
-      return 'Web';
-    }
+    if (GetPlatform.isAndroid) return 'Android';
+    if (GetPlatform.isIOS) return 'iOS';
+    if (GetPlatform.isMacOS) return 'macOS';
+    if (GetPlatform.isWindows) return 'Windows';
+    if (GetPlatform.isLinux) return 'Linux';
+    if (GetPlatform.isWeb) return 'Web';
     return 'Unknown';
   }
 
   Future<void> _resetControllersForNewSession() async {
     print('🔄 Reseteando controllers para nueva sesión...');
-
     try {
       final controllersToDelete = [];
-
       for (final controllerType in controllersToDelete) {
         if (Get.isRegistered(tag: controllerType.toString())) {
           Get.delete(tag: controllerType.toString());
           print('🗑️ ${controllerType.toString()} eliminado');
         }
       }
-
       await Future.delayed(const Duration(milliseconds: 100));
-
       print('✅ Controllers reseteados para nueva sesión');
     } catch (e) {
       print('❌ Error reseteando controllers: $e');
     }
   }
 
-  void _showErrorAlert(String title, String message,
-      {VoidCallback? onDismiss}) {
+  void _showErrorAlert(String title, String message, {VoidCallback? onDismiss}) {
     if (Get.context != null) {
       showCustomAlert(
         context: Get.context!,
         title: title,
         message: message,
-        confirmText: 'Aceptar',
+        confirmText: _l.t('accept'),   // ← antes: 'Aceptar' hardcodeado
         type: CustomAlertType.error,
         onConfirm: onDismiss,
       );
@@ -170,16 +159,16 @@ class LoginController extends GetxController {
   bool _validateFields() {
     if (emailController.text.isEmpty) {
       _showErrorAlert(
-        'Advertencia',
-        'Por favor, ingresa tu usuario',
+        _l.t('login_warning'),        // ← antes: 'Advertencia'
+        _l.t('login_val_email'),      // ← antes: 'Por favor, ingresa tu usuario'
       );
       return false;
     }
 
     if (passwordController.text.isEmpty) {
       _showErrorAlert(
-        'Advertencia',
-        'Por favor, ingresa tu contraseña',
+        _l.t('login_warning'),
+        _l.t('login_val_password'),   // ← antes: 'Por favor, ingresa tu contraseña'
       );
       return false;
     }
@@ -188,12 +177,8 @@ class LoginController extends GetxController {
   }
 
   void _clearFields() {
-    if (emailController.hasListeners) {
-      emailController.clear();
-    }
-    if (passwordController.hasListeners) {
-      passwordController.clear();
-    }
+    if (emailController.hasListeners) emailController.clear();
+    if (passwordController.hasListeners) passwordController.clear();
   }
 
   void onRegisterTap() {
@@ -202,16 +187,10 @@ class LoginController extends GetxController {
 
   @override
   void onClose() {
-    if (!emailController.hasListeners) {
-      emailController.dispose();
-    }
-    if (!passwordController.hasListeners) {
-      passwordController.dispose();
-    }
-
+    if (!emailController.hasListeners) emailController.dispose();
+    if (!passwordController.hasListeners) passwordController.dispose();
     emailFocusNode.dispose();
     passwordFocusNode.dispose();
-
     super.onClose();
   }
 }

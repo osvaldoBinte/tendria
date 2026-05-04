@@ -485,7 +485,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   Obx(
                     () => Text(
                       controller.distanceKm.value >= 300
-                          ? 'Sin límite de distancia'
+                          ? 'Máximo'
                           : 'Hasta ${controller.distanceKm.value} km',
                       style: ThemeColor.bodyMedium.copyWith(
                         color: ThemeColor.textSecondaryColor,
@@ -601,7 +601,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     String labelForIndex(int index) {
       if (index < 9) return '${(index + 1) * 100} m';
       final km = index - 9 + 1;
-      return km >= 300 ? '∞  Sin límite' : '$km km';
+      return km >= 300 ? 'Máximo' : '$km km';
     }
 
     double kmForIndex(int index) {

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
@@ -23,6 +24,9 @@ class NearbyUsersController extends GetxController {
     required this.fetchNearbyUsersUsecase,
     required this.toggleLikeUsecase,
   });
+ 
+  LanguageController get _l => Get.find<LanguageController>();
+ 
 
   final RxBool isLoading = false.obs;
   final RxBool isFavorite = false.obs;
@@ -43,6 +47,7 @@ class NearbyUsersController extends GetxController {
   late PageController pageController;
 
   final Rx<GetUserEntity?> currentProfile = Rx<GetUserEntity?>(null);
+ 
 
   GetUserEntity? get currentUser {
     if (nearbyUsers.isEmpty || currentUserIndex.value >= nearbyUsers.length) {
@@ -55,11 +60,10 @@ class NearbyUsersController extends GetxController {
 
   String get currentCity {
     final profile = currentProfile.value;
-    if (profile == null || profile.city == null) {
-      return '';
-    }
+    if (profile == null || profile.city == null) return '';
     return profile.city!;
   }
+ 
 
   @override
   void onInit() {
@@ -73,6 +77,7 @@ class NearbyUsersController extends GetxController {
     pageController.dispose();
     super.onClose();
   }
+ 
 
   Future<void> loadNearbyUsers() async {
     try {
@@ -83,7 +88,7 @@ class NearbyUsersController extends GetxController {
       );
 
       if (users.isEmpty) {
-        showInfoSnackbar('No hay más usuarios cercanos');
+        showInfoSnackbar(_l.t('nearby_no_more'));
         return;
       }
 
@@ -101,7 +106,7 @@ class NearbyUsersController extends GetxController {
       _preloadStoryIndicators(users);
     } catch (e) {
       showErrorSnackbar(
-        'No se pudieron cargar los usuarios: ${cleanExceptionMessage(e)}',
+        '${_l.t('nearby_load_error')}: ${cleanExceptionMessage(e)}',
       );
     } finally {
       isLoading.value = false;
@@ -164,9 +169,10 @@ class NearbyUsersController extends GetxController {
       currentUserIndex.value++;
       updateCurrentProfile();
     } else {
-      noMoreUsers.value = true; // ← activa el estado vacío
+      noMoreUsers.value = true;
     }
   }
+ 
 
   Future<void> toggleFavorite() async {
     if (currentUser == null || isProcessingLike.value) return;
@@ -176,17 +182,22 @@ class NearbyUsersController extends GetxController {
 
     try {
       isProcessingLike.value = true;
-      //  await toggleLikeUsecase.execute(currentUser!.id ?? 0, isFavorite.value);
 
       if (isFavorite.value) {
-        showSuccessSnackbar('¡Te gusta ${currentProfile.value?.name}!');
+        showSuccessSnackbar(
+          '${_l.t('nearby_liked')} ${currentProfile.value?.name}!',
+        );
         Future.delayed(const Duration(milliseconds: 1000), nextUser);
       } else {
-        showInfoSnackbar('${currentProfile.value?.name} removido de favoritos');
+        showInfoSnackbar(
+          '${currentProfile.value?.name} ${_l.t('nearby_removed_fav')}',
+        );
       }
     } catch (e) {
       isFavorite.value = previousState;
-      showErrorSnackbar('Error al procesar: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('nearby_error_process')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isProcessingLike.value = false;
     }
@@ -197,11 +208,14 @@ class NearbyUsersController extends GetxController {
 
     try {
       isProcessingLike.value = true;
-      //  await toggleLikeUsecase.execute(currentUser!.id ?? 0, true);
-      showSuccessSnackbar('¡Le diste like a ${currentProfile.value?.name}!');
+      showSuccessSnackbar(
+        '${_l.t('nearby_like_sent')} ${currentProfile.value?.name}!',
+      );
       Future.delayed(const Duration(milliseconds: 1000), nextUser);
     } catch (e) {
-      showErrorSnackbar('Error al dar like: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('nearby_error_like')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isProcessingLike.value = false;
     }
@@ -212,11 +226,12 @@ class NearbyUsersController extends GetxController {
 
     try {
       isProcessingLike.value = true;
-      //  await toggleLikeUsecase.execute(currentUser!.id ?? 0, false);
-      showInfoSnackbar('Pasando al siguiente perfil');
+      showInfoSnackbar(_l.t('nearby_next_profile'));
       nextUser();
     } catch (e) {
-      showErrorSnackbar('Error al rechazar: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('nearby_error_reject')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isProcessingLike.value = false;
     }
@@ -224,6 +239,7 @@ class NearbyUsersController extends GetxController {
 
   void sendMessage() => sendLike();
   void skipUser() => rejectUser();
+ 
 
   void sendMensaje() {
     final user = currentProfile.value;
@@ -237,7 +253,7 @@ class NearbyUsersController extends GetxController {
         PendingChatEntity(
           chatId: chat.id,
           userId: user.id ?? 0,
-          name: user.name ?? 'Usuario',
+          name: user.name ?? _l.t('user'),
           photoUrl: user.fotoUrl,
           age: user.age,
           hiddenMessage: null,
@@ -253,7 +269,7 @@ class NearbyUsersController extends GetxController {
         RoutesNames.chatPage,
         arguments: {
           'userid': user.id,
-          'name': user.name ?? 'Usuario',
+          'name': user.name ?? _l.t('user'),
           'goHomeIndex': 2,
         },
       );
@@ -264,7 +280,7 @@ class NearbyUsersController extends GetxController {
       RoutesNames.chatPage,
       arguments: {
         'chatId': chat.id,
-        'name': user.name ?? 'Usuario',
+        'name': user.name ?? _l.t('user'),
         'goHomeIndex': 2,
       },
     );
@@ -275,30 +291,31 @@ class NearbyUsersController extends GetxController {
     if (chat != null && chat.id != 0) return false;
     return true;
   }
+ 
 
   void sendSuperLike() {
     showInfoSnackbar(
-      'Le has enviado un Super Like a ${currentProfile.value?.name}',
+      '${_l.t('nearby_superlike_sent')} ${currentProfile.value?.name}',
     );
     Future.delayed(const Duration(milliseconds: 1000), nextUser);
   }
+  
 
   void blockUser() {
     if (Get.context == null) return;
     showCustomAlert(
       context: Get.context!,
-      title: 'Bloquear usuario',
-      message:
-          '¿Estás seguro de que quieres bloquear a ${currentProfile.value?.name}?',
-      confirmText: 'Bloquear',
-      cancelText: 'Cancelar',
+      title: _l.t('nearby_block_title'),
+      message: '${_l.t('nearby_block_msg')} ${currentProfile.value?.name}?',
+      confirmText: _l.t('nearby_block_confirm'),
+      cancelText: _l.t('cancel'),
       type: CustomAlertType.warning,
       onConfirm: _confirmBlock,
     );
   }
 
   void _confirmBlock() {
-    final userName = currentProfile.value?.name ?? 'Usuario';
+    final userName = currentProfile.value?.name ?? _l.t('user');
     nearbyUsers.removeAt(currentUserIndex.value);
     currentRadarUsers.removeAt(currentUserIndex.value);
 
@@ -306,24 +323,24 @@ class NearbyUsersController extends GetxController {
       currentUserIndex.value = nearbyUsers.length - 1;
     }
 
-    showErrorSnackbar('$userName ha sido bloqueado');
+    showErrorSnackbar('$userName ${_l.t('nearby_blocked')}');
 
     if (nearbyUsers.isEmpty) {
-      showWarningSnackbar('Has visto todos los perfiles disponibles');
+      showWarningSnackbar(_l.t('nearby_all_seen'));
       Future.delayed(const Duration(milliseconds: 1500), () => Get.back());
     } else {
       updateCurrentProfile();
     }
-  }
+  } 
 
   void reportUser() {
     if (Get.context == null) return;
     showCustomAlert(
       context: Get.context!,
-      title: 'Reportar usuario',
-      message: '¿Por qué quieres reportar a ${currentProfile.value?.name}?',
-      confirmText: 'Reportar',
-      cancelText: 'Cancelar',
+      title: _l.t('nearby_report_title'),
+      message: '${_l.t('nearby_report_msg')} ${currentProfile.value?.name}?',
+      confirmText: _l.t('nearby_report_confirm'),
+      cancelText: _l.t('cancel'),
       type: CustomAlertType.warning,
       onConfirm: _confirmReport,
     );
@@ -331,9 +348,10 @@ class NearbyUsersController extends GetxController {
 
   void _confirmReport() {
     showWarningSnackbar(
-      'Gracias por tu reporte. Revisaremos el perfil de ${currentProfile.value?.name}',
+      '${_l.t('nearby_report_thanks')} ${currentProfile.value?.name}',
     );
   }
+ 
 
   void showUserPreviewDialog(GetUserEntity user, int userIndex) {
     currentUserIndex.value = userIndex;
@@ -367,7 +385,7 @@ class NearbyUsersController extends GetxController {
                 SizedBox(
                   height: 320,
                   child: Stack(
-                    children: [
+                    children: [ 
                       PageView.builder(
                         controller: previewPageController,
                         itemCount: gallery.length,
@@ -406,7 +424,7 @@ class NearbyUsersController extends GetxController {
                           );
                         },
                       ),
-
+ 
                       if (gallery.length > 1)
                         Positioned(
                           top: 12,
@@ -433,7 +451,7 @@ class NearbyUsersController extends GetxController {
                             ),
                           ),
                         ),
-
+ 
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -458,7 +476,7 @@ class NearbyUsersController extends GetxController {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
+                                      '${user.name ?? _l.t('user')}, ${user.age ?? 0}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 22,
@@ -487,7 +505,7 @@ class NearbyUsersController extends GetxController {
                                   ],
                                 ),
                               ),
-
+ 
                               Obx(() {
                                 if (!hasStories.value) {
                                   return const SizedBox.shrink();
@@ -499,7 +517,7 @@ class NearbyUsersController extends GetxController {
                                       showTargetUserStoryModal(
                                         Get.context!,
                                         userId: user.id!,
-                                        userName: user.name ?? 'Usuario',
+                                        userName: user.name ?? _l.t('user'),
                                         userPhoto: user.fotoUrl,
                                       );
                                     }
@@ -572,9 +590,9 @@ class NearbyUsersController extends GetxController {
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      const Text(
-                                        'Historia',
-                                        style: TextStyle(
+                                      Text(
+                                        _l.t('stories'),
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 10,
                                           fontWeight: FontWeight.w500,
@@ -588,7 +606,7 @@ class NearbyUsersController extends GetxController {
                           ),
                         ),
                       ),
-
+ 
                       Positioned(
                         top: 12,
                         right: 12,
@@ -611,7 +629,7 @@ class NearbyUsersController extends GetxController {
                     ],
                   ),
                 ),
-
+ 
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -670,7 +688,7 @@ class NearbyUsersController extends GetxController {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-
+ 
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -681,7 +699,7 @@ class NearbyUsersController extends GetxController {
                               RoutesNames.chatPage,
                               arguments: {
                                 'userid': user.id,
-                                'name': user.name ?? 'Usuario',
+                                'name': user.name ?? _l.t('user'),
                                 'photo': user.fotoUrl,
                                 'MyPhoto': myProfileController.profilePhotoUrl,
                                 'goPerfilIndex': 1,
@@ -692,9 +710,9 @@ class NearbyUsersController extends GetxController {
                             Icons.chat_bubble_outline,
                             color: Colors.white,
                           ),
-                          label: const Text(
-                            'Enviar mensaje',
-                            style: TextStyle(
+                          label: Text(
+                            _l.t('nearby_send_message'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
@@ -711,7 +729,7 @@ class NearbyUsersController extends GetxController {
                       ),
 
                       const SizedBox(height: 8),
-
+ 
                       SizedBox(
                         width: double.infinity,
                         height: 44,
@@ -732,7 +750,7 @@ class NearbyUsersController extends GetxController {
                             ),
                           ),
                           child: Text(
-                            'Ver perfil completo',
+                            _l.t('nearby_view_profile'),
                             style: TextStyle(
                               color: ThemeColor.primaryColor,
                               fontSize: 14,
@@ -750,7 +768,7 @@ class NearbyUsersController extends GetxController {
       ),
       barrierDismissible: true,
     );
-  }
+  } 
 
   Widget buildUserAvatarWithStory({
     required GetUserEntity user,

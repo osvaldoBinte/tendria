@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/settings/routes_names.dart';
+import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/chat/domain/entities/chat_entity.dart';
 import 'package:tendria/features/chat/domain/entities/mensaje_entity.dart';
@@ -305,7 +306,20 @@ class ChatController extends GetxController {
       Future.delayed(const Duration(milliseconds: 100), scrollToBottom);
     } catch (e) {
       messageController.text = message;
-      showErrorSnackbar('No se pudo enviar: ${cleanExceptionMessage(e)}');
+     // showErrorSnackbar('No se pudo enviar: ${cleanExceptionMessage(e)}');
+    showCustomAlert(
+  context: Get.context!,
+  title: 'Saldo insuficiente',
+  message: 'No tienes suficiente saldo para realizar esta acción. ${cleanExceptionMessage(e)}',
+  confirmText: 'Recargar saldo',
+  cancelText: 'Cancelar',
+  type: CustomAlertType.error,
+  onConfirm: () {
+    Navigator.of(Get.context!).pop();
+    Get.offAllNamed(RoutesNames.purchasePage);
+  },
+  onCancel: () => Navigator.of(Get.context!).pop(),
+);
     } finally {
       isSending.value = false;
     }

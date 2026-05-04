@@ -1,24 +1,40 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class LanguageController extends GetxController {
- 
+  String get _deviceLanguage {
+    // Obtiene el locale del dispositivo (ej: "es", "en", "fr")
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final languageCode = locale.languageCode;
+
+    if (languageCode == 'es') return 'Español';
+    if (languageCode == 'en') return 'Inglés';
+
+    // Cualquier otro idioma → Inglés por defecto
+    return 'Inglés';
+  }
+
   String get lang {
     try {
-      return Get.find<ProfileController>().primarylanguage;
+      final profileLang = Get.find<ProfileController>().primarylanguage;
+      if (_translations.containsKey(profileLang)) {
+        return profileLang;
+      }
+      return _deviceLanguage;
     } catch (_) {
-      return 'Español';
+      return _deviceLanguage;
     }
   }
- 
+
   String t(String key) => translate(key, lang);
- 
+
   String translate(String key, String language) {
     return _translations[language]?[key] ??
         _translations['Español']?[key] ??
         key;
   }
- 
+
   static const Map<String, Map<String, String>> _translations = {
     'Español': {
       // ── UpdateProfilePage ──────────────────────────
@@ -31,7 +47,7 @@ class LanguageController extends GetxController {
       'looking_for': 'Busco',
       'connection_type': 'Tipo de conexión',
       'delete_account': 'Eliminar cuenta',
-      'no_limit': 'Sin límite',
+      'no_limit': 'Máximo',
 
       // ── ProfilePage ────────────────────────────────
       'profile': 'Perfil',
@@ -75,12 +91,14 @@ class LanguageController extends GetxController {
 
       // ── QualitiesSectionWidget ─────────────────────
       'qualities_title': 'Cualidades que valoro',
-      'qualities_subtitle': 'Elige hasta 3 cualidades que valoras en una persona.',
+      'qualities_subtitle':
+          'Elige hasta 3 cualidades que valoras en una persona.',
       'qualities_add': 'Agrega cualidades que valoras',
 
       // ── Bottom sheets: Intereses ───────────────────
       'bs_interests_title': 'Elige tus intereses\nprincipales',
-      'bs_interests_subtitle': 'Tus gustos nos ayudan a encontrar mejores coincidencias.',
+      'bs_interests_subtitle':
+          'Tus gustos nos ayudan a encontrar mejores coincidencias.',
       'bs_interests_counter': 'Intereses populares',
       'bs_interests_selected': 'seleccionados',
       'bs_max_interests': 'Puedes seleccionar máximo 5 intereses',
@@ -89,14 +107,16 @@ class LanguageController extends GetxController {
 
       // ── Bottom sheets: Cualidades ──────────────────
       'bs_qualities_title': 'Lo que más aprecias en\nuna persona',
-      'bs_qualities_subtitle': 'Estas cualidades nos ayudan a crear mejores coincidencias.',
+      'bs_qualities_subtitle':
+          'Estas cualidades nos ayudan a crear mejores coincidencias.',
       'bs_qualities_counter': 'Lo que buscas en alguien',
       'bs_max_qualities': 'Puedes seleccionar máximo 3 cualidades',
       'bs_qualities_saved': 'Cualidades actualizadas correctamente',
 
       // ── Bottom sheets: Altura ──────────────────────
       'bs_height_title': 'Tu altura',
-      'bs_height_subtitle': 'Esta información nos ayuda a mejorar tus coincidencias.',
+      'bs_height_subtitle':
+          'Esta información nos ayuda a mejorar tus coincidencias.',
 
       // ── Bottom sheets: Género ──────────────────────
       'bs_gender_title': '¿Cuál es tu género?',
@@ -113,7 +133,8 @@ class LanguageController extends GetxController {
 
       // ── Bottom sheets: Busco ───────────────────────
       'bs_search_gender_title': '¿Qué tipo de personas te\ngustaría conocer?',
-      'bs_search_gender_subtitle': 'Esta preferencia es flexible y editable más adelante.',
+      'bs_search_gender_subtitle':
+          'Esta preferencia es flexible y editable más adelante.',
 
       // ── Bottom sheets: Tipo de conexión ───────────
       'bs_connection_title': '¿Qué tipo de conexión\nquieres?',
@@ -126,11 +147,12 @@ class LanguageController extends GetxController {
 
       // ── Bottom sheets: Distancia ───────────────────
       'bs_distance_title': 'Distancia máxima',
-      'bs_no_limit_distance': 'Sin límite de distancia',
+      'bs_no_limit_distance': 'Distancia máxima',
 
       // ── Bottom sheets: Biografía ───────────────────
       'bs_bio_title': 'Cuéntanos sobre ti',
-      'bs_bio_subtitle': 'Una buena biografía ayuda a generar mejores conexiones.',
+      'bs_bio_subtitle':
+          'Una buena biografía ayuda a generar mejores conexiones.',
       'bs_bio_hint': 'Escribe algo sobre ti...',
 
       // ── Bottom sheets: Estado ──────────────────────
@@ -166,7 +188,8 @@ class LanguageController extends GetxController {
       'alert_logout_title': 'Cerrar sesión',
       'alert_logout_msg': '¿Estás seguro que deseas cerrar sesión?',
       'alert_delete_account_title': 'Eliminar cuenta',
-      'alert_delete_account_msg': '¿Estás seguro? Esta acción es permanente y no se puede deshacer.',
+      'alert_delete_account_msg':
+          '¿Estás seguro? Esta acción es permanente y no se puede deshacer.',
       'alert_confirm': 'Aceptar',
       'alert_delete': 'Eliminar',
 
@@ -179,7 +202,8 @@ class LanguageController extends GetxController {
       'error_title': 'Error al cargar chats',
       'retry': 'REINTENTAR',
       'empty_title_chats': 'No tienes chats aún',
-      'empty_subtitle_chats': 'Comienza a dar likes para encontrar tu match perfecto',
+      'empty_subtitle_chats':
+          'Comienza a dar likes para encontrar tu match perfecto',
       'empty_title_pending': 'No tienes match pendientes',
       'empty_subtitle_pending': 'Cuando alguien te escriba, aparecerá aquí',
       'explore': 'EXPLORAR PERFILES',
@@ -188,10 +212,120 @@ class LanguageController extends GetxController {
       'error': 'Error',
       'accept': 'Aceptar',
 
-'no_more_profiles': 'No hay más perfiles',
-'no_more_profiles_desc': 'No encontramos perfiles que coincidan con tus filtros actuales. Amplía tu rango de búsqueda para ver más personas.',
-'modify_preferences': 'Modificar preferencias',
-'try_again': 'Intentar de nuevo',
+      'no_more_profiles': 'No hay más perfiles',
+      'no_more_profiles_desc':
+          'No encontramos perfiles que coincidan con tus filtros actuales. Amplía tu rango de búsqueda para ver más personas.',
+      'modify_preferences': 'Modificar preferencias',
+      'try_again': 'Intentar de nuevo',
+
+      // ── RegisterPage ───────────────────────────────
+      'register_title': 'Empezar',
+      'register_have_account': '¿Ya cuentas con un registro? ',
+      'register_login': 'Iniciar Sesión',
+      'register_name': 'Nombre Completo:',
+      'register_name_hint': 'Karen Hernández Costa',
+      'register_email': 'Correo electrónico:',
+      'register_email_hint': 'correo@gmail.com',
+      'register_password': 'Crea una contraseña',
+      'register_confirm_password': 'Confirma tu contraseña:',
+      'register_privacy':
+          'Al registrarte estas aceptando el Aviso de Privacidad y los Términos y Condiciones.',
+      'register_btn': 'Registrarse',
+
+      'personal_title': 'Iniciemos con lo\nbásico',
+      'personal_dob': 'Selecciona tu fecha de nacimiento',
+      'personal_dob_placeholder': '14/05/1993',
+      'personal_gender': '¿Cómo te identificas?',
+      'personal_bio': 'Cuéntanos sobre ti:',
+      'personal_bio_hint': 'Escribe una breve biografía...',
+
+      'physical_title':
+          'Esta información nos ayuda a\nmejorar tus coincidencias',
+      'physical_height': 'Tu altura',
+
+      'interests_page_title': 'Elige tus intereses\nprincipales',
+      'interests_page_subtitle':
+          'Tus gustos nos ayudan a encontrar mejores\ncoincidencias.',
+      'interests_search_hint': 'Buscar intereses',
+      'interests_popular': 'Intereses populares',
+      'interests_custom_hint':
+          'si no se encuentran tus resultados escríbelos...',
+
+      'qualities_page_title': 'Lo que más aprecias en una\npersona',
+      'qualities_page_subtitle':
+          'Estas cualidades nos ayudan a crear mejores\ncoincidencias.',
+      'qualities_counter_label': 'Lo que buscas en alguien',
+
+      'nav_skip': 'Omitir',
+      'login_title': 'Iniciar Sesión',
+      'login_no_account': '¿Aún no tienes una cuenta? ',
+      'login_register': 'Registrarse',
+      'login_email': 'Correo electrónico:',
+      'login_email_hint': 'correo@gmail.com',
+      'login_password': 'Contraseña:',
+      'login_remember': 'Recuérdame',
+      'login_btn': 'Iniciar Sesión',
+
+      'val_name_required': 'El nombre es requerido',
+      'val_name_min': 'Mínimo 3 caracteres',
+      'val_email_required': 'El correo es requerido',
+      'val_email_invalid': 'Ingresa un correo válido',
+      'val_password_required': 'La contraseña es requerida',
+      'val_min_8': 'Mínimo 8 caracteres',
+      'val_min_10': 'Mínimo 10 caracteres',
+      'val_max_500': 'Máximo 500 caracteres',
+      'val_passwords_no_match': 'Las contraseñas no coinciden',
+      'val_dob_required': 'Selecciona tu fecha de nacimiento',
+      'val_gender_required': 'Selecciona tu género',
+      'val_custom_gender_required': 'Escribe cómo te identificas',
+      'val_bio_required': 'La biografía es requerida',
+      'val_bio_min': 'La biografía debe tener al menos 10 caracteres',
+      'val_bio_max': 'La biografía debe tener máximo 500 caracteres',
+      'val_height_required': 'Ingresa tu altura',
+      'val_height_invalid': 'Ingresa una altura válida entre 100 y 250 cm',
+      'val_interest_required': 'Selecciona al menos un interés',
+      'val_max_interests': 'Solo puedes seleccionar hasta',
+      'val_max_qualities': 'Solo puedes seleccionar hasta',
+      'register_success': 'Registro exitoso. Por favor, inicia sesión.',
+
+      'login_warning': 'Advertencia',
+      'login_val_email': 'Por favor, ingresa tu correo',
+      'login_val_password': 'Por favor, ingresa tu contraseña',
+      'login_error_title': 'Acceso incorrecto',
+      'chat_reconnecting': 'Reconectando...',
+      'chat_no_connection': 'Sin conexión · Toca para reintentar',
+      'chat_cost_info': 'Este mensaje tiene un costo de ',
+      'chat_balance_info': 'Tus créditos actuales son de ',
+      'chat_charge_info': 'El mensaje se cobrará solo cuando se envíe.',
+      'chat_first_msg_sent': 'Primer mensaje enviado. Espera la respuesta.',
+      'chat_hint_blocked': 'Espera la respuesta...',
+      'chat_hint': 'Escribe un mensaje...',
+      'chat_empty_title': 'Inicia la conversación',
+      'chat_empty_subtitle': 'Envía el primer mensaje para comenzar',
+      'chat_error_title': 'Error al cargar mensajes',
+      'nearby_no_more': 'No hay más usuarios cercanos',
+      'nearby_load_error': 'No se pudieron cargar los usuarios',
+      'nearby_liked': '¡Te gusta',
+      'nearby_removed_fav': 'removido de favoritos',
+      'nearby_error_process': 'Error al procesar',
+      'nearby_like_sent': '¡Le diste like a',
+      'nearby_error_like': 'Error al dar like',
+      'nearby_next_profile': 'Pasando al siguiente perfil',
+      'nearby_error_reject': 'Error al rechazar',
+      'nearby_superlike_sent': 'Le has enviado un Super Like a',
+      'nearby_block_title': 'Bloquear usuario',
+      'nearby_block_msg': '¿Estás seguro de que quieres bloquear a',
+      'nearby_block_confirm': 'Bloquear',
+      'nearby_blocked': 'ha sido bloqueado',
+      'nearby_all_seen': 'Has visto todos los perfiles disponibles',
+      'nearby_report_title': 'Reportar usuario',
+      'nearby_report_msg': '¿Por qué quieres reportar a',
+      'nearby_report_confirm': 'Reportar',
+      'nearby_report_thanks':
+          'Gracias por tu reporte. Revisaremos el perfil de',
+      'nearby_send_message': 'Enviar mensaje',
+      'nearby_view_profile': 'Ver perfil completo',
+      'chat_credits': 'créditos',
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -286,7 +420,8 @@ class LanguageController extends GetxController {
 
       // ── Bottom sheets: Busco ───────────────────────
       'bs_search_gender_title': 'What kind of people would\nyou like to meet?',
-      'bs_search_gender_subtitle': 'This preference is flexible and editable later.',
+      'bs_search_gender_subtitle':
+          'This preference is flexible and editable later.',
 
       // ── Bottom sheets: Tipo de conexión ───────────
       'bs_connection_title': 'What kind of connection\ndo you want?',
@@ -299,7 +434,7 @@ class LanguageController extends GetxController {
 
       // ── Bottom sheets: Distancia ───────────────────
       'bs_distance_title': 'Max distance',
-      'bs_no_limit_distance': 'No distance limit',
+      'bs_no_limit_distance': 'Max distance',
 
       // ── Bottom sheets: Biografía ───────────────────
       'bs_bio_title': 'Tell us about yourself',
@@ -339,7 +474,8 @@ class LanguageController extends GetxController {
       'alert_logout_title': 'Log out',
       'alert_logout_msg': 'Are you sure you want to log out?',
       'alert_delete_account_title': 'Delete account',
-      'alert_delete_account_msg': 'Are you sure? This action is permanent and cannot be undone.',
+      'alert_delete_account_msg':
+          'Are you sure? This action is permanent and cannot be undone.',
       'alert_confirm': 'Accept',
       'alert_delete': 'Delete',
 
@@ -352,18 +488,123 @@ class LanguageController extends GetxController {
       'error_title': 'Error loading chats',
       'retry': 'RETRY',
       'empty_title_chats': 'No chats yet',
-      'empty_subtitle_chats': 'Start liking profiles to find your perfect match',
+      'empty_subtitle_chats':
+          'Start liking profiles to find your perfect match',
       'empty_title_pending': 'No pending match',
-      'empty_subtitle_pending': 'When someone writes to you, it will appear here',
+      'empty_subtitle_pending':
+          'When someone writes to you, it will appear here',
       'explore': 'EXPLORE PROFILES',
       'save': 'Save',
       'cancel': 'Cancel',
       'error': 'Error',
       'accept': 'Accept',
       'no_more_profiles': 'No more profiles',
-'no_more_profiles_desc': 'We couldn\'t find profiles matching your current filters. Expand your search range to see more people.',
-'modify_preferences': 'Modify preferences',
-'try_again': 'Try again',
+      'no_more_profiles_desc':
+          'We couldn\'t find profiles matching your current filters. Expand your search range to see more people.',
+      'modify_preferences': 'Modify preferences',
+      'try_again': 'Try again',
+      // ── RegisterPage ───────────────────────────────
+      'register_title': 'Get Started',
+      'register_have_account': 'Already have an account? ',
+      'register_login': 'Log In',
+      'register_name': 'Full Name:',
+      'register_name_hint': 'Karen Hernández Costa',
+      'register_email': 'Email:',
+      'register_email_hint': 'email@gmail.com',
+      'register_password': 'Create a password',
+      'register_confirm_password': 'Confirm your password:',
+      'register_privacy':
+          'By registering you accept the Privacy Policy and Terms & Conditions.',
+      'register_btn': 'Register',
+
+      'personal_title': 'Let\'s start with\nthe basics',
+      'personal_dob': 'Select your date of birth',
+      'personal_dob_placeholder': '14/05/1993',
+      'personal_gender': 'How do you identify?',
+      'personal_bio': 'Tell us about yourself:',
+      'personal_bio_hint': 'Write a short biography...',
+
+      'physical_title': 'This information helps us\nimprove your matches',
+      'physical_height': 'Your height',
+
+      'interests_page_title': 'Choose your main\ninterests',
+      'interests_page_subtitle': 'Your interests help us find better\nmatches.',
+      'interests_search_hint': 'Search interests',
+      'interests_popular': 'Popular interests',
+      'interests_custom_hint': 'If you can\'t find your results, write them...',
+
+      'qualities_page_title': 'What you appreciate most\nin a person',
+      'qualities_page_subtitle':
+          'These qualities help us create better matches.',
+      'qualities_counter_label': 'What you look for in someone',
+
+      'nav_skip': 'Skip',
+      'login_title': 'Log In',
+      'login_no_account': 'Don\'t have an account yet? ',
+      'login_register': 'Register',
+      'login_email': 'Email:',
+      'login_email_hint': 'email@gmail.com',
+      'login_password': 'Password:',
+      'login_remember': 'Remember me',
+      'login_btn': 'Log In',
+      'val_name_required': 'Name is required',
+      'val_name_min': 'Minimum 3 characters',
+      'val_email_required': 'Email is required',
+      'val_email_invalid': 'Enter a valid email',
+      'val_password_required': 'Password is required',
+      'val_min_8': 'Minimum 8 characters',
+      'val_min_10': 'Minimum 10 characters',
+      'val_max_500': 'Maximum 500 characters',
+      'val_passwords_no_match': 'Passwords do not match',
+      'val_dob_required': 'Select your date of birth',
+      'val_gender_required': 'Select your gender',
+      'val_custom_gender_required': 'Write how you identify',
+      'val_bio_required': 'Biography is required',
+      'val_bio_min': 'Biography must have at least 10 characters',
+      'val_bio_max': 'Biography must have at most 500 characters',
+      'val_height_required': 'Enter your height',
+      'val_height_invalid': 'Enter a valid height between 100 and 250 cm',
+      'val_interest_required': 'Select at least one interest',
+      'val_max_interests': 'You can only select up to',
+      'val_max_qualities': 'You can only select up to',
+      'register_success': 'Registration successful. Please log in.',
+      'login_warning': 'Warning',
+      'login_val_email': 'Please enter your email',
+      'login_val_password': 'Please enter your password',
+      'login_error_title': 'Incorrect access',
+      'chat_reconnecting': 'Reconnecting...',
+      'chat_no_connection': 'No connection · Tap to retry',
+      'chat_cost_info': 'This message costs ',
+      'chat_balance_info': 'Your current credits are ',
+      'chat_charge_info': 'The message will be charged only when sent.',
+      'chat_first_msg_sent': 'First message sent. Wait for a reply.',
+      'chat_hint_blocked': 'Waiting for reply...',
+      'chat_hint': 'Write a message...',
+      'chat_empty_title': 'Start the conversation',
+      'chat_empty_subtitle': 'Send the first message to begin',
+      'chat_error_title': 'Error loading messages',
+      'nearby_no_more': 'No more nearby users',
+      'nearby_load_error': 'Could not load users',
+      'nearby_liked': 'You like',
+      'nearby_removed_fav': 'removed from favorites',
+      'nearby_error_process': 'Error processing',
+      'nearby_like_sent': 'You liked',
+      'nearby_error_like': 'Error liking',
+      'nearby_next_profile': 'Moving to next profile',
+      'nearby_error_reject': 'Error rejecting',
+      'nearby_superlike_sent': 'You sent a Super Like to',
+      'nearby_block_title': 'Block user',
+      'nearby_block_msg': 'Are you sure you want to block',
+      'nearby_block_confirm': 'Block',
+      'nearby_blocked': 'has been blocked',
+      'nearby_all_seen': 'You have seen all available profiles',
+      'nearby_report_title': 'Report user',
+      'nearby_report_msg': 'Why do you want to report',
+      'nearby_report_confirm': 'Report',
+      'nearby_report_thanks':
+          'Thanks for your report. We will review the profile of',
+      'nearby_send_message': 'Send message',
+      'nearby_view_profile': 'View full profile', 'chat_credits': 'credits',
     },
   };
 }

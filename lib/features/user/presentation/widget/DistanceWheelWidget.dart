@@ -26,7 +26,7 @@ class _DistanceWheelWidgetState extends State<DistanceWheelWidget> {
   String _labelForIndex(int index) {
     if (index < 9) return '${(index + 1) * 100} m';
     final km = index - 9 + 1;
-    return km >= 300 ? '∞  Sin límite' : '$km km';
+    return km >= 300 ? 'Máximo' : '$km km';
   }
 
   double _kmForIndex(int index) {

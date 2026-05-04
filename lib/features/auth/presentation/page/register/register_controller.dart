@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:tendria/common/errors/convert_message.dart';
+import 'package:tendria/common/services/translation_service.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
-import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/auth/domain/entities/user/create_user_entity.dart';
 import 'package:tendria/features/auth/domain/entities/user/registration_step.dart';
@@ -25,9 +25,24 @@ class RegisterController extends GetxController {
     required this.fetchInterestsUsecase,
   });
 
+  // ==========================================
+  // SERVICIOS
+  // ==========================================
+
+  TranslationService get _translator => Get.find<TranslationService>();
+  LanguageController get _l => Get.find<LanguageController>();
+
+  // ==========================================
+  // NAVEGACIÓN
+  // ==========================================
+
   final Rx<RegistrationStep> currentStep = RegistrationStep.basicInfo.obs;
   final RxInt currentStepIndex = 0.obs;
-  late final FixedExtentScrollController heightScrollController;
+  late FixedExtentScrollController heightScrollController;
+
+  // ==========================================
+  // TEXT CONTROLLERS
+  // ==========================================
 
   late final TextEditingController nameController;
   late final TextEditingController emailController;
@@ -36,16 +51,24 @@ class RegisterController extends GetxController {
   late final TextEditingController heightController;
   late final TextEditingController cityController;
   late final TextEditingController customGenderController;
-
   late final TextEditingController bioController;
-  late final FocusNode bioFocusNode;
-  late final FocusNode customGenderFocusNode;
+
+  // ==========================================
+  // FOCUS NODES
+  // ==========================================
+
   late final FocusNode nameFocusNode;
   late final FocusNode emailFocusNode;
   late final FocusNode passwordFocusNode;
   late final FocusNode confirmPasswordFocusNode;
   late final FocusNode heightFocusNode;
   late final FocusNode cityFocusNode;
+  late final FocusNode bioFocusNode;
+  late final FocusNode customGenderFocusNode;
+
+  // ==========================================
+  // ESTADOS
+  // ==========================================
 
   final RxBool isLoading = false.obs;
   final RxBool showPassword = false.obs;
@@ -54,6 +77,10 @@ class RegisterController extends GetxController {
   final RxBool locationObtained = false.obs;
   final RxBool isLoadingQualities = false.obs;
   final RxBool isLoadingInterests = false.obs;
+
+  // ==========================================
+  // DATOS DE PERFIL
+  // ==========================================
 
   final Rx<DateTime?> dateOfBirth = Rx<DateTime?>(null);
   final RxString selectedGender = ''.obs;
@@ -67,27 +94,49 @@ class RegisterController extends GetxController {
   final RxInt bioCharCount = 0.obs;
   final RxBool showCustomGender = false.obs;
 
+  // ==========================================
+  // CATÁLOGOS
+  // ==========================================
+
   final RxList<CatalogEntity> qualities = <CatalogEntity>[].obs;
   final RxList<CatalogEntity> interests = <CatalogEntity>[].obs;
+
+  final RxMap<String, String> translatedInterests = <String, String>{}.obs;
+  final RxMap<String, String> translatedQualities = <String, String>{}.obs;
+
+  // ==========================================
+  // UBICACIÓN
+  // ==========================================
 
   final RxString latitude = ''.obs;
   final RxString longitude = ''.obs;
   final RxString city = ''.obs;
 
+  // ==========================================
+  // ERRORES DE VALIDACIÓN
+  // ==========================================
+
   final RxBool emailError = false.obs;
   final RxBool passwordError = false.obs;
   final RxBool confirmPasswordError = false.obs;
   final RxBool nameError = false.obs;
+  final RxBool bioError = false.obs;
 
   final RxString emailErrorMessage = ''.obs;
   final RxString passwordErrorMessage = ''.obs;
   final RxString confirmPasswordErrorMessage = ''.obs;
   final RxString nameErrorMessage = ''.obs;
+  final RxString bioErrorMessage = ''.obs;
+
+  // ==========================================
+  // ALTURA
+  // ==========================================
 
   final RxInt selectedHeight = 170.obs;
 
-  final RxBool bioError = false.obs;
-  final RxString bioErrorMessage = ''.obs;
+  // ==========================================
+  // OPCIONES DE GÉNERO
+  // ==========================================
 
   final List<Map<String, dynamic>> genderOptions = [
     {'label': 'Masculino', 'value': 'Hombre', 'icon': Icons.male},
@@ -98,17 +147,18 @@ class RegisterController extends GetxController {
       'icon': Icons.transgender,
     },
   ];
-  void selectHeight(int height) {
-    heightController.text = height.toString();
-    selectedHeight.value = height;
-  }
+
+  // ==========================================
+  // INIT / CLOSE
+  // ==========================================
 
   @override
   void onInit() {
     super.onInit();
+    print('[RegisterController] ✅ onInit');
+    heightScrollController = FixedExtentScrollController(initialItem: 70);
     _initializeControllers();
     _loadCatalogs();
-    heightScrollController = FixedExtentScrollController(initialItem: 16);
   }
 
   void _initializeControllers() {
@@ -116,10 +166,10 @@ class RegisterController extends GetxController {
     emailController = TextEditingController();
     passwordController = TextEditingController();
     confirmPasswordController = TextEditingController();
-    heightController = TextEditingController();
+    heightController = TextEditingController(text: '170');
     cityController = TextEditingController();
     bioController = TextEditingController();
-    customGenderController = TextEditingController(); 
+    customGenderController = TextEditingController();
 
     nameFocusNode = FocusNode();
     emailFocusNode = FocusNode();
@@ -128,7 +178,7 @@ class RegisterController extends GetxController {
     heightFocusNode = FocusNode();
     cityFocusNode = FocusNode();
     bioFocusNode = FocusNode();
-    customGenderFocusNode = FocusNode(); 
+    customGenderFocusNode = FocusNode();
 
     emailController.addListener(_validateEmail);
     passwordController.addListener(_validatePassword);
@@ -137,18 +187,58 @@ class RegisterController extends GetxController {
     bioController.addListener(_validateBio);
   }
 
+  @override
+  void onClose() {
+    emailController.removeListener(_validateEmail);
+    passwordController.removeListener(_validatePassword);
+    confirmPasswordController.removeListener(_validateConfirmPassword);
+    nameController.removeListener(_validateName);
+    bioController.removeListener(_validateBio);
+
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    heightController.dispose();
+    cityController.dispose();
+    bioController.dispose();
+    customGenderController.dispose();
+
+    nameFocusNode.dispose();
+    emailFocusNode.dispose();
+    passwordFocusNode.dispose();
+    confirmPasswordFocusNode.dispose();
+    heightFocusNode.dispose();
+    cityFocusNode.dispose();
+    bioFocusNode.dispose();
+    customGenderFocusNode.dispose();
+
+    heightScrollController.dispose();
+
+    super.onClose();
+  }
+
+  // ==========================================
+  // CARGA DE CATÁLOGOS
+  // ==========================================
 
   Future<void> _loadCatalogs() async {
+    print('[RegisterController] 🔄 _loadCatalogs() iniciando...');
     await Future.wait([_loadQualities(), _loadInterests()]);
+    print('[RegisterController] ✅ _loadCatalogs() completado');
   }
 
   Future<void> _loadQualities() async {
     try {
       isLoadingQualities.value = true;
+      print('[RegisterController] 🔄 Cargando cualidades desde API...');
       final result = await fetchQualitiesUsecase.execute();
       qualities.value = result;
+      print('[RegisterController] ✅ Cualidades cargadas: ${result.length} items');
+      result.forEach((q) => print('  - cualidad: ${q.name}'));
+      await _translateQualitiesCatalog();
     } catch (e) {
-      print('Error cargando cualidades: $e');
+      print('[RegisterController] ❌ Error cargando cualidades: $e');
     } finally {
       isLoadingQualities.value = false;
     }
@@ -157,15 +247,95 @@ class RegisterController extends GetxController {
   Future<void> _loadInterests() async {
     try {
       isLoadingInterests.value = true;
+      print('[RegisterController] 🔄 Cargando intereses desde API...');
       final result = await fetchInterestsUsecase.execute();
       interests.value = result;
+      print('[RegisterController] ✅ Intereses cargados: ${result.length} items');
+      result.forEach((i) => print('  - interés: ${i.name}'));
+      await _translateInterestsCatalog();
     } catch (e) {
-      print('Error cargando intereses: $e');
+      print('[RegisterController] ❌ Error cargando intereses: $e');
     } finally {
       isLoadingInterests.value = false;
     }
   }
 
+  // ==========================================
+  // TRADUCCIÓN DE CATÁLOGOS
+  // ==========================================
+
+  Future<void> _waitForTranslator() async {
+    print('[RegisterController] 🔍 TranslationService.isReady = ${_translator.isReady.value}');
+    if (!_translator.isReady.value) {
+      print('[RegisterController] ⏳ Esperando que TranslationService esté listo...');
+      await _translator.isReady.stream.firstWhere((ready) => ready);
+      print('[RegisterController] ✅ TranslationService ya está listo');
+    }
+  }
+
+  Future<void> _translateInterestsCatalog() async {
+    print('[RegisterController] 🌐 _translateInterestsCatalog() iniciando...');
+
+    if (interests.isEmpty) {
+      print('[RegisterController] ⚠️ interests está vacío, nada que traducir');
+      return;
+    }
+
+    await _waitForTranslator();
+
+    // Verificar qué idioma detecta
+    final lang = _l.lang;
+    print('[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"');
+
+    final names = interests.map((i) => i.name).toList();
+    print('[RegisterController] 📋 Nombres a traducir: $names');
+
+    // translateList() sin parámetro → TranslationService usa _currentLanguage internamente
+    final results = await _translator.translateList(names);
+    print('[RegisterController] 📋 Resultados traducidos: $results');
+
+    translatedInterests.assignAll({
+      for (int i = 0; i < names.length; i++) names[i]: results[i],
+    });
+
+    print('[RegisterController] ✅ translatedInterests asignado:');
+    translatedInterests.forEach((k, v) => print('  "$k" → "$v"'));
+  }
+
+  Future<void> _translateQualitiesCatalog() async {
+    print('[RegisterController] 🌐 _translateQualitiesCatalog() iniciando...');
+
+    if (qualities.isEmpty) {
+      print('[RegisterController] ⚠️ qualities está vacío, nada que traducir');
+      return;
+    }
+
+    await _waitForTranslator();
+
+    final lang = _l.lang;
+    print('[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"');
+
+    final names = qualities.map((q) => q.name).toList();
+    print('[RegisterController] 📋 Nombres a traducir: $names');
+
+    final results = await _translator.translateList(names);
+    print('[RegisterController] 📋 Resultados traducidos: $results');
+
+    translatedQualities.assignAll({
+      for (int i = 0; i < names.length; i++) names[i]: results[i],
+    });
+
+    print('[RegisterController] ✅ translatedQualities asignado:');
+    translatedQualities.forEach((k, v) => print('  "$k" → "$v"'));
+  }
+ 
+  String getInterestLabel(String name) => translatedInterests[name] ?? name;
+ 
+  String getQualityLabel(String name) => translatedQualities[name] ?? name;
+
+  // ==========================================
+  // NAVEGACIÓN ENTRE PASOS
+  // ==========================================
 
   void nextStep() {
     if (_validateCurrentStep()) {
@@ -186,6 +356,21 @@ class RegisterController extends GetxController {
       currentStep.value = RegistrationStep.values[currentStepIndex.value];
     }
   }
+
+  void skipStep() {
+    if (currentStepIndex.value < 4) {
+      currentStepIndex.value++;
+      currentStep.value = RegistrationStep.values[currentStepIndex.value];
+
+      if (currentStep.value == RegistrationStep.personalInfo) {
+        _autoGetLocation();
+      }
+    }
+  }
+
+  // ==========================================
+  // VALIDACIONES POR PASO
+  // ==========================================
 
   bool _validateCurrentStep() {
     switch (currentStep.value) {
@@ -208,14 +393,14 @@ class RegisterController extends GetxController {
     if (nameController.text.isEmpty || nameController.text.length < 3) {
       nameError.value = true;
       nameErrorMessage.value = nameController.text.isEmpty
-          ? 'El nombre es requerido'
-          : 'Mínimo 3 caracteres';
+          ? _l.t('val_name_required')
+          : _l.t('val_name_min');
       isValid = false;
     }
 
     if (emailController.text.isEmpty) {
       emailError.value = true;
-      emailErrorMessage.value = 'El correo es requerido';
+      emailErrorMessage.value = _l.t('val_email_required');
       isValid = false;
     } else if (emailError.value) {
       isValid = false;
@@ -224,14 +409,14 @@ class RegisterController extends GetxController {
     if (passwordController.text.isEmpty || passwordController.text.length < 8) {
       passwordError.value = true;
       passwordErrorMessage.value = passwordController.text.isEmpty
-          ? 'La contraseña es requerida'
-          : 'Mínimo 8 caracteres';
+          ? _l.t('val_password_required')
+          : _l.t('val_min_8');
       isValid = false;
     }
 
     if (confirmPasswordController.text != passwordController.text) {
       confirmPasswordError.value = true;
-      confirmPasswordErrorMessage.value = 'Las contraseñas no coinciden';
+      confirmPasswordErrorMessage.value = _l.t('val_passwords_no_match');
       isValid = false;
     }
 
@@ -240,57 +425,48 @@ class RegisterController extends GetxController {
 
   bool _validatePersonalInfo() {
     if (dateOfBirth.value == null) {
-      showErrorSnackbar('Selecciona tu fecha de nacimiento');
+      showErrorSnackbar(_l.t('val_dob_required'));
       return false;
     }
 
     if (selectedGender.value.isEmpty) {
-      showErrorSnackbar('Selecciona tu género');
+      showErrorSnackbar(_l.t('val_gender_required'));
       return false;
     }
 
     if (selectedGender.value == 'Otro' &&
         customGenderController.text.trim().isEmpty) {
-      showErrorSnackbar('Escribe cómo te identificas');
+      showErrorSnackbar(_l.t('val_custom_gender_required'));
       return false;
     }
 
     if (bioController.text.trim().isEmpty) {
-      showErrorSnackbar('La biografía es requerida');
+      showErrorSnackbar(_l.t('val_bio_required'));
       return false;
     }
 
     if (bioController.text.trim().length < 10) {
-      showErrorSnackbar('La biografía debe tener al menos 10 caracteres');
+      showErrorSnackbar(_l.t('val_bio_min'));
       return false;
     }
 
     if (bioController.text.length > 500) {
-      showErrorSnackbar('La biografía debe tener máximo 500 caracteres');
+      showErrorSnackbar(_l.t('val_bio_max'));
       return false;
     }
 
     return true;
-  } 
-void skipStep() {
-  if (currentStepIndex.value < 4) {
-    currentStepIndex.value++;
-    currentStep.value = RegistrationStep.values[currentStepIndex.value];
-
-    if (currentStep.value == RegistrationStep.personalInfo) {
-      _autoGetLocation();
-    }
   }
-}
+
   bool _validatePhysicalInfo() {
     if (heightController.text.isEmpty) {
-      showErrorSnackbar('Ingresa tu altura');
+      showErrorSnackbar(_l.t('val_height_required'));
       return false;
     }
 
     final height = int.tryParse(heightController.text);
     if (height == null || height < 100 || height > 250) {
-      showErrorSnackbar('Ingresa una altura válida entre 100 y 250 cm');
+      showErrorSnackbar(_l.t('val_height_invalid'));
       return false;
     }
 
@@ -299,29 +475,32 @@ void skipStep() {
 
   bool _validateInterests() {
     if (selectedInterests.isEmpty) {
-      showErrorSnackbar('Selecciona al menos un interés');
+      showErrorSnackbar(_l.t('val_interest_required'));
       return false;
     }
     return true;
   }
+
+  // ==========================================
+  // VALIDACIONES EN TIEMPO REAL
+  // ==========================================
+
   void _validateBio() {
     bioCharCount.value = bioController.text.length;
 
     if (bioController.text.isEmpty) {
-      bioError.value = true; 
-      bioErrorMessage.value = 'La biografía es requerida';
+      bioError.value = true;
+      bioErrorMessage.value = _l.t('val_bio_required');
       return;
     }
-
     if (bioController.text.length < 10) {
       bioError.value = true;
-      bioErrorMessage.value = 'Mínimo 10 caracteres';
+      bioErrorMessage.value = _l.t('val_min_10');
       return;
     }
-
     if (bioController.text.length > 500) {
       bioError.value = true;
-      bioErrorMessage.value = 'Máximo 500 caracteres';
+      bioErrorMessage.value = _l.t('val_max_500');
       return;
     }
 
@@ -335,7 +514,7 @@ void skipStep() {
     }
     if (nameController.text.length < 3) {
       nameError.value = true;
-      nameErrorMessage.value = 'El nombre debe tener al menos 3 caracteres';
+      nameErrorMessage.value = _l.t('val_name_min');
     } else {
       nameError.value = false;
     }
@@ -349,7 +528,7 @@ void skipStep() {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(emailController.text)) {
       emailError.value = true;
-      emailErrorMessage.value = 'Ingresa un correo válido';
+      emailErrorMessage.value = _l.t('val_email_invalid');
     } else {
       emailError.value = false;
     }
@@ -362,7 +541,7 @@ void skipStep() {
     }
     if (passwordController.text.length < 8) {
       passwordError.value = true;
-      passwordErrorMessage.value = 'Mínimo 8 caracteres';
+      passwordErrorMessage.value = _l.t('val_min_8');
     } else {
       passwordError.value = false;
     }
@@ -375,11 +554,15 @@ void skipStep() {
     }
     if (confirmPasswordController.text != passwordController.text) {
       confirmPasswordError.value = true;
-      confirmPasswordErrorMessage.value = 'Las contraseñas no coinciden';
+      confirmPasswordErrorMessage.value = _l.t('val_passwords_no_match');
     } else {
       confirmPasswordError.value = false;
     }
   }
+
+  // ==========================================
+  // UBICACIÓN
+  // ==========================================
 
   Future<void> _autoGetLocation() async {
     try {
@@ -416,11 +599,20 @@ void skipStep() {
 
       locationObtained.value = true;
     } catch (e) {
-      print('Error obteniendo ubicación: $e');
+      print('[RegisterController] ❌ Error obteniendo ubicación: $e');
       city.value = 'Ciudad desconocida';
     } finally {
       isLoadingLocation.value = false;
     }
+  }
+
+  // ==========================================
+  // SELECCIONES
+  // ==========================================
+
+  void selectHeight(int height) {
+    heightController.text = height.toString();
+    selectedHeight.value = height;
   }
 
   void selectDateOfBirth(DateTime date) {
@@ -429,13 +621,11 @@ void skipStep() {
 
   void selectGender(String gender) {
     selectedGender.value = gender;
-
     if (gender == 'Otro') {
       showCustomGender.value = true;
     } else {
       showCustomGender.value = false;
-      customGenderController.clear(); 
-      
+      customGenderController.clear();
     }
   }
 
@@ -443,37 +633,44 @@ void skipStep() {
     selectedLanguage.value = language;
   }
 
-void toggleInterest(int interestId) {
-  if (selectedInterests.contains(interestId)) {
-    selectedInterests.remove(interestId);
-  } else {
-    if (selectedInterests.length >= maxInterests) {
-      showErrorSnackbar(
-        'Solo puedes seleccionar hasta $maxInterests intereses',
-      );
-      return;
+  void toggleInterest(int interestId) {
+    if (selectedInterests.contains(interestId)) {
+      selectedInterests.remove(interestId);
+    } else {
+      if (selectedInterests.length >= maxInterests) {
+        showErrorSnackbar(
+          '${_l.t('val_max_interests')} $maxInterests ${_l.t('bs_interests_selected')}',
+        );
+        return;
+      }
+      selectedInterests.add(interestId);
     }
-    selectedInterests.add(interestId);
   }
-}
 
-void toggleQuality(int qualityId) {
-  if (selectedQualities.contains(qualityId)) {
-    selectedQualities.remove(qualityId);
-  } else {
-    if (selectedQualities.length >= maxQualities) {
-      showErrorSnackbar(
-        'Solo puedes seleccionar hasta $maxQualities cualidades',
-      );
-      return;
+  void toggleQuality(int qualityId) {
+    if (selectedQualities.contains(qualityId)) {
+      selectedQualities.remove(qualityId);
+    } else {
+      if (selectedQualities.length >= maxQualities) {
+        showErrorSnackbar(
+          '${_l.t('val_max_qualities')} $maxQualities ${_l.t('bs_interests_selected')}',
+        );
+        return;
+      }
+      selectedQualities.add(qualityId);
     }
-    selectedQualities.add(qualityId);
   }
-}
+
+  // ==========================================
+  // REGISTRO
+  // ==========================================
 
   Future<void> onRegisterTap() async {
-   
- 
+    if (dateOfBirth.value == null) {
+      showErrorSnackbar(_l.t('val_dob_required'));
+      return;
+    }
+
     try {
       isLoading.value = true;
 
@@ -488,7 +685,7 @@ void toggleQuality(int qualityId) {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
         dateofbirth: _formatDate(dateOfBirth.value!),
-        gender: finalGender, 
+        gender: finalGender,
         bio: bioController.text.trim(),
         heightcm: heightController.text.trim(),
         primarylanguage: selectedLanguage.value,
@@ -500,16 +697,12 @@ void toggleQuality(int qualityId) {
       );
 
       await createUserUsecase.execute(entity);
-     
       _clearFields();
-      showSuccessSnackbar(
-        'Registro exitoso. Por favor, inicia sesión.',
-        
-      );
-     onLoginTap();
+      showSuccessSnackbar(_l.t('register_success'));
+      onLoginTap();
     } catch (e) {
-      print('Error en registro: $e');
-      showErrorSnackbar('Error en el registro: ${cleanExceptionMessage(e)}');
+      print('[RegisterController] ❌ Error en registro: $e');
+      showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
     } finally {
       isLoading.value = false;
     }
@@ -519,34 +712,27 @@ void toggleQuality(int qualityId) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  // ==========================================
+  // NAVEGACIÓN
+  // ==========================================
 
-  void onLoginTap() {
-    Get.toNamed(RoutesNames.loginPage);
-  }
+  void onLoginTap() => Get.toNamed(RoutesNames.loginPage);
 
-  void onNameSubmitted() {
-    emailFocusNode.requestFocus();
-  }
+  void onNameSubmitted() => emailFocusNode.requestFocus();
+  void onEmailSubmitted() => passwordFocusNode.requestFocus();
+  void onPasswordSubmitted() => confirmPasswordFocusNode.requestFocus();
+  void onConfirmPasswordSubmitted() => nextStep();
 
-  void onEmailSubmitted() {
-    passwordFocusNode.requestFocus();
-  }
-
-  void onPasswordSubmitted() {
-    confirmPasswordFocusNode.requestFocus();
-  }
-
-  void onConfirmPasswordSubmitted() {
-    nextStep();
-  }
-
+  // ==========================================
+  // RESET
+  // ==========================================
 
   void _clearFields() {
     nameController.clear();
     emailController.clear();
     passwordController.clear();
     confirmPasswordController.clear();
-    heightController.clear();
+    heightController.text = '170';
     cityController.clear();
     bioController.clear();
     customGenderController.clear();
@@ -563,36 +749,10 @@ void toggleQuality(int qualityId) {
     currentStepIndex.value = 0;
     currentStep.value = RegistrationStep.basicInfo;
     bioCharCount.value = 0;
-    showCustomGender.value = false; 
-    heightScrollController.dispose();
-  }
+    showCustomGender.value = false;
+    selectedHeight.value = 170;
 
-  @override
-  void onClose() {  
-    emailController.removeListener(_validateEmail);
-    passwordController.removeListener(_validatePassword);
-    confirmPasswordController.removeListener(_validateConfirmPassword);
-    nameController.removeListener(_validateName);
-    bioController.removeListener(_validateBio);
-
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    heightController.dispose();
-    cityController.dispose();
-    bioController.dispose();
-    customGenderController.dispose(); 
-
-    nameFocusNode.dispose();
-    emailFocusNode.dispose();
-    passwordFocusNode.dispose();
-    confirmPasswordFocusNode.dispose();
-    heightFocusNode.dispose();
-    cityFocusNode.dispose();
-    bioFocusNode.dispose();
-    customGenderFocusNode.dispose(); 
-
-    super.onClose();
+    translatedInterests.clear();
+    translatedQualities.clear();
   }
 }

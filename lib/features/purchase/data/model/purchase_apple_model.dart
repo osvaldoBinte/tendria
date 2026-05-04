@@ -10,7 +10,7 @@ class PurchaseAppleModel extends PurchaseAppleEntity{
     return {
       'productoId':productoId,
       'receiptData':receiptData,
-       'sandbox': true
+       'sandbox': false
     };
   }
 }

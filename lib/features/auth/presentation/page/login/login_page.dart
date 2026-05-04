@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tendria/common/settings/routes_names.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/auth/presentation/page/login/login_controller.dart';
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({Key? key}) : super(key: key);
+
+  LanguageController get lang => Get.find<LanguageController>();
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,6 @@ class LoginPage extends GetView<LoginController> {
               Positioned.fill(
                 child: Image.asset('assets/fondo.png', fit: BoxFit.cover),
               ),
-
               Positioned.fill(
                 child: Container(
                   color: const Color.fromARGB(255, 93, 93, 93).withOpacity(0.6),
@@ -25,7 +26,6 @@ class LoginPage extends GetView<LoginController> {
               ),
             ],
           ),
-
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -54,12 +54,11 @@ class LoginPage extends GetView<LoginController> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.asset('assets/logo/logo.png', width: 250,
-                          height: 100,),
+          child: Image.asset('assets/logo/logo.png', width: 250, height: 100),
         ),
         SizedBox(height: ThemeColor.paddingLarge),
         Text(
-          'Iniciar Sesión',
+          lang.t('login_title'),
           style: ThemeColor.headingLarge.copyWith(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -71,7 +70,7 @@ class LoginPage extends GetView<LoginController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '¿Aún no tienes una cuenta? ',
+              lang.t('login_no_account'),
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textDarkColor,
               ),
@@ -79,7 +78,7 @@ class LoginPage extends GetView<LoginController> {
             GestureDetector(
               onTap: controller.onRegisterTap,
               child: Text(
-                'Registrarse',
+                lang.t('login_register'),
                 style: ThemeColor.bodyMedium.copyWith(
                   color: ThemeColor.primaryColor,
                   fontWeight: FontWeight.w600,
@@ -101,10 +100,10 @@ class LoginPage extends GetView<LoginController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ThemeColor.createLabeledTextField(
-            label: 'Correo electrónico:',
+            label: lang.t('login_email'),
             controller: controller.emailController,
             focusNode: controller.emailFocusNode,
-            hintText: 'correo@gmail.com',
+            hintText: lang.t('login_email_hint'),
             keyboardType: TextInputType.emailAddress,
             onSubmitted: (_) => controller.onemailSubmitted(),
           ),
@@ -113,7 +112,7 @@ class LoginPage extends GetView<LoginController> {
 
           Obx(
             () => ThemeColor.createLabeledTextField(
-              label: 'Contraseña:',
+              label: lang.t('login_password'),
               controller: controller.passwordController,
               focusNode: controller.passwordFocusNode,
               hintText: '••••••••••',
@@ -144,7 +143,7 @@ class LoginPage extends GetView<LoginController> {
     return Row(
       children: [
         Text(
-          'Recuérdame',
+          lang.t('login_remember'),
           style: ThemeColor.bodyMedium.copyWith(
             color: ThemeColor.textSecondaryColor,
           ),
@@ -192,7 +191,7 @@ class LoginPage extends GetView<LoginController> {
                   ),
                 )
               : Text(
-                  'Iniciar Sesión',
+                  lang.t('login_btn'),
                   style: ThemeColor.buttonText.copyWith(fontSize: 16),
                 ),
         ),

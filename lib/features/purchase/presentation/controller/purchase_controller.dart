@@ -365,21 +365,29 @@ class PurchaseController extends GetxController {
                 purchase.billingClientPurchase.packageName,
           ),
         );
-      } else if (Platform.isIOS) {
-        if (purchase is! AppStorePurchaseDetails) {
-          errorMessage.value = 'Error interno al procesar la compra';
-          showErrorSnackbar('Error interno al procesar la compra');
-          return;
-        }
-        final receiptData =
-            purchase.verificationData.localVerificationData;
-        await purchaseAppleUsecase.call(
-          PurchaseAppleEntity(
-            productoId: purchase.productID,
-            receiptData: receiptData,
-          ),
-        );
-      }
+     } else if (Platform.isIOS) {
+  if (purchase is! AppStorePurchaseDetails) {
+    errorMessage.value = 'Error interno al procesar la compra';
+    showErrorSnackbar('Error interno al procesar la compra');
+    return;
+  }
+
+  // ✅ transactionId en lugar de base64 del receipt
+  final skPaymentTransaction = purchase.skPaymentTransaction;
+  final transactionId = skPaymentTransaction.transactionIdentifier;
+  final originalTransactionId =
+      skPaymentTransaction.originalTransaction?.transactionIdentifier;
+
+  final receiptData = originalTransactionId ?? transactionId ?? '';
+  print('🎫 receiptData (transactionId): $receiptData');
+
+  await purchaseAppleUsecase.call(
+    PurchaseAppleEntity(
+      productoId: purchase.productID,
+      receiptData: receiptData,
+    ),
+  );
+}
 
       successMessage.value = '¡Compra completada exitosamente!';
       showSuccessSnackbar('¡Compra completada exitosamente!');

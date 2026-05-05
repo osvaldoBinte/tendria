@@ -113,7 +113,8 @@ class ChatPage extends GetView<ChatController> {
                         ),
                       ),
                       child: ClipOval(
-                        child: (usuario?.fotoUrl != null &&
+                        child:
+                            (usuario?.fotoUrl != null &&
                                     usuario!.fotoUrl!.isNotEmpty) ||
                                 controller.userPhoto != null
                             ? Image.network(
@@ -136,9 +137,7 @@ class ChatPage extends GetView<ChatController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      usuario?.nombre ??
-                          controller.userName ??
-                          _l.t('user'),
+                      usuario?.nombre ?? controller.userName ?? _l.t('user'),
                       style: ThemeColor.subtitleLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -156,11 +155,7 @@ class ChatPage extends GetView<ChatController> {
   Widget _buildDefaultAvatar() {
     return Container(
       color: ThemeColor.backgroundColorfondo,
-      child: Icon(
-        Icons.person,
-        size: 24,
-        color: ThemeColor.textSecondaryColor,
-      ),
+      child: Icon(Icons.person, size: 24, color: ThemeColor.textSecondaryColor),
     );
   }
 
@@ -192,11 +187,7 @@ class ChatPage extends GetView<ChatController> {
                   ),
                 )
               else
-                Icon(
-                  Icons.refresh,
-                  size: 16,
-                  color: ThemeColor.warningColor,
-                ),
+                Icon(Icons.refresh, size: 16, color: ThemeColor.warningColor),
               const SizedBox(width: 8),
               Text(
                 isRetrying
@@ -288,8 +279,9 @@ class ChatPage extends GetView<ChatController> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisAlignment:
-            isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isOwn
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isOwn) ...[
@@ -299,8 +291,7 @@ class ChatPage extends GetView<ChatController> {
           Flexible(
             child: Container(
               constraints: BoxConstraints(maxWidth: Get.width * 0.7),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isOwn
                     ? ThemeColor.primaryColor
@@ -358,9 +349,7 @@ class ChatPage extends GetView<ChatController> {
           ),
           if (isOwn) ...[
             const SizedBox(width: 8),
-            _buildMessageAvatar(
-              mensaje.senderFoto ?? controller.myPhoto,
-            ),
+            _buildMessageAvatar(mensaje.senderFoto ?? controller.myPhoto),
           ],
         ],
       ),
@@ -429,7 +418,7 @@ class ChatPage extends GetView<ChatController> {
             padding: const EdgeInsets.all(8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [ 
+              children: [
                 if (controller.isNewConversation.value &&
                     !controller.firstMessageSent.value)
                   Container(
@@ -498,7 +487,7 @@ class ChatPage extends GetView<ChatController> {
                       ],
                     ),
                   ),
- 
+
                 if (blocked)
                   Container(
                     width: double.infinity,
@@ -534,7 +523,7 @@ class ChatPage extends GetView<ChatController> {
                       ],
                     ),
                   ),
- 
+
                 Row(
                   children: [
                     Expanded(
@@ -561,7 +550,8 @@ class ChatPage extends GetView<ChatController> {
                                       const Duration(milliseconds: 400),
                                       () {
                                         if (controller
-                                            .scrollController.hasClients) {
+                                            .scrollController
+                                            .hasClients) {
                                           controller.scrollToBottom();
                                         }
                                       },
@@ -592,9 +582,12 @@ class ChatPage extends GetView<ChatController> {
                     ),
                     const SizedBox(width: 8),
                     Obx(() {
-                      final canSend = !blocked &&
-                          controller.isTyping.value &&
-                          !controller.isSending.value;
+                      final canSend =
+                          !blocked &&
+                          (controller.isNewConversation.value
+                              ? !controller.isSending.value
+                              : controller.isTyping.value &&
+                                    !controller.isSending.value);
 
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
@@ -626,8 +619,8 @@ class ChatPage extends GetView<ChatController> {
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : Icon(
@@ -706,11 +699,7 @@ class ChatPage extends GetView<ChatController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 60,
-              color: ThemeColor.errorColor,
-            ),
+            Icon(Icons.error_outline, size: 60, color: ThemeColor.errorColor),
             const SizedBox(height: 16),
             Text(
               _l.t('chat_error_title'),

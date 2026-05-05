@@ -80,38 +80,45 @@ class NearbyUsersController extends GetxController {
  
 
   Future<void> loadNearbyUsers() async {
-    try {
-      isLoading.value = true;
-      final users = await fetchNearbyUsersUsecase.execute(
-        currentPage.value,
-        pageSize.value,
-      );
+  try {
+    isLoading.value = true;
+    noMoreUsers.value = false ;
+    final users = await fetchNearbyUsersUsecase.execute(
+      currentPage.value,
+      pageSize.value,
+    );
 
-      if (users.isEmpty) {
-        showInfoSnackbar(_l.t('nearby_no_more'));
-        return;
-      }
-
-      users.sort((a, b) {
-        final distanceA = double.tryParse(a.bio ?? '0') ?? 0.0;
-        final distanceB = double.tryParse(b.bio ?? '0') ?? 0.0;
-        return distanceA.compareTo(distanceB);
-      });
-
-      nearbyUsers.value = users;
-      currentRadarUsers.value = users;
-      currentUserIndex.value = 0;
-      updateCurrentProfile();
-
-      _preloadStoryIndicators(users);
-    } catch (e) {
-      showErrorSnackbar(
-        '${_l.t('nearby_load_error')}: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isLoading.value = false;
+    if (users.isEmpty) { 
+      nearbyUsers.value = [];
+      currentRadarUsers.value = [];
+      currentProfile.value = null;
+      noMoreUsers.value = true;
+      return;
     }
+
+    users.sort((a, b) {
+      final distanceA = double.tryParse(a.bio ?? '0') ?? 0.0;
+      final distanceB = double.tryParse(b.bio ?? '0') ?? 0.0;
+      return distanceA.compareTo(distanceB);
+    });
+
+    nearbyUsers.value = users;
+    currentRadarUsers.value = users;
+    currentUserIndex.value = 0;
+    updateCurrentProfile();
+    _preloadStoryIndicators(users);
+  } catch (e) { 
+    nearbyUsers.value = [];
+    currentRadarUsers.value = [];
+    currentProfile.value = null;
+    noMoreUsers.value = true;
+    showErrorSnackbar(
+      '${_l.t('nearby_load_error')}: ${cleanExceptionMessage(e)}',
+    );
+  } finally {
+    isLoading.value = false;
   }
+}
 
   Future<void> loadNextBatch() async {
     currentPage.value++;

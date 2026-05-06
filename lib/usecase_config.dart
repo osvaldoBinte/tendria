@@ -21,6 +21,12 @@ import 'package:tendria/features/chat/domain/usecase/leave_chat_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/marcar_mensajes_leidos_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/on_mensajes_leidos_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/set_on_disconnected_callback_usecase.dart';
+import 'package:tendria/features/facebookEvent/data/datasources/facebook_datasources_imp.dart';
+import 'package:tendria/features/facebookEvent/data/repositories/facebook_repository_imp.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_login_usecase.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_match_usecase.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_register_usecase.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_view_profile_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/payments_chat_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/send_message_usecase.dart';
 import 'package:tendria/features/chat/domain/usecase/setup_message_listener_usecase.dart';
@@ -78,6 +84,7 @@ class UsecaseConfig {
   LikeDataSourcesImp? likeDataSourcesImp;
   UnlockDatasourcesImp? unlockDataSourcesImp;
   PurchaseDataSourcesImp? purchaseDataSourcesImp;
+  FacebookDatasourcesImp? facebookDatasourcesImp;
   
   NotificationDataSourcesImp? notificationDataSourcesImp;
 
@@ -90,6 +97,7 @@ class UsecaseConfig {
   UnlockRepositoryImp? unlockRepositoryImp;
   PurchaseRepositoryImp? purchaseRepositoryImp;
    NotificationRepositoryImp? notificationRepositoryImp;
+   FacebookRepositoryImpl? facebookRepositoryImp;
 
   LoginUsecase? loginUsecase;
   CreateUserUsecase? createUserUsecase;
@@ -157,6 +165,11 @@ class UsecaseConfig {
    PurchaseAppleUsecase? purchaseAppleUsecase;
    PurchaseGoogleUsecase?purchaseGoogleUsecase;
 
+   LogViewProfileUsecase? logViewProfileUsecase;
+   LogRegisterUsecase? logRegisterUsecase;
+   LogMatchUsecase? logMatchUsecase;
+   LogLoginUsecase? logLoginUsecase;
+
   UsecaseConfig(){
     authDataSourceImp = AuthDataSourceImp();
     userDataSourcesImp = UserDataSourcesImp();
@@ -167,6 +180,7 @@ class UsecaseConfig {
     unlockDataSourcesImp = UnlockDatasourcesImp();
     notificationDataSourcesImp = NotificationDataSourcesImp();
     purchaseDataSourcesImp = PurchaseDataSourcesImp();
+    facebookDatasourcesImp = FacebookDatasourcesImp();
     notificationRepositoryImp = NotificationRepositoryImp(notificationDataSourcesImp: notificationDataSourcesImp!);
     authRepositoryImp = AuthRepositoryImp(authDataSourceImp: authDataSourceImp!);
     catalogRepositoryImp = CatalogRepositoryImp(catalogDataSourcesImp: catalogDataSourcesImp!);
@@ -176,7 +190,7 @@ class UsecaseConfig {
     likeRepositoryImp = LikeRepositoryImp(likeDataSourcesImp: likeDataSourcesImp!);
     unlockRepositoryImp = UnlockRepositoryImp(unlockDatasourcesImp: unlockDataSourcesImp!);
     purchaseRepositoryImp = PurchaseRepositoryImp(purchaseDataSourcesImp: purchaseDataSourcesImp!);
-
+    facebookRepositoryImp = FacebookRepositoryImpl(facebookDatasourcesImp: facebookDatasourcesImp!);
     loginUsecase = LoginUsecase(authRepository: authRepositoryImp!);
     
     createUserUsecase = CreateUserUsecase(authRepository: authRepositoryImp!);
@@ -237,6 +251,12 @@ class UsecaseConfig {
       getPurchasesUsecase = GetPurchasesUsecase(purchaseRepository: purchaseRepositoryImp!);
       purchaseAppleUsecase = PurchaseAppleUsecase(purchaseRepository: purchaseRepositoryImp!);
       purchaseGoogleUsecase = PurchaseGoogleUsecase(purchaseRepository: purchaseRepositoryImp!);
+
+
+      logViewProfileUsecase = LogViewProfileUsecase(facebookRepository: facebookRepositoryImp!);
+      logRegisterUsecase = LogRegisterUsecase(facebookRepository: facebookRepositoryImp!);
+      logMatchUsecase = LogMatchUsecase(facebookRepository: facebookRepositoryImp!);
+      logLoginUsecase = LogLoginUsecase(facebookRepository: facebookRepositoryImp!);
 
 
   }

@@ -108,10 +108,15 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.purchaseAppleUsecase!, permanent: true);
         Get.put(usecaseConfig.getPurchasesUsecase!, permanent: true);
 
+        Get.put(usecaseConfig.logViewProfileUsecase!, permanent: true);
+        Get.put(usecaseConfig.logRegisterUsecase!, permanent: true);
+        Get.put(usecaseConfig.logMatchUsecase!, permanent: true);
+        Get.put(usecaseConfig.logLoginUsecase!, permanent: true);
+
         Get.lazyPut(
           () => LoginController(
             loginUsecase: Get.find(),
-            saveTokenFcmUsecase: Get.find(),
+            saveTokenFcmUsecase: Get.find(), logLoginUsecase: Get.find(),
           ),
           fenix: true,
         );
@@ -132,7 +137,7 @@ class App extends StatelessWidget {
           () => RegisterController(
             createUserUsecase: Get.find(),
             fetchQualitiesUsecase: Get.find(),
-            fetchInterestsUsecase: Get.find(),
+            fetchInterestsUsecase: Get.find(), logRegisterUsecase: Get.find(),
           ),
           fenix: true,
         );
@@ -201,7 +206,7 @@ class App extends StatelessWidget {
         Get.lazyPut(
           () => LikedByUsersController(
             getPendingLikedChatsUsecase: Get.find(),
-            unlockChatUsecase: Get.find(),
+            unlockChatUsecase: Get.find(), logMatchUsecase:  Get.find(),
           ),
           fenix: true,
         );
@@ -210,7 +215,7 @@ class App extends StatelessWidget {
           () => UserProfileController(
             getUserByIdUsecase: Get.find(),
             toggleLikeUsecase: Get.find(),
-            blockUserUsecase: Get.find(),
+            blockUserUsecase: Get.find(), logViewProfileUsecase:  Get.find(),
           ),
           fenix: true,
         );

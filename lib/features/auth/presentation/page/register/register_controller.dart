@@ -13,16 +13,21 @@ import 'package:tendria/features/auth/domain/usecase/create_user_usecase.dart';
 import 'package:tendria/features/catalog/domain/entities/catalog_entity.dart';
 import 'package:tendria/features/catalog/domain/usecase/fetch_interests_usecase.dart';
 import 'package:tendria/features/catalog/domain/usecase/fetch_qualities_usecase.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_register_usecase.dart';
 
 class RegisterController extends GetxController {
   final CreateUserUsecase createUserUsecase;
   final FetchQualitiesUsecase fetchQualitiesUsecase;
   final FetchInterestsUsecase fetchInterestsUsecase;
+  final LogRegisterUsecase logRegisterUsecase; 
+  
 
   RegisterController({
     required this.createUserUsecase,
     required this.fetchQualitiesUsecase,
     required this.fetchInterestsUsecase,
+        required this.logRegisterUsecase,  
+
   });
 
   // ==========================================
@@ -695,8 +700,8 @@ class RegisterController extends GetxController {
         interestsIds: selectedInterests.toList(),
         qualitiesIds: selectedQualities.toList(),
       );
-
       await createUserUsecase.execute(entity);
+      await logRegisterUsecase(method: 'email'); 
       _clearFields();
       showSuccessSnackbar(_l.t('register_success'));
       onLoginTap();

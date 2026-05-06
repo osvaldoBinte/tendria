@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
-import 'package:tendria/common/widgets/alert/snackbar_helper.dart'; 
+import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_view_profile_usecase.dart'; 
 import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
@@ -18,11 +19,13 @@ class UserProfileController extends GetxController {
   final GetUserByIdUsecase getUserByIdUsecase;
   final ToggleLikeUsecase toggleLikeUsecase;
   final BlockUserUsecase blockUserUsecase;
+  final LogViewProfileUsecase logViewProfileUsecase;  
 
   UserProfileController({
     required this.getUserByIdUsecase,
     required this.toggleLikeUsecase,
     required this.blockUserUsecase,
+    required this.logViewProfileUsecase,  
   });
 
   final RxBool isLoading = false.obs;
@@ -87,13 +90,15 @@ class UserProfileController extends GetxController {
       final storyController = Get.find<StoryController>();
       final result = await storyController.fetchStoriesForUser(idUser);
       hasStories.value = result;
+ 
+      await logViewProfileUsecase(targetUserId: idUser.toString());
+
     } catch (e) {
       print('Error cargando perfil de usuario: $e');
     } finally {
       isLoading.value = false;
     }
   }
-
   List<String> _buildGallery(GetUserEntity? user) {
     if (user == null) return [''];
     final gallery = <String>[];

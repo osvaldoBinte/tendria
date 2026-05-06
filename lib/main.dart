@@ -1,3 +1,4 @@
+import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,6 +9,7 @@ import 'package:tendria/firebase_options.dart';
 import 'package:tendria/framework/preferences_service.dart';
 
 String enviromentSelect = Enviroment.testing.value;
+final facebookAppEvents = FacebookAppEvents();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +18,7 @@ void main() async {
   await NotificationService().initialize();
   print('=========ENVIROMENT SELECTED: $enviromentSelect');
   await dotenv.load(fileName: enviromentSelect);
+  await facebookAppEvents.setAdvertiserTracking(enabled: true); // 👈 así
 
   runApp(const App());
 }
- 

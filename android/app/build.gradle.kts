@@ -21,7 +21,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
 compileOptions {
-    isCoreLibraryDesugaringEnabled = true  // ← esto falta
+    isCoreLibraryDesugaringEnabled = true  
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }

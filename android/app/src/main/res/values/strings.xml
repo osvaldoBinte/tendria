@@ -2,4 +2,8 @@
 <resources>
     <string name="app_name">tantendria</string>
     <string name="default_notification_channel_id">default_channel</string>
+
+    <string name="facebook_app_id">1495585105688847</string>
+    <string name="fb_login_protocol_scheme">fb1495585105688847</string>
+    <string name="facebook_client_token">807008d54dab74091558102ce7d772e2</string>
 </resources>

@@ -4,6 +4,7 @@ import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_match_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/get_pending_liked_chats_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/unlock_chat_usecase.dart';
 import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
@@ -12,13 +13,13 @@ import 'package:tendria/common/settings/routes_names.dart';
 class LikedByUsersController extends GetxController {
   final GetPendingLikedChatsUsecase getPendingLikedChatsUsecase;
   final UnlockChatUsecase unlockChatUsecase;
-
+ final LogMatchUsecase logMatchUsecase; 
+ 
   LikedByUsersController({
     required this.getPendingLikedChatsUsecase,
-    required this.unlockChatUsecase,
+    required this.unlockChatUsecase, required this.logMatchUsecase,
   });
-
-  // Estados reactivos
+ 
   final RxList<PendingChatEntity> pendingChats = <PendingChatEntity>[].obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
@@ -29,8 +30,7 @@ class LikedByUsersController extends GetxController {
     super.onInit();
     loadPendingChats();
   }
-
-  // Cargar chats pendientes
+ 
   Future<void> loadPendingChats() async {
     try {
       isLoading.value = true;
@@ -47,16 +47,13 @@ class LikedByUsersController extends GetxController {
       isLoading.value = false;
     }
   }
-
-  // Refrescar chats pendientes
+ 
   Future<void> refreshPendingChats() async {
     await loadPendingChats();
   }
 
-  // Desbloquear chat
-  Future<void> unlockChat(PendingChatEntity chat) async {
-    // Mostrar diálogo de confirmación
-    _showUnlockConfirmation(chat);
+   Future<void> unlockChat(PendingChatEntity chat) async {
+     _showUnlockConfirmation(chat);
   }
 void _showUnlockConfirmation(PendingChatEntity chat) {
   showCustomAlert(
@@ -107,11 +104,9 @@ void _showUnlockConfirmation(PendingChatEntity chat) {
   );
 }
 
-  // Ejecutar desbloqueo
-  Future<void> _performUnlock(PendingChatEntity chat) async {
+   Future<void> _performUnlock(PendingChatEntity chat) async {
     try {
-      // Mostrar loading
-         showCustomAlert(
+          showCustomAlert(
         context: Get.context!,
         title: '',
         message: 'Desbloqueando chat...',
@@ -125,37 +120,30 @@ void _showUnlockConfirmation(PendingChatEntity chat) {
           ),
         ),
       );
-      // Desbloquear chat
-      await unlockChatUsecase.execute(chat.chatId);
+       await unlockChatUsecase.execute(chat.chatId);
+      await logMatchUsecase(targetUserId: chat.userId.toString());  
 
-      // Cerrar loading
-      Get.back();
+       Get.back();
 
-      // Mostrar mensaje de éxito
-      showSuccessSnackbar('Chat desbloqueado correctamente');
+       showSuccessSnackbar('Chat desbloqueado correctamente');
 
-      // Remover de la lista
-      await loadPendingChats();
+       await loadPendingChats();
 
 
-      // Navegar al chat
-      navigateToChat(chat.chatId, chat.name ?? 'Usuario');
+       navigateToChat(chat.chatId, chat.name ?? 'Usuario');
 
     } catch (e) {
-      // Cerrar loading si está abierto
-      if (Get.isDialogOpen ?? false) {
+       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
 
-      // Mostrar error con snackbar
-      showErrorSnackbar('Error al desbloquear chat: ${cleanExceptionMessage(e)}');
+       showErrorSnackbar('Error al desbloquear chat: ${cleanExceptionMessage(e)}');
       
       print('Error unlocking chat: $e');
     }
   }
 
-  // Navegar al chat
-void navigateToChat(int chatId, String name) {
+ void navigateToChat(int chatId, String name) {
   Get.toNamed(RoutesNames.chatPage, arguments: {
     'chatId': chatId,
     'name': name,
@@ -163,8 +151,7 @@ void navigateToChat(int chatId, String name) {
   });
 }
 
-  // Navegar al perfil
-  void navigateToProfile(int userId) {
+   void navigateToProfile(int userId) {
     
     Get.toNamed(
                             RoutesNames.userProfileDetailPage,

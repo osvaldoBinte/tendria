@@ -7,6 +7,7 @@ import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/features/auth/domain/usecase/login_usecase.dart';
+import 'package:tendria/features/facebookEvent/domain/usecase/log_login_usecase.dart'; 
 import 'package:tendria/features/notification/domain/usecase/save_token_fcm_usecase.dart';
 
 class LoginController extends GetxController {
@@ -21,6 +22,7 @@ class LoginController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   final LoginUsecase loginUsecase;
   final SaveTokenFcmUsecase saveTokenFcmUsecase;
+  final LogLoginUsecase logLoginUsecase;
 
   // ← único cambio estructural
   LanguageController get _l => Get.find<LanguageController>();
@@ -28,6 +30,7 @@ class LoginController extends GetxController {
   LoginController({
     required this.loginUsecase,
     required this.saveTokenFcmUsecase,
+    required this.logLoginUsecase,
   });
 
   @override
@@ -72,7 +75,7 @@ class LoginController extends GetxController {
 
       await _authService.saveLoginResponse(loginResponse);
       await _saveDeviceToken();
-
+      await logLoginUsecase.call(method: 'email');
       _clearFields();
       await _resetControllersForNewSession();
 

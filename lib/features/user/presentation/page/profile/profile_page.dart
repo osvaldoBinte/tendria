@@ -246,32 +246,32 @@ class ProfilePage extends GetView<ProfileController> {
                           maxLines: 2,
                         ),
                         InkWell(
-  onTap: () {
-    Get.offAllNamed(RoutesNames.purchasePage);
-  },
-  child: SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(
-          Icons.bolt_rounded,
-          color: Colors.amber,
-          size: 22,
-        ),
-        const SizedBox(width: 2),
-        Text(
-          '${_balanceController.currentBalance} créditos',
-          style: ThemeColor.headingMedium.copyWith(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: ThemeColor.textDarkColor,
-          ),
-        ),
-      ],
-    ),
-  ),
-),
+                          onTap: () {
+                            Get.offAllNamed(RoutesNames.purchasePage);
+                          },
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.bolt_rounded,
+                                  color: Colors.amber,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${_balanceController.currentBalance} créditos',
+                                  style: ThemeColor.headingMedium.copyWith(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: ThemeColor.textDarkColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     );
                   }),
@@ -414,8 +414,7 @@ class ProfilePage extends GetView<ProfileController> {
             ),
             child: ClipRRect(
               borderRadius: ThemeColor.mediumBorderRadius,
-              child: CachedNetworkImage(
-                // 👈 reemplaza Image.network
+              child: CachedNetworkImage( 
                 imageUrl: asset.url,
                 fit: BoxFit.cover,
                 width: double.infinity,

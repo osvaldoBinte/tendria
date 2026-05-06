@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart'; 
+import 'package:permission_handler/permission_handler.dart' as Geolocator;
+
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
@@ -10,12 +11,19 @@ import 'package:tendria/features/user/presentation/controller/nearby_users_contr
 
 class NearbyUsersPage extends StatelessWidget {
   const NearbyUsersPage({Key? key}) : super(key: key);
+  LanguageController get _l => Get.find<LanguageController>();
+
+  NearbyUsersController get controller => Get.find<NearbyUsersController>();
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<NearbyUsersController>();
-
     return Obx(() {
+      if (controller.locationPermissionDenied.value) {
+        return Scaffold(
+          backgroundColor: ThemeColor.backgroundColor,
+          body: _buildLocationPermissionState(),
+        );
+      }
       if (controller.isLoading.value) {
         return Scaffold(
           backgroundColor: ThemeColor.backgroundColorfondo,
@@ -77,298 +85,373 @@ class NearbyUsersPage extends StatelessWidget {
         );
       }
 
-return Scaffold(
-  backgroundColor: ThemeColor.backgroundColorfondo,
-  body: Obx(() {
-  if (controller.noMoreUsers.value || 
-    (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
-      return _buildNoMoreUsersState(controller);
-    }
+      return Scaffold(
+        backgroundColor: ThemeColor.backgroundColorfondo,
+        body: Obx(() {
+          if (controller.noMoreUsers.value ||
+              (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
+            return _buildNoMoreUsersState(controller);
+          }
 
-    return Column(
-      children: [
-        Expanded(
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                backgroundColor: ThemeColor.backgroundColorfondo,
-                elevation: 4,
-                shadowColor: ThemeColor.shadowColor,
-                pinned: true,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Get.offAllNamed(
-                      RoutesNames.radarScannerPage,
-                    );
-                  },
-                ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset(
-                      'assets/logo/logo.png',
-                      width: 100,
-                      height: 100,
+          return Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      backgroundColor: ThemeColor.backgroundColorfondo,
+                      elevation: 4,
+                      shadowColor: ThemeColor.shadowColor,
+                      pinned: true,
+                      leading: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          Get.offAllNamed(RoutesNames.radarScannerPage);
+                        },
+                      ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset(
+                            'assets/logo/logo.png',
+                            width: 100,
+                            height: 100,
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildSliverAppBar(controller),
+                    SliverToBoxAdapter(
+                      child: Obx(() {
+                        final user = controller.currentProfile.value;
+                        if (user == null) return const SizedBox.shrink();
+
+                        return Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            _buildBioSection(controller),
+                            const SizedBox(height: 16),
+                            _buildBuscoSection(controller),
+                            const SizedBox(height: 16),
+                            if (user.qualitiesIds != null &&
+                                user.qualitiesIds!.isNotEmpty)
+                              _buildQualitiesSection(controller),
+                            const SizedBox(height: 16),
+                            if (user.interestsIds != null &&
+                                user.interestsIds!.isNotEmpty)
+                              _buildInterestsSection(controller),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      }),
                     ),
                   ],
                 ),
               ),
-              _buildSliverAppBar(controller),
-              SliverToBoxAdapter(
-                child: Obx(() {
-                  final user = controller.currentProfile.value;
-                  if (user == null) return const SizedBox.shrink();
-
-                  return Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      _buildBioSection(controller),
-                      const SizedBox(height: 16),
-                      _buildBuscoSection(controller),
-                      const SizedBox(height: 16),
-                      if (user.qualitiesIds != null &&
-                          user.qualitiesIds!.isNotEmpty)
-                        _buildQualitiesSection(controller),
-                      const SizedBox(height: 16),
-                      if (user.interestsIds != null &&
-                          user.interestsIds!.isNotEmpty)
-                        _buildInterestsSection(controller),
-                      const SizedBox(height: 20),
-                    ],
-                  );
-                }),
-              ),
+              _buildReporteButtons(controller),
             ],
-          ),
-        ),
-        _buildReporteButtons(controller),
-      ],
-    );
-  }),
-);
+          );
+        }),
+      );
     });
   }
 
-Widget _buildNoMoreUsersState(NearbyUsersController controller) {
-  final l = Get.find<LanguageController>();
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: ThemeColor.primaryColor.withOpacity(0.08),
-              shape: BoxShape.circle,
+  Widget _buildLocationPermissionState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: ThemeColor.primaryColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.location_off_rounded,
+                size: 72,
+                color: ThemeColor.primaryColor,
+              ),
             ),
-            child: Icon(
-              Icons.search_off_rounded,
-              size: 72,
-              color: ThemeColor.primaryColor,
+            const SizedBox(height: 24),
+            Text(
+              _l.t('location_required_title'),
+              style: ThemeColor.headingMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l.t('no_more_profiles'),
-            style: ThemeColor.headingMedium.copyWith(
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 12),
+            Text(
+              _l.t('location_required_desc'),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondaryColor,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l.t('no_more_profiles_desc'),
-            style: ThemeColor.bodyMedium.copyWith(
-              color: ThemeColor.textSecondaryColor,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
-              icon: const Icon(Icons.tune_rounded, color: Colors.white),
-              label: Text(
-                l.t('modify_preferences'),
-                style: const TextStyle(
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final granted = await controller.checkLocationPermission();
+                  if (!granted) {
+                    await Geolocator.openAppSettings();
+                  } else {
+                    controller.loadNearbyUsers();
+                  }
+                },
+                icon: const Icon(
+                  Icons.location_on_rounded,
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
                 ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ThemeColor.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                label: Text(
+                  _l.t('enable_location'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                elevation: 0,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                controller.noMoreUsers.value = false;
-                controller.loadNearbyUsers();
-              },
-              icon: Icon(Icons.refresh_rounded, color: ThemeColor.primaryColor),
-              label: Text(
-                l.t('try_again'),
-                style: TextStyle(
-                  color: ThemeColor.primaryColor,
-                  fontSize: 15,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: BorderSide(color: ThemeColor.primaryColor),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColor.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
- Widget _buildReporteButtons(NearbyUsersController controller) {
-  return SafeArea(
-    top: false,
-    child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Obx(() {
-        final showReject = controller.showRejectButton;
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [ 
-            if (showReject)
-              GestureDetector(
-                onTap: controller.rejectUser,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.textSecondaryColor,
-                        ThemeColor.textSecondaryColor.withOpacity(0.8),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColor.textSecondaryColor.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.close_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              )
-            else
-              GestureDetector(
-                onTap: controller.sendMensaje,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.primaryColor,
-                        ThemeColor.primaryColor.withOpacity(0.8),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColor.primaryColor.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              ),
- 
-            if (showReject)
-              GestureDetector(
-                onTap: controller.sendMensaje,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.primaryColor,
-                        ThemeColor.primaryColor.withOpacity(0.8),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColor.primaryColor.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              )
-            else
-              GestureDetector(
-                onTap: controller.blockUser,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.red.shade700, Colors.red.shade400],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.red.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.block_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 28,
-                  ),
-                ),
-              ),
           ],
-        );
-      }),
-    ),
-  );
-}
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoMoreUsersState(NearbyUsersController controller) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: ThemeColor.primaryColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 72,
+                color: ThemeColor.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              _l.t('no_more_profiles'),
+              style: ThemeColor.headingMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _l.t('no_more_profiles_desc'),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondaryColor,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
+                icon: const Icon(Icons.tune_rounded, color: Colors.white),
+                label: Text(
+                  _l.t('modify_preferences'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColor.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  controller.noMoreUsers.value = false;
+                  controller.loadNearbyUsers();
+                },
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: ThemeColor.primaryColor,
+                ),
+                label: Text(
+                  _l.t('try_again'),
+                  style: TextStyle(
+                    color: ThemeColor.primaryColor,
+                    fontSize: 15,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: BorderSide(color: ThemeColor.primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReporteButtons(NearbyUsersController controller) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        child: Obx(() {
+          final showReject = controller.showRejectButton;
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (showReject)
+                GestureDetector(
+                  onTap: controller.rejectUser,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColor.textSecondaryColor,
+                          ThemeColor.textSecondaryColor.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColor.textSecondaryColor.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 32,
+                    ),
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: controller.sendMensaje,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColor.primaryColor,
+                          ThemeColor.primaryColor.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColor.primaryColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 32,
+                    ),
+                  ),
+                ),
+
+              if (showReject)
+                GestureDetector(
+                  onTap: controller.sendMensaje,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColor.primaryColor,
+                          ThemeColor.primaryColor.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColor.primaryColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 32,
+                    ),
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: controller.blockUser,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade700, Colors.red.shade400],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.block_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 28,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 
   Widget _buildSliverAppBar(NearbyUsersController controller) {
     return Obx(() {
@@ -462,148 +545,155 @@ Widget _buildNoMoreUsersState(NearbyUsersController controller) {
                       ),
                     ),
 
-Positioned(
-  bottom: 0,
-  left: 0,
-  right: 0,
-  child: Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: ThemeColor.tertiaryColor,
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(ThemeColor.largeRadius),
-        bottomRight: Radius.circular(ThemeColor.largeRadius),
-      ),
-      boxShadow: [ThemeColor.lightShadow],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Nombre y ciudad (existente)
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: ThemeColor.textLightColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    size: 16,
-                    color: ThemeColor.textLightColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    controller.currentCity,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: ThemeColor.textLightColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
- 
-        Obx(() {
-          final hasStory = controller.userHasStories[user.id] == true;
-          if (!hasStory) return const SizedBox.shrink();
-
-          return GestureDetector(
-            onTap: () {
-              if (Get.context != null) {
-                showTargetUserStoryModal(
-                  Get.context!,
-                  userId: user.id!,
-                  userName: user.name ?? 'Usuario',
-                  userPhoto: user.fotoUrl,
-                );
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFE040FB), Color(0xFFFF6D00)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(2.5),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black,
-                    ),
-                    padding: const EdgeInsets.all(1.5),
-                    child: ClipOval(
-                      child: user.fotoUrl != null && user.fotoUrl!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: user.fotoUrl!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              placeholder: (_, __) => Container(
-                                color: Colors.grey[800],
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white54,
-                                  size: 24,
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: ThemeColor.tertiaryColor,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(ThemeColor.largeRadius),
+                          bottomRight: Radius.circular(ThemeColor.largeRadius),
+                        ),
+                        boxShadow: [ThemeColor.lightShadow],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: ThemeColor.textLightColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              errorWidget: (_, __, ___) => Container(
-                                color: Colors.grey[800],
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white54,
-                                  size: 24,
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
+                                      size: 16,
+                                      color: ThemeColor.textLightColor,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      controller.currentCity,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: ThemeColor.textLightColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            )
-                          : Container(
-                              color: Colors.grey[800],
-                              child: const Icon(
-                                Icons.person,
-                                color: Colors.white54,
-                                size: 24,
-                              ),
+                              ],
                             ),
+                          ),
+
+                          Obx(() {
+                            final hasStory =
+                                controller.userHasStories[user.id] == true;
+                            if (!hasStory) return const SizedBox.shrink();
+
+                            return GestureDetector(
+                              onTap: () {
+                                if (Get.context != null) {
+                                  showTargetUserStoryModal(
+                                    Get.context!,
+                                    userId: user.id!,
+                                    userName: user.name ?? 'Usuario',
+                                    userPhoto: user.fotoUrl,
+                                  );
+                                }
+                              },
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color(0xFFE040FB),
+                                          Color(0xFFFF6D00),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.all(2.5),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                      padding: const EdgeInsets.all(1.5),
+                                      child: ClipOval(
+                                        child:
+                                            user.fotoUrl != null &&
+                                                user.fotoUrl!.isNotEmpty
+                                            ? CachedNetworkImage(
+                                                imageUrl: user.fotoUrl!,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                placeholder: (_, __) =>
+                                                    Container(
+                                                      color: Colors.grey[800],
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white54,
+                                                        size: 24,
+                                                      ),
+                                                    ),
+                                                errorWidget: (_, __, ___) =>
+                                                    Container(
+                                                      color: Colors.grey[800],
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white54,
+                                                        size: 24,
+                                                      ),
+                                                    ),
+                                              )
+                                            : Container(
+                                                color: Colors.grey[800],
+                                                child: const Icon(
+                                                  Icons.person,
+                                                  color: Colors.white54,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Historia',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Historia',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    ),
-  ),
-),
                 ],
               ),
             ),
@@ -826,5 +916,4 @@ Positioned(
       ),
     );
   }
-
 }

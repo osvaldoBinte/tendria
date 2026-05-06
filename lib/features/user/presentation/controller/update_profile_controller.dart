@@ -20,6 +20,7 @@ import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
 import 'package:tendria/features/user/domain/usecase/delete_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/put_preferences_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_user_usecase.dart';
+import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class UpdateProfileController extends GetxController {
@@ -45,6 +46,7 @@ class UpdateProfileController extends GetxController {
     required this.deleteUserUsecase,
   });
 
+        final nearbyController = Get.find<NearbyUsersController>();
   // Estados
   final RxBool isUpdating = false.obs;
   final RxBool isDeletingInterest = false.obs;
@@ -1440,6 +1442,8 @@ class UpdateProfileController extends GetxController {
       );
       await updateUserUsecase.execute(completeEntity);
       await _profile.loadUserProfile();
+          nearbyController.noMoreUsers.value = false;
+                nearbyController.loadNearbyUsers();
       showSuccessSnackbar(successMsg);
     } catch (e) {
       showErrorSnackbar(
@@ -1464,6 +1468,8 @@ class UpdateProfileController extends GetxController {
       );
       await putPreferencesUserUsecase.execute(completeEntity);
       await _profile.loadUserProfile();
+                nearbyController.noMoreUsers.value = false;
+                nearbyController.loadNearbyUsers();
       showSuccessSnackbar(successMsg);
     } catch (e) {
       showErrorSnackbar(

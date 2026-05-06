@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart' as Geolocator;
 import 'package:tendria/common/controller/tutorial_controller.dart';
 import 'package:tendria/common/controller/tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
@@ -56,7 +57,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       duration: const Duration(milliseconds: 2000),
     )..repeat();
 
-    // Registrar callback de scroll para el tutorial
     tutorialCtrl.onScrollToTarget = _scrollToCurrentTarget;
   }
 
@@ -88,9 +88,89 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     });
   }
 
+  Widget _buildLocationPermissionState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: ThemeColor.primaryColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.location_off_rounded,
+                size: 72,
+                color: ThemeColor.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              _l.t('location_required_title'),
+              style: ThemeColor.headingMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _l.t('location_required_desc'),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondaryColor,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final granted = await controller.checkLocationPermission();
+                  if (!granted) {
+                    await Geolocator.openAppSettings();
+                  } else {
+                    controller.loadNearbyUsers();
+                  }
+                },
+                icon: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  _l.t('enable_location'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColor.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if (controller.locationPermissionDenied.value) {
+        return Scaffold(
+          backgroundColor: ThemeColor.backgroundColor,
+          body: _buildLocationPermissionState(),
+        );
+      }
       if (controller.noMoreUsers.value ||
           (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
         return Scaffold(
@@ -116,7 +196,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                     children: [
                       SizedBox(height: ThemeColor.paddingLarge),
 
-                      // ── Logo ─────────────────────────────────────────────
                       Image.asset(
                         'assets/logo/logo.png',
                         width: 100,
@@ -125,10 +204,10 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                       SizedBox(height: ThemeColor.paddingSmall),
 
-                      // ── Slider de distancia ───────────────────────────────
                       Obx(() {
                         final profileCtrl = Get.find<ProfileController>();
-                        final km = profileCtrl
+                        final km =
+                            profileCtrl
                                 .userEntity
                                 .value
                                 ?.preferences
@@ -146,7 +225,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                       SizedBox(height: ThemeColor.paddingSmall),
 
-                      // ── Texto buscando / cerca ────────────────────────────
                       Obx(
                         () => Text(
                           controller.isLoading.value
@@ -162,7 +240,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                       SizedBox(height: ThemeColor.paddingLarge),
 
-                      // ── Radar / GIF ───────────────────────────────────────
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final size = math.min(constraints.maxWidth, 350.0);
@@ -198,7 +275,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                       SizedBox(height: ThemeColor.paddingLarge),
                       SizedBox(height: ThemeColor.paddingLarge),
 
-                      // ── Botón buscar más perfiles ─────────────────────────
                       Obx(
                         () => SizedBox(
                           key: tutorialCtrl.searchButtonKey,
@@ -217,8 +293,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                                 borderRadius: ThemeColor.circularBorderRadius,
                               ),
                               elevation: 0,
-                              disabledBackgroundColor:
-                                  ThemeColor.tertiaryColor.withOpacity(0.5),
+                              disabledBackgroundColor: ThemeColor.tertiaryColor
+                                  .withOpacity(0.5),
                             ),
                             child: controller.isLoading.value
                                 ? const SizedBox(
@@ -241,7 +317,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                       SizedBox(height: ThemeColor.paddingMedium),
 
-                      // ── Botón ver perfil ──────────────────────────────────
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -282,8 +357,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     });
   }
 
-  // ── No more users ──────────────────────────────────────────────────────────
-
   Widget _buildNoMoreUsersState(NearbyUsersController controller) {
     final l = Get.find<LanguageController>();
     return Center(
@@ -322,6 +395,17 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
+            Obx(() {
+              final profileCtrl = Get.find<ProfileController>();
+              final km =
+                  profileCtrl.userEntity.value?.preferences?.distancekm ?? 50;
+              return KeyedSubtree(
+                key: tutorialCtrl.distanceSliderKey,
+                child: _DistanceSlider(initialKm: km, updater: _updater, l: _l),
+              );
+            }),
+
+            SizedBox(height: ThemeColor.paddingSmall),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -378,8 +462,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
-
-  // ── Radar points ───────────────────────────────────────────────────────────
 
   Widget _buildDetectedPoints() {
     return Obx(() {
@@ -525,8 +607,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           ],
                         ),
                         child: ClipOval(
-                          child: user.fotoUrl != null &&
-                                  user.fotoUrl!.isNotEmpty
+                          child:
+                              user.fotoUrl != null && user.fotoUrl!.isNotEmpty
                               ? CachedNetworkImage(
                                   imageUrl: user.fotoUrl!,
                                   fit: BoxFit.cover,
@@ -618,10 +700,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-//  SLIDER DE DISTANCIA
-// ══════════════════════════════════════════════════════════════════════════════
-
 class _DistanceSlider extends StatefulWidget {
   final double initialKm;
   final UpdateProfileController updater;
@@ -643,16 +721,14 @@ class _DistanceSliderState extends State<_DistanceSlider> {
   @override
   void initState() {
     super.initState();
-    _current = (widget.initialKm >= 300 ? 300.0 : widget.initialKm)
-        .clamp(1.0, 300.0);
+    _current = widget.initialKm.clamp(0.1, 300.0);
   }
 
   @override
   void didUpdateWidget(_DistanceSlider old) {
     super.didUpdateWidget(old);
-    final newKm = (widget.initialKm >= 300 ? 300.0 : widget.initialKm)
-        .clamp(1.0, 300.0);
-    if ((newKm - _current).abs() > 1) {
+    final newKm = widget.initialKm.clamp(0.1, 300.0);
+    if ((newKm - _current).abs() > 0.05) {
       setState(() => _current = newKm);
     }
   }
@@ -686,11 +762,7 @@ class _DistanceSliderState extends State<_DistanceSlider> {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.radar,
-                    size: 16,
-                    color: ThemeColor.radarScanner,
-                  ),
+                  Icon(Icons.radar, size: 16, color: ThemeColor.radarScanner),
                   const SizedBox(width: 6),
                   Text(
                     widget.l.t('max_distance'),
@@ -717,17 +789,15 @@ class _DistanceSliderState extends State<_DistanceSlider> {
               inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
               thumbColor: ThemeColor.radarScanner,
               overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
-              thumbShape:
-                  const RoundSliderThumbShape(enabledThumbRadius: 8),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               trackHeight: 3,
-              overlayShape:
-                  const RoundSliderOverlayShape(overlayRadius: 16),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
             ),
             child: Slider(
               value: _current,
-              min: 1,
+              min: 0.1,
               max: 300,
-              divisions: 299,
+              divisions: 2990,
               onChanged: (value) => setState(() => _current = value),
               onChangeEnd: (value) => widget.updater.updateDistance(value),
             ),
@@ -737,10 +807,6 @@ class _DistanceSliderState extends State<_DistanceSlider> {
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-//  PULSING TOUCH ICON
-// ══════════════════════════════════════════════════════════════════════════════
 
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
@@ -763,12 +829,14 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _scale = Tween(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
-    _opacity = Tween(begin: 0.7, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween(
+      begin: 0.85,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _opacity = Tween(
+      begin: 0.7,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -810,10 +878,6 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-//  PAINTERS
-// ══════════════════════════════════════════════════════════════════════════════
 
 class GridPainter extends CustomPainter {
   @override

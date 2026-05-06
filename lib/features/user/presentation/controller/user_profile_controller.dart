@@ -3,20 +3,16 @@ import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
-import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
-import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
+import 'package:tendria/common/widgets/alert/snackbar_helper.dart'; 
 import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
-import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
-import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
+import 'package:tendria/features/user/domain/entities/get_user_entity.dart'; 
 import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/unlock/domain/usecase/block_user_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
-
-
 
 class UserProfileController extends GetxController {
   final GetUserByIdUsecase getUserByIdUsecase;
@@ -34,12 +30,11 @@ class UserProfileController extends GetxController {
   final RxInt currentImageIndex = 0.obs;
   final RxBool isProcessingLike = false.obs;
   final RxBool isProcessingBlock = false.obs;
-final RxBool hasStories = false.obs;
+  final RxBool hasStories = false.obs;
 
   final Rxn<GetUserEntity> currentUser = Rxn<GetUserEntity>();
   final RxInt userId = 0.obs;
   late PageController pageController;
-
 
   String get userName => currentUser.value?.name ?? 'Usuario';
   int get userAge => currentUser.value?.age ?? 0;
@@ -53,24 +48,23 @@ final RxBool hasStories = false.obs;
   final RxInt goPerfilIndex = (-1).obs;
   @override
   void onInit() {
-
     final args = Get.arguments as Map<String, dynamic>?;
     super.onInit();
     pageController = PageController();
- print('UserProfileController initialized with arguments: ${Get.arguments}');
+    print('UserProfileController initialized with arguments: ${Get.arguments}');
     if (Get.arguments != null && Get.arguments['userId'] != null) {
       userId.value = Get.arguments['userId'];
       loadUserProfile(userId.value);
     }
-final index = args?['goPerfilIndex'];
+    final index = args?['goPerfilIndex'];
 
-if (index is RxInt) {
-  goPerfilIndex.value = index.value;
-} else if (index is int) {
-  goPerfilIndex.value = index;
-} else {
-  goPerfilIndex.value = -1;
-}
+    if (index is RxInt) {
+      goPerfilIndex.value = index.value;
+    } else if (index is int) {
+      goPerfilIndex.value = index;
+    } else {
+      goPerfilIndex.value = -1;
+    }
   }
 
   @override
@@ -79,27 +73,27 @@ if (index is RxInt) {
     super.onClose();
   }
 
-Future<void> loadUserProfile(int idUser) async {
-  try {
-    isLoading.value = true;
-    final user = await getUserByIdUsecase.execute(idUser);
-    currentUser.value = user;
-    currentImageIndex.value = 0;
-    if (pageController.hasClients) {
-      pageController.jumpToPage(0);
-    }
-    isFavorite.value = false;
- 
-    final storyController = Get.find<StoryController>();
-    final result = await storyController.fetchStoriesForUser(idUser);
-    hasStories.value = result;
+  Future<void> loadUserProfile(int idUser) async {
+    try {
+      isLoading.value = true;
+      final user = await getUserByIdUsecase.execute(idUser);
+      currentUser.value = user;
+      currentImageIndex.value = 0;
+      if (pageController.hasClients) {
+        pageController.jumpToPage(0);
+      }
+      isFavorite.value = false;
 
-  } catch (e) {
-    print('Error cargando perfil de usuario: $e');
-  } finally {
-    isLoading.value = false;
+      final storyController = Get.find<StoryController>();
+      final result = await storyController.fetchStoriesForUser(idUser);
+      hasStories.value = result;
+    } catch (e) {
+      print('Error cargando perfil de usuario: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
-}
+
   List<String> _buildGallery(GetUserEntity? user) {
     if (user == null) return [''];
     final gallery = <String>[];
@@ -166,69 +160,59 @@ Future<void> loadUserProfile(int idUser) async {
     }
   }
 
-Future<void> rejectUser() async {
-  if (isProcessingLike.value) return;
+  Future<void> rejectUser() async {
+    if (isProcessingLike.value) return;
 
-  try {
-    isProcessingLike.value = true;
-    await toggleLikeUsecase.execute(userId.value, false);
-    showInfoSnackbar('Usuario rechazado');
- 
-    final nearbyController = Get.find<NearbyUsersController>();
-    nearbyController.noMoreUsers.value = false;
-    await nearbyController.loadNearbyUsers();
+    try {
+      isProcessingLike.value = true;
+      await toggleLikeUsecase.execute(userId.value, false);
+      showInfoSnackbar('Usuario rechazado');
 
-    Get.offAllNamed(RoutesNames.nearbyProfilesPage);
-  } catch (e) {
-    showErrorSnackbar('Error al rechazar: ${cleanExceptionMessage(e)}');
-  } finally {
-    isProcessingLike.value = false;
-  }
-}
-void sendMensaje() {
-  final chat = currentUser.value?.chat;
+      final nearbyController = Get.find<NearbyUsersController>();
+      nearbyController.noMoreUsers.value = false;
+      await nearbyController.loadNearbyUsers();
 
-
-  if (chat != null && chat.pendingAcepted) {
-    final likedByController = Get.find<LikedByUsersController>();
-    likedByController.unlockChat(
-      PendingChatEntity(
-        chatId: chat.id,
-        userId: userId.value,
-        name: userName,
-        photoUrl: currentUser.value?.fotoUrl,
-        age: currentUser.value?.age,
-        hiddenMessage: null,
-        createdAt: DateTime.now(),
-        unlockCost: 0,
-      ),
-    );
-    return;
+      Get.offAllNamed(RoutesNames.nearbyProfilesPage);
+    } catch (e) {
+      showErrorSnackbar('Error al rechazar: ${cleanExceptionMessage(e)}');
+    } finally {
+      isProcessingLike.value = false;
+    }
   }
 
+  void sendMensaje() {
+    final chat = currentUser.value?.chat;
 
-  if (chat == null || chat.id == 0) {
+    if (chat != null && chat.pendingAcepted) {
+      final likedByController = Get.find<LikedByUsersController>();
+      likedByController.unlockChat(
+        PendingChatEntity(
+          chatId: chat.id,
+          userId: userId.value,
+          name: userName,
+          photoUrl: currentUser.value?.fotoUrl,
+          age: currentUser.value?.age,
+          hiddenMessage: null,
+          createdAt: DateTime.now(),
+          unlockCost: 0,
+        ),
+      );
+      return;
+    }
+
+    if (chat == null || chat.id == 0) {
+      Get.toNamed(
+        RoutesNames.chatPage,
+        arguments: {'userid': userId.value, 'name': userName, 'goHomeIndex': 2},
+      );
+      return;
+    }
+
     Get.toNamed(
       RoutesNames.chatPage,
-      arguments: {
-        'userid': userId.value,
-        'name': userName,
-        'goHomeIndex': 2,
-      },
+      arguments: {'chatId': chat.id, 'name': userName, 'goHomeIndex': 2},
     );
-    return;
   }
-
-
-  Get.toNamed(
-    RoutesNames.chatPage,
-    arguments: {
-      'chatId': chat.id,
-      'name': userName,
-      'goHomeIndex': 2,
-    },
-  );
-}
 
   void skipUser() => Get.back();
 
@@ -263,12 +247,14 @@ void sendMensaje() {
       isProcessingBlock.value = false;
     }
   }
-bool get showRejectButton {
-  final chat = currentUser.value?.chat;
-  
-  if (chat != null && chat.id != 0 ) return false;
-  return true;
-}
+
+  bool get showRejectButton {
+    final chat = currentUser.value?.chat;
+
+    if (chat != null && chat.id != 0) return false;
+    return true;
+  }
+
   void reportUser() {
     if (Get.context == null) return;
     showCustomAlert(

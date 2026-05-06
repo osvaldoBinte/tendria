@@ -32,11 +32,11 @@ class UpdateProfilePage extends GetView<ProfileController> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios, color: ThemeColor.textDarkColor),
             onPressed: () {
-              try {
+             /* try {
                 final nearbyController = Get.find<NearbyUsersController>();
                 nearbyController.noMoreUsers.value = false;
                 nearbyController.loadNearbyUsers();
-              } catch (_) {}
+              } catch (_) {}*/
               Get.back();
             },
           ),

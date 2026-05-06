@@ -326,6 +326,11 @@ class LanguageController extends GetxController {
       'nearby_send_message': 'Enviar mensaje',
       'nearby_view_profile': 'Ver perfil completo',
       'chat_credits': 'créditos',
+      'location_required_title': 'Ubicación requerida',
+      'location_required_desc':
+          'Necesitamos tu ubicación para mostrarte usuarios cercanos',
+      'enable_location': 'Activar ubicación',
+      'open_settings': 'Abrir configuración',
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -605,6 +610,11 @@ class LanguageController extends GetxController {
           'Thanks for your report. We will review the profile of',
       'nearby_send_message': 'Send message',
       'nearby_view_profile': 'View full profile', 'chat_credits': 'credits',
+      'location_required_title': 'Location required',
+      'location_required_desc':
+          'We need your location to show you nearby users',
+      'enable_location': 'Enable location',
+      'open_settings': 'Open settings',
     },
   };
 }

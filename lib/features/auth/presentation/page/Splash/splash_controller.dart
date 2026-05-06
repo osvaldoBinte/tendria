@@ -36,6 +36,7 @@ class SplashController extends GetxController {
   Future<void> requestLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      print('Servicios de ubicación deshabilitados');
       showErrorSnackbar(
         'Por favor activa los servicios de ubicación para usar la aplicación',
       );
@@ -47,6 +48,7 @@ class SplashController extends GetxController {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        print(  'Permiso de ubicación denegado');
         showErrorSnackbar(
           'Se requieren permisos de ubicación para usar la aplicación',
         );
@@ -56,6 +58,7 @@ class SplashController extends GetxController {
 
     if (permission == LocationPermission.whileInUse ||
         permission == LocationPermission.always) {
+          print('Permiso de ubicación concedido');
       await _updateUserCity();
     }
   }

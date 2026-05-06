@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/settings/language_controller.dart';
@@ -16,7 +17,7 @@ import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
-class NearbyUsersController extends GetxController {
+class NearbyUsersController extends GetxController with WidgetsBindingObserver {
   final FetchNearbyUsersUsecase fetchNearbyUsersUsecase;
   final ToggleLikeUsecase toggleLikeUsecase;
 
@@ -26,7 +27,8 @@ class NearbyUsersController extends GetxController {
   });
  
   LanguageController get _l => Get.find<LanguageController>();
- 
+ final RxBool locationPermissionDenied = false.obs;
+
 
   final RxBool isLoading = false.obs;
   final RxBool isFavorite = false.obs;
@@ -66,23 +68,92 @@ class NearbyUsersController extends GetxController {
  
 
   @override
-  void onInit() {
+void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);  
     pageController = PageController();
     loadNearbyUsers();
   }
 
+
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this); 
     pageController.dispose();
     super.onClose();
   }
- 
 
+ @override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  if (state == AppLifecycleState.resumed) { 
+    _checkPermissionOnResume();
+  }
+}
+Future<void> _checkPermissionOnResume() async {
+  final permission = await Geolocator.checkPermission();
+  final hasPermission = permission == LocationPermission.whileInUse ||
+      permission == LocationPermission.always;
+
+  if (!hasPermission) {
+    // permiso fue revocado
+    locationPermissionDenied.value = true;
+    nearbyUsers.value = [];
+    currentRadarUsers.value = [];
+    currentProfile.value = null;
+  } else if (locationPermissionDenied.value) {
+    // tenía denegado y ahora fue concedido
+    locationPermissionDenied.value = false;
+    currentPage.value = 1;
+    await loadNearbyUsers();
+  }
+  // si tenía permiso y sigue teniéndolo, no hacer nada
+}
+
+ 
+Future<bool> checkLocationPermission() async {
+  // ✅ verificar servicio habilitado
+  final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    print('📍 Servicio de ubicación deshabilitado');
+    return false;
+  }
+
+  LocationPermission permission = await Geolocator.checkPermission();
+  print('📍 Geolocator permission status: $permission');
+
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    print('📍 Geolocator permission after request: $permission');
+  }
+
+  return permission == LocationPermission.whileInUse ||
+      permission == LocationPermission.always;
+}
+
+Future<void> retryAfterPermission() async {
+  // ✅ también usar Geolocator aquí
+  final permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.whileInUse ||
+      permission == LocationPermission.always) {
+    locationPermissionDenied.value = false;
+    currentPage.value = 1;
+    await loadNearbyUsers();
+  }
+}
+Future<void> openAppSettings() async {
+  await openAppSettings(); // de permission_handler
+}
   Future<void> loadNearbyUsers() async {
   try {
     isLoading.value = true;
     noMoreUsers.value = false ;
+        locationPermissionDenied.value = false; // reset
+
+     final hasPermission = await  checkLocationPermission();
+    if (!hasPermission) {
+      locationPermissionDenied.value = true;
+      return;
+    }
     final users = await fetchNearbyUsersUsecase.execute(
       currentPage.value,
       pageSize.value,
@@ -112,9 +183,7 @@ class NearbyUsersController extends GetxController {
     currentRadarUsers.value = [];
     currentProfile.value = null;
     noMoreUsers.value = true;
-    showErrorSnackbar(
-      '${_l.t('nearby_load_error')}: ${cleanExceptionMessage(e)}',
-    );
+   // showErrorSnackbar(    '${_l.t('nearby_load_error')}: ${cleanExceptionMessage(e)}', );
   } finally {
     isLoading.value = false;
   }

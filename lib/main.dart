@@ -18,7 +18,7 @@ void main() async {
   await NotificationService().initialize();
   print('=========ENVIROMENT SELECTED: $enviromentSelect');
   await dotenv.load(fileName: enviromentSelect);
-  await facebookAppEvents.setAdvertiserTracking(enabled: true); // 👈 así
+  await facebookAppEvents.setAdvertiserTracking(enabled: true); 
 
   runApp(const App());
 }

@@ -29,25 +29,15 @@ class RegisterController extends GetxController {
         required this.logRegisterUsecase,  
 
   });
-
-  // ==========================================
-  // SERVICIOS
-  // ==========================================
-
+  
   TranslationService get _translator => Get.find<TranslationService>();
   LanguageController get _l => Get.find<LanguageController>();
-
-  // ==========================================
-  // NAVEGACIÓN
-  // ==========================================
+ 
 
   final Rx<RegistrationStep> currentStep = RegistrationStep.basicInfo.obs;
   final RxInt currentStepIndex = 0.obs;
   late FixedExtentScrollController heightScrollController;
-
-  // ==========================================
-  // TEXT CONTROLLERS
-  // ==========================================
+ 
 
   late final TextEditingController nameController;
   late final TextEditingController emailController;
@@ -57,10 +47,7 @@ class RegisterController extends GetxController {
   late final TextEditingController cityController;
   late final TextEditingController customGenderController;
   late final TextEditingController bioController;
-
-  // ==========================================
-  // FOCUS NODES
-  // ==========================================
+ 
 
   late final FocusNode nameFocusNode;
   late final FocusNode emailFocusNode;
@@ -70,10 +57,7 @@ class RegisterController extends GetxController {
   late final FocusNode cityFocusNode;
   late final FocusNode bioFocusNode;
   late final FocusNode customGenderFocusNode;
-
-  // ==========================================
-  // ESTADOS
-  // ==========================================
+ 
 
   final RxBool isLoading = false.obs;
   final RxBool showPassword = false.obs;
@@ -82,11 +66,7 @@ class RegisterController extends GetxController {
   final RxBool locationObtained = false.obs;
   final RxBool isLoadingQualities = false.obs;
   final RxBool isLoadingInterests = false.obs;
-
-  // ==========================================
-  // DATOS DE PERFIL
-  // ==========================================
-
+ 
   final Rx<DateTime?> dateOfBirth = Rx<DateTime?>(null);
   final RxString selectedGender = ''.obs;
   final RxString selectedLanguage = 'Español'.obs;
@@ -98,28 +78,19 @@ class RegisterController extends GetxController {
 
   final RxInt bioCharCount = 0.obs;
   final RxBool showCustomGender = false.obs;
-
-  // ==========================================
-  // CATÁLOGOS
-  // ==========================================
+ 
 
   final RxList<CatalogEntity> qualities = <CatalogEntity>[].obs;
   final RxList<CatalogEntity> interests = <CatalogEntity>[].obs;
 
   final RxMap<String, String> translatedInterests = <String, String>{}.obs;
   final RxMap<String, String> translatedQualities = <String, String>{}.obs;
-
-  // ==========================================
-  // UBICACIÓN
-  // ==========================================
+ 
 
   final RxString latitude = ''.obs;
   final RxString longitude = ''.obs;
   final RxString city = ''.obs;
-
-  // ==========================================
-  // ERRORES DE VALIDACIÓN
-  // ==========================================
+ 
 
   final RxBool emailError = false.obs;
   final RxBool passwordError = false.obs;
@@ -133,15 +104,9 @@ class RegisterController extends GetxController {
   final RxString nameErrorMessage = ''.obs;
   final RxString bioErrorMessage = ''.obs;
 
-  // ==========================================
-  // ALTURA
-  // ==========================================
-
+   
   final RxInt selectedHeight = 170.obs;
-
-  // ==========================================
-  // OPCIONES DE GÉNERO
-  // ==========================================
+ 
 
   final List<Map<String, dynamic>> genderOptions = [
     {'label': 'Masculino', 'value': 'Hombre', 'icon': Icons.male},
@@ -152,17 +117,16 @@ class RegisterController extends GetxController {
       'icon': Icons.transgender,
     },
   ];
-
-  // ==========================================
-  // INIT / CLOSE
-  // ==========================================
+ 
 
   @override
   void onInit() {
     super.onInit();
-    print('[RegisterController] ✅ onInit');
+    
+  selectedLanguage.value = _l.deviceLanguage;  
     heightScrollController = FixedExtentScrollController(initialItem: 70);
     _initializeControllers();
+
     _loadCatalogs();
   }
 
@@ -222,11 +186,7 @@ class RegisterController extends GetxController {
 
     super.onClose();
   }
-
-  // ==========================================
-  // CARGA DE CATÁLOGOS
-  // ==========================================
-
+ 
   Future<void> _loadCatalogs() async {
     print('[RegisterController] 🔄 _loadCatalogs() iniciando...');
     await Future.wait([_loadQualities(), _loadInterests()]);
@@ -564,10 +524,7 @@ class RegisterController extends GetxController {
       confirmPasswordError.value = false;
     }
   }
-
-  // ==========================================
-  // UBICACIÓN
-  // ==========================================
+ 
 
   Future<void> _autoGetLocation() async {
     try {
@@ -610,10 +567,7 @@ class RegisterController extends GetxController {
       isLoadingLocation.value = false;
     }
   }
-
-  // ==========================================
-  // SELECCIONES
-  // ==========================================
+ 
 
   void selectHeight(int height) {
     heightController.text = height.toString();
@@ -665,10 +619,7 @@ class RegisterController extends GetxController {
       selectedQualities.add(qualityId);
     }
   }
-
-  // ==========================================
-  // REGISTRO
-  // ==========================================
+ 
 
   Future<void> onRegisterTap() async {
     if (dateOfBirth.value == null) {
@@ -716,10 +667,7 @@ class RegisterController extends GetxController {
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
-
-  // ==========================================
-  // NAVEGACIÓN
-  // ==========================================
+ 
 
   void onLoginTap() => Get.toNamed(RoutesNames.loginPage);
 
@@ -727,10 +675,7 @@ class RegisterController extends GetxController {
   void onEmailSubmitted() => passwordFocusNode.requestFocus();
   void onPasswordSubmitted() => confirmPasswordFocusNode.requestFocus();
   void onConfirmPasswordSubmitted() => nextStep();
-
-  // ==========================================
-  // RESET
-  // ==========================================
+ 
 
   void _clearFields() {
     nameController.clear();

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class LanguageController extends GetxController {
+  String get deviceLanguage => _deviceLanguage;
+
   String get _deviceLanguage {
     // Obtiene el locale del dispositivo (ej: "es", "en", "fr")
     final locale = WidgetsBinding.instance.platformDispatcher.locale;

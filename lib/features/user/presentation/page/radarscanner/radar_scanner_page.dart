@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart' as Geolocator;
+import 'package:geolocator/geolocator.dart';
 import 'package:tendria/common/controller/tutorial_controller.dart';
 import 'package:tendria/common/controller/tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
@@ -88,6 +88,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     });
   }
 
+  // ─── ESTADOS ────────────────────────────────────────────────────────────────
+
+  /// Estado: permiso de ubicación denegado
   Widget _buildLocationPermissionState() {
     return Center(
       child: Padding(
@@ -136,10 +139,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                     controller.loadNearbyUsers();
                   }
                 },
-                icon: const Icon(
-                  Icons.location_on_rounded,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.location_on_rounded, color: Colors.white),
                 label: Text(
                   _l.t('enable_location'),
                   style: const TextStyle(
@@ -162,203 +162,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.locationPermissionDenied.value) {
-        return Scaffold(
-          backgroundColor: ThemeColor.backgroundColor,
-          body: _buildLocationPermissionState(),
-        );
-      }
-      if (controller.noMoreUsers.value ||
-          (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
-        return Scaffold(
-          backgroundColor: ThemeColor.backgroundColor,
-          body: _buildNoMoreUsersState(controller),
-        );
-      }
-
-      return Stack(
-        children: [
-          Scaffold(
-            backgroundColor: ThemeColor.backgroundColor,
-            body: SafeArea(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const ClampingScrollPhysics(),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: ThemeColor.paddingLarge,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(height: ThemeColor.paddingLarge),
-
-                      Image.asset(
-                        'assets/logo/logo.png',
-                        width: 100,
-                        height: 100,
-                      ),
-
-                      SizedBox(height: ThemeColor.paddingSmall),
-
-                      Obx(() {
-                        final profileCtrl = Get.find<ProfileController>();
-                        final km =
-                            profileCtrl
-                                .userEntity
-                                .value
-                                ?.preferences
-                                ?.distancekm ??
-                            50;
-                        return KeyedSubtree(
-                          key: tutorialCtrl.distanceSliderKey,
-                          child: _DistanceSlider(
-                            initialKm: km,
-                            updater: _updater,
-                            l: _l,
-                          ),
-                        );
-                      }),
-
-                      SizedBox(height: ThemeColor.paddingSmall),
-
-                      Obx(
-                        () => Text(
-                          controller.isLoading.value
-                              ? _l.t('searching')
-                              : _l.t('nearby'),
-                          style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
-                            fontSize: 16,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-
-                      SizedBox(height: ThemeColor.paddingLarge),
-
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final size = math.min(constraints.maxWidth, 350.0);
-                          return SizedBox(
-                            width: size,
-                            height: size,
-                            child: Obx(() {
-                              if (controller.isLoading.value) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: ThemeColor.radarScanner,
-                                  ),
-                                );
-                              }
-                              return Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/gift/gitf.gif',
-                                    width: size,
-                                    height: size,
-                                    fit: BoxFit.contain,
-                                  ),
-                                  _buildDetectedPoints(),
-                                ],
-                              );
-                            }),
-                          );
-                        },
-                      ),
-
-                      SizedBox(height: ThemeColor.paddingLarge),
-                      SizedBox(height: ThemeColor.paddingLarge),
-                      SizedBox(height: ThemeColor.paddingLarge),
-
-                      Obx(
-                        () => SizedBox(
-                          key: tutorialCtrl.searchButtonKey,
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : () async {
-                                    await controller.loadNextBatch();
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ThemeColor.tertiaryColor,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: ThemeColor.circularBorderRadius,
-                              ),
-                              elevation: 0,
-                              disabledBackgroundColor: ThemeColor.tertiaryColor
-                                  .withOpacity(0.5),
-                            ),
-                            child: controller.isLoading.value
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    _l.t('search_btn'),
-                                    style: ThemeColor.buttonText.copyWith(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: ThemeColor.paddingMedium),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton(
-                          onPressed: () =>
-                              Get.offAllNamed(RoutesNames.homePage),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: ThemeColor.tertiaryColor,
-                            side: BorderSide(
-                              color: ThemeColor.tertiaryColor,
-                              width: 2,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: ThemeColor.circularBorderRadius,
-                            ),
-                          ),
-                          child: Text(
-                            _l.t('view_profile'),
-                            style: ThemeColor.buttonText.copyWith(
-                              fontSize: 16,
-                              color: ThemeColor.tertiaryColor,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: ThemeColor.paddingLarge),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const TutorialOverlay(),
-        ],
-      );
-    });
-  }
-
-  Widget _buildNoMoreUsersState(NearbyUsersController controller) {
-    final l = Get.find<LanguageController>();
+  /// Estado: sin más usuarios / lista vacía
+  Widget _buildNoMoreUsersState() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -379,7 +184,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              l.t('no_more_profiles'),
+              _l.t('no_more_profiles'),
               style: ThemeColor.headingMedium.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -387,7 +192,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              l.t('no_more_profiles_desc'),
+              _l.t('no_more_profiles_desc'),
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textSecondaryColor,
                 height: 1.5,
@@ -395,24 +200,32 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
+
+            // Slider de distancia (reutilizado aquí también)
             Obx(() {
               final profileCtrl = Get.find<ProfileController>();
               final km =
                   profileCtrl.userEntity.value?.preferences?.distancekm ?? 50;
               return KeyedSubtree(
                 key: tutorialCtrl.distanceSliderKey,
-                child: _DistanceSlider(initialKm: km, updater: _updater, l: _l),
+                child: _DistanceSlider(
+                  initialKm: km,
+                  updater: _updater,
+                  l: _l,
+                ),
               );
             }),
 
             SizedBox(height: ThemeColor.paddingSmall),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
+                onPressed: () =>
+                    Get.toNamed(RoutesNames.updateProfilePage),
                 icon: const Icon(Icons.tune_rounded, color: Colors.white),
                 label: Text(
-                  l.t('modify_preferences'),
+                  _l.t('modify_preferences'),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -442,7 +255,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                   color: ThemeColor.primaryColor,
                 ),
                 label: Text(
-                  l.t('try_again'),
+                  _l.t('try_again'),
                   style: TextStyle(
                     color: ThemeColor.primaryColor,
                     fontSize: 15,
@@ -462,6 +275,214 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
+
+  /// Estado principal: radar con usuarios
+  Widget _buildMainContent() {
+    return Stack(
+      children: [
+        SafeArea(
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: const ClampingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: ThemeColor.paddingLarge,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: ThemeColor.paddingLarge),
+
+                  Image.asset(
+                    'assets/logo/logo.png',
+                    width: 100,
+                    height: 100,
+                  ),
+
+                  SizedBox(height: ThemeColor.paddingSmall),
+
+                  Obx(() {
+                    final profileCtrl = Get.find<ProfileController>();
+                    final km =
+                        profileCtrl
+                            .userEntity
+                            .value
+                            ?.preferences
+                            ?.distancekm ??
+                        50;
+                    return KeyedSubtree(
+                      key: tutorialCtrl.distanceSliderKey,
+                      child: _DistanceSlider(
+                        initialKm: km,
+                        updater: _updater,
+                        l: _l,
+                      ),
+                    );
+                  }),
+
+                  SizedBox(height: ThemeColor.paddingSmall),
+
+                  Obx(
+                    () => Text(
+                      controller.isLoading.value
+                          ? _l.t('searching')
+                          : _l.t('nearby'),
+                      style: ThemeColor.bodyMedium.copyWith(
+                        color: ThemeColor.textSecondaryColor,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  SizedBox(height: ThemeColor.paddingLarge),
+
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final size = math.min(constraints.maxWidth, 350.0);
+                      return SizedBox(
+                        width: size,
+                        height: size,
+                        child: Obx(() {
+                          if (controller.isLoading.value) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                color: ThemeColor.radarScanner,
+                              ),
+                            );
+                          }
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/gift/gitf.gif',
+                                width: size,
+                                height: size,
+                                fit: BoxFit.contain,
+                              ),
+                              _buildDetectedPoints(),
+                            ],
+                          );
+                        }),
+                      );
+                    },
+                  ),
+
+                  SizedBox(height: ThemeColor.paddingLarge),
+                  SizedBox(height: ThemeColor.paddingLarge),
+                  SizedBox(height: ThemeColor.paddingLarge),
+
+                  Obx(
+                    () => SizedBox(
+                      key: tutorialCtrl.searchButtonKey,
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : () async {
+                                await controller.loadNextBatch();
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ThemeColor.tertiaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: ThemeColor.circularBorderRadius,
+                          ),
+                          elevation: 0,
+                          disabledBackgroundColor:
+                              ThemeColor.tertiaryColor.withOpacity(0.5),
+                        ),
+                        child: controller.isLoading.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                _l.t('search_btn'),
+                                style: ThemeColor.buttonText.copyWith(
+                                  fontSize: 16,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: ThemeColor.paddingMedium),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: () =>
+                          Get.offAllNamed(RoutesNames.homePage),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ThemeColor.tertiaryColor,
+                        side: BorderSide(
+                          color: ThemeColor.tertiaryColor,
+                          width: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: ThemeColor.circularBorderRadius,
+                        ),
+                      ),
+                      child: Text(
+                        _l.t('view_profile'),
+                        style: ThemeColor.buttonText.copyWith(
+                          fontSize: 16,
+                          color: ThemeColor.tertiaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: ThemeColor.paddingLarge),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Tutorial overlay — solo cuando está visible
+        Obx(
+          () => tutorialCtrl.isVisible.value
+              ? const TutorialOverlay()
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  // ─── BUILD PRINCIPAL ────────────────────────────────────────────────────────
+  // Un único Scaffold raíz para que los snackbars siempre tengan dónde anclarse
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: ThemeColor.backgroundColor,
+      body: Obx(() {
+        // 1. Sin permiso de ubicación
+        if (controller.locationPermissionDenied.value) {
+          return _buildLocationPermissionState();
+        }
+
+        // 2. Sin más usuarios / lista vacía
+        if (controller.noMoreUsers.value ||
+            (!controller.isLoading.value &&
+                controller.nearbyUsers.isEmpty)) {
+          return _buildNoMoreUsersState();
+        }
+
+        // 3. Estado normal con radar
+        return _buildMainContent();
+      }),
+    );
+  }
+
+  // ─── PUNTOS DETECTADOS ──────────────────────────────────────────────────────
 
   Widget _buildDetectedPoints() {
     return Obx(() {
@@ -538,7 +559,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           child: GestureDetector(
             key: isFirstProfile ? tutorialCtrl.profileDotKey : null,
             behavior: HitTestBehavior.translucent,
-            onTap: () => controller.showUserPreviewDialog(user, userIndex),
+            onTap: () =>
+                controller.showUserPreviewDialog(user, userIndex),
             child: SizedBox(
               width: 70,
               height: 110,
@@ -555,7 +577,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: ThemeColor.backgroundColor.withOpacity(0.92),
+                        color:
+                            ThemeColor.backgroundColor.withOpacity(0.92),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(8),
                           topRight: Radius.circular(8),
@@ -563,12 +586,14 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           bottomLeft: Radius.circular(2),
                         ),
                         border: Border.all(
-                          color: ThemeColor.radarScanner.withOpacity(0.6),
+                          color:
+                              ThemeColor.radarScanner.withOpacity(0.6),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: ThemeColor.radarScanner.withOpacity(0.2),
+                            color: ThemeColor.radarScanner
+                                .withOpacity(0.2),
                             blurRadius: 4,
                           ),
                         ],
@@ -600,15 +625,16 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: ThemeColor.radarScanner.withOpacity(0.8),
+                              color: ThemeColor.radarScanner
+                                  .withOpacity(0.8),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
                         child: ClipOval(
-                          child:
-                              user.fotoUrl != null && user.fotoUrl!.isNotEmpty
+                          child: user.fotoUrl != null &&
+                                  user.fotoUrl!.isNotEmpty
                               ? CachedNetworkImage(
                                   imageUrl: user.fotoUrl!,
                                   fit: BoxFit.cover,
@@ -648,10 +674,12 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: ThemeColor.backgroundColor.withOpacity(0.9),
+                        color:
+                            ThemeColor.backgroundColor.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: ThemeColor.radarScanner.withOpacity(0.5),
+                          color:
+                              ThemeColor.radarScanner.withOpacity(0.5),
                           width: 1,
                         ),
                       ),
@@ -673,7 +701,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           Text(
                             '${user.age ?? 0} ${_l.t('years')}',
                             style: TextStyle(
-                              color: ThemeColor.radarScanner.withOpacity(0.7),
+                              color: ThemeColor.radarScanner
+                                  .withOpacity(0.7),
                               fontSize: 7,
                               fontWeight: FontWeight.w500,
                             ),
@@ -695,10 +724,16 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   Widget _avatarPlaceholder() {
     return Container(
       color: ThemeColor.radarScanner.withOpacity(0.3),
-      child: Icon(Icons.person, color: ThemeColor.radarScanner, size: 20),
+      child: Icon(
+        Icons.person,
+        color: ThemeColor.radarScanner,
+        size: 20,
+      ),
     );
   }
 }
+
+// ─── DISTANCE SLIDER ──────────────────────────────────────────────────────────
 
 class _DistanceSlider extends StatefulWidget {
   final double initialKm;
@@ -762,7 +797,11 @@ class _DistanceSliderState extends State<_DistanceSlider> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.radar, size: 16, color: ThemeColor.radarScanner),
+                  Icon(
+                    Icons.radar,
+                    size: 16,
+                    color: ThemeColor.radarScanner,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     widget.l.t('max_distance'),
@@ -786,12 +825,15 @@ class _DistanceSliderState extends State<_DistanceSlider> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: ThemeColor.radarScanner,
-              inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
+              inactiveTrackColor:
+                  ThemeColor.radarScanner.withOpacity(0.2),
               thumbColor: ThemeColor.radarScanner,
               overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              thumbShape:
+                  const RoundSliderThumbShape(enabledThumbRadius: 8),
               trackHeight: 3,
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+              overlayShape:
+                  const RoundSliderOverlayShape(overlayRadius: 16),
             ),
             child: Slider(
               value: _current,
@@ -799,7 +841,8 @@ class _DistanceSliderState extends State<_DistanceSlider> {
               max: 300,
               divisions: 2990,
               onChanged: (value) => setState(() => _current = value),
-              onChangeEnd: (value) => widget.updater.updateDistance(value),
+              onChangeEnd: (value) =>
+                  widget.updater.updateDistance(value),
             ),
           ),
         ],
@@ -807,6 +850,8 @@ class _DistanceSliderState extends State<_DistanceSlider> {
     );
   }
 }
+
+// ─── PULSING TOUCH ICON ───────────────────────────────────────────────────────
 
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
@@ -829,14 +874,12 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _scale = Tween(
-      begin: 0.85,
-      end: 1.15,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-    _opacity = Tween(
-      begin: 0.7,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _scale = Tween(begin: 0.85, end: 1.15).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+    _opacity = Tween(begin: 0.7, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -878,6 +921,8 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
     );
   }
 }
+
+// ─── PAINTERS ─────────────────────────────────────────────────────────────────
 
 class GridPainter extends CustomPainter {
   @override
@@ -938,15 +983,18 @@ class RotatingScanLinePainter extends CustomPainter {
           ThemeColor.radarScanner,
         ],
         stops: const [0.0, 0.7, 1.0],
-      ).createShader(Rect.fromLTWH(center.dx, center.dy - 1.5, radius, 3))
+      ).createShader(
+          Rect.fromLTWH(center.dx, center.dy - 1.5, radius, 3))
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(center, Offset(center.dx + radius, center.dy), paint);
+    canvas.drawLine(
+        center, Offset(center.dx + radius, center.dy), paint);
 
     final glowPaint = Paint()
       ..color = ThemeColor.radarScanner
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-    canvas.drawCircle(Offset(center.dx + radius, center.dy), 4, glowPaint);
+    canvas.drawCircle(
+        Offset(center.dx + radius, center.dy), 4, glowPaint);
     canvas.drawCircle(
       Offset(center.dx + radius, center.dy),
       2,

@@ -1028,18 +1028,14 @@ class UpdateProfileController extends GetxController {
         ),
       );
     }
-  }
-
-  // ==========================================
-  // TIPO DE CONEXIÓN
-  // ==========================================
+  } 
 
   void showEditConnectionType(String currentValue) {
     final List<Map<String, String>> options = [
-      {'label': 'Amistad y buena vibra', 'value': 'amistad'},
-      {'label': 'Conocer gente y pasarla bien', 'value': 'citas'},
-      {'label': 'Algo estable y con futuro', 'value': 'algo_serio'},
-      {'label': 'Conexiones sin ataduras', 'value': 'casual'},
+      {'label': 'Amistad y buena vibra', 'value': 'Amistad'},
+      {'label': 'Conocer gente y pasarla bien', 'value': 'Citas'},
+      {'label': 'Algo estable y con futuro', 'value': 'Algo_serio'},
+      {'label': 'Conexiones sin ataduras', 'value': 'Casual'},
     ];
 
     final RxString selected = currentValue.obs;

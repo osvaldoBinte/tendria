@@ -61,40 +61,61 @@ class SplashController extends GetxController {
   }
 
   Future<void> _updateUserCity() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
-        timeLimit: const Duration(seconds: 10),
-      );
+  try {
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.low,
+      timeLimit: const Duration(seconds: 10),
+    );
 
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+    final placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
 
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
-        final city = place.locality?.isNotEmpty == true
-            ? place.locality!
-            : place.subAdministrativeArea ?? '';
+    if (placemarks.isNotEmpty) {
+      final place = placemarks.first;
 
-        if (city.isNotEmpty) {
-          print('city : $city');
+      // Jerarquía de fallback para obtener la ciudad principal
+      final city = _resolveCity(place);
 
-          await updateLocationUsecase.execute(
-            UpdateLocationEntity(
-              latitude: position.latitude,
-              longitude: position.longitude,
-              city: city,
-            ),
-          );
-        }
+      if (city.isNotEmpty) {
+        print('city : $city');
+        await updateLocationUsecase.execute(
+          UpdateLocationEntity(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            city: city,
+          ),
+        );
       }
-    } catch (e) {
-      print('Error obteniendo ubicación: $e');
     }
+  } catch (e) {
+    print('Error obteniendo ubicación: $e');
+  }
+}
+
+String _resolveCity(Placemark place) {
+  // subAdministrativeArea suele ser "Tuxtla Gutiérrez" (municipio)
+  // locality puede ser el barrio/colonia o la ciudad abreviada
+  // administrativeArea es el estado (Chiapas) — demasiado amplio
+
+  final subAdmin = place.subAdministrativeArea?.trim() ?? '';
+  final locality = place.locality?.trim() ?? '';
+
+  // Preferir subAdministrativeArea si parece una ciudad real
+  // (más de una palabra o más de 6 chars = más descriptivo)
+  if (subAdmin.isNotEmpty && (subAdmin.contains(' ') || subAdmin.length > 6)) {
+    return subAdmin;
   }
 
+  // Si locality parece la ciudad completa úsalo
+  if (locality.isNotEmpty && (locality.contains(' ') || locality.length > 6)) {
+    return locality;
+  }
+
+  // Último fallback: lo que haya
+  return subAdmin.isNotEmpty ? subAdmin : locality;
+}
   
 
   Future<void> checkUserSession() async {

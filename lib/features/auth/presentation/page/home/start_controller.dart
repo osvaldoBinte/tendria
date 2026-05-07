@@ -13,7 +13,7 @@ import 'package:tendria/features/user/presentation/profiledetail/nearby_users_pa
 
 class StartController extends GetxController {
   final List<Widget> pages = [
-    ProfilePage(),
+      ProfilePage(), 
     RadarScannerScreen(),
     LikedByUsersView(),
     MyMatchView(),

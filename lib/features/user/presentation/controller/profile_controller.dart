@@ -72,12 +72,7 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (userEntity.value == null) {
-      isLoading.value = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        loadUserProfile();
-      });
-    }
+    loadUserProfile();
   }
 
   Future<void> loadUserProfile() async {

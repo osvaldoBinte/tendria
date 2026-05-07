@@ -249,27 +249,34 @@ class ProfilePage extends GetView<ProfileController> {
                           onTap: () {
                             Get.offAllNamed(RoutesNames.purchasePage);
                           },
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.bolt_rounded,
-                                  color: Colors.amber,
-                                  size: 22,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.bolt_rounded,
+                                color: Colors.amber,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 2),
+                              Flexible(
+                                child: Text(
                                   '${_balanceController.currentBalance} créditos',
                                   style: ThemeColor.headingMedium.copyWith(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                     color: ThemeColor.textDarkColor,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.add_circle_outline,
+                                color: ThemeColor.primaryColor,
+                                size: 18,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -280,38 +287,6 @@ class ProfilePage extends GetView<ProfileController> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNearbyProfilesButton() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () => Get.offAllNamed(RoutesNames.preferencesPage),
-        icon: Icon(Icons.radar, size: 24, color: ThemeColor.textLightColor),
-        label: Text(
-          _l.t('discover'),
-          style: ThemeColor.buttonText.copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: ThemeColor.tertiaryColor,
-          foregroundColor: ThemeColor.textLightColor,
-          padding: EdgeInsets.symmetric(
-            vertical: ThemeColor.paddingMedium + 4,
-            horizontal: ThemeColor.paddingLarge,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: ThemeColor.mediumBorderRadius,
-          ),
-          elevation: 2,
-          shadowColor: ThemeColor.tertiaryColor.withOpacity(0.3),
-        ),
       ),
     );
   }
@@ -414,7 +389,7 @@ class ProfilePage extends GetView<ProfileController> {
             ),
             child: ClipRRect(
               borderRadius: ThemeColor.mediumBorderRadius,
-              child: CachedNetworkImage( 
+              child: CachedNetworkImage(
                 imageUrl: asset.url,
                 fit: BoxFit.cover,
                 width: double.infinity,

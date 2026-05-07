@@ -221,8 +221,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    Get.toNamed(RoutesNames.updateProfilePage),
+                onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
                 icon: const Icon(Icons.tune_rounded, color: Colors.white),
                 label: Text(
                   _l.t('modify_preferences'),
@@ -418,8 +417,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                     width: double.infinity,
                     height: 52,
                     child: OutlinedButton(
-                      onPressed: () =>
-                          Get.offAllNamed(RoutesNames.homePage),
+                      onPressed: () => Get.offAllNamed(RoutesNames.homePage),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: ThemeColor.tertiaryColor,
                         side: BorderSide(
@@ -458,7 +456,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   }
 
   // ─── BUILD PRINCIPAL ────────────────────────────────────────────────────────
-  // Un único Scaffold raíz para que los snackbars siempre tengan dónde anclarse
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -471,8 +468,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
         // 2. Sin más usuarios / lista vacía
         if (controller.noMoreUsers.value ||
-            (!controller.isLoading.value &&
-                controller.nearbyUsers.isEmpty)) {
+            (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
           return _buildNoMoreUsersState();
         }
 
@@ -490,6 +486,13 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       if (users.isEmpty) return const SizedBox.shrink();
 
       final points = _calculateUserPositions(users);
+
+      // ✅ Notificar al tutorial que los usuarios ya están renderizados.
+      // addPostFrameCallback garantiza que el layout esté completo antes de
+      // que el tutorial intente calcular posiciones de widgets.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        tutorialCtrl.notifyUsersReady();
+      });
 
       return SizedBox(
         key: tutorialCtrl.detectedPointsKey,
@@ -559,8 +562,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           child: GestureDetector(
             key: isFirstProfile ? tutorialCtrl.profileDotKey : null,
             behavior: HitTestBehavior.translucent,
-            onTap: () =>
-                controller.showUserPreviewDialog(user, userIndex),
+            onTap: () => controller.showUserPreviewDialog(user, userIndex),
             child: SizedBox(
               width: 70,
               height: 110,
@@ -577,8 +579,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            ThemeColor.backgroundColor.withOpacity(0.92),
+                        color: ThemeColor.backgroundColor.withOpacity(0.92),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(8),
                           topRight: Radius.circular(8),
@@ -586,14 +587,12 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           bottomLeft: Radius.circular(2),
                         ),
                         border: Border.all(
-                          color:
-                              ThemeColor.radarScanner.withOpacity(0.6),
+                          color: ThemeColor.radarScanner.withOpacity(0.6),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: ThemeColor.radarScanner
-                                .withOpacity(0.2),
+                            color: ThemeColor.radarScanner.withOpacity(0.2),
                             blurRadius: 4,
                           ),
                         ],
@@ -625,8 +624,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: ThemeColor.radarScanner
-                                  .withOpacity(0.8),
+                              color: ThemeColor.radarScanner.withOpacity(0.8),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -674,12 +672,10 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            ThemeColor.backgroundColor.withOpacity(0.9),
+                        color: ThemeColor.backgroundColor.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color:
-                              ThemeColor.radarScanner.withOpacity(0.5),
+                          color: ThemeColor.radarScanner.withOpacity(0.5),
                           width: 1,
                         ),
                       ),
@@ -701,8 +697,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           Text(
                             '${user.age ?? 0} ${_l.t('years')}',
                             style: TextStyle(
-                              color: ThemeColor.radarScanner
-                                  .withOpacity(0.7),
+                              color: ThemeColor.radarScanner.withOpacity(0.7),
                               fontSize: 7,
                               fontWeight: FontWeight.w500,
                             ),
@@ -769,7 +764,7 @@ class _DistanceSliderState extends State<_DistanceSlider> {
   }
 
   String get _label {
-    if (_current >= 300) return widget.l.t('no_limit');
+    if (_current >= 300) return widget.l.t('max_distance');
     if (_current < 1) return '${(_current * 1000).toInt()} m';
     return '${_current.toStringAsFixed(_current == _current.roundToDouble() ? 0 : 1)} km';
   }
@@ -825,15 +820,12 @@ class _DistanceSliderState extends State<_DistanceSlider> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: ThemeColor.radarScanner,
-              inactiveTrackColor:
-                  ThemeColor.radarScanner.withOpacity(0.2),
+              inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
               thumbColor: ThemeColor.radarScanner,
               overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
-              thumbShape:
-                  const RoundSliderThumbShape(enabledThumbRadius: 8),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               trackHeight: 3,
-              overlayShape:
-                  const RoundSliderOverlayShape(overlayRadius: 16),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
             ),
             child: Slider(
               value: _current,
@@ -841,8 +833,7 @@ class _DistanceSliderState extends State<_DistanceSlider> {
               max: 300,
               divisions: 2990,
               onChanged: (value) => setState(() => _current = value),
-              onChangeEnd: (value) =>
-                  widget.updater.updateDistance(value),
+              onChangeEnd: (value) => widget.updater.updateDistance(value),
             ),
           ),
         ],
@@ -983,18 +974,15 @@ class RotatingScanLinePainter extends CustomPainter {
           ThemeColor.radarScanner,
         ],
         stops: const [0.0, 0.7, 1.0],
-      ).createShader(
-          Rect.fromLTWH(center.dx, center.dy - 1.5, radius, 3))
+      ).createShader(Rect.fromLTWH(center.dx, center.dy - 1.5, radius, 3))
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-        center, Offset(center.dx + radius, center.dy), paint);
+    canvas.drawLine(center, Offset(center.dx + radius, center.dy), paint);
 
     final glowPaint = Paint()
       ..color = ThemeColor.radarScanner
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-    canvas.drawCircle(
-        Offset(center.dx + radius, center.dy), 4, glowPaint);
+    canvas.drawCircle(Offset(center.dx + radius, center.dy), 4, glowPaint);
     canvas.drawCircle(
       Offset(center.dx + radius, center.dy),
       2,

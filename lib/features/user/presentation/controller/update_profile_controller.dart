@@ -1263,11 +1263,7 @@ class UpdateProfileController extends GetxController {
       );
     }
   }
-
-  // ==========================================
-  // DISTANCIA
-  // ==========================================
-
+ 
   void showEditDistance(int currentDistanceKm) {
     int initialIndex;
     if (currentDistanceKm < 1) {
@@ -1283,7 +1279,7 @@ class UpdateProfileController extends GetxController {
     String labelForIndex(int index) {
       if (index < 9) return '${(index + 1) * 100} m';
       final km = index - 9 + 1;
-      return km >= 300 ? '∞  ${_l.t('no_limit')}' : '$km km';
+      return km >= 300 ? '${_l.t('max_distance')}' : '$km km';
     }
 
     double kmForIndex(int index) {

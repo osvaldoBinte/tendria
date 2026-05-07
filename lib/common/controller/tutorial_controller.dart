@@ -36,6 +36,10 @@ class TutorialController extends GetxController {
   final GlobalKey searchButtonKey   = GlobalKey();
   final GlobalKey profileDotKey     = GlobalKey();
 
+  // ─── Control interno para esperar usuarios ────────────────────────────────
+  bool _pendingShow = false;
+  bool _usersReady  = false;
+
   // ─── Pasos del tutorial ───────────────────────────────────────────────────
   late final List<TutorialStep> steps;
 
@@ -81,7 +85,25 @@ class TutorialController extends GetxController {
     final seen  = prefs.getBool(AppConstants.tutorialKey) ?? false;
     if (!seen) {
       await Future.delayed(const Duration(milliseconds: 800));
-      showTutorial();
+      if (_usersReady) {
+        // Usuarios ya cargaron antes de que terminara el delay
+        showTutorial();
+      } else {
+        // Marcar pendiente — se lanzará cuando lleguen los usuarios
+        _pendingShow = true;
+      }
+    }
+  }
+
+  /// Llamar desde la pantalla cuando los usuarios ya están renderizados en pantalla.
+  /// Usa addPostFrameCallback para garantizar que el layout esté completo.
+  void notifyUsersReady() {
+    _usersReady = true;
+    if (_pendingShow) {
+      _pendingShow = false;
+      Future.delayed(const Duration(milliseconds: 300), () {
+        showTutorial();
+      });
     }
   }
 
@@ -98,6 +120,24 @@ class TutorialController extends GetxController {
 
   void nextStep() {
     if (currentStep.value < steps.length - 1) {
+      final nextIndex    = currentStep.value + 1;
+      final nextStepData = steps[nextIndex];
+
+      // Guard: si el siguiente paso apunta al profileDotKey y no existe,
+      // terminar el tutorial en lugar de crashear
+      if (nextStepData.targetKey == profileDotKey) {
+        final ctx = profileDotKey.currentContext;
+        if (ctx == null) {
+          _completeTutorial();
+          return;
+        }
+        final box = ctx.findRenderObject() as RenderBox?;
+        if (box == null || !box.hasSize) {
+          _completeTutorial();
+          return;
+        }
+      }
+
       isAnimatingOut.value = true;
       Future.delayed(const Duration(milliseconds: 250), () {
         currentStep.value++;
@@ -122,20 +162,17 @@ class TutorialController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.tutorialKey, true);
   }
-
-  /// Permite resetear el tutorial desde ajustes (útil en desarrollo)
+ 
   Future<void> resetTutorial() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.tutorialKey);
   }
-
-  // ─── Helpers de UI ────────────────────────────────────────────────────────
+ 
 
   TutorialStep get currentStepData => steps[currentStep.value];
 
   bool get isLastStep => currentStep.value == steps.length - 1;
-
-  /// Devuelve el Rect del widget apuntado (null si no se encontró)
+ 
   Rect? getTargetRect(GlobalKey key) {
     final ctx = key.currentContext;
     if (ctx == null) return null;

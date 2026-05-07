@@ -139,7 +139,7 @@ class UpdateProfilePage extends GetView<ProfileController> {
           () {
             final km =
                 controller.userEntity.value?.preferences?.distancekm ?? 50;
-            if (km >= 300) return _l.t('no_limit');
+            if (km >= 300) return _l.t('max_distance');
             if (km < 1) return '${(km * 1000).toInt()} m';
             return '${km.toStringAsFixed(km == km.toInt() ? 0 : 1)} km';
           },

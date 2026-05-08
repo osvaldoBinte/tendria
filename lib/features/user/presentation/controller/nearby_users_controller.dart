@@ -129,9 +129,12 @@ Future<bool> checkLocationPermission() async {
   return permission == LocationPermission.whileInUse ||
       permission == LocationPermission.always;
 }
-
+Future<void> reloadFromStart() async {
+  currentPage.value = 1; 
+  await loadNearbyUsers();
+}
 Future<void> retryAfterPermission() async {
-  // ✅ también usar Geolocator aquí
+   
   final permission = await Geolocator.checkPermission();
   if (permission == LocationPermission.whileInUse ||
       permission == LocationPermission.always) {

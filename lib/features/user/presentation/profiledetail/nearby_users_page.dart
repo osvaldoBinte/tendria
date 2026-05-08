@@ -295,10 +295,8 @@ class NearbyUsersPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () {
-                  controller.noMoreUsers.value = false;
-                  controller.loadNearbyUsers();
-                },
+                               onPressed: () => controller.reloadFromStart(),
+
                 icon: Icon(
                   Icons.refresh_rounded,
                   color: ThemeColor.primaryColor,

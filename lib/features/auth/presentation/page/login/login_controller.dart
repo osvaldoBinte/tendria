@@ -79,7 +79,8 @@ class LoginController extends GetxController {
       _clearFields();
       await _resetControllersForNewSession();
 
-      Get.offAllNamed(RoutesNames.homePage);
+          Get.offAllNamed(RoutesNames.preferencesPage);
+
     } catch (e) {
       _showErrorAlert(
         _l.t('login_error_title'),

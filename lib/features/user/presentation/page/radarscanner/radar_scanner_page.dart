@@ -245,10 +245,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () {
-                  controller.noMoreUsers.value = false;
-                  controller.loadNearbyUsers();
-                },
+                onPressed: () => controller.reloadFromStart(),
+
                 icon: Icon(
                   Icons.refresh_rounded,
                   color: ThemeColor.primaryColor,
@@ -477,8 +475,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       }),
     );
   }
-
-  // ─── PUNTOS DETECTADOS ──────────────────────────────────────────────────────
+ 
 
   Widget _buildDetectedPoints() {
     return Obx(() {
@@ -486,10 +483,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       if (users.isEmpty) return const SizedBox.shrink();
 
       final points = _calculateUserPositions(users);
-
-      // ✅ Notificar al tutorial que los usuarios ya están renderizados.
-      // addPostFrameCallback garantiza que el layout esté completo antes de
-      // que el tutorial intente calcular posiciones de widgets.
+ 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         tutorialCtrl.notifyUsersReady();
       });

@@ -188,9 +188,9 @@ class App extends StatelessWidget {
           ),
           fenix: true,
         );
-        Get.put(
-          MyMatchController(getMyChatsUsecase: Get.find()),
-          permanent: true,
+        Get.lazyPut(
+          () => MyMatchController(getMyChatsUsecase: Get.find()),
+        fenix: true,
         );
 
         Get.lazyPut(

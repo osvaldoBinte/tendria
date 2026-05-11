@@ -184,7 +184,7 @@ class App extends StatelessWidget {
         Get.lazyPut(
           () => NearbyUsersController(
             fetchNearbyUsersUsecase: Get.find(),
-            toggleLikeUsecase: Get.find(),
+            toggleLikeUsecase: Get.find(), updateLocationUsecase: Get.find(),
           ),
           fenix: true,
         );

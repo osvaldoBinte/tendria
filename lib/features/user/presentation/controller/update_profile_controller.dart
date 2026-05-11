@@ -1264,88 +1264,86 @@ class UpdateProfileController extends GetxController {
     }
   }
  
-  void showEditDistance(int currentDistanceKm) {
-    int initialIndex;
-    if (currentDistanceKm < 1) {
-      initialIndex = 0;
-    } else if (currentDistanceKm >= 300) {
-      initialIndex = 308;
-    } else {
-      initialIndex = 9 + (currentDistanceKm - 1).clamp(0, 299);
-    }
-
-    final RxInt selectedIndex = initialIndex.obs;
-
-    String labelForIndex(int index) {
-      if (index < 9) return '${(index + 1) * 100} m';
-      final km = index - 9 + 1;
-      return km >= 300 ? '${_l.t('max_distance')}' : '$km km';
-    }
-
-    double kmForIndex(int index) {
-      if (index < 9) return ((index + 1) * 100) / 1000.0;
-      return (index - 9 + 1).toDouble();
-    }
-
-    if (Get.context != null) {
-      showModalBottomSheet(
-        context: Get.context!,
-        isScrollControlled: true,
-        backgroundColor: ThemeColor.backgroundColorfondo,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (context) => Container(
-          height: Get.height * 0.6,
-          padding: EdgeInsets.all(ThemeColor.paddingLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildHandle(),
-              SizedBox(height: ThemeColor.paddingExtraLarge),
-              _buildBsTitle(_l.t('bs_distance_title')),
-              SizedBox(height: ThemeColor.paddingSmall),
-              Obx(() {
-                final idx = selectedIndex.value;
-                final label = idx == 308
-                    ? _l.t('bs_no_limit_distance')
-                    : idx < 9
-                        ? 'Hasta ${(idx + 1) * 100} metros'
-                        : 'Hasta ${idx - 9 + 1} km';
-                return _buildBsSubtitle(label,
-                    textAlign: TextAlign.center);
-              }),
-              SizedBox(height: ThemeColor.paddingLarge),
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _buildWheelHighlight(
-                        horizontal:
-                            ThemeColor.paddingExtraLarge * 2),
-                    _buildDateWheel(
-                      itemCount: 309,
-                      initialIndex: initialIndex,
-                      labelBuilder: labelForIndex,
-                      onChanged: (index) {
-                        selectedIndex.value = index;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: ThemeColor.paddingMedium),
-              _buildSaveButton(onPressed: () {
-                Get.back();
-                updateDistance(kmForIndex(selectedIndex.value));
-              }),
-              SizedBox(height: ThemeColor.paddingMedium),
-            ],
-          ),
-        ),
-      );
-    }
+ void showEditDistance(int currentDistanceKm) {
+  int initialIndex;
+  if (currentDistanceKm < 1) {
+    initialIndex = 0;
+  } else if (currentDistanceKm >= 1000) {
+    initialIndex = 1008;
+  } else {
+    initialIndex = 9 + (currentDistanceKm - 1).clamp(0, 999);
   }
+
+  final RxInt selectedIndex = initialIndex.obs;
+
+  String labelForIndex(int index) {
+    if (index < 9) return '${(index + 1) * 100} m';
+    final km = index - 9 + 1;
+    return km >= 1000 ? _l.t('max_distance') : '$km km';
+  }
+
+  double kmForIndex(int index) {
+    if (index < 9) return ((index + 1) * 100) / 1000.0;
+    return (index - 9 + 1).toDouble();
+  }
+
+  if (Get.context != null) {
+    showModalBottomSheet(
+      context: Get.context!,
+      isScrollControlled: true,
+      backgroundColor: ThemeColor.backgroundColorfondo,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        height: Get.height * 0.6,
+        padding: EdgeInsets.all(ThemeColor.paddingLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _buildHandle(),
+            SizedBox(height: ThemeColor.paddingExtraLarge),
+            _buildBsTitle(_l.t('bs_distance_title')),
+            SizedBox(height: ThemeColor.paddingSmall),
+            Obx(() {
+              final idx = selectedIndex.value;
+              final label = idx == 1008
+                  ? _l.t('bs_no_limit_distance')
+                  : idx < 9
+                      ? 'Hasta ${(idx + 1) * 100} metros'
+                      : 'Hasta ${idx - 9 + 1} km';
+              return _buildBsSubtitle(label, textAlign: TextAlign.center);
+            }),
+            SizedBox(height: ThemeColor.paddingLarge),
+            Expanded(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  _buildWheelHighlight(
+                      horizontal: ThemeColor.paddingExtraLarge * 2),
+                  _buildDateWheel(
+                    itemCount: 1009,
+                    initialIndex: initialIndex,
+                    labelBuilder: labelForIndex,
+                    onChanged: (index) {
+                      selectedIndex.value = index;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: ThemeColor.paddingMedium),
+            _buildSaveButton(onPressed: () {
+              Get.back();
+              updateDistance(kmForIndex(selectedIndex.value));
+            }),
+            SizedBox(height: ThemeColor.paddingMedium),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
   // ==========================================
   // UPDATE MÉTODOS

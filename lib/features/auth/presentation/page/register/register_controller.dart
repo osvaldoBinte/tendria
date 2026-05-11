@@ -19,25 +19,21 @@ class RegisterController extends GetxController {
   final CreateUserUsecase createUserUsecase;
   final FetchQualitiesUsecase fetchQualitiesUsecase;
   final FetchInterestsUsecase fetchInterestsUsecase;
-  final LogRegisterUsecase logRegisterUsecase; 
-  
+  final LogRegisterUsecase logRegisterUsecase;
 
   RegisterController({
     required this.createUserUsecase,
     required this.fetchQualitiesUsecase,
     required this.fetchInterestsUsecase,
-        required this.logRegisterUsecase,  
-
+    required this.logRegisterUsecase,
   });
-  
+
   TranslationService get _translator => Get.find<TranslationService>();
   LanguageController get _l => Get.find<LanguageController>();
- 
 
   final Rx<RegistrationStep> currentStep = RegistrationStep.basicInfo.obs;
   final RxInt currentStepIndex = 0.obs;
   late FixedExtentScrollController heightScrollController;
- 
 
   late final TextEditingController nameController;
   late final TextEditingController emailController;
@@ -47,7 +43,6 @@ class RegisterController extends GetxController {
   late final TextEditingController cityController;
   late final TextEditingController customGenderController;
   late final TextEditingController bioController;
- 
 
   late final FocusNode nameFocusNode;
   late final FocusNode emailFocusNode;
@@ -57,7 +52,6 @@ class RegisterController extends GetxController {
   late final FocusNode cityFocusNode;
   late final FocusNode bioFocusNode;
   late final FocusNode customGenderFocusNode;
- 
 
   final RxBool isLoading = false.obs;
   final RxBool showPassword = false.obs;
@@ -66,7 +60,7 @@ class RegisterController extends GetxController {
   final RxBool locationObtained = false.obs;
   final RxBool isLoadingQualities = false.obs;
   final RxBool isLoadingInterests = false.obs;
- 
+
   final Rx<DateTime?> dateOfBirth = Rx<DateTime?>(null);
   final RxString selectedGender = ''.obs;
   final RxString selectedLanguage = 'Español'.obs;
@@ -78,19 +72,16 @@ class RegisterController extends GetxController {
 
   final RxInt bioCharCount = 0.obs;
   final RxBool showCustomGender = false.obs;
- 
 
   final RxList<CatalogEntity> qualities = <CatalogEntity>[].obs;
   final RxList<CatalogEntity> interests = <CatalogEntity>[].obs;
 
   final RxMap<String, String> translatedInterests = <String, String>{}.obs;
   final RxMap<String, String> translatedQualities = <String, String>{}.obs;
- 
 
   final RxString latitude = ''.obs;
   final RxString longitude = ''.obs;
   final RxString city = ''.obs;
- 
 
   final RxBool emailError = false.obs;
   final RxBool passwordError = false.obs;
@@ -104,9 +95,7 @@ class RegisterController extends GetxController {
   final RxString nameErrorMessage = ''.obs;
   final RxString bioErrorMessage = ''.obs;
 
-   
   final RxInt selectedHeight = 170.obs;
- 
 
   final List<Map<String, dynamic>> genderOptions = [
     {'label': 'Masculino', 'value': 'Hombre', 'icon': Icons.male},
@@ -117,13 +106,12 @@ class RegisterController extends GetxController {
       'icon': Icons.transgender,
     },
   ];
- 
 
   @override
   void onInit() {
     super.onInit();
-    
-  selectedLanguage.value = _l.deviceLanguage;  
+
+    selectedLanguage.value = _l.deviceLanguage;
     heightScrollController = FixedExtentScrollController(initialItem: 70);
     _initializeControllers();
 
@@ -186,7 +174,7 @@ class RegisterController extends GetxController {
 
     super.onClose();
   }
- 
+
   Future<void> _loadCatalogs() async {
     print('[RegisterController] 🔄 _loadCatalogs() iniciando...');
     await Future.wait([_loadQualities(), _loadInterests()]);
@@ -199,7 +187,9 @@ class RegisterController extends GetxController {
       print('[RegisterController] 🔄 Cargando cualidades desde API...');
       final result = await fetchQualitiesUsecase.execute();
       qualities.value = result;
-      print('[RegisterController] ✅ Cualidades cargadas: ${result.length} items');
+      print(
+        '[RegisterController] ✅ Cualidades cargadas: ${result.length} items',
+      );
       result.forEach((q) => print('  - cualidad: ${q.name}'));
       await _translateQualitiesCatalog();
     } catch (e) {
@@ -215,7 +205,9 @@ class RegisterController extends GetxController {
       print('[RegisterController] 🔄 Cargando intereses desde API...');
       final result = await fetchInterestsUsecase.execute();
       interests.value = result;
-      print('[RegisterController] ✅ Intereses cargados: ${result.length} items');
+      print(
+        '[RegisterController] ✅ Intereses cargados: ${result.length} items',
+      );
       result.forEach((i) => print('  - interés: ${i.name}'));
       await _translateInterestsCatalog();
     } catch (e) {
@@ -230,9 +222,13 @@ class RegisterController extends GetxController {
   // ==========================================
 
   Future<void> _waitForTranslator() async {
-    print('[RegisterController] 🔍 TranslationService.isReady = ${_translator.isReady.value}');
+    print(
+      '[RegisterController] 🔍 TranslationService.isReady = ${_translator.isReady.value}',
+    );
     if (!_translator.isReady.value) {
-      print('[RegisterController] ⏳ Esperando que TranslationService esté listo...');
+      print(
+        '[RegisterController] ⏳ Esperando que TranslationService esté listo...',
+      );
       await _translator.isReady.stream.firstWhere((ready) => ready);
       print('[RegisterController] ✅ TranslationService ya está listo');
     }
@@ -250,7 +246,9 @@ class RegisterController extends GetxController {
 
     // Verificar qué idioma detecta
     final lang = _l.lang;
-    print('[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"');
+    print(
+      '[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"',
+    );
 
     final names = interests.map((i) => i.name).toList();
     print('[RegisterController] 📋 Nombres a traducir: $names');
@@ -278,7 +276,9 @@ class RegisterController extends GetxController {
     await _waitForTranslator();
 
     final lang = _l.lang;
-    print('[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"');
+    print(
+      '[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"',
+    );
 
     final names = qualities.map((q) => q.name).toList();
     print('[RegisterController] 📋 Nombres a traducir: $names');
@@ -293,9 +293,9 @@ class RegisterController extends GetxController {
     print('[RegisterController] ✅ translatedQualities asignado:');
     translatedQualities.forEach((k, v) => print('  "$k" → "$v"'));
   }
- 
+
   String getInterestLabel(String name) => translatedInterests[name] ?? name;
- 
+
   String getQualityLabel(String name) => translatedQualities[name] ?? name;
 
   // ==========================================
@@ -524,7 +524,6 @@ class RegisterController extends GetxController {
       confirmPasswordError.value = false;
     }
   }
- 
 
   Future<void> _autoGetLocation() async {
     try {
@@ -556,18 +555,17 @@ class RegisterController extends GetxController {
         final placemark = placemarks.first;
         city.value = placemark.locality?.isNotEmpty == true
             ? placemark.locality!
-            : placemark.administrativeArea ?? 'Ciudad desconocida';
+            : placemark.administrativeArea ?? '';
       }
 
       locationObtained.value = true;
     } catch (e) {
       print('[RegisterController] ❌ Error obteniendo ubicación: $e');
-      city.value = 'Ciudad desconocida';
+      city.value = '';
     } finally {
       isLoadingLocation.value = false;
     }
   }
- 
 
   void selectHeight(int height) {
     heightController.text = height.toString();
@@ -619,7 +617,6 @@ class RegisterController extends GetxController {
       selectedQualities.add(qualityId);
     }
   }
- 
 
   Future<void> onRegisterTap() async {
     if (dateOfBirth.value == null) {
@@ -645,14 +642,14 @@ class RegisterController extends GetxController {
         bio: bioController.text.trim(),
         heightcm: heightController.text.trim(),
         primarylanguage: selectedLanguage.value,
-        city: city.value.isNotEmpty ? city.value : 'Ciudad desconocida',
+        city: city.value.isNotEmpty ? city.value : '',
         lat: latitude.value,
         lng: longitude.value,
         interestsIds: selectedInterests.toList(),
         qualitiesIds: selectedQualities.toList(),
       );
       await createUserUsecase.execute(entity);
-      await logRegisterUsecase(method: 'email'); 
+      await logRegisterUsecase(method: 'email');
       _clearFields();
       showSuccessSnackbar(_l.t('register_success'));
       onLoginTap();
@@ -667,7 +664,6 @@ class RegisterController extends GetxController {
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
- 
 
   void onLoginTap() => Get.toNamed(RoutesNames.loginPage);
 
@@ -675,7 +671,6 @@ class RegisterController extends GetxController {
   void onEmailSubmitted() => passwordFocusNode.requestFocus();
   void onPasswordSubmitted() => confirmPasswordFocusNode.requestFocus();
   void onConfirmPasswordSubmitted() => nextStep();
- 
 
   void _clearFields() {
     nameController.clear();
@@ -689,7 +684,7 @@ class RegisterController extends GetxController {
 
     dateOfBirth.value = null;
     selectedGender.value = '';
-    selectedLanguage.value = 'Español';
+    selectedLanguage.value = _l.deviceLanguage;
     selectedInterests.clear();
     selectedQualities.clear();
     latitude.value = '';

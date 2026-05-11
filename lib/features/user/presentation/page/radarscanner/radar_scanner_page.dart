@@ -745,20 +745,20 @@ class _DistanceSliderState extends State<_DistanceSlider> {
   @override
   void initState() {
     super.initState();
-    _current = widget.initialKm.clamp(0.1, 300.0);
+    _current = widget.initialKm.clamp(0.1, 1000.0);
   }
 
   @override
   void didUpdateWidget(_DistanceSlider old) {
     super.didUpdateWidget(old);
-    final newKm = widget.initialKm.clamp(0.1, 300.0);
+    final newKm = widget.initialKm.clamp(0.1, 1000.0);
     if ((newKm - _current).abs() > 0.05) {
       setState(() => _current = newKm);
     }
   }
 
   String get _label {
-    if (_current >= 300) return widget.l.t('max_distance');
+    if (_current >= 1000) return widget.l.t('max_distance');
     if (_current < 1) return '${(_current * 1000).toInt()} m';
     return '${_current.toStringAsFixed(_current == _current.roundToDouble() ? 0 : 1)} km';
   }
@@ -824,8 +824,8 @@ class _DistanceSliderState extends State<_DistanceSlider> {
             child: Slider(
               value: _current,
               min: 0.1,
-              max: 300,
-              divisions: 2990,
+              max: 1000,
+              divisions: 9999,
               onChanged: (value) => setState(() => _current = value),
               onChangeEnd: (value) => widget.updater.updateDistance(value),
             ),

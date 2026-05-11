@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tendria/common/errors/convert_message.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
@@ -32,7 +31,6 @@ class PreferencesController extends GetxController {
   final PostInterestsUsecase postInterestsUsecase;
   final PostQualitiesUsecase postQualitiesUsecase;
   final UploadPicturePerfileUsecase uploadPicturePerfileUsecase;
-  
 
   PreferencesController({
     required this.preferencesUserUsecase,
@@ -44,16 +42,17 @@ class PreferencesController extends GetxController {
     required this.uploadPicturePerfileUsecase,
   });
 
+  LanguageController get _l => Get.find<LanguageController>();
+
+  // ─── ESTADO ──────────────────────────────────────────────────────────────────
 
   final Rx<PreferencesStep> currentStep = PreferencesStep.genderPreference.obs;
   final RxInt currentStepIndex = 0.obs;
   final RxBool showSuccessScreen = false.obs;
   final RxBool isInitialized = false.obs;
 
-
   final RxList<PreferencesStep> availableSteps = <PreferencesStep>[].obs;
   final RxBool isPickingPhotos = false.obs;
-
 
   final RxBool isLoading = false.obs;
   final RxBool isUploadingPhotos = false.obs;
@@ -61,19 +60,17 @@ class PreferencesController extends GetxController {
   final RxBool isLoadingQualities = false.obs;
   final RxBool isLoadingUserData = false.obs;
 
-
   final RxString selectedGenderPreference = ''.obs;
   final RxString selectedConnectionType = ''.obs;
 
   final RxInt minAge = 18.obs;
   final RxInt maxAge = 80.obs;
-  final RxDouble distanceKm = 50.0.obs;
-  
+  final RxDouble distanceKm = 1000.0.obs;
+
   final RxBool preferencesAlreadySent = false.obs;
   final RxBool photosAlreadySent = false.obs;
   final RxBool interestsAlreadySent = false.obs;
   final RxBool qualitiesAlreadySent = false.obs;
-
 
   final RxList<String> selectedPhotos = <String>[].obs;
   final int maxPhotos = 6;
@@ -87,10 +84,11 @@ class PreferencesController extends GetxController {
   final int maxQualities = 3;
 
   final ImagePicker _picker = ImagePicker();
-
   ProfileController? _profileController;
+  final RxString customGenderInput = ''.obs;
 
- 
+  // ─── OPCIONES (labels traducidos en la Page, values fijos aquí) ───────────
+
   final List<Map<String, dynamic>> genderOptions = [
     {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
     {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
@@ -109,122 +107,35 @@ class PreferencesController extends GetxController {
     {'label': 'Conexiones sin ataduras', 'value': 'casual'},
   ];
 
-  final RxString customGenderInput = ''.obs;
+  // ─── INIT ─────────────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
     super.onInit();
-
-
     try {
       _profileController = Get.find<ProfileController>();
     } catch (e) {
       print('ProfileController no encontrado, se cargará sin datos previos');
     }
-
     _initializeController();
   }
 
-  Future<String> _ensureValidImageFormat(String originalPath) async {
-    final ext = originalPath.toLowerCase();
-
-
-    if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
-      return originalPath;
-    }
-
-    try {
-      
-      final File originalFile = File(originalPath);
-      final Uint8List bytes = await originalFile.readAsBytes();
-
-
-      final String tempDir = (await Directory.systemTemp.createTemp(
-        'tendria_img',
-      )).path;
-      final String newPath =
-          '$tempDir/photo_${DateTime.now().millisecondsSinceEpoch}.png';
-
-      final File newFile = File(newPath);
-      await newFile.writeAsBytes(bytes);
-
-      print('🖼️ Imagen convertida: $originalPath → $newPath');
-      return newPath;
-    } catch (e) {
-      print('⚠️ No se pudo convertir la imagen, usando original: $e');
-      return originalPath; 
-    }
+  @override
+  void onClose() {
+    super.onClose();
   }
 
-  Future<void> pickMultipleImages() async {
-    final remaining = maxPhotos - selectedPhotos.length;
-    if (remaining <= 0) {
-      _showErrorAlert(
-        'Límite alcanzado',
-        'Puedes subir máximo $maxPhotos fotos',
-      );
-      return;
-    }
-
-    try {
-      isPickingPhotos.value = true;
-
-      final List<XFile> images = await _picker.pickMultiImage(
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
-
-      if (images.isEmpty) return;
-
-      final toAdd = images.take(remaining).toList();
-
-
-      final List<String> convertedPaths = [];
-      for (final image in toAdd) {
-        final converted = await _ensureValidImageFormat(image.path);
-        convertedPaths.add(converted);
-      }
-
-      selectedPhotos.addAll(convertedPaths);
-
-      if (images.length > remaining) {
-        _showErrorAlert(
-          'Límite alcanzado',
-          'Solo se agregaron $remaining fotos (máximo $maxPhotos)',
-        );
-      }
-    } catch (e) {
-      _showErrorAlert(
-        'Error',
-        'No se pudo seleccionar las fotos: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isPickingPhotos.value = false;
-    }
-  }
-
-  void updateDistance(double distance) {
-    distanceKm.value = distance;
-  }
+  // ─── INICIALIZACIÓN ───────────────────────────────────────────────────────────
 
   Future<void> _initializeController() async {
     try {
-      
       await _loadCatalogs();
-
-
       await _loadUserData();
-
-
       _determineAvailableSteps();
-
-
       if (availableSteps.isNotEmpty) {
         currentStep.value = availableSteps.first;
         currentStepIndex.value = 0;
       }
-
       isInitialized.value = true;
     } catch (e) {
       print('Error en inicialización: $e');
@@ -232,12 +143,9 @@ class PreferencesController extends GetxController {
     }
   }
 
-
-
   Future<void> _loadUserData() async {
     try {
       isLoadingUserData.value = true;
-
       if (_profileController != null) {
         if (_profileController!.userEntity.value != null) {
           _preloadExistingData(_profileController!.userEntity.value!);
@@ -256,15 +164,12 @@ class PreferencesController extends GetxController {
   }
 
   void _preloadExistingData(GetUserEntity user) {
-    
     if (user.preferences != null) {
       final prefs = user.preferences!;
-
       if (prefs.searchgender != null) {
         preferencesAlreadySent.value = true;
         selectedGenderPreference.value = prefs.searchgender!;
       }
-
       if (prefs.agemin != null) minAge.value = prefs.agemin!;
       if (prefs.agemax != null) maxAge.value = prefs.agemax!;
       if (prefs.distancekm != null) distanceKm.value = prefs.distancekm!;
@@ -289,48 +194,34 @@ class PreferencesController extends GetxController {
       selectedQualities.value = user.qualitiesIds!.map((q) => q.id).toList();
     }
   }
-  
 
   void _determineAvailableSteps() {
     availableSteps.clear();
-
     final user = _profileController?.userEntity.value;
-
 
     final hasPreferences =
         user?.preferences != null && user!.preferences!.searchgender != null;
-
     if (!hasPreferences) {
       availableSteps.add(PreferencesStep.genderPreference);
       availableSteps.add(PreferencesStep.connectionType);
       availableSteps.add(PreferencesStep.ageRange);
     }
 
-    final hasPhotos =
-        user?.assets != null &&
+    final hasPhotos = user?.assets != null &&
         user!.assets!.isNotEmpty &&
         user.assets!.length >= minPhotos;
-
-    if (!hasPhotos) {
-      availableSteps.add(PreferencesStep.photos);
-    }
+    if (!hasPhotos) availableSteps.add(PreferencesStep.photos);
 
     final hasInterests =
         user?.interestsIds != null && user!.interestsIds!.isNotEmpty;
-
-    if (!hasInterests) {
-      availableSteps.add(PreferencesStep.interests);
-    }
+    if (!hasInterests) availableSteps.add(PreferencesStep.interests);
 
     final hasQualities =
         user?.qualitiesIds != null && user!.qualitiesIds!.isNotEmpty;
-
-    if (!hasQualities) {
-      availableSteps.add(PreferencesStep.qualities);
-    }
+    if (!hasQualities) availableSteps.add(PreferencesStep.qualities);
   }
 
-
+  // ─── CATÁLOGOS ────────────────────────────────────────────────────────────────
 
   Future<void> _loadCatalogs() async {
     await Future.wait([_loadInterests(), _loadQualities()]);
@@ -360,7 +251,7 @@ class PreferencesController extends GetxController {
     }
   }
 
-
+  // ─── NAVEGACIÓN ───────────────────────────────────────────────────────────────
 
   void nextStep() {
     if (validateCurrentStep()) {
@@ -377,6 +268,8 @@ class PreferencesController extends GetxController {
       currentStep.value = availableSteps[currentStepIndex.value];
     }
   }
+
+  // ─── VALIDACIONES ─────────────────────────────────────────────────────────────
 
   bool validateCurrentStep() {
     switch (currentStep.value) {
@@ -397,7 +290,10 @@ class PreferencesController extends GetxController {
 
   bool _validateGenderPreference() {
     if (selectedGenderPreference.value.isEmpty) {
-      _showErrorAlert('Selección requerida', 'Selecciona un tipo de persona');
+      _showErrorAlert(
+        _l.t('pref_selection_required'),
+        _l.t('pref_select_gender'),
+      );
       return false;
     }
     return true;
@@ -406,8 +302,8 @@ class PreferencesController extends GetxController {
   bool _validateConnectionType() {
     if (selectedConnectionType.value.isEmpty) {
       _showErrorAlert(
-        'Selección requerida',
-        'Selecciona al menos un tipo de conexión',
+        _l.t('pref_selection_required'),
+        _l.t('pref_select_connection'),
       );
       return false;
     }
@@ -417,8 +313,8 @@ class PreferencesController extends GetxController {
   bool _validateAgeRange() {
     if (minAge.value > maxAge.value) {
       _showErrorAlert(
-        'Rango inválido',
-        'La edad mínima no puede ser mayor que la edad máxima',
+        _l.t('pref_invalid_range'),
+        _l.t('pref_age_range_error'),
       );
       return false;
     }
@@ -427,13 +323,16 @@ class PreferencesController extends GetxController {
 
   bool _validateInterests() {
     if (selectedInterests.isEmpty) {
-      _showErrorAlert('Selección requerida', 'Selecciona al menos un interés');
+      _showErrorAlert(
+        _l.t('pref_selection_required'),
+        _l.t('val_interest_required'),
+      );
       return false;
     }
     return true;
   }
 
-
+  // ─── SELECCIÓN ────────────────────────────────────────────────────────────────
 
   void selectGenderPreference(String gender) {
     selectedGenderPreference.value = gender;
@@ -443,15 +342,9 @@ class PreferencesController extends GetxController {
     selectedConnectionType.value = type;
   }
 
-  void updateMinAge(int age) {
-    minAge.value = age;
-  }
-
-  void updateMaxAge(int age) {
-    maxAge.value = age;
-  }
-
-
+  void updateMinAge(int age) => minAge.value = age;
+  void updateMaxAge(int age) => maxAge.value = age;
+  void updateDistance(double distance) => distanceKm.value = distance;
 
   void toggleInterest(int interestId) {
     if (selectedInterests.contains(interestId)) {
@@ -459,8 +352,8 @@ class PreferencesController extends GetxController {
     } else {
       if (selectedInterests.length >= maxInterests) {
         _showErrorAlert(
-          'Límite alcanzado',
-          'Puedes seleccionar máximo $maxInterests intereses',
+          _l.t('pref_limit_reached'),
+          _l.t('bs_max_interests'),
         );
         return;
       }
@@ -474,8 +367,8 @@ class PreferencesController extends GetxController {
     } else {
       if (selectedQualities.length >= maxQualities) {
         _showErrorAlert(
-          'Límite alcanzado',
-          'Puedes seleccionar máximo $maxQualities cualidades',
+          _l.t('pref_limit_reached'),
+          _l.t('bs_max_qualities'),
         );
         return;
       }
@@ -483,27 +376,86 @@ class PreferencesController extends GetxController {
     }
   }
 
+  // ─── FOTOS ────────────────────────────────────────────────────────────────────
 
+  Future<String> _ensureValidImageFormat(String originalPath) async {
+    final ext = originalPath.toLowerCase();
+    if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
+      return originalPath;
+    }
+    try {
+      final File originalFile = File(originalPath);
+      final Uint8List bytes = await originalFile.readAsBytes();
+      final String tempDir =
+          (await Directory.systemTemp.createTemp('tendria_img')).path;
+      final String newPath =
+          '$tempDir/photo_${DateTime.now().millisecondsSinceEpoch}.png';
+      final File newFile = File(newPath);
+      await newFile.writeAsBytes(bytes);
+      print('🖼️ Imagen convertida: $originalPath → $newPath');
+      return newPath;
+    } catch (e) {
+      print('⚠️ No se pudo convertir la imagen, usando original: $e');
+      return originalPath;
+    }
+  }
+
+  Future<void> pickMultipleImages() async {
+    final remaining = maxPhotos - selectedPhotos.length;
+    if (remaining <= 0) {
+      _showErrorAlert(
+        _l.t('pref_limit_reached'),
+        '${_l.t('pref_photos_max')} $maxPhotos',
+      );
+      return;
+    }
+    try {
+      isPickingPhotos.value = true;
+      final List<XFile> images = await _picker.pickMultiImage(
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      if (images.isEmpty) return;
+      final toAdd = images.take(remaining).toList();
+      final List<String> convertedPaths = [];
+      for (final image in toAdd) {
+        final converted = await _ensureValidImageFormat(image.path);
+        convertedPaths.add(converted);
+      }
+      selectedPhotos.addAll(convertedPaths);
+      if (images.length > remaining) {
+        _showErrorAlert(
+          _l.t('pref_limit_reached'),
+          '${_l.t('pref_photos_partial')} $remaining (${_l.t('pref_photos_max')} $maxPhotos)',
+        );
+      }
+    } catch (e) {
+      _showErrorAlert(
+        _l.t('error'),
+        '${_l.t('pref_photos_pick_error')}: ${cleanExceptionMessage(e)}',
+      );
+    } finally {
+      isPickingPhotos.value = false;
+    }
+  }
 
   Future<void> pickImage() async {
     if (selectedPhotos.length >= maxPhotos) {
       _showErrorAlert(
-        'Límite alcanzado',
-        'Puedes subir máximo $maxPhotos fotos',
+        _l.t('pref_limit_reached'),
+        '${_l.t('pref_photos_max')} $maxPhotos',
       );
       return;
     }
-
     try {
       isPickingPhotos.value = true;
-
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
       );
-
       if (image != null) {
         final converted = await _ensureValidImageFormat(image.path);
         selectedPhotos.add(converted);
@@ -511,8 +463,8 @@ class PreferencesController extends GetxController {
     } catch (e) {
       print('Error seleccionando Foto: $e');
       _showErrorAlert(
-        'Error',
-        'No se pudo seleccionar la Foto: ${cleanExceptionMessage(e)}',
+        _l.t('error'),
+        '${_l.t('pref_photos_pick_error')}: ${cleanExceptionMessage(e)}',
       );
     } finally {
       isPickingPhotos.value = false;
@@ -522,31 +474,27 @@ class PreferencesController extends GetxController {
   Future<void> takePhoto() async {
     if (selectedPhotos.length >= maxPhotos) {
       _showErrorAlert(
-        'Límite alcanzado',
-        'Puedes subir máximo $maxPhotos fotos',
+        _l.t('pref_limit_reached'),
+        '${_l.t('pref_photos_max')} $maxPhotos',
       );
       return;
     }
-
     try {
       isPickingPhotos.value = true;
-
       final XFile? photo = await _picker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
       );
-
       if (photo != null) {
-        
         final converted = await _ensureValidImageFormat(photo.path);
         selectedPhotos.add(converted);
       }
     } catch (e) {
       _showErrorAlert(
-        'Error',
-        'No se pudo tomar la foto: ${cleanExceptionMessage(e)}',
+        _l.t('error'),
+        '${_l.t('pref_photo_take_error')}: ${cleanExceptionMessage(e)}',
       );
     } finally {
       isPickingPhotos.value = false;
@@ -571,7 +519,6 @@ class PreferencesController extends GetxController {
       customWidget: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -598,14 +545,15 @@ class PreferencesController extends GetxController {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Agregar fotos',
+                    _l.t('pref_add_photos'),
                     style: ThemeColor.headingSmall.copyWith(
                       color: ThemeColor.primaryColor,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.close, color: ThemeColor.textSecondaryColor),
+                  icon:
+                      Icon(Icons.close, color: ThemeColor.textSecondaryColor),
                   onPressed: () => Get.back(),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -613,16 +561,14 @@ class PreferencesController extends GetxController {
               ],
             ),
           ),
-
-
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
               children: [
                 _buildPhotoOption(
                   icon: Icons.photo_library,
-                  title: 'Galería (selección múltiple)',
-                  subtitle: 'Selecciona varias fotos de jalón',
+                  title: _l.t('pref_gallery_multiple'),
+                  subtitle: _l.t('pref_gallery_multiple_hint'),
                   onTap: () {
                     Get.back();
                     pickMultipleImages();
@@ -631,8 +577,8 @@ class PreferencesController extends GetxController {
                 const SizedBox(height: 8),
                 _buildPhotoOption(
                   icon: Icons.camera_alt,
-                  title: 'Tomar foto',
-                  subtitle: 'Captura una nueva foto',
+                  title: _l.t('pref_take_photo'),
+                  subtitle: _l.t('pref_take_photo_hint'),
                   onTap: () {
                     Get.back();
                     takePhoto();
@@ -707,31 +653,28 @@ class PreferencesController extends GetxController {
     );
   }
 
+  // ─── SUBMIT ───────────────────────────────────────────────────────────────────
 
   Future<void> submitPreferences() async {
     try {
       isLoading.value = true;
 
-
+      // ── Fotos ──
       if (currentStep.value == PreferencesStep.photos) {
         if (selectedPhotos.length < minPhotos) {
           _showErrorAlert(
-            'Fotos requeridas',
-            'Debes subir al menos $minPhotos fotos',
+            _l.t('pref_photos_required'),
+            _l.t('pref_photos_min'),
           );
           isLoading.value = false;
           return;
         }
-
-
         if (selectedPhotos.isNotEmpty && !photosAlreadySent.value) {
           print('📸 Subiendo ${selectedPhotos.length} fotos...');
           isUploadingPhotos.value = true;
-
           final mediaEntities = selectedPhotos
               .map((path) => UploadMediaEntity(mediaPath: path))
               .toList();
-
           await uploadMediaUsecase.execute(mediaEntities);
           photosAlreadySent.value = true;
           isUploadingPhotos.value = false;
@@ -744,18 +687,16 @@ class PreferencesController extends GetxController {
         }
       }
 
-
+      // ── Intereses ──
       if (currentStep.value == PreferencesStep.interests) {
         if (selectedInterests.isEmpty) {
           _showErrorAlert(
-            'Intereses requeridos',
-            'Debes seleccionar al menos un interés',
+            _l.t('pref_interests_required'),
+            _l.t('val_interest_required'),
           );
           isLoading.value = false;
           return;
         }
-
-
         if (!interestsAlreadySent.value && selectedInterests.isNotEmpty) {
           print('🎯 Guardando ${selectedInterests.length} intereses...');
           await postInterestsUsecase.execute(selectedInterests.toList());
@@ -764,20 +705,20 @@ class PreferencesController extends GetxController {
         }
       }
 
-
+      // ── Cualidades ──
       if (currentStep.value == PreferencesStep.qualities) {
         if (selectedQualities.isEmpty) {
           _showErrorAlert(
-            'Cualidades requeridas',
-            'Debes seleccionar al menos una cualidad',
+            _l.t('pref_qualities_required'),
+            _l.t('pref_select_quality'),
           );
           isLoading.value = false;
           return;
         }
-
         print('⭐ ${selectedQualities.length} cualidades seleccionadas');
       }
 
+      // ── Preferencias ──
       if (!preferencesAlreadySent.value &&
           currentStep.value == PreferencesStep.ageRange &&
           selectedGenderPreference.value.isNotEmpty &&
@@ -785,7 +726,6 @@ class PreferencesController extends GetxController {
         print(
           '⚙️ Enviando preferencias con edad min:${minAge.value} max:${maxAge.value}...',
         );
-
         final preferencesEntity = PreferencesEntity(
           agemin: minAge.value,
           agemax: maxAge.value,
@@ -793,35 +733,27 @@ class PreferencesController extends GetxController {
           searchgender: selectedGenderPreference.value,
           connectiontype: selectedConnectionType.value,
         );
-
         await preferencesUserUsecase.execute(preferencesEntity);
         preferencesAlreadySent.value = true;
       }
 
-
+      // ── Avanzar o finalizar ──
       if (currentStepIndex.value < availableSteps.length - 1) {
         print('➡️ Avanzando al siguiente paso...');
         currentStepIndex.value++;
         currentStep.value = availableSteps[currentStepIndex.value];
       } else {
-        
-        
         print('🚀 Último paso alcanzado, enviando lo pendiente...');
-
-
         if (!qualitiesAlreadySent.value && selectedQualities.isNotEmpty) {
           print('⭐ Guardando ${selectedQualities.length} cualidades...');
           await postQualitiesUsecase.execute(selectedQualities.toList());
           qualitiesAlreadySent.value = true;
           print('✅ Cualidades guardadas exitosamente');
         }
-
-
         if (_profileController != null) {
           print('🔄 Recargando perfil del usuario...');
           await _profileController!.loadUserProfile();
         }
-        
         print('✅ Proceso completado exitosamente');
         showSuccessScreen.value = true;
         _clearData();
@@ -829,8 +761,8 @@ class PreferencesController extends GetxController {
     } catch (e) {
       print('❌ Error guardando preferencias: $e');
       _showErrorAlert(
-        'Error',
-        'No se pudieron guardar las preferencias: ${cleanExceptionMessage(e)}',
+        _l.t('error'),
+        '${_l.t('snack_could_not_update')}: ${cleanExceptionMessage(e)}',
       );
     } finally {
       isLoading.value = false;
@@ -838,42 +770,34 @@ class PreferencesController extends GetxController {
     }
   }
 
+  // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-
-  void _showErrorAlert(
-    String title,
-    String message, {
-    VoidCallback? onDismiss,
-  }) {
+  void _showErrorAlert(String title, String message, {VoidCallback? onDismiss}) {
     if (Get.context != null) {
       showCustomAlert(
         context: Get.context!,
         title: title,
         message: message,
-        confirmText: 'Aceptar',
+        confirmText: _l.t('accept'),
         type: CustomAlertType.error,
         onConfirm: onDismiss,
       );
     }
   }
 
-  void _showSuccessAlert(
-    String title,
-    String message, {
-    VoidCallback? onDismiss,
-  }) {
+  void _showSuccessAlert(String title, String message,
+      {VoidCallback? onDismiss}) {
     if (Get.context != null) {
       showCustomAlert(
         context: Get.context!,
         title: title,
         message: message,
-        confirmText: 'Aceptar',
+        confirmText: _l.t('accept'),
         type: CustomAlertType.success,
         onConfirm: onDismiss,
       );
     }
   }
-
 
   void _clearData() {
     selectedPhotos.clear();
@@ -881,10 +805,5 @@ class PreferencesController extends GetxController {
     if (availableSteps.isNotEmpty) {
       currentStep.value = availableSteps.first;
     }
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
   }
 }

@@ -1,20 +1,19 @@
-
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
-import 'package:tendria/features/auth/presentation/page/home/start_page.dart';
 import 'package:tendria/features/user/domain/entities/preferences_step.dart';
 import 'package:tendria/features/user/presentation/controller/preferences_controller.dart';
-import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
-import 'package:tendria/features/user/presentation/profiledetail/nearby_users_page.dart';
 import 'package:tendria/features/user/presentation/widget/AgeWheelWidget.dart';
 import 'package:tendria/features/user/presentation/widget/DistanceWheelWidget.dart';
 
 class PreferencesPage extends GetView<PreferencesController> {
   const PreferencesPage({Key? key}) : super(key: key);
+
+  LanguageController get lang => Get.find<LanguageController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,11 +32,9 @@ class PreferencesPage extends GetView<PreferencesController> {
           }
 
           if (controller.showSuccessScreen.value) {
-
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
             });
-
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
@@ -51,6 +48,7 @@ class PreferencesPage extends GetView<PreferencesController> {
               body: Center(child: CircularProgressIndicator()),
             );
           }
+
           switch (controller.currentStep.value) {
             case PreferencesStep.genderPreference:
               return _buildGenderPreferenceStep();
@@ -70,7 +68,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-
+  // ─── GENDER PREFERENCE ───────────────────────────────────────────────────────
 
   Widget _buildGenderPreferenceStep() {
     return Column(
@@ -83,10 +81,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   Text(
-                    '¿Qué tipo de personas te\ngustaría conocer?',
+                    lang.t('pref_gender_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -96,26 +92,20 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
-                    'Esta preferencia es flexible y editable más\nadelante.',
+                    lang.t('pref_gender_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondaryColor,
                       height: 1.4,
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   ...controller.genderOptions.map((option) {
                     return Column(
                       children: [
                         _buildGenderPreferenceOption(
-                          option['icon'] as IconData, 
-                          
-                          option['label'], 
-                          
-                          option['value'], 
-                          
+                          option['icon'] as IconData,
+                          option['label'],
+                          option['value'],
                           hasCustomInput: option['hasCustomInput'] ?? false,
                         ),
                         SizedBox(height: ThemeColor.paddingSmall),
@@ -123,8 +113,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                     );
                   }).toList(),
                   SizedBox(height: ThemeColor.paddingLarge),
-
-
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -136,7 +124,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Te mostraremos perfiles compatibles con tus preferencias.',
+                          lang.t('pref_gender_hint'),
                           style: ThemeColor.bodySmall.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
@@ -149,7 +137,6 @@ class PreferencesPage extends GetView<PreferencesController> {
             ),
           ),
         ),
-
         _buildNavigationButtons(),
       ],
     );
@@ -163,7 +150,6 @@ class PreferencesPage extends GetView<PreferencesController> {
   }) {
     return Obx(() {
       final isSelected = controller.selectedGenderPreference.value == value;
-
       return GestureDetector(
         onTap: () => controller.selectGenderPreference(value),
         child: Container(
@@ -205,6 +191,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     });
   }
 
+  // ─── CONNECTION TYPE ──────────────────────────────────────────────────────────
 
   Widget _buildConnectionTypeStep() {
     return Column(
@@ -217,10 +204,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   Text(
-                    '¿Qué tipo de conexión\nquieres?',
+                    lang.t('pref_connection_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -230,16 +215,13 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
-                    'Selecciona hasta dos opciones que vayan\ncontigo.',
+                    lang.t('pref_connection_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondaryColor,
                       height: 1.4,
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   ...controller.connectionOptions.map((option) {
                     return Column(
                       children: [
@@ -251,10 +233,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                       ],
                     );
                   }).toList(),
-
                   SizedBox(height: ThemeColor.paddingLarge),
-
-
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -266,7 +245,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Mostraremos esta preferencia para mejorar tus coincidencias.',
+                          lang.t('pref_connection_hint'),
                           style: ThemeColor.bodySmall.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
@@ -279,7 +258,6 @@ class PreferencesPage extends GetView<PreferencesController> {
             ),
           ),
         ),
-
         _buildNavigationButtons(),
       ],
     );
@@ -288,7 +266,6 @@ class PreferencesPage extends GetView<PreferencesController> {
   Widget _buildConnectionOption(String label, String value) {
     return Obx(() {
       final isSelected = controller.selectedConnectionType.value == value;
-
       return InkWell(
         onTap: () => controller.selectConnectionType(value),
         child: Container(
@@ -339,7 +316,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     });
   }
 
-
+  // ─── AGE RANGE ────────────────────────────────────────────────────────────────
 
   Widget _buildAgeRangeStep() {
     return Column(
@@ -352,9 +329,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
                   Text(
-                    '¿Qué rango de edad\nprefieres?',
+                    lang.t('pref_age_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -364,21 +340,18 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
-                    'Puedes ajustar esto más tarde.',
+                    lang.t('pref_age_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondaryColor,
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   Row(
                     children: [
                       Expanded(
                         child: Center(
                           child: Text(
-                            'Mínimo',
+                            lang.t('bs_age_min'),
                             style: ThemeColor.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
                               color: ThemeColor.textDarkColor,
@@ -389,7 +362,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                       Expanded(
                         child: Center(
                           child: Text(
-                            'Máximo',
+                            lang.t('bs_age_max'),
                             style: ThemeColor.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
                               color: ThemeColor.textDarkColor,
@@ -400,8 +373,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                     ],
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
-
-
                   SizedBox(
                     height: 200,
                     child: Stack(
@@ -428,7 +399,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                         ),
                         Row(
                           children: [
-                            
                             Expanded(
                               child: AgeWheelWidget(
                                 initialAge: controller.minAge.value,
@@ -440,7 +410,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                                 },
                               ),
                             ),
-                            
                             Expanded(
                               child: AgeWheelWidget(
                                 initialAge: controller.maxAge.value,
@@ -457,24 +426,19 @@ class PreferencesPage extends GetView<PreferencesController> {
                       ],
                     ),
                   ),
-
-
                   Obx(
                     () => Center(
                       child: Text(
-                        'De ${controller.minAge.value} a ${controller.maxAge.value} años',
+                        'De ${controller.minAge.value} a ${controller.maxAge.value} ${lang.t('years')}',
                         style: ThemeColor.bodyMedium.copyWith(
                           color: ThemeColor.textSecondaryColor,
                         ),
                       ),
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   Text(
-                    'Distancia máxima',
+                    lang.t('pref_distance_title'),
                     style: ThemeColor.headingSmall.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -484,17 +448,15 @@ class PreferencesPage extends GetView<PreferencesController> {
                   SizedBox(height: ThemeColor.paddingSmall),
                   Obx(
                     () => Text(
-                      controller.distanceKm.value >= 300
-                          ? 'Máximo'
-                          : 'Hasta ${controller.distanceKm.value} km',
+                      controller.distanceKm.value >= 1000
+                          ? lang.t('no_limit')
+                          : '${lang.t('pref_distance_up_to')} ${controller.distanceKm.value.toStringAsFixed(controller.distanceKm.value == controller.distanceKm.value.roundToDouble() ? 0 : 1)} km',
                       style: ThemeColor.bodyMedium.copyWith(
                         color: ThemeColor.textSecondaryColor,
                       ),
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingMedium),
-
-
                   SizedBox(
                     height: 200,
                     child: Stack(
@@ -526,7 +488,6 @@ class PreferencesPage extends GetView<PreferencesController> {
                       ],
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
                 ],
               ),
@@ -538,111 +499,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  Widget _buildAgeWheel({
-    required int initialAge,
-    required void Function(int age) onChanged,
-  }) {
-    final scrollController = FixedExtentScrollController(
-      initialItem: (initialAge - 18).clamp(0, 62),
-    );
-    final RxInt selected = initialAge.obs;
-
-    return ListWheelScrollView.useDelegate(
-      controller: scrollController,
-      itemExtent: 60,
-      diameterRatio: 1.5,
-      perspective: 0.003,
-      physics: FixedExtentScrollPhysics(),
-      onSelectedItemChanged: (index) {
-        selected.value = 18 + index;
-        onChanged(18 + index);
-      },
-      childDelegate: ListWheelChildBuilderDelegate(
-        childCount: 63,
-        builder: (context, index) {
-          return Obx(() {
-            final isSelected = index == selected.value - 18;
-            return Container(
-              height: 60,
-              alignment: Alignment.center,
-              child: Text(
-                '${18 + index}',
-                style: ThemeColor.bodyLarge.copyWith(
-                  color: isSelected
-                      ? ThemeColor.textDarkColor
-                      : ThemeColor.textSecondaryColor,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  fontSize: isSelected ? 20 : 16,
-                ),
-              ),
-            );
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _buildDistanceWheel({
-    required double initialDistance,
-    required void Function(double km) onChanged,
-  }) {
-    int initialIndex;
-    if (initialDistance < 1) {
-      initialIndex = ((initialDistance * 10).round() - 1).clamp(0, 8);
-    } else {
-      initialIndex = (9 + (initialDistance.toInt() - 1)).clamp(0, 308);
-    }
-
-    final scrollController = FixedExtentScrollController(
-      initialItem: initialIndex,
-    );
-    final RxInt selected = initialIndex.obs;
-
-    String labelForIndex(int index) {
-      if (index < 9) return '${(index + 1) * 100} m';
-      final km = index - 9 + 1;
-      return km >= 300 ? 'Máximo' : '$km km';
-    }
-
-    double kmForIndex(int index) {
-      if (index < 9) return ((index + 1) * 100) / 1000.0;
-      return (index - 9 + 1).toDouble();
-    }
-
-    return ListWheelScrollView.useDelegate(
-      controller: scrollController,
-      itemExtent: 60,
-      diameterRatio: 1.5,
-      perspective: 0.003,
-      physics: FixedExtentScrollPhysics(),
-      onSelectedItemChanged: (index) {
-        selected.value = index;
-        onChanged(kmForIndex(index));
-      },
-      childDelegate: ListWheelChildBuilderDelegate(
-        childCount: 309, 
-        builder: (context, index) {
-          return Obx(() {
-            final isSelected = index == selected.value;
-            return Container(
-              height: 60,
-              alignment: Alignment.center,
-              child: Text(
-                labelForIndex(index),
-                style: ThemeColor.bodyLarge.copyWith(
-                  color: isSelected
-                      ? ThemeColor.textDarkColor
-                      : ThemeColor.textSecondaryColor,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  fontSize: isSelected ? 20 : 16,
-                ),
-              ),
-            );
-          });
-        },
-      ),
-    );
-  }
+  // ─── PHOTOS ───────────────────────────────────────────────────────────────────
 
   Widget _buildPhotosStep() {
     return Column(
@@ -656,7 +513,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
                   Text(
-                    'Preséntate con fotos',
+                    lang.t('pref_photos_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -665,14 +522,13 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
-                    'Sube al menos 2 fotos que muestren tu esencia.\nLas mejores conexiones empiezan con buenas\nfotos.',
+                    lang.t('pref_photos_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondaryColor,
                       height: 1.4,
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
                   GridView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -687,26 +543,21 @@ class PreferencesPage extends GetView<PreferencesController> {
                       return Obx(() {
                         final photos = controller.selectedPhotos;
                         final isPicking = controller.isPickingPhotos.value;
-
                         if (index < photos.length) {
                           return _buildPhotoItem(photos[index], index);
                         }
-
                         if (isPicking) {
                           return _buildLoadingPhotoSlot();
                         }
-
                         return _buildAddPhotoButton();
                       });
                     },
                   ),
-
                   SizedBox(height: ThemeColor.paddingLarge),
-
                   Obx(
                     () => Center(
                       child: Text(
-                        '${controller.selectedPhotos.length}/${controller.maxPhotos} fotos',
+                        '${controller.selectedPhotos.length}/${controller.maxPhotos} ${lang.t('photos')}',
                         style: ThemeColor.bodyMedium.copyWith(
                           color: ThemeColor.textSecondaryColor,
                         ),
@@ -739,7 +590,8 @@ class PreferencesPage extends GetView<PreferencesController> {
           height: 28,
           child: CircularProgressIndicator(
             strokeWidth: 2.5,
-            valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+            valueColor:
+                AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
           ),
         ),
       ),
@@ -793,10 +645,13 @@ class PreferencesPage extends GetView<PreferencesController> {
           borderRadius: ThemeColor.mediumBorderRadius,
           border: Border.all(color: ThemeColor.dividerColor, width: 1),
         ),
-        child: Icon(Icons.add, color: ThemeColor.textSecondaryColor, size: 32),
+        child:
+            Icon(Icons.add, color: ThemeColor.textSecondaryColor, size: 32),
       ),
     );
   }
+
+  // ─── INTERESTS ────────────────────────────────────────────────────────────────
 
   Widget _buildInterestsStep() {
     return Column(
@@ -809,9 +664,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
                   Text(
-                    'Elige tus intereses\nprincipales',
+                    lang.t('interests_page_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -821,15 +675,13 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
-                    'Tus gustos nos ayudan a encontrar mejores\ncoincidencias.',
+                    lang.t('interests_page_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondaryColor,
                       height: 1.4,
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: ThemeColor.paddingLarge,
@@ -841,15 +693,12 @@ class PreferencesPage extends GetView<PreferencesController> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.search,
-                          color: ThemeColor.textSecondaryColor,
-                        ),
+                        Icon(Icons.search, color: ThemeColor.textSecondaryColor),
                         SizedBox(width: ThemeColor.paddingSmall),
                         Expanded(
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: 'Buscar intereses',
+                              hintText: lang.t('interests_search_hint'),
                               hintStyle: ThemeColor.bodyMedium.copyWith(
                                 color: ThemeColor.textSecondaryColor,
                               ),
@@ -861,22 +710,20 @@ class PreferencesPage extends GetView<PreferencesController> {
                       ],
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingLarge),
-
                   Obx(
                     () => Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Intereses populares',
+                          lang.t('interests_popular'),
                           style: ThemeColor.bodyMedium.copyWith(
                             color: ThemeColor.textDarkColor,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
-                          '${controller.selectedInterests.length}/${controller.maxInterests} seleccionados',
+                          '${controller.selectedInterests.length}/${controller.maxInterests} ${lang.t('bs_interests_selected')}',
                           style: ThemeColor.bodyMedium.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
@@ -884,14 +731,13 @@ class PreferencesPage extends GetView<PreferencesController> {
                       ],
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingMedium),
-
                   Obx(() {
                     if (controller.isLoadingInterests.value) {
                       return Center(
                         child: Padding(
-                          padding: EdgeInsets.all(ThemeColor.paddingExtraLarge),
+                          padding:
+                              EdgeInsets.all(ThemeColor.paddingExtraLarge),
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
                               ThemeColor.primaryColor,
@@ -900,24 +746,22 @@ class PreferencesPage extends GetView<PreferencesController> {
                         ),
                       );
                     }
-
                     if (controller.interests.isEmpty) {
                       return Center(
                         child: Text(
-                          'No hay intereses disponibles',
+                          lang.t('pref_no_interests'),
                           style: ThemeColor.bodyMedium.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
                         ),
                       );
                     }
-
                     return Wrap(
                       spacing: ThemeColor.paddingSmall,
                       runSpacing: ThemeColor.paddingSmall,
                       children: controller.interests.map((interest) {
-                        final isSelected = controller.selectedInterests
-                            .contains(interest.id);
+                        final isSelected =
+                            controller.selectedInterests.contains(interest.id);
                         return _buildInterestChip(
                           interest.name,
                           _getInterestIcon(interest.name),
@@ -927,28 +771,23 @@ class PreferencesPage extends GetView<PreferencesController> {
                       }).toList(),
                     );
                   }),
-
                   SizedBox(height: ThemeColor.paddingLarge),
-
                   Center(
                     child: Text(
-                      'si no se encuentran tus resultados escríbelos...',
+                      lang.t('interests_custom_hint'),
                       style: ThemeColor.bodySmall.copyWith(
                         color: ThemeColor.textSecondaryColor,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingMedium),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
                 ],
               ),
             ),
           ),
         ),
-
         _buildNavigationButtons(),
       ],
     );
@@ -1001,57 +840,47 @@ class PreferencesPage extends GetView<PreferencesController> {
       'Pintura': Icons.brush,
       'Fotografía': Icons.camera_alt,
       'Arte': Icons.palette,
-
       'Cine': Icons.movie,
       'Videojuegos': Icons.videogame_asset,
       'Anime': Icons.auto_awesome,
-
       'Música en vivo': Icons.mic,
       'Rock': Icons.music_note,
       'Reggaetón': Icons.headphones,
       'Conciertos': Icons.music_note,
       'Festivales': Icons.festival,
       'Bailar': Icons.music_note,
-
       'Gimnasio': Icons.fitness_center,
       'Correr': Icons.directions_run,
       'Yoga': Icons.self_improvement,
       'Meditación': Icons.spa,
       'Deportes': Icons.sports_soccer,
-
       'Senderismo': Icons.terrain,
       'Viajar': Icons.flight_takeoff,
       'Playa': Icons.beach_access,
-
       'Café': Icons.coffee,
       'Vino': Icons.wine_bar,
       'Cocinar': Icons.restaurant_menu,
       'Foodie': Icons.restaurant,
-
       'Lectura': Icons.menu_book,
       'Libros': Icons.book,
       'Psicología': Icons.psychology,
       'Programación': Icons.code,
-
       'Emprendimiento': Icons.rocket_launch,
       'Startups': Icons.trending_up,
       'Criptomonedas': Icons.currency_bitcoin,
       'Autos deportivos': Icons.directions_car,
       'Nómada digital': Icons.laptop_mac,
-
       'Perros': Icons.pets,
       'Gatos': Icons.pets,
-
       'Relación seria': Icons.favorite,
       'Algo casual': Icons.sentiment_satisfied_alt,
-
       'Escribir': Icons.edit,
       'Museos y galerías': Icons.museum,
     };
-
     return icons[interest] ?? Icons.favorite;
   }
 
+  // ─── QUALITIES ────────────────────────────────────────────────────────────────
 
   Widget _buildQualitiesStep() {
     return Column(
@@ -1064,10 +893,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   Text(
-                    'Lo que más aprecias en una\npersona',
+                    lang.t('qualities_page_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -1077,34 +904,29 @@ class PreferencesPage extends GetView<PreferencesController> {
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
-                    'Estas cualidades nos ayudan a crear mejores\ncoincidencias.',
+                    lang.t('qualities_page_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondaryColor,
                       height: 1.4,
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge),
-
-
                   Obx(
                     () => Text(
-                      'Lo que buscas en alguien        ${controller.selectedQualities.length}/${controller.maxQualities} seleccionados',
+                      '${lang.t('qualities_counter_label')}        ${controller.selectedQualities.length}/${controller.maxQualities} ${lang.t('bs_interests_selected')}',
                       style: ThemeColor.bodyMedium.copyWith(
                         color: ThemeColor.textDarkColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-
                   SizedBox(height: ThemeColor.paddingMedium),
-
-
                   Obx(() {
                     if (controller.isLoadingQualities.value) {
                       return Center(
                         child: Padding(
-                          padding: EdgeInsets.all(ThemeColor.paddingExtraLarge),
+                          padding:
+                              EdgeInsets.all(ThemeColor.paddingExtraLarge),
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
                               ThemeColor.primaryColor,
@@ -1113,24 +935,22 @@ class PreferencesPage extends GetView<PreferencesController> {
                         ),
                       );
                     }
-
                     if (controller.qualities.isEmpty) {
                       return Center(
                         child: Text(
-                          'No hay cualidades disponibles',
+                          lang.t('pref_no_qualities'),
                           style: ThemeColor.bodyMedium.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
                         ),
                       );
                     }
-
                     return Wrap(
                       spacing: ThemeColor.paddingSmall,
                       runSpacing: ThemeColor.paddingSmall,
                       children: controller.qualities.map((quality) {
-                        final isSelected = controller.selectedQualities
-                            .contains(quality.id);
+                        final isSelected =
+                            controller.selectedQualities.contains(quality.id);
                         return _buildQualityChip(
                           quality.name,
                           isSelected,
@@ -1139,20 +959,19 @@ class PreferencesPage extends GetView<PreferencesController> {
                       }).toList(),
                     );
                   }),
-
                   SizedBox(height: ThemeColor.paddingExtraLarge * 2),
                 ],
               ),
             ),
           ),
         ),
-
         _buildFinalButtons(),
       ],
     );
   }
 
-  Widget _buildQualityChip(String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildQualityChip(
+      String label, bool isSelected, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -1178,6 +997,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
+  // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 
   Widget _buildNavigationButtons() {
     return Container(
@@ -1201,7 +1021,6 @@ class PreferencesPage extends GetView<PreferencesController> {
           SizedBox(),
           Obx(() {
             final isSaving = controller.isLoading.value;
-
             return GestureDetector(
               onTap: isSaving ? null : controller.submitPreferences,
               child: Container(
@@ -1253,33 +1072,19 @@ class PreferencesPage extends GetView<PreferencesController> {
           : SizedBox(width: 56),
     );
   }
-  
 
   Widget _buildNextButton() {
     return Obx(() {
       final isSaving = controller.isLoading.value;
-
-
-      final isLastStep =
-          controller.currentStepIndex.value >=
+      final isLastStep = controller.currentStepIndex.value >=
           controller.availableSteps.length - 1;
 
       return GestureDetector(
         onTap: isSaving
             ? null
             : () {
-              
-                if (!controller.validateCurrentStep()) {
-                  return;
-                }
-
-
-                if (!isLastStep) {
-                  controller
-                      .submitPreferences(); 
-                } else {
-                  controller.submitPreferences();
-                }
+                if (!controller.validateCurrentStep()) return;
+                controller.submitPreferences();
               },
         child: Container(
           width: 56,
@@ -1297,7 +1102,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
                 )

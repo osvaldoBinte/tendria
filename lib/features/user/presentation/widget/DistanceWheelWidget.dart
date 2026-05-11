@@ -20,13 +20,13 @@ class _DistanceWheelWidgetState extends State<DistanceWheelWidget> {
 
   int _indexForDistance(double d) {
     if (d < 1) return ((d * 10).round() - 1).clamp(0, 8);
-    return (9 + (d.toInt() - 1)).clamp(0, 308);
+    return (9 + (d.toInt() - 1)).clamp(0, 1008);
   }
 
   String _labelForIndex(int index) {
     if (index < 9) return '${(index + 1) * 100} m';
     final km = index - 9 + 1;
-    return km >= 300 ? 'Máximo' : '$km km';
+    return km >= 1000 ? 'Máximo' : '$km km';
   }
 
   double _kmForIndex(int index) {
@@ -60,7 +60,7 @@ class _DistanceWheelWidgetState extends State<DistanceWheelWidget> {
         widget.onChanged(_kmForIndex(index));
       },
       childDelegate: ListWheelChildBuilderDelegate(
-        childCount: 309,
+        childCount: 1009,
         builder: (context, index) {
           final isSelected = index == _selected;
           return Container(

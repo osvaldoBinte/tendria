@@ -333,6 +333,49 @@ class LanguageController extends GetxController {
           'Necesitamos tu ubicación para mostrarte usuarios cercanos',
       'enable_location': 'Activar ubicación',
       'open_settings': 'Abrir configuración',
+      //PreferencesPage
+      'pref_gender_title': '¿Qué tipo de personas te\ngustaría conocer?',
+      'pref_gender_subtitle':
+          'Esta preferencia es flexible y editable más adelante.',
+      'pref_gender_hint':
+          'Te mostraremos perfiles compatibles con tus preferencias.',
+      'pref_connection_title': '¿Qué tipo de conexión\nquieres?',
+      'pref_connection_subtitle':
+          'Selecciona hasta dos opciones que vayan contigo.',
+      'pref_connection_hint':
+          'Mostraremos esta preferencia para mejorar tus coincidencias.',
+      'pref_age_title': '¿Qué rango de edad\nprefieres?',
+      'pref_age_subtitle': 'Puedes ajustar esto más tarde.',
+      'pref_distance_title': 'Distancia máxima',
+      'pref_distance_up_to': 'Hasta',
+      'pref_photos_title': 'Preséntate con fotos',
+      'pref_photos_subtitle':
+          'Sube al menos 2 fotos que muestren tu esencia.\nLas mejores conexiones empiezan con buenas fotos.',
+      'pref_selection_required': 'Selección requerida',
+      'pref_select_gender': 'Selecciona un tipo de persona',
+      'pref_select_connection': 'Selecciona al menos un tipo de conexión',
+      'pref_invalid_range': 'Rango inválido',
+      'pref_age_range_error':
+          'La edad mínima no puede ser mayor que la edad máxima',
+      'pref_photos_required': 'Fotos requeridas',
+      'pref_photos_min': 'Debes subir al menos 2 fotos',
+      'pref_interests_required': 'Intereses requeridos',
+      'pref_qualities_required': 'Cualidades requeridas',
+      'pref_select_quality': 'Debes seleccionar al menos una cualidad',
+      'pref_limit_reached': 'Límite alcanzado',
+
+      'pref_no_interests': 'No hay intereses disponibles',
+      'pref_no_qualities': 'No hay cualidades disponibles',
+
+      'pref_photos_max': 'Puedes subir máximo',
+      'pref_photos_partial': 'Solo se agregaron',
+      'pref_photos_pick_error': 'No se pudo seleccionar la foto',
+      'pref_photo_take_error': 'No se pudo tomar la foto',
+      'pref_add_photos': 'Agregar fotos',
+      'pref_gallery_multiple': 'Galería (selección múltiple)',
+      'pref_gallery_multiple_hint': 'Selecciona varias fotos de jalón',
+      'pref_take_photo': 'Tomar foto',
+      'pref_take_photo_hint': 'Captura una nueva foto',
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -617,6 +660,46 @@ class LanguageController extends GetxController {
           'We need your location to show you nearby users',
       'enable_location': 'Enable location',
       'open_settings': 'Open settings',
+      //PreferencesPage
+      'pref_gender_title': 'What kind of people would\nyou like to meet?',
+      'pref_gender_subtitle': 'This preference is flexible and editable later.',
+      'pref_gender_hint':
+          'We\'ll show you profiles compatible with your preferences.',
+      'pref_connection_title': 'What kind of connection\ndo you want?',
+      'pref_connection_subtitle': 'Select up to two options that suit you.',
+      'pref_connection_hint':
+          'We\'ll show this preference to improve your matches.',
+      'pref_age_title': 'What age range\ndo you prefer?',
+      'pref_age_subtitle': 'You can adjust this later.',
+      'pref_distance_title': 'Max distance',
+      'pref_distance_up_to': 'Up to',
+      'pref_photos_title': 'Introduce yourself with photos',
+      'pref_photos_subtitle':
+          'Upload at least 2 photos that show your essence.\nThe best connections start with great photos.',
+      'pref_selection_required': 'Selection required',
+      'pref_select_gender': 'Select a type of person',
+      'pref_select_connection': 'Select at least one connection type',
+      'pref_invalid_range': 'Invalid range',
+      'pref_age_range_error': 'Minimum age cannot be greater than maximum age',
+      'pref_photos_required': 'Photos required',
+      'pref_photos_min': 'You must upload at least 2 photos',
+      'pref_interests_required': 'Interests required',
+      'pref_qualities_required': 'Qualities required',
+      'pref_select_quality': 'You must select at least one quality',
+      'pref_limit_reached': 'Limit reached',
+
+      'pref_no_interests': 'No interests available',
+      'pref_no_qualities': 'No qualities available',
+
+      'pref_photos_max': 'You can upload up to',
+      'pref_photos_partial': 'Only',
+      'pref_photos_pick_error': 'Could not select photo',
+      'pref_photo_take_error': 'Could not take photo',
+      'pref_add_photos': 'Add photos',
+      'pref_gallery_multiple': 'Gallery (multiple selection)',
+      'pref_gallery_multiple_hint': 'Select several photos at once',
+      'pref_take_photo': 'Take photo',
+      'pref_take_photo_hint': 'Capture a new photo',
     },
   };
 }

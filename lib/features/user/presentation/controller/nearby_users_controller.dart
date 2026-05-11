@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
@@ -13,17 +14,21 @@ import 'package:tendria/features/like/presentation/controller/liked_by_users_con
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/stories/presentation/page/target_user_story_modal.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
+import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class NearbyUsersController extends GetxController with WidgetsBindingObserver {
   final FetchNearbyUsersUsecase fetchNearbyUsersUsecase;
   final ToggleLikeUsecase toggleLikeUsecase;
+  final UpdateLocationUsecase updateLocationUsecase;  
 
   NearbyUsersController({
     required this.fetchNearbyUsersUsecase,
     required this.toggleLikeUsecase,
+    required this.updateLocationUsecase,
   });
  
   LanguageController get _l => Get.find<LanguageController>();
@@ -94,24 +99,65 @@ Future<void> _checkPermissionOnResume() async {
   final hasPermission = permission == LocationPermission.whileInUse ||
       permission == LocationPermission.always;
 
-  if (!hasPermission) {
-    // permiso fue revocado
+  if (!hasPermission) { 
     locationPermissionDenied.value = true;
     nearbyUsers.value = [];
     currentRadarUsers.value = [];
     currentProfile.value = null;
-  } else if (locationPermissionDenied.value) {
-    // tenía denegado y ahora fue concedido
+  } else if (locationPermissionDenied.value) { 
     locationPermissionDenied.value = false;
+        await _updateUserLocation();  
+
     currentPage.value = 1;
     await loadNearbyUsers();
   }
-  // si tenía permiso y sigue teniéndolo, no hacer nada
+ }
+
+Future<void> _updateUserLocation() async {
+  try {
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.low,
+      timeLimit: const Duration(seconds: 10),
+    );
+
+    final placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    if (placemarks.isNotEmpty) {
+      final city = _resolveCity(placemarks.first);
+      if (city.isNotEmpty) {
+        await updateLocationUsecase.execute(
+          UpdateLocationEntity(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            city: city,
+          ),
+        );
+        print('✅ Ubicación actualizada desde NearbyUsersController: $city');
+      }
+    }
+  } catch (e) {
+    print('⚠️ Error actualizando ubicación en resume: $e');
+ 
+  }
 }
 
+String _resolveCity(Placemark place) {
+  final subAdmin = place.subAdministrativeArea?.trim() ?? '';
+  final locality = place.locality?.trim() ?? '';
+
+  if (subAdmin.isNotEmpty && (subAdmin.contains(' ') || subAdmin.length > 6)) {
+    return subAdmin;
+  }
+  if (locality.isNotEmpty && (locality.contains(' ') || locality.length > 6)) {
+    return locality;
+  }
+  return subAdmin.isNotEmpty ? subAdmin : locality;
+}
  
-Future<bool> checkLocationPermission() async {
-  // ✅ verificar servicio habilitado
+Future<bool> checkLocationPermission() async { 
   final serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     print('📍 Servicio de ubicación deshabilitado');
@@ -144,13 +190,13 @@ Future<void> retryAfterPermission() async {
   }
 }
 Future<void> openAppSettings() async {
-  await openAppSettings(); // de permission_handler
+  await openAppSettings();  
 }
   Future<void> loadNearbyUsers() async {
   try {
     isLoading.value = true;
     noMoreUsers.value = false ;
-        locationPermissionDenied.value = false; // reset
+        locationPermissionDenied.value = false; 
 
      final hasPermission = await  checkLocationPermission();
     if (!hasPermission) {

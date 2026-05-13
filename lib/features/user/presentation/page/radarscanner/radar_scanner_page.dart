@@ -58,6 +58,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     )..repeat();
 
     tutorialCtrl.onScrollToTarget = _scrollToCurrentTarget;
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+    tutorialCtrl.notifyPageReady();
+  });
   }
 
   @override
@@ -87,10 +90,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       );
     });
   }
-
-  // ─── ESTADOS ────────────────────────────────────────────────────────────────
-
-  /// Estado: permiso de ubicación denegado
+ 
   Widget _buildLocationPermissionState() {
     return Center(
       child: Padding(
@@ -161,8 +161,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
-
-  /// Estado: sin más usuarios / lista vacía
+ 
   Widget _buildNoMoreUsersState() {
     return Center(
       child: Padding(
@@ -200,8 +199,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-
-            // Slider de distancia (reutilizado aquí también)
+ 
             Obx(() {
               final profileCtrl = Get.find<ProfileController>();
               final km =
@@ -272,8 +270,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
-
-  /// Estado principal: radar con usuarios
+ 
   Widget _buildMainContent() {
     return Stack(
       children: [
@@ -442,8 +439,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             ),
           ),
         ),
-
-        // Tutorial overlay — solo cuando está visible
+ 
         Obx(
           () => tutorialCtrl.isVisible.value
               ? const TutorialOverlay()
@@ -452,25 +448,21 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ],
     );
   }
-
-  // ─── BUILD PRINCIPAL ────────────────────────────────────────────────────────
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ThemeColor.backgroundColor,
-      body: Obx(() {
-        // 1. Sin permiso de ubicación
+      body: Obx(() { 
         if (controller.locationPermissionDenied.value) {
           return _buildLocationPermissionState();
         }
-
-        // 2. Sin más usuarios / lista vacía
+ 
         if (controller.noMoreUsers.value ||
             (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
           return _buildNoMoreUsersState();
         }
-
-        // 3. Estado normal con radar
+ 
         return _buildMainContent();
       }),
     );
@@ -722,7 +714,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   }
 }
 
-// ─── DISTANCE SLIDER ──────────────────────────────────────────────────────────
+ 
 
 class _DistanceSlider extends StatefulWidget {
   final double initialKm;
@@ -835,8 +827,7 @@ class _DistanceSliderState extends State<_DistanceSlider> {
     );
   }
 }
-
-// ─── PULSING TOUCH ICON ───────────────────────────────────────────────────────
+ 
 
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
@@ -906,8 +897,7 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
     );
   }
 }
-
-// ─── PAINTERS ─────────────────────────────────────────────────────────────────
+ 
 
 class GridPainter extends CustomPainter {
   @override

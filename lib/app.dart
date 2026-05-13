@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
 import 'package:tendria/common/controller/tutorial_controller.dart';
 import 'package:tendria/common/routes/router.dart';
 import 'package:tendria/common/services/auth_service.dart';
@@ -254,6 +255,7 @@ class App extends StatelessWidget {
         Get.lazyPut(() => LanguageController(), fenix: true);
         Get.put(TranslationService());
         Get.lazyPut(() => TutorialController(), fenix: true);
+        Get.lazyPut(()=> ProfileTutorialController(), fenix: true);
         Get.lazyPut(
           () => PurchaseController(
             getPurchasesUsecase: Get.find(),

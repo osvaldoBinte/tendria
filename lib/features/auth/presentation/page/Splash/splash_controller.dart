@@ -101,19 +101,15 @@ String _resolveCity(Placemark place) {
 
   final subAdmin = place.subAdministrativeArea?.trim() ?? '';
   final locality = place.locality?.trim() ?? '';
-
-  // Preferir subAdministrativeArea si parece una ciudad real
-  // (más de una palabra o más de 6 chars = más descriptivo)
+ 
   if (subAdmin.isNotEmpty && (subAdmin.contains(' ') || subAdmin.length > 6)) {
     return subAdmin;
   }
-
-  // Si locality parece la ciudad completa úsalo
+ 
   if (locality.isNotEmpty && (locality.contains(' ') || locality.length > 6)) {
     return locality;
   }
-
-  // Último fallback: lo que haya
+ 
   return subAdmin.isNotEmpty ? subAdmin : locality;
 }
   

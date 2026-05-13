@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tendria/common/constants/constants.dart';
-
-/// Posición relativa de un tooltip de tutorial
+import 'package:tendria/common/settings/language_controller.dart';
+ 
 enum TutorialAnchor { top, bottom, left, right }
-
-/// Modelo de cada paso del tutorial
+ 
 class TutorialStep {
   final String message;
   final GlobalKey? targetKey;
@@ -21,82 +20,73 @@ class TutorialStep {
   });
 }
 
-class TutorialController extends GetxController {
-  // ─── Estado ───────────────────────────────────────────────────────────────
+class TutorialController extends GetxController { 
   final RxBool isVisible      = false.obs;
   final RxInt  currentStep    = 0.obs;
   final RxBool isAnimatingOut = false.obs;
-
-  // ─── Callback de scroll registrado por la pantalla ────────────────────────
+ 
   VoidCallback? onScrollToTarget;
-
-  // ─── Claves globales para posicionar los tooltips ─────────────────────────
+ 
   final GlobalKey distanceSliderKey = GlobalKey();
   final GlobalKey detectedPointsKey = GlobalKey();
   final GlobalKey searchButtonKey   = GlobalKey();
   final GlobalKey profileDotKey     = GlobalKey();
-
-  // ─── Control interno para esperar usuarios ────────────────────────────────
+ 
   bool _pendingShow = false;
   bool _usersReady  = false;
-
-  // ─── Pasos del tutorial ───────────────────────────────────────────────────
+ 
   late final List<TutorialStep> steps;
-
   @override
-  void onInit() {
-    super.onInit();
+void onInit() {
+  super.onInit();
+  final l = Get.find<LanguageController>();
+  steps = [
+    TutorialStep(
+      message: l.t('tutorial_radar_slider'),
+      targetKey: distanceSliderKey,
+      anchor: TutorialAnchor.bottom,
+      icon: Icons.radar,
+    ),
+    TutorialStep(
+      message: l.t('tutorial_radar_points'),
+      targetKey: detectedPointsKey,
+      anchor: TutorialAnchor.top,
+      icon: Icons.people_alt_rounded,
+    ),
+    TutorialStep(
+      message: l.t('tutorial_radar_search'),
+      targetKey: searchButtonKey,
+      anchor: TutorialAnchor.top,
+      icon: Icons.touch_app_rounded,
+    ),
+    TutorialStep(
+      message: l.t('tutorial_radar_profile'),
+      targetKey: profileDotKey,
+      anchor: TutorialAnchor.bottom,
+      icon: Icons.person_search_rounded,
+    ),
+  ];
+}
+ 
+void notifyPageReady() {
+  _checkAndShowTutorial();
+}
+Future<void> _checkAndShowTutorial() async {
+  final prefs = await SharedPreferences.getInstance();
+  final seen  = prefs.getBool(AppConstants.tutorialKey) ?? false;
+  if (seen) return;
+ 
+  final startSeen = prefs.getBool('start_tutorial_seen') ?? false;
+  if (!startSeen) return;
 
-    steps = [
-      TutorialStep(
-        message: 'Ajusta el radio de búsqueda para encontrar personas más cerca o más lejos de ti',
-        targetKey: distanceSliderKey,
-        anchor: TutorialAnchor.bottom,
-        icon: Icons.radar,
-      ),
-      TutorialStep(
-        message:
-            'Te damos un grupo pequeño de perfiles cercanos para que puedas ver a cada persona',
-        targetKey: detectedPointsKey,
-        anchor: TutorialAnchor.top,
-        icon: Icons.people_alt_rounded,
-      ),
-      TutorialStep(
-        message: 'Vuelve a pulsar para ver más',
-        targetKey: searchButtonKey,
-        anchor: TutorialAnchor.top,
-        icon: Icons.touch_app_rounded,
-      ),
-      TutorialStep(
-        message: 'Pulsa para ver los perfiles',
-        targetKey: profileDotKey,
-        anchor: TutorialAnchor.bottom,
-        icon: Icons.person_search_rounded,
-      ),
-    ];
-
-    _checkAndShowTutorial();
+  await Future.delayed(const Duration(milliseconds: 800));
+  if (_usersReady) {
+    showTutorial();
+  } else {
+    _pendingShow = true;
   }
-
-  // ─── Lógica ───────────────────────────────────────────────────────────────
-
-  Future<void> _checkAndShowTutorial() async {
-    final prefs = await SharedPreferences.getInstance();
-    final seen  = prefs.getBool(AppConstants.tutorialKey) ?? false;
-    if (!seen) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (_usersReady) {
-        // Usuarios ya cargaron antes de que terminara el delay
-        showTutorial();
-      } else {
-        // Marcar pendiente — se lanzará cuando lleguen los usuarios
-        _pendingShow = true;
-      }
-    }
-  }
-
-  /// Llamar desde la pantalla cuando los usuarios ya están renderizados en pantalla.
-  /// Usa addPostFrameCallback para garantizar que el layout esté completo.
+}
+ 
   void notifyUsersReady() {
     _usersReady = true;
     if (_pendingShow) {
@@ -111,8 +101,7 @@ class TutorialController extends GetxController {
     currentStep.value    = 0;
     isAnimatingOut.value = false;
     isVisible.value      = true;
-
-    // Scroll al primer target al mostrar el tutorial
+ 
     Future.delayed(const Duration(milliseconds: 300), () {
       onScrollToTarget?.call();
     });
@@ -122,9 +111,7 @@ class TutorialController extends GetxController {
     if (currentStep.value < steps.length - 1) {
       final nextIndex    = currentStep.value + 1;
       final nextStepData = steps[nextIndex];
-
-      // Guard: si el siguiente paso apunta al profileDotKey y no existe,
-      // terminar el tutorial en lugar de crashear
+  
       if (nextStepData.targetKey == profileDotKey) {
         final ctx = profileDotKey.currentContext;
         if (ctx == null) {
@@ -142,8 +129,7 @@ class TutorialController extends GetxController {
       Future.delayed(const Duration(milliseconds: 250), () {
         currentStep.value++;
         isAnimatingOut.value = false;
-
-        // Scroll al nuevo target después de cambiar de paso
+ 
         onScrollToTarget?.call();
       });
     } else {

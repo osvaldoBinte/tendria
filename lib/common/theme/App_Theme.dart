@@ -673,7 +673,8 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
       ),
     );
   }
-static Widget createMainScaffold({
+
+  static Widget createMainScaffold({
   required Widget body,
   required int currentIndex,
   required Function(int) onNavigationTap,
@@ -681,20 +682,22 @@ static Widget createMainScaffold({
   List<String>? labels,
   Color? backgroundColor,
   Color? bottomNavBackgroundColor,
-  Widget? floatingActionButton,           // ← nuevo
-  FloatingActionButtonLocation? floatingActionButtonLocation, // ← nuevo
+  Widget? floatingActionButton,
+  FloatingActionButtonLocation? floatingActionButtonLocation,
+  List<Key?>? navKeys,                 // ← nuevo
 }) {
   return Scaffold(
     backgroundColor: backgroundColor ?? bottomNavBackgroundColor,
     body: body,
-    floatingActionButton: floatingActionButton,          // ← nuevo
-    floatingActionButtonLocation: floatingActionButtonLocation, // ← nuevo
+    floatingActionButton: floatingActionButton,
+    floatingActionButtonLocation: floatingActionButtonLocation,
     bottomNavigationBar: createBottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onNavigationTap,
       iconPaths: iconPaths,
       labels: labels,
       backgroundColor: bottomNavBackgroundColor,
+      navKeys: navKeys,                // ← pasar
     ),
   );
 }
@@ -703,10 +706,11 @@ static Widget createBottomNavigationBar({
   required int currentIndex,
   required Function(int) onTap,
   required List<String> iconPaths,
-  List<String>? labels, // ← nuevo
+  List<String>? labels,
   Color? backgroundColor,
   Color? selectedItemColor,
   Color? unselectedItemColor,
+  List<Key?>? navKeys,                 // ← nuevo
 }) {
   return Container(
     decoration: BoxDecoration(
@@ -721,40 +725,52 @@ static Widget createBottomNavigationBar({
       ],
     ),
     child: SafeArea(
-      child: Container(
+      child: SizedBox(
         height: 70,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(iconPaths.length, (index) {
             final isSelected = currentIndex == index;
-            return GestureDetector(
-              onTap: () => onTap(index),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      iconPaths[index],
-                      width: 26,
-                      height: 26,
-                      fit: BoxFit.contain,
-                      color: isSelected ? ThemeColor.textPrimaryColor : null,
-                    ),
-                    if (labels != null && index < labels.length) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        labels[index],
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected
-                              ? ThemeColor.textPrimaryColor
-                              : ThemeColor.textSecondaryColor,
-                        ),
+            return KeyedSubtree(
+              key: navKeys != null && index < navKeys.length
+                  ? navKeys[index]
+                  : null,
+              child: GestureDetector(
+                onTap: () => onTap(index),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 16,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        iconPaths[index],
+                        width: 26,
+                        height: 26,
+                        fit: BoxFit.contain,
+                        color: isSelected
+                            ? ThemeColor.textPrimaryColor
+                            : null,
                       ),
+                      if (labels != null && index < labels.length) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          labels[index],
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? ThemeColor.textPrimaryColor
+                                : ThemeColor.textSecondaryColor,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             );
@@ -764,7 +780,6 @@ static Widget createBottomNavigationBar({
     ),
   );
 }
-
   /// Widget reutilizable para campos de texto con label
   /// Soporta email, password, text normal, etc.
   static Widget createLabeledTextField({

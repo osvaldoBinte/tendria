@@ -6,4 +6,8 @@ class AppConstants {
    static   const String tutorialKey = 'has_seen_tutdorial';
 
   
+  static const String startTutorialKey = 'start_tutorial_seen';
+    static const String profileTutorialKey = 'profile_tutorial_seen';
+  static const String updateProfileTutorialKey = 'update_profile_tutorial_seend';
+
 }

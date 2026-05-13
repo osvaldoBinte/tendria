@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
+import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
@@ -13,19 +15,36 @@ import 'package:tendria/features/user/presentation/controller/update_profile_con
 import 'package:tendria/features/user/presentation/widget/interests_section_widget.dart';
 import 'package:tendria/features/user/presentation/widget/qualities_section_widget.dart';
 
-class ProfilePage extends GetView<ProfileController> {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+   ProfileController controller= Get.find<ProfileController>();
+    ProfileTutorialController tutorialCtrl = Get.find<ProfileTutorialController>();
 
   UpdateProfileController get _updater => Get.find<UpdateProfileController>();
   BalanceController get _balanceController => Get.find<BalanceController>();
-
   LanguageController get _l => Get.find<LanguageController>();
 
   @override
+  void initState() {
+    super.initState(); 
+ 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tutorialCtrl.notifyPageReady();
+    });
+  }
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ThemeColor.backgroundColorfondo,
-      body: SafeArea(
+  return Scaffold(
+    backgroundColor: ThemeColor.backgroundColorfondo,
+    body: Stack(                          // ← Stack
+      children: [
+       SafeArea(
         child: Obx(() {
           if (controller.isLoading.value &&
               controller.userEntity.value == null) {
@@ -63,9 +82,15 @@ class ProfilePage extends GetView<ProfileController> {
           );
         }),
       ),
-    );
-  }
-
+        Obx(
+          () => tutorialCtrl.isVisible.value
+              ? const ProfileTutorialOverlay()
+              : const SizedBox.shrink(),
+        ),
+      ],
+    ),
+  );
+}
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
@@ -87,32 +112,29 @@ class ProfilePage extends GetView<ProfileController> {
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.person_off,
-                      color: ThemeColor.textDarkColor,
-                    ),
-                    onPressed: controller.onViewBlockedUsers,
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.notifications_none,
-                      color: ThemeColor.textDarkColor,
-                    ),
-                    onPressed: controller.onViewNotifications,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.edit, color: ThemeColor.textDarkColor),
-                    onPressed: controller.onHelpTap,
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.settings_outlined,
-                      color: ThemeColor.textDarkColor,
-                    ),
-                    onPressed: controller.onSettingsTap,
-                  ),
+                children: [ 
+IconButton(
+  key: tutorialCtrl.blockedUsersKey,   
+  icon: Icon(Icons.person_off, color: ThemeColor.textDarkColor),
+  onPressed: controller.onViewBlockedUsers,
+), 
+IconButton(
+  key: tutorialCtrl.notificationsKey,   
+  icon: Icon(Icons.notifications_none, color: ThemeColor.textDarkColor),
+  onPressed: controller.onViewNotifications,
+),
+// Editar perfil
+IconButton(
+  key: tutorialCtrl.editProfileKey,   
+  icon: Icon(Icons.edit, color: ThemeColor.textDarkColor),
+  onPressed: controller.onHelpTap,
+),
+// Settings
+IconButton(
+  key: tutorialCtrl.settingsKey,       
+  icon: Icon(Icons.settings_outlined, color: ThemeColor.textDarkColor),
+  onPressed: controller.onSettingsTap,
+),
                 ],
               ),
             ],
@@ -141,7 +163,7 @@ class ProfilePage extends GetView<ProfileController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (status.isNotEmpty)
-                          GestureDetector(
+                          GestureDetector(  key: tutorialCtrl.statusKey,
                             onTap: () => _updater.showEditStatus(status),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 6),
@@ -245,7 +267,8 @@ class ProfilePage extends GetView<ProfileController> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,
                         ),
-                        InkWell(
+                        InkWell(  key: tutorialCtrl.creditsKey,  
+
                           onTap: () {
                             Get.offAllNamed(RoutesNames.purchasePage);
                           },

@@ -376,6 +376,44 @@ class LanguageController extends GetxController {
       'pref_gallery_multiple_hint': 'Selecciona varias fotos de jalón',
       'pref_take_photo': 'Tomar foto',
       'pref_take_photo_hint': 'Captura una nueva foto',
+
+      // ── Tutoriales ─────────────────────────────────
+      'tutorial_start_profile':
+          'Aquí puedes ver y editar la información de tu perfil',
+      'tutorial_start_radar':
+          'Radar: encuentra personas cercanas a tu ubicación',
+      'tutorial_start_match':
+          'Match: ve las personas que quieren conectar contigo',
+      'tutorial_start_chat': 'Chat: sigue la conversación con tus conexiones',
+      'tutorial_start_panic':
+          'Botón de pánico: en caso de emergencia, úsalo para pedir ayuda inmediata',
+
+      'tutorial_profile_blocked':
+          'Aquí puedes ver y gestionar los usuarios que has bloqueado',
+      'tutorial_profile_notifications':
+          'Gestiona tus notificaciones push y preferencias de alertas',
+      'tutorial_profile_edit':
+          'Edita tu perfil: nombre, edad, preferencias y más',
+      'tutorial_profile_settings':
+          'Ajustes de la app y opción para cerrar sesión',
+      'tutorial_profile_credits':
+          'Toca aquí para agregar más créditos a tu cuenta',
+      'tutorial_profile_status':
+          'Toca para editar tu mensaje de estado visible en el radar',
+
+      'tutorial_update_age':
+          'Edita el rango de edad de las personas con quienes prefieres conectar',
+      'tutorial_update_distance':
+          'Ajusta la distancia máxima de las personas con las que prefieres conectar',
+
+      'tutorial_radar_slider':
+          'Ajusta el radio de búsqueda para encontrar personas más cerca o más lejos de ti',
+      'tutorial_radar_points':
+          'Te damos un grupo pequeño de perfiles cercanos para que puedas ver a cada persona',
+      'tutorial_radar_search': 'Vuelve a pulsar para ver más',
+      'tutorial_radar_profile': 'Pulsa para ver los perfiles',
+      'tutorial_skip': 'Omitir',
+
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -700,6 +738,41 @@ class LanguageController extends GetxController {
       'pref_gallery_multiple_hint': 'Select several photos at once',
       'pref_take_photo': 'Take photo',
       'pref_take_photo_hint': 'Capture a new photo',
+      // ── Tutoriales ─────────────────────────────────
+      'tutorial_start_profile':
+          'Here you can view and edit your profile information',
+      'tutorial_start_radar': 'Radar: find people near your location',
+      'tutorial_start_match': 'Match: see people who want to connect with you',
+      'tutorial_start_chat':
+          'Chat: continue conversations with your connections',
+      'tutorial_start_panic':
+          'Panic button: in case of emergency, use it to get immediate help',
+
+      'tutorial_profile_blocked':
+          'Here you can view and manage users you have blocked',
+      'tutorial_profile_notifications':
+          'Manage your push notifications and alert preferences',
+      'tutorial_profile_edit':
+          'Edit your profile: name, age, preferences and more',
+      'tutorial_profile_settings': 'App settings and option to log out',
+      'tutorial_profile_credits':
+          'Tap here to add more credits to your account',
+      'tutorial_profile_status':
+          'Tap to edit your status message visible on the radar',
+
+      'tutorial_update_age':
+          'Edit the age range of people you prefer to connect with',
+      'tutorial_update_distance':
+          'Adjust the maximum distance of people you prefer to connect with',
+
+      'tutorial_radar_slider':
+          'Adjust the search radius to find people closer or farther from you',
+      'tutorial_radar_points':
+          'We give you a small group of nearby profiles so you can see each person',
+      'tutorial_radar_search': 'Tap again to see more',
+      'tutorial_radar_profile': 'Tap to view profiles',
+      'tutorial_skip': 'Skip',
+
     },
   };
 }

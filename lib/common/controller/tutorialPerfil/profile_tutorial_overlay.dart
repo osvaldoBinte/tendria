@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
-import 'tutorial_controller.dart';
+import 'profile_tutorial_controller.dart';
 
-class TutorialOverlay extends StatelessWidget {
-  const TutorialOverlay({Key? key}) : super(key: key);
+class ProfileTutorialOverlay extends StatelessWidget {
+  const ProfileTutorialOverlay({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = Get.find<TutorialController>();
+    final ctrl = Get.find<ProfileTutorialController>();
 
     return Obx(() {
       if (!ctrl.isVisible.value) return const SizedBox.shrink();
@@ -58,8 +58,7 @@ class TutorialOverlay extends StatelessWidget {
             child: GestureDetector(
               onTap: ctrl.skipTutorial,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.45),
                   borderRadius: BorderRadius.circular(20),
@@ -105,41 +104,36 @@ class TutorialOverlay extends StatelessWidget {
       );
     });
   }
-  
 
   Widget _buildTooltip(
     BuildContext context,
-    TutorialController ctrl,
-    TutorialStep step,
+    ProfileTutorialController ctrl,
+    ProfileTutorialStep step,
     Rect? targetRect,
   ) {
-    final screenH   = MediaQuery.of(context).size.height;
-    final screenW   = MediaQuery.of(context).size.width;
-    final topPad    = MediaQuery.of(context).padding.top;
- 
-    const double iconSize     = 52.0;   
-    const double iconBoxH     = 64.0;    
-    const double bubbleH      = 72.0;    
-    const double totalH       = iconBoxH + bubbleH;
+    final screenH  = MediaQuery.of(context).size.height;
+    final screenW  = MediaQuery.of(context).size.width;
+    final topPad   = MediaQuery.of(context).padding.top;
+
+    const double iconSize      = 52.0;
+    const double iconBoxH      = 64.0;
+    const double bubbleH       = 72.0;
+    const double totalH        = iconBoxH + bubbleH;
     const double horizontalPad = 24.0;
- 
 
     double top;
-    bool   iconAbove;  
-                    
+    bool   iconAbove;
 
     if (targetRect != null) {
       switch (step.anchor) {
-        case TutorialAnchor.bottom: 
+        case TutorialAnchor.bottom:
           iconAbove = false;
           top = targetRect.top - totalH - 12;
           break;
-
-        case TutorialAnchor.top: 
+        case TutorialAnchor.top:
           iconAbove = true;
           top = targetRect.bottom + 12;
           break;
-
         default:
           iconAbove = true;
           top = screenH / 2 - totalH / 2;
@@ -148,13 +142,13 @@ class TutorialOverlay extends StatelessWidget {
       iconAbove = true;
       top = screenH / 2 - totalH / 2;
     }
- 
+
     top = top.clamp(topPad + 60.0, screenH - totalH - 80.0);
- 
+
     double centerX = targetRect != null
         ? (targetRect.left + targetRect.right) / 2
         : screenW / 2;
- 
+
     const double bubbleMaxW = 280.0;
     double bubbleLeft = (centerX - bubbleMaxW / 2)
         .clamp(horizontalPad, screenW - bubbleMaxW - horizontalPad);
@@ -165,26 +159,20 @@ class TutorialOverlay extends StatelessWidget {
         duration: const Duration(milliseconds: 220),
         child: Stack(
           children: [
-             Positioned(
-              top: iconAbove
-                  ? top                      
-                  : top + bubbleH,          
-              
+            Positioned(
+              top: iconAbove ? top : top + bubbleH,
               left: (centerX - iconSize / 2)
                   .clamp(horizontalPad, screenW - iconSize - horizontalPad),
               child: GestureDetector(
                 onTap: ctrl.nextStep,
                 child: _BouncingClickIcon(
-                  size: iconSize, 
+                  size: iconSize,
                   flipVertical: !iconAbove,
                 ),
               ),
             ),
- 
             Positioned(
-              top: iconAbove
-                  ? top + iconBoxH           
-                  : top,                      
+              top: iconAbove ? top + iconBoxH : top,
               left: bubbleLeft,
               width: bubbleMaxW,
               child: GestureDetector(
@@ -207,10 +195,7 @@ class TutorialOverlay extends StatelessWidget {
 class _BouncingClickIcon extends StatefulWidget {
   final double size;
   final bool   flipVertical;
-  const _BouncingClickIcon({
-    required this.size,
-    this.flipVertical = false,
-  });
+  const _BouncingClickIcon({required this.size, this.flipVertical = false});
 
   @override
   State<_BouncingClickIcon> createState() => _BouncingClickIconState();
@@ -228,31 +213,27 @@ class _BouncingClickIconState extends State<_BouncingClickIcon>
       vsync: this,
       duration: const Duration(milliseconds: 700),
     )..repeat(reverse: true);
-
     _bounce = Tween<double>(begin: 0.0, end: 10.0).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
     );
   }
 
   @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+  void dispose() { _ctrl.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _bounce,
       builder: (_, __) {
-         final dy = widget.flipVertical ? -_bounce.value : _bounce.value;
+        final dy = widget.flipVertical ? -_bounce.value : _bounce.value;
         return Transform.translate(
           offset: Offset(0, dy),
           child: Transform.scale(
             scaleY: widget.flipVertical ? -1.0 : 1.0,
             child: Image.asset(
               'assets/clik.png',
-              width:  widget.size,
+              width: widget.size,
               height: widget.size,
               fit: BoxFit.contain,
             ),
@@ -262,7 +243,6 @@ class _BouncingClickIconState extends State<_BouncingClickIcon>
     );
   }
 }
- 
 
 class _DialogBubble extends StatelessWidget {
   final String message;
@@ -282,10 +262,7 @@ class _DialogBubble extends StatelessWidget {
       decoration: BoxDecoration(
         color: ThemeColor.backgroundColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: accentColor.withOpacity(0.5),
-          width: 1.5,
-        ),
+        border: Border.all(color: accentColor.withOpacity(0.5), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.28),

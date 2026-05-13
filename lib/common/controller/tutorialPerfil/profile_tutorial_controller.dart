@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tendria/common/constants/constants.dart';
+import 'package:tendria/common/controller/startTutorial/start_tutorial_controller.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 
 enum TutorialAnchor { top, bottom, left, right }
@@ -42,22 +43,22 @@ void onInit() {
     ProfileTutorialStep(
       message: l.t('tutorial_profile_blocked'),
       targetKey: blockedUsersKey,
-      anchor: TutorialAnchor.bottom,
+      anchor: TutorialAnchor.top,
     ),
     ProfileTutorialStep(
       message: l.t('tutorial_profile_notifications'),
       targetKey: notificationsKey,
-      anchor: TutorialAnchor.bottom,
+      anchor: TutorialAnchor.top,
     ),
     ProfileTutorialStep(
       message: l.t('tutorial_profile_edit'),
       targetKey: editProfileKey,
-      anchor: TutorialAnchor.bottom,
+      anchor: TutorialAnchor.top,
     ),
     ProfileTutorialStep(
       message: l.t('tutorial_profile_settings'),
       targetKey: settingsKey,
-      anchor: TutorialAnchor.bottom,
+      anchor: TutorialAnchor.top,
     ),
     ProfileTutorialStep(
       message: l.t('tutorial_profile_credits'),
@@ -67,29 +68,31 @@ void onInit() {
     ProfileTutorialStep(
       message: l.t('tutorial_profile_status'),
       targetKey: statusKey,
-      anchor: TutorialAnchor.bottom,
+      anchor: TutorialAnchor.top,
     ),
   ];
+   ever(Get.find<StartTutorialController>().completed, (bool done) {
+    if (done) _checkAndShow();
+  });
 }
  
   void notifyPageReady() {
     _checkAndShow();
   }
  
+
 Future<void> _checkAndShow() async {
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool(_prefKey) ?? false) return;
- 
+
   final startSeen = prefs.getBool(AppConstants.startTutorialKey) ?? false;
   if (!startSeen) return;
 
-  await Future.delayed(const Duration(milliseconds: 400));
-  if (blockedUsersKey.currentContext == null) {
+   if (blockedUsersKey.currentContext == null) {
     await Future.delayed(const Duration(milliseconds: 300));
   }
   showTutorial();
 }
-
   void showTutorial() {
     currentStep.value    = 0;
     isAnimatingOut.value = false;

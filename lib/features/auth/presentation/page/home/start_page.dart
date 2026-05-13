@@ -23,7 +23,7 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     super.initState();
     controller   = Get.put(StartController());
-    tutorialCtrl = Get.put(StartTutorialController());
+    tutorialCtrl =  Get.find<StartTutorialController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tutorialCtrl.notifyPageReady();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tendria/common/constants/constants.dart';
+import 'package:tendria/common/controller/startTutorial/start_tutorial_controller.dart';
 import 'package:tendria/common/settings/language_controller.dart';
  
 enum TutorialAnchor { top, bottom, left, right }
@@ -66,6 +67,9 @@ void onInit() {
       icon: Icons.person_search_rounded,
     ),
   ];
+   ever(Get.find<StartTutorialController>().completed, (bool done) {
+    if (done) _checkAndShowTutorial();
+  });
 }
  
 void notifyPageReady() {
@@ -75,11 +79,10 @@ Future<void> _checkAndShowTutorial() async {
   final prefs = await SharedPreferences.getInstance();
   final seen  = prefs.getBool(AppConstants.tutorialKey) ?? false;
   if (seen) return;
- 
-  final startSeen = prefs.getBool('start_tutorial_seen') ?? false;
-  if (!startSeen) return;
 
-  await Future.delayed(const Duration(milliseconds: 800));
+  final startSeen = prefs.getBool(AppConstants.startTutorialKey) ?? false;
+  if (!startSeen) return;
+ 
   if (_usersReady) {
     showTutorial();
   } else {

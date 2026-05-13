@@ -386,7 +386,7 @@ class LanguageController extends GetxController {
           'Match: ve las personas que quieren conectar contigo',
       'tutorial_start_chat': 'Chat: sigue la conversación con tus conexiones',
       'tutorial_start_panic':
-          'Botón de pánico: en caso de emergencia, úsalo para pedir ayuda inmediata',
+          'Botón de pánico: en caso de emergencia presionalo para llamar al 911 y pedir ayuda inmediata',
 
       'tutorial_profile_blocked':
           'Aquí puedes ver y gestionar los usuarios que has bloqueado',
@@ -394,8 +394,7 @@ class LanguageController extends GetxController {
           'Gestiona tus notificaciones push y preferencias de alertas',
       'tutorial_profile_edit':
           'Edita tu perfil: nombre, edad, preferencias y más',
-      'tutorial_profile_settings':
-          'Ajustes de la app y opción para cerrar sesión',
+      'tutorial_profile_settings': 'opción para cerrar sesión',
       'tutorial_profile_credits':
           'Toca aquí para agregar más créditos a tu cuenta',
       'tutorial_profile_status':
@@ -413,7 +412,6 @@ class LanguageController extends GetxController {
       'tutorial_radar_search': 'Vuelve a pulsar para ver más',
       'tutorial_radar_profile': 'Pulsa para ver los perfiles',
       'tutorial_skip': 'Omitir',
-
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -746,7 +744,7 @@ class LanguageController extends GetxController {
       'tutorial_start_chat':
           'Chat: continue conversations with your connections',
       'tutorial_start_panic':
-          'Panic button: in case of emergency, use it to get immediate help',
+          'Panic button: in an emergency, press it to call 911 and get immediate help',
 
       'tutorial_profile_blocked':
           'Here you can view and manage users you have blocked',
@@ -754,7 +752,7 @@ class LanguageController extends GetxController {
           'Manage your push notifications and alert preferences',
       'tutorial_profile_edit':
           'Edit your profile: name, age, preferences and more',
-      'tutorial_profile_settings': 'App settings and option to log out',
+      'tutorial_profile_settings': 'option to log out',
       'tutorial_profile_credits':
           'Tap here to add more credits to your account',
       'tutorial_profile_status':
@@ -772,7 +770,6 @@ class LanguageController extends GetxController {
       'tutorial_radar_search': 'Tap again to see more',
       'tutorial_radar_profile': 'Tap to view profiles',
       'tutorial_skip': 'Skip',
-
     },
   };
 }

@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
+import 'package:tendria/common/controller/tutorial_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/features/like/presentation/page/liked_by_users_page.dart';
 import 'package:tendria/features/like/presentation/page/my_match_page.dart';
@@ -45,9 +47,23 @@ final List<String> labels = [
 
   final RxBool isCheckingProfile = true.obs;
 
-  void changePage(int index) {
-    selectedIndex.value = index;
+void changePage(int index) { 
+  if (selectedIndex.value == 0) {
+    try {
+      final profileTutorial = Get.find<ProfileTutorialController>();
+      if (profileTutorial.isVisible.value) return; 
+    } catch (_) {}
   }
+
+  if (selectedIndex.value == 1) {
+    try {
+      final radarTutorial = Get.find<TutorialController>();
+      if (radarTutorial.isVisible.value) return;  
+    } catch (_) {}
+  }
+
+  selectedIndex.value = index;
+}
 
   Widget get currentPage => pages[selectedIndex.value];
 

@@ -32,7 +32,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   void initState() {
     super.initState();
     controller   = Get.find<ProfileController>();
-    tutorialCtrl = Get.put(UpdateProfileTutorialController());
+    tutorialCtrl = Get.find<UpdateProfileTutorialController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tutorialCtrl.notifyPageReady();

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/controller/startTutorial/start_tutorial_controller.dart';
 import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
 import 'package:tendria/common/controller/tutorial_controller.dart';
+import 'package:tendria/common/controller/updateProfile/update_profile_tutorial_controller.dart';
 import 'package:tendria/common/routes/router.dart';
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/services/translation_service.dart';
@@ -37,6 +39,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      
       locale: const Locale('es', 'ES'),
       supportedLocales: [const Locale('es', 'ES')],
       localizationsDelegates: const [
@@ -254,8 +257,10 @@ class App extends StatelessWidget {
         );
         Get.lazyPut(() => LanguageController(), fenix: true);
         Get.put(TranslationService());
-        Get.lazyPut(() => TutorialController(), fenix: true);
-        Get.lazyPut(()=> ProfileTutorialController(), fenix: true);
+      Get.lazyPut(() => TutorialController(), fenix: true);
+Get.lazyPut(() => ProfileTutorialController(), fenix: true);
+Get.lazyPut(() => StartTutorialController(), fenix: true);
+Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
         Get.lazyPut(
           () => PurchaseController(
             getPurchasesUsecase: Get.find(),

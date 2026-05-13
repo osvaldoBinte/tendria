@@ -101,14 +101,18 @@ void onInit() {
 
   void skipTutorial() => _complete();
 
-  Future<void> _complete() async {
-    isAnimatingOut.value = true;
-    await Future.delayed(const Duration(milliseconds: 300));
-    isVisible.value      = false;
-    isAnimatingOut.value = false;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_prefKey, true);
-  }
+ Future<void> _complete() async {
+  isAnimatingOut.value = true;
+  await Future.delayed(const Duration(milliseconds: 300));
+  isVisible.value      = false;
+  isAnimatingOut.value = false;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_prefKey, true);
+  
+   completed.value = true;
+}
+
+final RxBool completed = false.obs;
 
   Future<void> resetTutorial() async {
     final prefs = await SharedPreferences.getInstance();

@@ -10,7 +10,7 @@ import 'package:tendria/framework/preferences_service.dart';
 
 String enviromentSelect = Enviroment.testing.value;
 final facebookAppEvents = FacebookAppEvents();
-
+ 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

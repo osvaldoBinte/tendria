@@ -412,6 +412,17 @@ class LanguageController extends GetxController {
       'tutorial_radar_search': 'Vuelve a pulsar para ver más',
       'tutorial_radar_profile': 'Pulsa para ver los perfiles',
       'tutorial_skip': 'Omitir',
+
+      // ── LikedByUsersView ───────────────────────────
+      'liked_by_title': 'Les gusté',
+      'liked_by_hint': 'Usuarios que te dieron like',
+      'liked_by_tab': 'Les gusté',
+      'pending_tab': 'Pendientes',
+      'liked_by_view_profile': 'Ver perfil',
+      'liked_by_empty_title': 'Nadie te ha dado like aún',
+      'liked_by_empty_subtitle': 'Sigue explorando para conseguir más matches',
+      'liked_by_error_title': 'Error al cargar likes',
+      'liked_by_loading': 'Cargando likes...',
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -770,6 +781,16 @@ class LanguageController extends GetxController {
       'tutorial_radar_search': 'Tap again to see more',
       'tutorial_radar_profile': 'Tap to view profiles',
       'tutorial_skip': 'Skip',
+      // ── LikedByUsersView ───────────────────────────
+      'liked_by_title': 'They liked me',
+      'liked_by_hint': 'Users who liked you',
+      'liked_by_tab': 'Liked me',
+      'pending_tab': 'Pending',
+      'liked_by_view_profile': 'View profile',
+      'liked_by_empty_title': 'Nobody has liked you yet',
+      'liked_by_empty_subtitle': 'Keep exploring to get more matches',
+      'liked_by_error_title': 'Error loading likes',
+      'liked_by_loading': 'Loading likes...',
     },
   };
 }

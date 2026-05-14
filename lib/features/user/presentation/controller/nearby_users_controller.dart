@@ -54,7 +54,11 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
   late PageController pageController;
 
   final Rx<GetUserEntity?> currentProfile = Rx<GetUserEntity?>(null);
- 
+ bool get isUserFemale {
+  final profileController = Get.find<ProfileController>();
+  final g = profileController.gender.toLowerCase().trim();
+  return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
+}
 
   GetUserEntity? get currentUser {
     if (nearbyUsers.isEmpty || currentUserIndex.value >= nearbyUsers.length) {
@@ -328,39 +332,41 @@ Future<void> openAppSettings() async {
     }
   }
 
-  Future<void> sendLike() async {
-    if (currentUser == null || isProcessingLike.value) return;
+Future<void> sendLike() async {
+  if (currentUser == null || isProcessingLike.value) return;
 
-    try {
-      isProcessingLike.value = true;
-      showSuccessSnackbar(
-        '${_l.t('nearby_like_sent')} ${currentProfile.value?.name}!',
-      );
-      Future.delayed(const Duration(milliseconds: 1000), nextUser);
-    } catch (e) {
-      showErrorSnackbar(
-        '${_l.t('nearby_error_like')}: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isProcessingLike.value = false;
-    }
+  try {
+    isProcessingLike.value = true;
+    await toggleLikeUsecase.execute(currentProfile.value!.id ?? 0, true);
+    showSuccessSnackbar(
+      '${_l.t('nearby_like_sent')} ${currentProfile.value?.name}!',
+    );
+    Future.delayed(const Duration(milliseconds: 1000), nextUser);
+  } catch (e) {
+    showErrorSnackbar(
+      '${_l.t('nearby_error_like')}: ${cleanExceptionMessage(e)}',
+    );
+  } finally {
+    isProcessingLike.value = false;
   }
+}
 
-  Future<void> rejectUser() async {
-    if (currentUser == null || isProcessingLike.value) return;
+Future<void> rejectUser() async {
+  if (currentUser == null || isProcessingLike.value) return;
 
-    try {
-      isProcessingLike.value = true;
-      showInfoSnackbar(_l.t('nearby_next_profile'));
-      nextUser();
-    } catch (e) {
-      showErrorSnackbar(
-        '${_l.t('nearby_error_reject')}: ${cleanExceptionMessage(e)}',
-      );
-    } finally {
-      isProcessingLike.value = false;
-    }
+  try {
+    isProcessingLike.value = true;
+    await toggleLikeUsecase.execute(currentProfile.value!.id ?? 0, false);
+    showInfoSnackbar(_l.t('nearby_next_profile'));
+    nextUser();
+  } catch (e) {
+    showErrorSnackbar(
+      '${_l.t('nearby_error_reject')}: ${cleanExceptionMessage(e)}',
+    );
+  } finally {
+    isProcessingLike.value = false;
   }
+}
 
   void sendMessage() => sendLike();
   void skipUser() => rejectUser();

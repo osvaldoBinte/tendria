@@ -210,7 +210,7 @@ class App extends StatelessWidget {
         Get.lazyPut(
           () => LikedByUsersController(
             getPendingLikedChatsUsecase: Get.find(),
-            unlockChatUsecase: Get.find(), logMatchUsecase:  Get.find(),
+            unlockChatUsecase: Get.find(), logMatchUsecase:  Get.find(), getLikeByUsersUsecase: Get.find(),
           ),
           fenix: true,
         );

@@ -5,6 +5,7 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
+import 'package:tendria/features/like/domain/entities/liked_by_users_entity.dart';
 
 class LikedByUsersView extends GetView<LikedByUsersController> {
   const LikedByUsersView({Key? key}) : super(key: key);
@@ -19,48 +20,14 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
         child: Column(
           children: [
             Obx(() => _buildHeader()),
+            _buildTabSwitch(),
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value &&
-                    controller.pendingChats.isEmpty) {
-                  return _buildLoadingState();
+                if (controller.activeTab.value == 0) {
+                  return _buildPendingChatsSection();
+                } else {
+                  return _buildLikesSection();
                 }
-
-                if (controller.hasError.value &&
-                    controller.pendingChats.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshPendingChats,
-                    color: ThemeColor.primaryColor,
-                    backgroundColor: ThemeColor.surfaceColor,
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverFillRemaining(child: _buildErrorState()),
-                      ],
-                    ),
-                  );
-                }
-
-                if (controller.pendingChats.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshPendingChats,
-                    color: ThemeColor.primaryColor,
-                    backgroundColor: ThemeColor.surfaceColor,
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverFillRemaining(child: _buildEmptyState()),
-                      ],
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: controller.refreshPendingChats,
-                  color: ThemeColor.primaryColor,
-                  backgroundColor: ThemeColor.surfaceColor,
-                  child: _buildChatGrid(),
-                );
               }),
             ),
           ],
@@ -83,8 +50,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
           Row(
             children: [
               const SizedBox(width: 8),
-              Image.asset('assets/logo/logo.png',width: 100,
-                          height: 100,),
+              Image.asset('assets/logo/logo.png', width: 100, height: 100),
               const SizedBox(width: 8),
               Container(
                 width: 8,
@@ -96,14 +62,18 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
               ),
               const SizedBox(width: 8),
               Text(
-                _l.t('pending_chats'),
+                controller.activeTab.value == 0
+                    ? _l.t('pending_chats')
+                    : 'Les gusté',
                 style: ThemeColor.subtitleLarge.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const Spacer(),
               Obx(() {
-                final count = controller.pendingChats.length;
+                final count = controller.activeTab.value == 0
+                    ? controller.pendingChats.length
+                    : controller.likedByUsers.length;
                 if (count == 0) return const SizedBox.shrink();
                 return Stack(
                   clipBehavior: Clip.none,
@@ -150,7 +120,9 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
           ),
           SizedBox(height: ThemeColor.paddingSmall),
           Text(
-            _l.t('unlock_hint'),
+            controller.activeTab.value == 0
+                ? _l.t('unlock_hint')
+                : 'Usuarios que te dieron like',
             style: ThemeColor.bodyMedium.copyWith(
               color: ThemeColor.textSecondaryColor,
             ),
@@ -161,10 +133,183 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
   }
 
   // ==========================================
-  // GRID
+  // TAB SWITCH
   // ==========================================
 
-  Widget _buildChatGrid() {
+  Widget _buildTabSwitch() {
+    return Obx(() => Container(
+          margin: EdgeInsets.all(ThemeColor.paddingMedium),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: ThemeColor.backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [ThemeColor.lightShadow],
+          ),
+          child: Row(
+            children: [
+              _buildTabItem(
+                index: 0,
+                icon: Icons.chat_bubble_outline_rounded,
+                label: 'Pendientes',
+                count: controller.pendingChats.length,
+              ),
+              _buildTabItem(
+                index: 1,
+                icon: Icons.favorite_rounded,
+                label: 'Les gusté',
+                count: controller.likedByUsers.length,
+              ),
+            ],
+          ),
+        ));
+  }
+
+  Widget _buildTabItem({
+    required int index,
+    required IconData icon,
+    required String label,
+    required int count,
+  }) {
+    final isActive = controller.activeTab.value == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => controller.switchTab(index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isActive ? ThemeColor.primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isActive
+                    ? ThemeColor.textLightColor
+                    : ThemeColor.textSecondaryColor,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight:
+                      isActive ? FontWeight.w600 : FontWeight.w400,
+                  color: isActive
+                      ? ThemeColor.textLightColor
+                      : ThemeColor.textSecondaryColor,
+                ),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? Colors.white.withOpacity(0.3)
+                        : ThemeColor.primaryColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    count > 99 ? '99+' : '$count',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isActive
+                          ? ThemeColor.textLightColor
+                          : Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // SECCIÓN CHATS PENDIENTES
+  // ==========================================
+
+  Widget _buildPendingChatsSection() {
+    if (controller.isLoading.value && controller.pendingChats.isEmpty) {
+      return _buildLoadingState();
+    }
+    if (controller.hasError.value && controller.pendingChats.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: controller.refreshPendingChats,
+        color: ThemeColor.primaryColor,
+        backgroundColor: ThemeColor.surfaceColor,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [SliverFillRemaining(child: _buildErrorState())],
+        ),
+      );
+    }
+    if (controller.pendingChats.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: controller.refreshPendingChats,
+        color: ThemeColor.primaryColor,
+        backgroundColor: ThemeColor.surfaceColor,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [SliverFillRemaining(child: _buildEmptyState())],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: controller.refreshPendingChats,
+      color: ThemeColor.primaryColor,
+      backgroundColor: ThemeColor.surfaceColor,
+      child: _buildChatGrid(),
+    );
+  }
+
+  // ==========================================
+  // SECCIÓN LIKES RECIBIDOS
+  // ==========================================
+
+  Widget _buildLikesSection() {
+    if (controller.isLoadingLikes.value && controller.likedByUsers.isEmpty) {
+      return _buildLoadingState();
+    }
+    if (controller.hasErrorLikes.value && controller.likedByUsers.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: controller.refreshLikedByUsers,
+        color: ThemeColor.primaryColor,
+        backgroundColor: ThemeColor.surfaceColor,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [SliverFillRemaining(child: _buildLikesErrorState())],
+        ),
+      );
+    }
+    if (controller.likedByUsers.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: controller.refreshLikedByUsers,
+        color: ThemeColor.primaryColor,
+        backgroundColor: ThemeColor.surfaceColor,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [SliverFillRemaining(child: _buildLikesEmptyState())],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: controller.refreshLikedByUsers,
+      color: ThemeColor.primaryColor,
+      backgroundColor: ThemeColor.surfaceColor,
+      child: _buildLikesGrid(),
+    );
+  }
+
+  Widget _buildLikesGrid() {
     return GridView.builder(
       padding: EdgeInsets.all(ThemeColor.paddingMedium),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -173,21 +318,17 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
         crossAxisSpacing: ThemeColor.paddingMedium,
         mainAxisSpacing: ThemeColor.paddingMedium,
       ),
-      itemCount: controller.pendingChats.length,
+      itemCount: controller.likedByUsers.length,
       itemBuilder: (context, index) {
-        final chat = controller.pendingChats[index];
-        return _buildChatCard(chat);
+        final user = controller.likedByUsers[index];
+        return _buildLikeCard(user);
       },
     );
   }
 
-  // ==========================================
-  // CHAT CARD
-  // ==========================================
-
-  Widget _buildChatCard(PendingChatEntity chat) {
+  Widget _buildLikeCard(LikedByUsersEntity user) {
     return GestureDetector(
-      onTap: () => controller.navigateToProfile(chat.userId),
+      onTap: () => controller.navigateToUserProfile(user.fromusererId),
       child: Container(
         decoration: BoxDecoration(
           color: ThemeColor.backgroundColor,
@@ -209,10 +350,9 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                     child: Container(
                       width: double.infinity,
                       color: ThemeColor.backgroundColorfondo,
-                      child: chat.photoUrl != null &&
-                              chat.photoUrl!.isNotEmpty
+                      child: user.profilePictureUrl.isNotEmpty
                           ? Image.network(
-                              chat.photoUrl!,
+                              user.profilePictureUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) =>
                                   _buildDefaultAvatar(),
@@ -224,9 +364,8 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                                         ? progress.cumulativeBytesLoaded /
                                             progress.expectedTotalBytes!
                                         : null,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(
-                                            ThemeColor.primaryColor),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        ThemeColor.primaryColor),
                                   ),
                                 );
                               },
@@ -247,7 +386,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        controller.getTimeAgo(chat.createdAt),
+                        controller.getTimeAgo(user.likedAt),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -257,22 +396,22 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                     ),
                   ),
 
-                  // Candado
+                  // Badge corazón
                   Positioned(
                     top: 8,
                     left: 8,
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: ThemeColor.primaryColor,
+                        color: Colors.pinkAccent,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.lock,
+                      child: const Icon(Icons.favorite_rounded,
                           color: Colors.white, size: 16),
                     ),
                   ),
 
-                  // Gradiente
+                  // Gradiente inferior
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -291,8 +430,164 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                       ),
                     ),
                   ),
+                ],
+              ),
+            ),
 
-                  // Mensaje oculto
+            // Info inferior
+            Padding(
+              padding: EdgeInsets.all(ThemeColor.paddingSmall),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${user.username}, ${user.ega}',
+                    style: ThemeColor.subtitleMedium
+                        .copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ThemeColor.widgetButton(
+                      text: 'Ver perfil',
+                      onPressed: () =>
+                          controller.navigateToUserProfile(user.fromusererId),
+                      backgroundColor: Colors.pinkAccent,
+                      textColor: Colors.white,
+                      fontSize: 12,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      borderRadius: ThemeColor.smallRadius,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // GRID CHATS
+  // ==========================================
+
+  Widget _buildChatGrid() {
+    return GridView.builder(
+      padding: EdgeInsets.all(ThemeColor.paddingMedium),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        crossAxisSpacing: ThemeColor.paddingMedium,
+        mainAxisSpacing: ThemeColor.paddingMedium,
+      ),
+      itemCount: controller.pendingChats.length,
+      itemBuilder: (context, index) {
+        final chat = controller.pendingChats[index];
+        return _buildChatCard(chat);
+      },
+    );
+  }
+
+  Widget _buildChatCard(PendingChatEntity chat) {
+    return GestureDetector(
+      onTap: () => controller.navigateToProfile(chat.userId),
+      child: Container(
+        decoration: BoxDecoration(
+          color: ThemeColor.backgroundColor,
+          borderRadius: ThemeColor.mediumBorderRadius,
+          boxShadow: [ThemeColor.cardShadow],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(ThemeColor.mediumRadius),
+                      topRight: Radius.circular(ThemeColor.mediumRadius),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      color: ThemeColor.backgroundColorfondo,
+                      child: chat.photoUrl != null && chat.photoUrl!.isNotEmpty
+                          ? Image.network(
+                              chat.photoUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _buildDefaultAvatar(),
+                              loadingBuilder: (_, child, progress) {
+                                if (progress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: progress.expectedTotalBytes != null
+                                        ? progress.cumulativeBytesLoaded /
+                                            progress.expectedTotalBytes!
+                                        : null,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        ThemeColor.primaryColor),
+                                  ),
+                                );
+                              },
+                            )
+                          : _buildDefaultAvatar(),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        controller.getTimeAgo(chat.createdAt),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: ThemeColor.primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.lock,
+                          color: Colors.white, size: 16),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.6),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   if (chat.hiddenMessage != null)
                     Positioned(
                       bottom: 8,
@@ -325,8 +620,6 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                 ],
               ),
             ),
-
-            // Info inferior
             Padding(
               padding: EdgeInsets.all(ThemeColor.paddingSmall),
               child: Column(
@@ -415,8 +708,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
             ),
             SizedBox(height: ThemeColor.paddingLarge),
             Text(_l.t('error_title'),
-                style: ThemeColor.headingSmall,
-                textAlign: TextAlign.center),
+                style: ThemeColor.headingSmall, textAlign: TextAlign.center),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               controller.errorMessage.value,
@@ -428,6 +720,49 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
             ThemeColor.widgetButton(
               text: _l.t('retry'),
               onPressed: controller.loadPendingChats,
+              backgroundColor: ThemeColor.primaryColor,
+              textColor: ThemeColor.textLightColor,
+              padding: EdgeInsets.symmetric(
+                horizontal: ThemeColor.paddingLarge,
+                vertical: ThemeColor.paddingMedium,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLikesErrorState() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(ThemeColor.paddingLarge),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(ThemeColor.paddingLarge),
+              decoration: BoxDecoration(
+                color: ThemeColor.errorColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.error_outline,
+                  size: 60, color: ThemeColor.errorColor),
+            ),
+            SizedBox(height: ThemeColor.paddingLarge),
+            Text('Error al cargar likes',
+                style: ThemeColor.headingSmall, textAlign: TextAlign.center),
+            SizedBox(height: ThemeColor.paddingSmall),
+            Text(
+              controller.errorMessageLikes.value,
+              style: ThemeColor.bodyMedium
+                  .copyWith(color: ThemeColor.textSecondaryColor),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: ThemeColor.paddingLarge),
+            ThemeColor.widgetButton(
+              text: _l.t('retry'),
+              onPressed: controller.refreshLikedByUsers,
               backgroundColor: ThemeColor.primaryColor,
               textColor: ThemeColor.textLightColor,
               padding: EdgeInsets.symmetric(
@@ -459,8 +794,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
             ),
             SizedBox(height: ThemeColor.paddingLarge),
             Text(_l.t('empty_title_pending'),
-                style: ThemeColor.headingSmall,
-                textAlign: TextAlign.center),
+                style: ThemeColor.headingSmall, textAlign: TextAlign.center),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               _l.t('empty_subtitle_pending'),
@@ -479,6 +813,41 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                 horizontal: ThemeColor.paddingLarge,
                 vertical: ThemeColor.paddingMedium,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLikesEmptyState() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(ThemeColor.paddingLarge),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(ThemeColor.paddingLarge),
+              decoration: BoxDecoration(
+                color: Colors.pinkAccent.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.favorite_border_rounded,
+                  size: 60, color: Colors.pinkAccent),
+            ),
+            SizedBox(height: ThemeColor.paddingLarge),
+            Text(
+              'Nadie te ha dado like aún',
+              style: ThemeColor.headingSmall,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: ThemeColor.paddingSmall),
+            Text(
+              'Sigue explorando para conseguir más matches',
+              style: ThemeColor.bodyMedium
+                  .copyWith(color: ThemeColor.textSecondaryColor),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

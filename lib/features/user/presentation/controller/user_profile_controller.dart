@@ -14,6 +14,7 @@ import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/unlock/domain/usecase/block_user_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
+import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
 class UserProfileController extends GetxController {
   final GetUserByIdUsecase getUserByIdUsecase;
@@ -47,7 +48,11 @@ class UserProfileController extends GetxController {
   List<String> get userQualities =>
       currentUser.value?.qualitiesIds?.map((q) => q.name).toList() ?? [];
   List<String> get userGallery => _buildGallery(currentUser.value);
-
+bool get isUserFemale {
+  final profileController = Get.find<ProfileController>();
+  final g = profileController.gender.toLowerCase().trim();
+  return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
+}
   final RxInt goPerfilIndex = (-1).obs;
   @override
   void onInit() {
@@ -60,7 +65,7 @@ class UserProfileController extends GetxController {
       loadUserProfile(userId.value);
     }
     final index = args?['goPerfilIndex'];
-
+ debugPrint('is mujer isUserFemale: $isUserFemale ${ currentUser.value?.gender?.toLowerCase()}');
     if (index is RxInt) {
       goPerfilIndex.value = index.value;
     } else if (index is int) {
@@ -80,6 +85,7 @@ class UserProfileController extends GetxController {
     try {
       isLoading.value = true;
       final user = await getUserByIdUsecase.execute(idUser);
+      print('User profile loaded: ${user.name}, id: ${user.id}');
       currentUser.value = user;
       currentImageIndex.value = 0;
       if (pageController.hasClients) {
@@ -151,13 +157,17 @@ class UserProfileController extends GetxController {
   }
 
   Future<void> sendLike() async {
-    if (currentUser.value == null || isProcessingLike.value) return;
+    if (isProcessingLike.value) return;
 
     try {
       isProcessingLike.value = true;
-      await toggleLikeUsecase.execute(currentUser.value!.id ?? 0, true);
+      await toggleLikeUsecase.execute(userId.value?? 0, true);
       showSuccessSnackbar('¡Le diste like a $userName!');
-      Future.delayed(Duration(milliseconds: 1000), () => Get.back());
+         final nearbyController = Get.find<NearbyUsersController>();
+      nearbyController.noMoreUsers.value = false;
+      await nearbyController.loadNearbyUsers();
+
+      Get.offAllNamed(RoutesNames.nearbyProfilesPage);    
     } catch (e) {
       showErrorSnackbar('Error al dar like: ${cleanExceptionMessage(e)}');
     } finally {

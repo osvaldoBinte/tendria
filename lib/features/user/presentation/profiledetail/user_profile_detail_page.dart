@@ -616,10 +616,12 @@ Widget _buildReporteButtons(UserProfileController controller) {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       child: Obx(() {
         final showReject = controller.showRejectButton;
+        final isFemale = controller.isUserFemale;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [ 
+          children: [
+            // Botón izquierdo: X (rechazar) o Mensaje
             if (showReject)
               GestureDetector(
                 onTap: controller.rejectUser,
@@ -676,7 +678,37 @@ Widget _buildReporteButtons(UserProfileController controller) {
                   ),
                 ),
               ),
- 
+
+            // Botón central: Like rosa (solo si showReject y es mujer)
+            if (showReject && isFemale)
+              GestureDetector(
+                onTap: controller.sendLike,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.pinkAccent,
+                        Colors.pink.shade300,
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.pink.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.waving_hand_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+              ),
+  
             if (showReject)
               GestureDetector(
                 onTap: controller.sendMensaje,
@@ -685,14 +717,14 @@ Widget _buildReporteButtons(UserProfileController controller) {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        ThemeColor.primaryColor,
-                        ThemeColor.primaryColor.withOpacity(0.8),
+                        ThemeColor.errorColor,
+                        ThemeColor.errorColor.withOpacity(0.8),
                       ],
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: ThemeColor.primaryColor.withOpacity(0.4),
+                        color: ThemeColor.errorColor.withOpacity(0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),

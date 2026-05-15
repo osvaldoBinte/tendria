@@ -113,6 +113,7 @@ flutter:
    -  test.env
    - .env
    - dev.env
+   - assets/video/radarback.mp4
    - assets/logo/logo.png
    - assets/icons/home/perfil.png
    - assets/icons/home/parati.png

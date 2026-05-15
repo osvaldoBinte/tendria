@@ -87,39 +87,48 @@ class LikeDataSourcesImp {
       throw Exception('$e');
     }
   }
+Future<void> toggleLike(int userId, bool liked, String token) async {
+  try {
+    Uri url = Uri.parse('$defaultApiServer/Likes/dar-like');
 
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+      body: jsonEncode({
+        'to_user': userId,
+        'liked': liked,
+      }),
+    );
 
-  Future<void> toggleLike(int userId, bool liked,String token) async {
-    try {
-      Uri url = Uri.parse('$defaultApiServer/Likes/dar-like');
+    // PRINTS PARA DEBUG
+    print('STATUS CODE: ${response.statusCode}');
+    print('RESPONSE BODY: ${response.body}');
 
-      final response = await http.post(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization':'Bearer $token'
-        },
-        body: jsonEncode({
-          'to_user': userId,
-          'liked': liked,
-        }),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return;
-      } 
-
-      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-      exception.validateMesage();
-      throw exception;
-    } catch (e) {
-      if (e is SocketException ||
-          e is http.ClientException ||
-          e is TimeoutException) {
-        throw Exception(convertMessageException(error: e));
-      }
-      throw Exception('$e');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
     }
+
+    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+    exception.validateMesage();
+    throw exception;
+
+  } catch (e) {
+
+    // PRINT DEL ERROR
+    print('ERROR EN toggleLike: $e');
+
+    if (e is SocketException ||
+        e is http.ClientException ||
+        e is TimeoutException) {
+      throw Exception(convertMessageException(error: e));
+    }
+
+    throw Exception('$e');
   }
+}
 
   Future<void> unlockChat(int chatId, String token) async {
     try {

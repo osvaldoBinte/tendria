@@ -36,9 +36,7 @@ class BlockedUsersController extends GetxController {
       final users = await fetchBlockedUsersUsecase.execute();
       blockedUsers.value = users;
       
-      if (users.isEmpty) {
-        showInfoSnackbar('No tienes usuarios bloqueados');
-      }
+    
     } catch (e) {
       print('Error cargando usuarios bloqueados: $e');
       

@@ -775,8 +775,8 @@ static ThemeData get darkThemeData => ThemeData(
       ),
     );
   }
-
-  static Widget createMainScaffold({
+// En ThemeColor — SIN Obx, solo retorna el widget directamente
+static Widget createMainScaffold({
   required Widget body,
   required int currentIndex,
   required Function(int) onNavigationTap,
@@ -786,10 +786,10 @@ static ThemeData get darkThemeData => ThemeData(
   Color? bottomNavBackgroundColor,
   Widget? floatingActionButton,
   FloatingActionButtonLocation? floatingActionButtonLocation,
-  List<Key?>? navKeys,                 // ← nuevo
+  List<Key?>? navKeys,
 }) {
   return Scaffold(
-    backgroundColor: backgroundColor ?? bottomNavBackgroundColor,
+    backgroundColor: backgroundColor ?? ThemeColor.backgroundColorfondo,
     body: body,
     floatingActionButton: floatingActionButton,
     floatingActionButtonLocation: floatingActionButtonLocation,
@@ -798,8 +798,7 @@ static ThemeData get darkThemeData => ThemeData(
       onTap: onNavigationTap,
       iconPaths: iconPaths,
       labels: labels,
-      backgroundColor: bottomNavBackgroundColor,
-      navKeys: navKeys,                // ← pasar
+      navKeys: navKeys,
     ),
   );
 }
@@ -812,14 +811,14 @@ static Widget createBottomNavigationBar({
   Color? backgroundColor,
   Color? selectedItemColor,
   Color? unselectedItemColor,
-  List<Key?>? navKeys,                 // ← nuevo
+  List<Key?>? navKeys,
 }) {
   return Container(
     decoration: BoxDecoration(
-      color: backgroundColor ?? Colors.white,
+      color: ThemeColor.cardBackground,  // ← getter reactivo, funciona porque el Obx padre lo envuelve
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.5),
+          color: Colors.grey.withOpacity(0.3),
           spreadRadius: 0,
           blurRadius: 4,
           offset: const Offset(0, -2),
@@ -853,8 +852,8 @@ static Widget createBottomNavigationBar({
                         height: 26,
                         fit: BoxFit.contain,
                         color: isSelected
-                            ? ThemeColor.textPrimaryColor
-                            : null,
+                            ? ThemeColor.textPrimary
+                            : ThemeColor.textSecondary,
                       ),
                       if (labels != null && index < labels.length) ...[
                         const SizedBox(height: 4),
@@ -866,8 +865,8 @@ static Widget createBottomNavigationBar({
                                 ? FontWeight.w600
                                 : FontWeight.normal,
                             color: isSelected
-                                ? ThemeColor.textPrimaryColor
-                                : ThemeColor.textSecondaryColor,
+                                ? ThemeColor.textPrimary
+                                : ThemeColor.textSecondary,
                           ),
                         ),
                       ],

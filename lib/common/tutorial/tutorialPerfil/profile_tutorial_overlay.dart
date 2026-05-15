@@ -255,12 +255,13 @@ class _DialogBubble extends StatelessWidget {
     required this.accentColor,
   });
 
-  @override
+
+@override
   Widget build(BuildContext context) {
-    return Container(
+    return Obx(() => Container(   // ← envuelve en Obx
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        color: ThemeColor.backgroundColor,
+        color: ThemeColor.cardBackground,   // ← antes backgroundColor
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: accentColor.withOpacity(0.5), width: 1.5),
         boxShadow: [
@@ -283,9 +284,12 @@ class _DialogBubble extends StatelessWidget {
             child: Text(
               message,
               style: TextStyle(
-                color: ThemeColor.textPrimaryColor,
+                color: ThemeColor.textPrimary,   // ← antes textPrimaryColor
                 fontSize: 14,
-                height: 1.45,
+                height: 1.45, 
+                decoration: TextDecoration.none,
+                decorationColor: Colors.transparent,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -299,6 +303,6 @@ class _DialogBubble extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

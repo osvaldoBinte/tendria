@@ -41,26 +41,32 @@ class UserProfileDetailPage extends StatelessWidget {
                 Icon(
                   Icons.person_off_outlined,
                   size: 80,
-                  color: ThemeColor.textSecondaryColor,
+                  color: ThemeColor.textSecondary,
                 ),
-                SizedBox(height: 16),
-                Text('Usuario no encontrado', style: ThemeColor.headingMedium),
-                SizedBox(height: 8),
+                const SizedBox(height: 16),
+                Text(
+                  'Usuario no encontrado',
+                  style: ThemeColor.headingMedium.copyWith(
+                    color: ThemeColor.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'No se pudo cargar el perfil',
                   style: ThemeColor.bodyMedium.copyWith(
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () => Get.back(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ThemeColor.primaryColor,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                   ),
-                  child: Text('Volver'),
+                  child: const Text('Volver'),
                 ),
               ],
             ),
@@ -94,12 +100,13 @@ class UserProfileDetailPage extends StatelessWidget {
                       elevation: 4,
                       shadowColor: ThemeColor.shadowColor,
                       pinned: true,
-
                       leading: IconButton(
-                        icon: const Icon(Icons.arrow_back),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: ThemeColor.iconColor,
+                        ),
                         onPressed: () {
                           FocusScope.of(Get.context!).unfocus();
-
                           if (controller.goPerfilIndex.value >= 0) {
                             Get.offAllNamed(
                               RoutesNames.homePage,
@@ -112,11 +119,10 @@ class UserProfileDetailPage extends StatelessWidget {
                           }
                         },
                       ),
-
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                  ThemeColor.widgetLogo( width: 100, height: 100),
+                          ThemeColor.widgetLogo(width: 100, height: 100),
                         ],
                       ),
                     ),
@@ -151,6 +157,10 @@ class UserProfileDetailPage extends StatelessWidget {
     });
   }
 
+  // ==========================================
+  // SLIVER APP BAR (galería)
+  // ==========================================
+
   Widget _buildSliverAppBar(UserProfileController controller) {
     return Obx(
       () => SliverAppBar(
@@ -179,7 +189,7 @@ class UserProfileDetailPage extends StatelessWidget {
                           child: Icon(
                             Icons.person,
                             size: 100,
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         );
                       }
@@ -192,7 +202,7 @@ class UserProfileDetailPage extends StatelessWidget {
                           child: Icon(
                             Icons.person,
                             size: 100,
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                         loadingBuilder: (_, child, progress) {
@@ -203,7 +213,7 @@ class UserProfileDetailPage extends StatelessWidget {
                               child: CircularProgressIndicator(
                                 value: progress.expectedTotalBytes != null
                                     ? progress.cumulativeBytesLoaded /
-                                          progress.expectedTotalBytes!
+                                        progress.expectedTotalBytes!
                                     : null,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   ThemeColor.primaryColor,
@@ -216,6 +226,7 @@ class UserProfileDetailPage extends StatelessWidget {
                     },
                   ),
 
+                  // Indicadores de página
                   if (controller.userGallery.length > 1)
                     Positioned(
                       top: 16,
@@ -227,17 +238,18 @@ class UserProfileDetailPage extends StatelessWidget {
                           (index) => Expanded(
                             child: Container(
                               margin: EdgeInsets.only(
-                                right: index < controller.userGallery.length - 1
-                                    ? 4
-                                    : 0,
+                                right:
+                                    index < controller.userGallery.length - 1
+                                        ? 4
+                                        : 0,
                               ),
                               height: 3,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(2),
-                                color:
-                                    controller.currentImageIndex.value == index
-                                    ? ThemeColor.cardColor
-                                    : ThemeColor.cardColor.withOpacity(0.4),
+                                color: controller.currentImageIndex.value ==
+                                        index
+                                    ? Colors.white
+                                    : Colors.white.withOpacity(0.4),
                                 boxShadow: [ThemeColor.lightShadow],
                               ),
                             ),
@@ -246,151 +258,161 @@ class UserProfileDetailPage extends StatelessWidget {
                       ),
                     ),
 
-                 Positioned(
-  bottom: 0,
-  left: 0,
-  right: 0,
-  child: Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: ThemeColor.tertiaryColor,
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(ThemeColor.largeRadius),
-        bottomRight: Radius.circular(ThemeColor.largeRadius),
-      ),
-      boxShadow: [ThemeColor.lightShadow],
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Nombre y ciudad (existente)
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${controller.userName}, ${controller.userAge}',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: ThemeColor.textLightColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    size: 16,
-                    color: ThemeColor.textLightColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    controller.currentUser.value?.city ?? 'Cerca de ti',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: ThemeColor.textLightColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
- 
-        Obx(() {
-          if (!controller.hasStories.value) return const SizedBox.shrink();
-
-          final user = controller.currentUser.value;
-          if (user == null) return const SizedBox.shrink();
-
-          return GestureDetector(
-            onTap: () {
-              if (Get.context != null) {
-                print('showTargetUserStoryModal in ${user.id}');
-                showTargetUserStoryModal(
-                  Get.context!,
-                  userId:  controller.userId.value,
-                  userName: user.name ?? 'Usuario',
-                  userPhoto: user.fotoUrl,
-                );
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFE040FB), Color(0xFFFF6D00)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(2.5),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black,
-                    ),
-                    padding: const EdgeInsets.all(1.5),
-                    child: ClipOval(
-                      child: user.fotoUrl != null && user.fotoUrl!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: user.fotoUrl!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              placeholder: (_, __) => Container(
-                                color: Colors.grey[800],
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white54,
-                                  size: 24,
+                  // Info inferior
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: ThemeColor.tertiaryColor,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft:
+                              Radius.circular(ThemeColor.largeRadius),
+                          bottomRight:
+                              Radius.circular(ThemeColor.largeRadius),
+                        ),
+                        boxShadow: [ThemeColor.lightShadow],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${controller.userName}, ${controller.userAge}',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              errorWidget: (_, __, ___) => Container(
-                                color: Colors.grey[800],
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white54,
-                                  size: 24,
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      controller.currentUser.value?.city ??
+                                          'Cerca de ti',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            )
-                          : Container(
-                              color: Colors.grey[800],
-                              child: const Icon(
-                                Icons.person,
-                                color: Colors.white54,
-                                size: 24,
-                              ),
+                              ],
                             ),
+                          ),
+
+                          // Historia
+                          Obx(() {
+                            if (!controller.hasStories.value)
+                              return const SizedBox.shrink();
+
+                            final user = controller.currentUser.value;
+                            if (user == null) return const SizedBox.shrink();
+
+                            return GestureDetector(
+                              onTap: () {
+                                if (Get.context != null) {
+                                  showTargetUserStoryModal(
+                                    Get.context!,
+                                    userId: controller.userId.value,
+                                    userName: user.name ?? 'Usuario',
+                                    userPhoto: user.fotoUrl,
+                                  );
+                                }
+                              },
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color(0xFFE040FB),
+                                          Color(0xFFFF6D00)
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.all(2.5),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                      padding: const EdgeInsets.all(1.5),
+                                      child: ClipOval(
+                                        child: user.fotoUrl != null &&
+                                                user.fotoUrl!.isNotEmpty
+                                            ? CachedNetworkImage(
+                                                imageUrl: user.fotoUrl!,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                placeholder: (_, __) =>
+                                                    Container(
+                                                  color: Colors.grey[800],
+                                                  child: const Icon(
+                                                    Icons.person,
+                                                    color: Colors.white54,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                                errorWidget: (_, __, ___) =>
+                                                    Container(
+                                                  color: Colors.grey[800],
+                                                  child: const Icon(
+                                                    Icons.person,
+                                                    color: Colors.white54,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                              )
+                                            : Container(
+                                                color: Colors.grey[800],
+                                                child: const Icon(
+                                                  Icons.person,
+                                                  color: Colors.white54,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Historia',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Historia',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    ),
-  ),
-),
                 ],
               ),
             ),
@@ -400,6 +422,10 @@ class UserProfileDetailPage extends StatelessWidget {
     );
   }
 
+  // ==========================================
+  // SECCIONES INFO
+  // ==========================================
+
   Widget _buildBioSection(UserProfileController controller) {
     return Obx(
       () => Container(
@@ -407,7 +433,7 @@ class UserProfileDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
           boxShadow: [ThemeColor.lightShadow],
         ),
@@ -419,17 +445,16 @@ class UserProfileDetailPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimaryColor,
+                color: ThemeColor.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
-
             Text(
               controller.userBio,
               style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
-                color: ThemeColor.textTertiaryColor,
+                color: ThemeColor.textSecondary,
               ),
             ),
           ],
@@ -448,7 +473,7 @@ class UserProfileDetailPage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
           boxShadow: [ThemeColor.lightShadow],
         ),
@@ -460,7 +485,7 @@ class UserProfileDetailPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimaryColor,
+                color: ThemeColor.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -493,7 +518,7 @@ class UserProfileDetailPage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
           boxShadow: [ThemeColor.lightShadow],
         ),
@@ -505,14 +530,13 @@ class UserProfileDetailPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimaryColor,
+                color: ThemeColor.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-
               children: controller.userInterests
                   .map((i) => _buildChip(i))
                   .toList(),
@@ -530,7 +554,7 @@ class UserProfileDetailPage extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
           boxShadow: [ThemeColor.lightShadow],
         ),
@@ -542,14 +566,13 @@ class UserProfileDetailPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimaryColor,
+                color: ThemeColor.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-
               children: controller.userQualities
                   .map((q) => _buildChip(q))
                   .toList(),
@@ -559,6 +582,10 @@ class UserProfileDetailPage extends StatelessWidget {
       ),
     );
   }
+
+  // ==========================================
+  // CHIPS
+  // ==========================================
 
   Widget _buildPrefChip(IconData icon, String label) {
     return Container(
@@ -577,7 +604,7 @@ class UserProfileDetailPage extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 13,
-              color: ThemeColor.textPrimaryColor,
+              color: ThemeColor.textPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -591,177 +618,180 @@ class UserProfileDetailPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: ThemeColor.textPrimaryColor, width: 1),
+        border: Border.all(color: ThemeColor.subtleBorder, width: 1),
+        color: ThemeColor.backgroundColorfondo,
       ),
       child: Text(
         text,
         style: TextStyle(
           fontSize: 14,
-          color: ThemeColor.textPrimaryColor,
+          color: ThemeColor.textPrimary,
           fontWeight: FontWeight.w500,
         ),
       ),
     );
   }
 
-Widget _buildReporteButtons(UserProfileController controller) {
-  return SafeArea(
-    top: false,
-    child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Obx(() {
-        final showReject = controller.showRejectButton;
-        final isFemale = controller.isUserFemale;
+  // ==========================================
+  // BOTONES DE ACCIÓN
+  // ==========================================
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Botón izquierdo: X (rechazar) o Mensaje
-            if (showReject)
-              GestureDetector(
-                onTap: controller.rejectUser,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.textSecondaryColor,
-                        ThemeColor.textSecondaryColor.withOpacity(0.8),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColor.textSecondaryColor.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.close_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              )
-            else
-              GestureDetector(
-                onTap: controller.sendMensaje,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.primaryColor,
-                        ThemeColor.primaryColor.withOpacity(0.8),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColor.primaryColor.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              ),
+  Widget _buildReporteButtons(UserProfileController controller) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        child: Obx(() {
+          final showReject = controller.showRejectButton;
+          final isFemale = controller.isUserFemale;
 
-            // Botón central: Like rosa (solo si showReject y es mujer)
-            if (showReject && isFemale)
-              GestureDetector(
-                onTap: controller.sendLike,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.pinkAccent,
-                        Colors.pink.shade300,
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Botón izquierdo: X (rechazar) o Like
+              if (showReject)
+                GestureDetector(
+                  onTap: controller.rejectUser,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColor.textSecondaryColor,
+                          ThemeColor.textSecondaryColor.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              ThemeColor.textSecondaryColor.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pink.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 32,
+                    ),
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: controller.sendMensaje,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColor.primaryColor,
+                          ThemeColor.primaryColor.withOpacity(0.8),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.waving_hand_rounded,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                ),
-              ),
-  
-            if (showReject)
-              GestureDetector(
-                onTap: controller.sendMensaje,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.errorColor,
-                        ThemeColor.errorColor.withOpacity(0.8),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColor.primaryColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: ThemeColor.errorColor.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 32,
-                  ),
-                ),
-              )
-            else
-              GestureDetector(
-                onTap: controller.blockUser,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.red.shade700, Colors.red.shade400],
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 32,
                     ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.red.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.block_rounded,
-                    color: ThemeColor.textLightColor,
-                    size: 28,
                   ),
                 ),
-              ),
-          ],
-        );
-      }),
-    ),
-  );
-}
+
+              // Botón central: Like rosa (solo si showReject y es mujer)
+              if (showReject && isFemale)
+                GestureDetector(
+                  onTap: controller.sendLike,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.pinkAccent, Colors.pink.shade300],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.pink.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.waving_hand_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ),
+
+              if (showReject)
+                GestureDetector(
+                  onTap: controller.sendMensaje,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          ThemeColor.errorColor,
+                          ThemeColor.errorColor.withOpacity(0.8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: ThemeColor.errorColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 32,
+                    ),
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: controller.blockUser,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade700, Colors.red.shade400],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.block_rounded,
+                      color: ThemeColor.textLightColor,
+                      size: 28,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 }

@@ -16,58 +16,63 @@ class ChatPage extends GetView<ChatController> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        FocusScope.of(context).unfocus();
-        mycontroller.loadChats();
-        if (controller.goHomeIndex.value >= 0) {
-          Get.offAllNamed(
-            RoutesNames.homePage,
-            arguments: {'tab': controller.goHomeIndex.value},
-          );
-        } else {
-          Get.back();
-          mycontroller.loadChats();
-        }
-      },
-      child: Listener(
-        onPointerDown: (e) {
-          controller.setPointerDown(e.position);
-          controller.setPointerDownTime(DateTime.now());
-        },
-        onPointerUp: (e) {
-          final distance = (e.position - controller.pointerDown).distance;
-          final duration = DateTime.now().difference(
-            controller.pointerDownTime,
-          );
-          if (distance < 10 && duration.inMilliseconds < 200) {
+    return Obx(() => PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
             FocusScope.of(context).unfocus();
-          }
-        },
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          backgroundColor: ThemeColor.backgroundColor,
-          appBar: _buildAppBar(),
-          body: Column(
-            children: [
-              _buildConnectionIndicator(),
-              Expanded(child: _buildBody()),
-              _buildMessageInput(),
-            ],
+            mycontroller.loadChats();
+            if (controller.goHomeIndex.value >= 0) {
+              Get.offAllNamed(
+                RoutesNames.homePage,
+                arguments: {'tab': controller.goHomeIndex.value},
+              );
+            } else {
+              Get.back();
+              mycontroller.loadChats();
+            }
+          },
+          child: Listener(
+            onPointerDown: (e) {
+              controller.setPointerDown(e.position);
+              controller.setPointerDownTime(DateTime.now());
+            },
+            onPointerUp: (e) {
+              final distance =
+                  (e.position - controller.pointerDown).distance;
+              final duration = DateTime.now().difference(
+                controller.pointerDownTime,
+              );
+              if (distance < 10 && duration.inMilliseconds < 200) {
+                FocusScope.of(context).unfocus();
+              }
+            },
+            child: Scaffold(
+              resizeToAvoidBottomInset: true,
+              backgroundColor: ThemeColor.backgroundColor,
+              appBar: _buildAppBar(),
+              body: Column(
+                children: [
+                  _buildConnectionIndicator(),
+                  Expanded(child: _buildBody()),
+                  _buildMessageInput(),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
+
+  // ==========================================
+  // APP BAR
+  // ==========================================
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: ThemeColor.surfaceColor,
+      backgroundColor: ThemeColor.cardBackground,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: ThemeColor.textPrimaryColor),
+        icon: Icon(Icons.arrow_back, color: ThemeColor.iconColor),
         onPressed: () {
           FocusScope.of(Get.context!).unfocus();
           if (controller.goHomeIndex.value >= 0) {
@@ -76,10 +81,8 @@ class ChatPage extends GetView<ChatController> {
               RoutesNames.homePage,
               arguments: {'tab': controller.goHomeIndex.value},
             );
-            print('silencio homePage');
           } else {
             Get.back();
-            print('silencio');
             mycontroller.loadChats(silent: true);
           }
         },
@@ -108,13 +111,12 @@ class ChatPage extends GetView<ChatController> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: ThemeColor.surfaceColor,
+                          color: ThemeColor.cardBackground,
                           width: 1.5,
                         ),
                       ),
                       child: ClipOval(
-                        child:
-                            (usuario?.fotoUrl != null &&
+                        child: (usuario?.fotoUrl != null &&
                                     usuario!.fotoUrl!.isNotEmpty) ||
                                 controller.userPhoto != null
                             ? Image.network(
@@ -137,8 +139,12 @@ class ChatPage extends GetView<ChatController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      usuario?.nombre ?? controller.userName ?? _l.t('user'),
-                      style: ThemeColor.subtitleLarge,
+                      usuario?.nombre ??
+                          controller.userName ??
+                          _l.t('user'),
+                      style: ThemeColor.subtitleLarge.copyWith(
+                        color: ThemeColor.textPrimary,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -155,17 +161,24 @@ class ChatPage extends GetView<ChatController> {
   Widget _buildDefaultAvatar() {
     return Container(
       color: ThemeColor.backgroundColorfondo,
-      child: Icon(Icons.person, size: 24, color: ThemeColor.textSecondaryColor),
+      child: Icon(
+        Icons.person,
+        size: 24,
+        color: ThemeColor.textSecondary,
+      ),
     );
   }
+
+  // ==========================================
+  // CONNECTION INDICATOR
+  // ==========================================
 
   Widget _buildConnectionIndicator() {
     return Obx(() {
       if (controller.isNewConversation.value) return const SizedBox.shrink();
       if (controller.isSignalRConnected.value) return const SizedBox.shrink();
 
-      final isRetrying =
-          controller.isRetrying.value ||
+      final isRetrying = controller.isRetrying.value ||
           Get.find<SignalRService>().isReconnecting.value;
 
       return GestureDetector(
@@ -205,6 +218,10 @@ class ChatPage extends GetView<ChatController> {
     });
   }
 
+  // ==========================================
+  // BODY
+  // ==========================================
+
   Widget _buildBody() {
     return Stack(
       children: [
@@ -230,11 +247,15 @@ class ChatPage extends GetView<ChatController> {
     );
   }
 
+  // ==========================================
+  // MESSAGES LIST
+  // ==========================================
+
   Widget _buildMessagesList() {
     return RefreshIndicator(
       onRefresh: controller.refreshChat,
       color: ThemeColor.primaryColor,
-      backgroundColor: ThemeColor.surfaceColor,
+      backgroundColor: ThemeColor.cardBackground,
       child: ListView.builder(
         controller: controller.scrollController,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
@@ -260,13 +281,13 @@ class ChatPage extends GetView<ChatController> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColorfondo,
+          color: ThemeColor.cardBackground.withOpacity(0.85),
           borderRadius: ThemeColor.mediumBorderRadius,
         ),
         child: Text(
           controller.formatDateSeparator(dt),
           style: ThemeColor.caption.copyWith(
-            color: ThemeColor.textSecondaryColor,
+            color: ThemeColor.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -279,9 +300,8 @@ class ChatPage extends GetView<ChatController> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        mainAxisAlignment: isOwn
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isOwn ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isOwn) ...[
@@ -291,11 +311,12 @@ class ChatPage extends GetView<ChatController> {
           Flexible(
             child: Container(
               constraints: BoxConstraints(maxWidth: Get.width * 0.7),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isOwn
                     ? ThemeColor.primaryColor
-                    : ThemeColor.surfaceColor,
+                    : ThemeColor.cardBackground,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(ThemeColor.mediumRadius),
                   topRight: Radius.circular(ThemeColor.mediumRadius),
@@ -317,7 +338,7 @@ class ChatPage extends GetView<ChatController> {
                       style: ThemeColor.bodyMedium.copyWith(
                         color: isOwn
                             ? ThemeColor.textLightColor
-                            : ThemeColor.textPrimaryColor,
+                            : ThemeColor.textPrimary,
                       ),
                     ),
                   const SizedBox(height: 4),
@@ -332,7 +353,7 @@ class ChatPage extends GetView<ChatController> {
                           style: ThemeColor.caption.copyWith(
                             color: isOwn
                                 ? ThemeColor.textLightColor.withOpacity(0.7)
-                                : ThemeColor.textSecondaryColor,
+                                : ThemeColor.textSecondary,
                             fontSize: 10,
                           ),
                         ),
@@ -349,7 +370,8 @@ class ChatPage extends GetView<ChatController> {
           ),
           if (isOwn) ...[
             const SizedBox(width: 8),
-            _buildMessageAvatar(mensaje.senderFoto ?? controller.myPhoto),
+            _buildMessageAvatar(
+                mensaje.senderFoto ?? controller.myPhoto),
           ],
         ],
       ),
@@ -385,17 +407,21 @@ class ChatPage extends GetView<ChatController> {
                 errorBuilder: (_, __, ___) => Icon(
                   Icons.person,
                   size: 18,
-                  color: ThemeColor.textSecondaryColor,
+                  color: ThemeColor.textSecondary,
                 ),
               )
             : Icon(
                 Icons.person,
                 size: 18,
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
               ),
       ),
     );
   }
+
+  // ==========================================
+  // MESSAGE INPUT
+  // ==========================================
 
   Widget _buildMessageInput() {
     return Obx(() {
@@ -404,7 +430,7 @@ class ChatPage extends GetView<ChatController> {
 
       return Container(
         decoration: BoxDecoration(
-          color: ThemeColor.surfaceColor,
+          color: ThemeColor.cardBackground,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -465,7 +491,8 @@ class ChatPage extends GetView<ChatController> {
                                     text:
                                         '${controller.balanceController.chatCost.toStringAsFixed(0)} ${_l.t('chat_credits')}. ',
                                   ),
-                                  TextSpan(text: _l.t('chat_balance_info')),
+                                  TextSpan(
+                                      text: _l.t('chat_balance_info')),
                                   WidgetSpan(
                                     alignment: PlaceholderAlignment.middle,
                                     child: Icon(
@@ -478,7 +505,8 @@ class ChatPage extends GetView<ChatController> {
                                     text:
                                         '${controller.balanceController.currentBalance.toStringAsFixed(0)}. ',
                                   ),
-                                  TextSpan(text: _l.t('chat_charge_info')),
+                                  TextSpan(
+                                      text: _l.t('chat_charge_info')),
                                 ],
                               ),
                             ),
@@ -540,9 +568,12 @@ class ChatPage extends GetView<ChatController> {
                             controller: controller.messageController,
                             enabled: !blocked,
                             maxLines: null,
-                            textCapitalization: TextCapitalization.sentences,
+                            textCapitalization:
+                                TextCapitalization.sentences,
                             textInputAction: TextInputAction.done,
-                            style: ThemeColor.bodyMedium,
+                            style: ThemeColor.bodyMedium.copyWith(
+                              color: ThemeColor.textPrimary,
+                            ),
                             onTap: blocked
                                 ? null
                                 : () {
@@ -562,10 +593,11 @@ class ChatPage extends GetView<ChatController> {
                                   ? _l.t('chat_hint_blocked')
                                   : _l.t('chat_hint'),
                               hintStyle: ThemeColor.bodyMedium.copyWith(
-                                color: ThemeColor.textSecondaryColor,
+                                color: ThemeColor.textSecondary,
                               ),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
+                              contentPadding:
+                                  const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 10,
                               ),
@@ -582,12 +614,11 @@ class ChatPage extends GetView<ChatController> {
                     ),
                     const SizedBox(width: 8),
                     Obx(() {
-                      final canSend =
-                          !blocked &&
+                      final canSend = !blocked &&
                           (controller.isNewConversation.value
                               ? !controller.isSending.value
                               : controller.isTyping.value &&
-                                    !controller.isSending.value);
+                                  !controller.isSending.value);
 
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
@@ -598,7 +629,8 @@ class ChatPage extends GetView<ChatController> {
                               ? ThemeColor.primaryColor
                               : ThemeColor.disabledColor,
                           shape: BoxShape.circle,
-                          boxShadow: canSend ? [ThemeColor.lightShadow] : [],
+                          boxShadow:
+                              canSend ? [ThemeColor.lightShadow] : [],
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -619,15 +651,15 @@ class ChatPage extends GetView<ChatController> {
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
+                                          Colors.white,
+                                        ),
                                       ),
                                     )
                                   : Icon(
                                       Icons.send,
                                       color: canSend
                                           ? ThemeColor.textLightColor
-                                          : ThemeColor.textSecondaryColor,
+                                          : ThemeColor.textSecondary,
                                       size: 22,
                                     ),
                             ),
@@ -644,6 +676,10 @@ class ChatPage extends GetView<ChatController> {
       );
     });
   }
+
+  // ==========================================
+  // ESTADOS
+  // ==========================================
 
   Widget _buildEmptyState() {
     return Center(
@@ -667,14 +703,16 @@ class ChatPage extends GetView<ChatController> {
             const SizedBox(height: 24),
             Text(
               _l.t('chat_empty_title'),
-              style: ThemeColor.headingSmall,
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               _l.t('chat_empty_subtitle'),
               style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -687,7 +725,8 @@ class ChatPage extends GetView<ChatController> {
   Widget _buildLoadingState() {
     return Center(
       child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+        valueColor:
+            AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
       ),
     );
   }
@@ -699,18 +738,24 @@ class ChatPage extends GetView<ChatController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 60, color: ThemeColor.errorColor),
+            Icon(
+              Icons.error_outline,
+              size: 60,
+              color: ThemeColor.errorColor,
+            ),
             const SizedBox(height: 16),
             Text(
               _l.t('chat_error_title'),
-              style: ThemeColor.headingSmall,
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               controller.errorMessage.value,
               style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

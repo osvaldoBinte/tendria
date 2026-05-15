@@ -2,8 +2,9 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
-import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_overlay.dart';
+import 'package:tendria/common/controller/theme_controller.dart';
+import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
@@ -23,74 +24,76 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-   ProfileController controller= Get.find<ProfileController>();
-    ProfileTutorialController tutorialCtrl = Get.find<ProfileTutorialController>();
+  ProfileController controller = Get.find<ProfileController>();
+  ProfileTutorialController tutorialCtrl =
+      Get.find<ProfileTutorialController>();
 
   UpdateProfileController get _updater => Get.find<UpdateProfileController>();
   BalanceController get _balanceController => Get.find<BalanceController>();
   LanguageController get _l => Get.find<LanguageController>();
+  ThemeController get _themeCtrl => Get.find<ThemeController>();
 
   @override
   void initState() {
-    super.initState(); 
- 
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tutorialCtrl.notifyPageReady();
     });
   }
+
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: ThemeColor.backgroundColorfondo,
-    body: Stack(                          // ← Stack
-      children: [
-       SafeArea(
-        child: Obx(() {
-          if (controller.isLoading.value &&
-              controller.userEntity.value == null) {
-            return Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  ThemeColor.primaryColor,
-                ),
-              ),
-            );
-          }
+    return Obx(() => Scaffold(
+          backgroundColor: ThemeColor.backgroundColorfondo,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Obx(() {
+                  if (controller.isLoading.value &&
+                      controller.userEntity.value == null) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ThemeColor.primaryColor,
+                        ),
+                      ),
+                    );
+                  }
 
-          return RefreshIndicator(
-            onRefresh: controller.loadUserProfile,
-            color: ThemeColor.primaryColor,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  SizedBox(height: ThemeColor.paddingLarge),
-                  //    _buildNearbyProfilesButton(),
-                  SizedBox(height: ThemeColor.paddingLarge),
-                  _buildPhotosSection(),
-                  SizedBox(height: ThemeColor.paddingLarge),
-                  _buildBiographySection(),
-                  SizedBox(height: ThemeColor.paddingLarge),
-                  InterestsSectionWidget(isEditable: true),
-                  SizedBox(height: ThemeColor.paddingLarge),
-                  QualitiesSectionWidget(isEditable: true),
-                  SizedBox(height: ThemeColor.paddingExtraLarge),
-                ],
+                  return RefreshIndicator(
+                    onRefresh: controller.loadUserProfile,
+                    color: ThemeColor.primaryColor,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          _buildHeader(),
+                          SizedBox(height: ThemeColor.paddingLarge),
+                          SizedBox(height: ThemeColor.paddingLarge),
+                          _buildPhotosSection(),
+                          SizedBox(height: ThemeColor.paddingLarge),
+                          _buildBiographySection(),
+                          SizedBox(height: ThemeColor.paddingLarge),
+                          InterestsSectionWidget(isEditable: true),
+                          SizedBox(height: ThemeColor.paddingLarge),
+                          QualitiesSectionWidget(isEditable: true),
+                          SizedBox(height: ThemeColor.paddingExtraLarge),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
               ),
-            ),
-          );
-        }),
-      ),
-        Obx(
-          () => tutorialCtrl.isVisible.value
-              ? const ProfileTutorialOverlay()
-              : const SizedBox.shrink(),
-        ),
-      ],
-    ),
-  );
-}
+              Obx(
+                () => tutorialCtrl.isVisible.value
+                    ? const ProfileTutorialOverlay()
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ));
+  }
+
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
@@ -105,36 +108,53 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: ThemeColor.headingLarge.copyWith(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: ThemeColor.textDarkColor,
+                    color: ThemeColor.textPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [ 
-IconButton(
-  key: tutorialCtrl.blockedUsersKey,   
-  icon: Icon(Icons.person_off, color: ThemeColor.textDarkColor),
-  onPressed: controller.onViewBlockedUsers,
-), 
-IconButton(
-  key: tutorialCtrl.notificationsKey,   
-  icon: Icon(Icons.notifications_none, color: ThemeColor.textDarkColor),
-  onPressed: controller.onViewNotifications,
-),
-// Editar perfil
-IconButton(
-  key: tutorialCtrl.editProfileKey,   
-  icon: Icon(Icons.edit, color: ThemeColor.textDarkColor),
-  onPressed: controller.onHelpTap,
-),
-// Settings
-IconButton(
-  key: tutorialCtrl.settingsKey,       
-  icon: Icon(Icons.settings_outlined, color: ThemeColor.textDarkColor),
-  onPressed: controller.onSettingsTap,
-),
+                children: [
+                  IconButton(
+                    key: tutorialCtrl.blockedUsersKey,
+                    icon: Icon(
+                      Icons.person_off,
+                      color: ThemeColor.iconColor,
+                    ),
+                    onPressed: controller.onViewBlockedUsers,
+                  ),
+                  IconButton(
+                    key: tutorialCtrl.notificationsKey,
+                    icon: Icon(
+                      Icons.notifications_none,
+                      color: ThemeColor.iconColor,
+                    ),
+                    onPressed: controller.onViewNotifications,
+                  ),
+                  IconButton(
+                    key: tutorialCtrl.editProfileKey,
+                    icon: Icon(Icons.edit, color: ThemeColor.iconColor),
+                    onPressed: controller.onHelpTap,
+                  ),
+                  // Botón tema oscuro/claro
+                  Obx(() => IconButton(
+                        icon: Icon(
+                          _themeCtrl.isDarkMode.value
+                              ? Icons.light_mode_rounded
+                              : Icons.dark_mode_rounded,
+                          color: ThemeColor.iconColor,
+                        ),
+                        onPressed: _themeCtrl.toggleTheme,
+                      )),
+                  IconButton(
+                    key: tutorialCtrl.settingsKey,
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: ThemeColor.iconColor,
+                    ),
+                    onPressed: controller.onSettingsTap,
+                  ),
                 ],
               ),
             ],
@@ -163,7 +183,8 @@ IconButton(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (status.isNotEmpty)
-                          GestureDetector(  key: tutorialCtrl.statusKey,
+                          GestureDetector(
+                            key: tutorialCtrl.statusKey,
                             onTap: () => _updater.showEditStatus(status),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 6),
@@ -172,9 +193,7 @@ IconButton(
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: ThemeColor.primaryColor.withOpacity(
-                                  0.12,
-                                ),
+                                color: ThemeColor.primaryColor.withOpacity(0.12),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(12),
                                   topRight: Radius.circular(12),
@@ -182,9 +201,7 @@ IconButton(
                                   bottomLeft: Radius.circular(4),
                                 ),
                                 border: Border.all(
-                                  color: ThemeColor.primaryColor.withOpacity(
-                                    0.3,
-                                  ),
+                                  color: ThemeColor.primaryColor.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
@@ -206,9 +223,8 @@ IconButton(
                                   Icon(
                                     Icons.edit,
                                     size: 12,
-                                    color: ThemeColor.primaryColor.withOpacity(
-                                      0.6,
-                                    ),
+                                    color:
+                                        ThemeColor.primaryColor.withOpacity(0.6),
                                   ),
                                 ],
                               ),
@@ -225,7 +241,7 @@ IconButton(
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
+                                color: ThemeColor.subtleBackground,
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(12),
                                   topRight: Radius.circular(12),
@@ -233,7 +249,7 @@ IconButton(
                                   bottomLeft: Radius.circular(4),
                                 ),
                                 border: Border.all(
-                                  color: Colors.grey.shade300,
+                                  color: ThemeColor.subtleBorder,
                                   width: 1,
                                 ),
                               ),
@@ -243,13 +259,13 @@ IconButton(
                                   Icon(
                                     Icons.add,
                                     size: 13,
-                                    color: ThemeColor.textSecondaryColor,
+                                    color: ThemeColor.textSecondary,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     _l.t('add_status'),
                                     style: ThemeColor.bodySmall.copyWith(
-                                      color: ThemeColor.textSecondaryColor,
+                                      color: ThemeColor.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -262,13 +278,14 @@ IconButton(
                           style: ThemeColor.headingMedium.copyWith(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: ThemeColor.textDarkColor,
+                            color: ThemeColor.textPrimary,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,
                         ),
-                        InkWell(  key: tutorialCtrl.creditsKey,  
 
+                        InkWell(
+                          key: tutorialCtrl.creditsKey,
                           onTap: () {
                             Get.offAllNamed(RoutesNames.purchasePage);
                           },
@@ -287,7 +304,7 @@ IconButton(
                                   style: ThemeColor.headingMedium.copyWith(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: ThemeColor.textDarkColor,
+                                    color: ThemeColor.textPrimary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
@@ -319,7 +336,7 @@ IconButton(
       margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
       padding: EdgeInsets.all(ThemeColor.paddingLarge),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ThemeColor.cardBackground,
         borderRadius: ThemeColor.largeBorderRadius,
         boxShadow: [ThemeColor.cardShadow],
       ),
@@ -336,7 +353,7 @@ IconButton(
                   _l.t('photos'),
                   style: ThemeColor.subtitleLarge.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: ThemeColor.textDarkColor,
+                    color: ThemeColor.textPrimary,
                   ),
                 ),
                 Container(
@@ -353,9 +370,8 @@ IconButton(
                   child: Text(
                     '$count / $max',
                     style: ThemeColor.bodySmall.copyWith(
-                      color: count < max
-                          ? ThemeColor.primaryColor
-                          : Colors.green,
+                      color:
+                          count < max ? ThemeColor.primaryColor : Colors.green,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -367,7 +383,7 @@ IconButton(
           Text(
             _l.t('photos_hint'),
             style: ThemeColor.bodySmall.copyWith(
-              color: ThemeColor.textSecondaryColor,
+              color: ThemeColor.textSecondary,
             ),
           ),
           SizedBox(height: ThemeColor.paddingMedium),
@@ -406,7 +422,7 @@ IconButton(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: ThemeColor.cardBackground,
               borderRadius: ThemeColor.mediumBorderRadius,
               border: Border.all(color: ThemeColor.dividerColor, width: 1),
             ),
@@ -429,13 +445,12 @@ IconButton(
                   color: ThemeColor.backgroundColorfondo,
                   child: Icon(
                     Icons.broken_image,
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                 ),
               ),
             ),
           ),
-
           Positioned(
             top: 4,
             right: 4,
@@ -455,9 +470,8 @@ IconButton(
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Icon(Icons.close, color: Colors.white, size: 14),
@@ -477,7 +491,7 @@ IconButton(
         onTap: isUploading ? null : controller.addPhoto,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.mediumBorderRadius,
             border: Border.all(color: ThemeColor.dividerColor, width: 1),
           ),
@@ -494,7 +508,7 @@ IconButton(
                     ),
                   ),
                 )
-              : Icon(Icons.add, color: ThemeColor.textSecondaryColor, size: 32),
+              : Icon(Icons.add, color: ThemeColor.textSecondary, size: 32),
         ),
       );
     });
@@ -512,7 +526,7 @@ IconButton(
           margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
           padding: EdgeInsets.all(ThemeColor.paddingLarge),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.largeBorderRadius,
             boxShadow: [ThemeColor.cardShadow],
           ),
@@ -527,7 +541,7 @@ IconButton(
                       _l.t('my_biography'),
                       style: ThemeColor.subtitleLarge.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -535,7 +549,7 @@ IconButton(
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                 ],
               ),
@@ -543,7 +557,7 @@ IconButton(
               Text(
                 bio,
                 style: ThemeColor.bodyMedium.copyWith(
-                  color: ThemeColor.textDarkColor,
+                  color: ThemeColor.textPrimary,
                 ),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,

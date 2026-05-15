@@ -66,7 +66,7 @@ class PurchasePage extends StatelessWidget {
 
             // ── Contenido principal ──────────────────────────────────
             if (controller.isLoadingProducts.value)
-              const Expanded(
+               Expanded(
                 child: Center(
                   child: CircularProgressIndicator(
                     color: ThemeColor.primaryColor,

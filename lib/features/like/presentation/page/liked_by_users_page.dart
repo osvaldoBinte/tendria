@@ -14,26 +14,26 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ThemeColor.backgroundColorfondo,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Obx(() => _buildHeader()),
-            _buildTabSwitch(),
-            Expanded(
-              child: Obx(() {
-                if (controller.activeTab.value == 0) {
-                  return _buildPendingChatsSection();
-                } else {
-                  return _buildLikesSection();
-                }
-              }),
+    return Obx(() => Scaffold(
+          backgroundColor: ThemeColor.backgroundColorfondo,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Obx(() => _buildHeader()),
+                _buildTabSwitch(),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.activeTab.value == 0) {
+                      return _buildPendingChatsSection();
+                    } else {
+                      return _buildLikesSection();
+                    }
+                  }),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   // ==========================================
@@ -43,14 +43,14 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.all(ThemeColor.paddingMedium),
-      color: ThemeColor.backgroundColor,
+      color: ThemeColor.cardBackground,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               const SizedBox(width: 8),
-              Image.asset('assets/logo/logo.png', width: 100, height: 100),
+              ThemeColor.widgetLogo(width: 100, height: 100),
               const SizedBox(width: 8),
               Container(
                 width: 8,
@@ -67,6 +67,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                     : 'Les gusté',
                 style: ThemeColor.subtitleLarge.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: ThemeColor.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -87,7 +88,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                       child: Icon(
                         Icons.notifications_outlined,
                         size: 26,
-                        color: ThemeColor.textPrimaryColor,
+                        color: ThemeColor.textPrimary,
                       ),
                     ),
                     Positioned(
@@ -124,7 +125,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                 ? _l.t('unlock_hint')
                 : 'Usuarios que te dieron like',
             style: ThemeColor.bodyMedium.copyWith(
-              color: ThemeColor.textSecondaryColor,
+              color: ThemeColor.textSecondary,
             ),
           ),
         ],
@@ -141,7 +142,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
           margin: EdgeInsets.all(ThemeColor.paddingMedium),
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: ThemeColor.backgroundColor,
+            color: ThemeColor.cardBackground,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [ThemeColor.lightShadow],
           ),
@@ -189,25 +190,23 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                 size: 18,
                 color: isActive
                     ? ThemeColor.textLightColor
-                    : ThemeColor.textSecondaryColor,
+                    : ThemeColor.textSecondary,
               ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight:
-                      isActive ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                   color: isActive
                       ? ThemeColor.textLightColor
-                      : ThemeColor.textSecondaryColor,
+                      : ThemeColor.textSecondary,
                 ),
               ),
               if (count > 0) ...[
                 const SizedBox(width: 6),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: isActive
                         ? Colors.white.withOpacity(0.3)
@@ -219,9 +218,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: isActive
-                          ? ThemeColor.textLightColor
-                          : Colors.white,
+                      color: isActive ? ThemeColor.textLightColor : Colors.white,
                     ),
                   ),
                 ),
@@ -245,7 +242,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       return RefreshIndicator(
         onRefresh: controller.refreshPendingChats,
         color: ThemeColor.primaryColor,
-        backgroundColor: ThemeColor.surfaceColor,
+        backgroundColor: ThemeColor.cardBackground,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [SliverFillRemaining(child: _buildErrorState())],
@@ -256,7 +253,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       return RefreshIndicator(
         onRefresh: controller.refreshPendingChats,
         color: ThemeColor.primaryColor,
-        backgroundColor: ThemeColor.surfaceColor,
+        backgroundColor: ThemeColor.cardBackground,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [SliverFillRemaining(child: _buildEmptyState())],
@@ -266,7 +263,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
     return RefreshIndicator(
       onRefresh: controller.refreshPendingChats,
       color: ThemeColor.primaryColor,
-      backgroundColor: ThemeColor.surfaceColor,
+      backgroundColor: ThemeColor.cardBackground,
       child: _buildChatGrid(),
     );
   }
@@ -283,7 +280,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       return RefreshIndicator(
         onRefresh: controller.refreshLikedByUsers,
         color: ThemeColor.primaryColor,
-        backgroundColor: ThemeColor.surfaceColor,
+        backgroundColor: ThemeColor.cardBackground,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [SliverFillRemaining(child: _buildLikesErrorState())],
@@ -294,7 +291,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       return RefreshIndicator(
         onRefresh: controller.refreshLikedByUsers,
         color: ThemeColor.primaryColor,
-        backgroundColor: ThemeColor.surfaceColor,
+        backgroundColor: ThemeColor.cardBackground,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [SliverFillRemaining(child: _buildLikesEmptyState())],
@@ -304,7 +301,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
     return RefreshIndicator(
       onRefresh: controller.refreshLikedByUsers,
       color: ThemeColor.primaryColor,
-      backgroundColor: ThemeColor.surfaceColor,
+      backgroundColor: ThemeColor.cardBackground,
       child: _buildLikesGrid(),
     );
   }
@@ -331,7 +328,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       onTap: () => controller.navigateToUserProfile(user.fromusererId),
       child: Container(
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
           boxShadow: [ThemeColor.cardShadow],
         ),
@@ -341,7 +338,6 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
             Expanded(
               child: Stack(
                 children: [
-                  // Foto
                   ClipRRect(
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(ThemeColor.mediumRadius),
@@ -354,8 +350,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                           ? Image.network(
                               user.profilePictureUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _buildDefaultAvatar(),
+                              errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
                               loadingBuilder: (_, child, progress) {
                                 if (progress == null) return child;
                                 return Center(
@@ -402,7 +397,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                     left: 8,
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.pinkAccent,
                         shape: BoxShape.circle,
                       ),
@@ -442,8 +437,10 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                 children: [
                   Text(
                     '${user.username}, ${user.ega}',
-                    style: ThemeColor.subtitleMedium
-                        .copyWith(fontWeight: FontWeight.w600),
+                    style: ThemeColor.subtitleMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: ThemeColor.textPrimary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -496,7 +493,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       onTap: () => controller.navigateToProfile(chat.userId),
       child: Container(
         decoration: BoxDecoration(
-          color: ThemeColor.backgroundColor,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
           boxShadow: [ThemeColor.cardShadow],
         ),
@@ -518,8 +515,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                           ? Image.network(
                               chat.photoUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _buildDefaultAvatar(),
+                              errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
                               loadingBuilder: (_, child, progress) {
                                 if (progress == null) return child;
                                 return Center(
@@ -566,8 +562,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                         color: ThemeColor.primaryColor,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.lock,
-                          color: Colors.white, size: 16),
+                      child: const Icon(Icons.lock, color: Colors.white, size: 16),
                     ),
                   ),
                   Positioned(
@@ -629,8 +624,10 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                     chat.age != null
                         ? '${chat.name ?? _l.t('user')}, ${chat.age}'
                         : chat.name ?? _l.t('user'),
-                    style: ThemeColor.subtitleMedium
-                        .copyWith(fontWeight: FontWeight.w600),
+                    style: ThemeColor.subtitleMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: ThemeColor.textPrimary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -660,8 +657,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
     return Container(
       color: ThemeColor.backgroundColorfondo,
       child: Center(
-        child: Icon(Icons.person,
-            size: 60, color: ThemeColor.textSecondaryColor),
+        child: Icon(Icons.person, size: 60, color: ThemeColor.textSecondary),
       ),
     );
   }
@@ -676,14 +672,14 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor:
-                AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
           ),
           SizedBox(height: ThemeColor.paddingLarge),
           Text(
             _l.t('loading_pending'),
-            style: ThemeColor.bodyMedium
-                .copyWith(color: ThemeColor.textSecondaryColor),
+            style: ThemeColor.bodyMedium.copyWith(
+              color: ThemeColor.textSecondary,
+            ),
           ),
         ],
       ),
@@ -707,13 +703,19 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                   size: 60, color: ThemeColor.errorColor),
             ),
             SizedBox(height: ThemeColor.paddingLarge),
-            Text(_l.t('error_title'),
-                style: ThemeColor.headingSmall, textAlign: TextAlign.center),
+            Text(
+              _l.t('error_title'),
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               controller.errorMessage.value,
-              style: ThemeColor.bodyMedium
-                  .copyWith(color: ThemeColor.textSecondaryColor),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: ThemeColor.paddingLarge),
@@ -750,13 +752,19 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                   size: 60, color: ThemeColor.errorColor),
             ),
             SizedBox(height: ThemeColor.paddingLarge),
-            Text('Error al cargar likes',
-                style: ThemeColor.headingSmall, textAlign: TextAlign.center),
+            Text(
+              'Error al cargar likes',
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               controller.errorMessageLikes.value,
-              style: ThemeColor.bodyMedium
-                  .copyWith(color: ThemeColor.textSecondaryColor),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: ThemeColor.paddingLarge),
@@ -793,20 +801,25 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                   size: 60, color: ThemeColor.primaryColor),
             ),
             SizedBox(height: ThemeColor.paddingLarge),
-            Text(_l.t('empty_title_pending'),
-                style: ThemeColor.headingSmall, textAlign: TextAlign.center),
+            Text(
+              _l.t('empty_title_pending'),
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               _l.t('empty_subtitle_pending'),
-              style: ThemeColor.bodyMedium
-                  .copyWith(color: ThemeColor.textSecondaryColor),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: ThemeColor.paddingLarge),
             ThemeColor.widgetButton(
               text: _l.t('explore'),
-              onPressed: () =>
-                  Get.offAllNamed(RoutesNames.preferencesPage),
+              onPressed: () => Get.offAllNamed(RoutesNames.preferencesPage),
               backgroundColor: ThemeColor.primaryColor,
               textColor: ThemeColor.textLightColor,
               padding: EdgeInsets.symmetric(
@@ -839,14 +852,17 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
             SizedBox(height: ThemeColor.paddingLarge),
             Text(
               'Nadie te ha dado like aún',
-              style: ThemeColor.headingSmall,
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               'Sigue explorando para conseguir más matches',
-              style: ThemeColor.bodyMedium
-                  .copyWith(color: ThemeColor.textSecondaryColor),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tendria/common/controller/updateProfile/update_profile_tutorial_controller.dart';
-import 'package:tendria/common/controller/updateProfile/update_profile_tutorial_overlay.dart';
+import 'package:tendria/common/tutorial/updateProfile/update_profile_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/updateProfile/update_profile_tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
@@ -48,14 +48,17 @@ Widget build(BuildContext context) {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: AppBar(
-            backgroundColor: ThemeColor.backgroundColor,
-            elevation: 10,
-            shadowColor: ThemeColor.shadowColor,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: ThemeColor.textDarkColor),
-              onPressed: () => Get.back(),
-            ),
-          ),
+                  backgroundColor: ThemeColor.cardBackground,
+                  elevation: 10,
+                  shadowColor: ThemeColor.shadowColor,
+                  leading: IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios,
+                      color: ThemeColor.iconColor,
+                    ),
+                    onPressed: () => Get.back(),
+                  ),
+                ),
         ),
         body: SafeArea(
           child: Obx(() {

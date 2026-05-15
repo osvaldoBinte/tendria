@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tendria/common/controller/startTutorial/start_tutorial_controller.dart';
-import 'package:tendria/common/controller/startTutorial/start_tutorial_overlay.dart';
-import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/startTutorial/start_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/startTutorial/start_tutorial_overlay.dart';
+import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/panic_button.dart';
 import 'start_controller.dart';

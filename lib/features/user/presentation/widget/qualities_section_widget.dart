@@ -10,31 +10,25 @@ import 'package:tendria/features/user/presentation/controller/update_profile_con
 class QualitiesSectionWidget extends StatefulWidget {
   final bool isEditable;
 
-  const QualitiesSectionWidget({
-    Key? key,
-    this.isEditable = false,
-  }) : super(key: key);
+  const QualitiesSectionWidget({Key? key, this.isEditable = false})
+    : super(key: key);
 
   @override
-  State<QualitiesSectionWidget> createState() =>
-      _QualitiesSectionWidgetState();
+  State<QualitiesSectionWidget> createState() => _QualitiesSectionWidgetState();
 }
 
 class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
   ProfileController get _profile => Get.find<ProfileController>();
-  UpdateProfileController get _update =>
-      Get.find<UpdateProfileController>();
+  UpdateProfileController get _update => Get.find<UpdateProfileController>();
   LanguageController get _l => Get.find<LanguageController>();
   TranslationService get _translator => Get.find<TranslationService>();
 
-  // Cache local: nombre original → traducción actual
   final RxMap<String, String> _translated = <String, String>{}.obs;
   String _lastLang = '';
 
   @override
   void initState() {
     super.initState();
-    // Traducir cuando cambie el idioma o las cualidades
     ever(_profile.userEntity, (_) => _translateQualities());
     ever(_translator.isReady, (_) => _translateQualities());
   }
@@ -45,7 +39,6 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
 
     if (qualities.isEmpty) return;
 
-    // Si el idioma es español, usar nombres originales directamente
     if (lang == 'Español') {
       final map = {for (var q in qualities) q.name: q.name};
       _translated.assignAll(map);
@@ -53,13 +46,11 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
       return;
     }
 
-    // Si ya tradujimos para este idioma, no repetir
     if (_lastLang == lang &&
         qualities.every((q) => _translated.containsKey(q.name))) {
       return;
     }
 
-    // Traducir todos los nombres
     final names = qualities.map((q) => q.name).toList();
     final results = await _translator.translateList(names, lang);
 
@@ -81,25 +72,23 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
     return Obx(() {
       final qualities = _profile.qualities;
 
-      // Disparar traducción cuando cambie el idioma
       final currentLang = _l.lang;
       if (currentLang != _lastLang) {
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _translateQualities());
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _translateQualities(),
+        );
       }
 
       return GestureDetector(
         onTap: widget.isEditable
-            ? () => _update.showEditQualities(
-                  qualities.map((q) => q.id).toList(),
-                )
+            ? () =>
+                  _update.showEditQualities(qualities.map((q) => q.id).toList())
             : null,
         child: Container(
-          margin: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingLarge),
+          margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
           padding: EdgeInsets.all(ThemeColor.paddingLarge),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.largeBorderRadius,
             boxShadow: [ThemeColor.cardShadow],
           ),
@@ -114,7 +103,7 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
                       _l.t('qualities_title'),
                       style: ThemeColor.subtitleLarge.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -122,7 +111,7 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                 ],
               ),
@@ -132,7 +121,7 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
               Text(
                 _l.t('qualities_subtitle'),
                 style: ThemeColor.bodySmall.copyWith(
-                  color: ThemeColor.textSecondaryColor,
+                  color: ThemeColor.textSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
@@ -142,19 +131,20 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
 
               qualities.isEmpty
                   ? _buildEmptyState()
-                  : Obx(() => Wrap(
+                  : Obx(
+                      () => Wrap(
                         spacing: ThemeColor.paddingSmall,
                         runSpacing: ThemeColor.paddingSmall,
                         children: qualities.take(3).map((quality) {
                           return _QualityChip(
                             label: _getLabel(quality.name),
                             onDelete: widget.isEditable
-                                ? () =>
-                                    _update.removeQuality(quality.id)
+                                ? () => _update.removeQuality(quality.id)
                                 : null,
                           );
                         }).toList(),
-                      )),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -168,14 +158,12 @@ class _QualitiesSectionWidgetState extends State<QualitiesSectionWidget> {
         Icon(
           Icons.add_circle_outline,
           size: 18,
-          color: ThemeColor.textSecondaryColor,
+          color: ThemeColor.textSecondary,
         ),
         const SizedBox(width: 8),
         Text(
           _l.t('qualities_add'),
-          style: ThemeColor.bodySmall.copyWith(
-            color: ThemeColor.textSecondaryColor,
-          ),
+          style: ThemeColor.bodySmall.copyWith(color: ThemeColor.textSecondary),
         ),
       ],
     );
@@ -187,44 +175,47 @@ class _QualityChip extends StatelessWidget {
   final VoidCallback? onDelete;
 
   const _QualityChip({Key? key, required this.label, this.onDelete})
-      : super(key: key);
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: ThemeColor.paddingLarge,
-        vertical: ThemeColor.paddingSmall + 2,
-      ),
-      decoration: BoxDecoration(
-        color: ThemeColor.backgroundColorfondo,
-        borderRadius: ThemeColor.circularBorderRadius,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              label,
-              style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textDarkColor,
-                fontWeight: FontWeight.w500,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          if (onDelete != null) ...[
-            const SizedBox(width: 6),
-            GestureDetector(
-              onTap: onDelete,
-              child: Icon(
-                Icons.close,
-                size: 16,
-                color: ThemeColor.textSecondaryColor,
+    return Obx(
+      () => Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: ThemeColor.paddingLarge,
+          vertical: ThemeColor.paddingSmall + 2,
+        ),
+        decoration: BoxDecoration(
+          color: ThemeColor.backgroundColorfondo,
+          borderRadius: ThemeColor.circularBorderRadius,
+          border: Border.all(color: ThemeColor.subtleBorder),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                label,
+                style: ThemeColor.bodyMedium.copyWith(
+                  color: ThemeColor.textPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            if (onDelete != null) ...[
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: onDelete,
+                child: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: ThemeColor.textSecondary,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

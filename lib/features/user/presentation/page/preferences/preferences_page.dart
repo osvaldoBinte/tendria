@@ -16,56 +16,56 @@ class PreferencesPage extends GetView<PreferencesController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ThemeColor.backgroundColorfondo,
-      body: SafeArea(
-        child: Obx(() {
-          if (!controller.isInitialized.value ||
-              controller.isLoadingUserData.value) {
-            return Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  ThemeColor.primaryColor,
-                ),
-              ),
-            );
-          }
+    return Obx(() => Scaffold(
+          backgroundColor: ThemeColor.backgroundColorfondo,
+          body: SafeArea(
+            child: Obx(() {
+              if (!controller.isInitialized.value ||
+                  controller.isLoadingUserData.value) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ThemeColor.primaryColor,
+                    ),
+                  ),
+                );
+              }
 
-          if (controller.showSuccessScreen.value) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
-            });
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+              if (controller.showSuccessScreen.value) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
+                });
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          if (controller.availableSteps.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
-            });
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+              if (controller.availableSteps.isEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Get.offAllNamed(RoutesNames.homePage, arguments: {'tab': 1});
+                });
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          switch (controller.currentStep.value) {
-            case PreferencesStep.genderPreference:
-              return _buildGenderPreferenceStep();
-            case PreferencesStep.connectionType:
-              return _buildConnectionTypeStep();
-            case PreferencesStep.ageRange:
-              return _buildAgeRangeStep();
-            case PreferencesStep.photos:
-              return _buildPhotosStep();
-            case PreferencesStep.interests:
-              return _buildInterestsStep();
-            case PreferencesStep.qualities:
-              return _buildQualitiesStep();
-          }
-        }),
-      ),
-    );
+              switch (controller.currentStep.value) {
+                case PreferencesStep.genderPreference:
+                  return _buildGenderPreferenceStep();
+                case PreferencesStep.connectionType:
+                  return _buildConnectionTypeStep();
+                case PreferencesStep.ageRange:
+                  return _buildAgeRangeStep();
+                case PreferencesStep.photos:
+                  return _buildPhotosStep();
+                case PreferencesStep.interests:
+                  return _buildInterestsStep();
+                case PreferencesStep.qualities:
+                  return _buildQualitiesStep();
+              }
+            }),
+          ),
+        ));
   }
 
   // ─── GENDER PREFERENCE ───────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -94,7 +94,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   Text(
                     lang.t('pref_gender_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -119,14 +119,14 @@ class PreferencesPage extends GetView<PreferencesController> {
                       Icon(
                         Icons.visibility_outlined,
                         size: 16,
-                        color: ThemeColor.textSecondaryColor,
+                        color: ThemeColor.textSecondary,
                       ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           lang.t('pref_gender_hint'),
                           style: ThemeColor.bodySmall.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       ),
@@ -159,7 +159,7 @@ class PreferencesPage extends GetView<PreferencesController> {
             border: Border.all(
               color: isSelected
                   ? ThemeColor.primaryColor
-                  : ThemeColor.textSecondaryColor,
+                  : ThemeColor.subtleBorder,
             ),
             color: isSelected
                 ? ThemeColor.primaryColor.withOpacity(0.1)
@@ -171,18 +171,25 @@ class PreferencesPage extends GetView<PreferencesController> {
                 icon,
                 color: isSelected
                     ? ThemeColor.tertiaryColor
-                    : ThemeColor.textSecondaryColor,
+                    : ThemeColor.textSecondary,
                 size: 24,
               ),
               SizedBox(width: 8),
-              Expanded(child: Text(label)),
+              Expanded(
+                child: Text(
+                  label,
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textPrimary,
+                  ),
+                ),
+              ),
               Icon(
                 isSelected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
                 color: isSelected
                     ? ThemeColor.primaryColor
-                    : ThemeColor.textSecondaryColor,
+                    : ThemeColor.textSecondary,
               ),
             ],
           ),
@@ -209,7 +216,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -217,7 +224,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   Text(
                     lang.t('pref_connection_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -240,14 +247,14 @@ class PreferencesPage extends GetView<PreferencesController> {
                       Icon(
                         Icons.visibility_outlined,
                         size: 16,
-                        color: ThemeColor.textSecondaryColor,
+                        color: ThemeColor.textSecondary,
                       ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           lang.t('pref_connection_hint'),
                           style: ThemeColor.bodySmall.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       ),
@@ -274,11 +281,11 @@ class PreferencesPage extends GetView<PreferencesController> {
             vertical: ThemeColor.paddingMedium + 2,
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.mediumBorderRadius,
             border: isSelected
                 ? Border.all(color: ThemeColor.tertiaryColor, width: 2)
-                : null,
+                : Border.all(color: ThemeColor.subtleBorder),
           ),
           child: Row(
             children: [
@@ -286,7 +293,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                 child: Text(
                   label,
                   style: ThemeColor.bodyMedium.copyWith(
-                    color: ThemeColor.textDarkColor,
+                    color: ThemeColor.textPrimary,
                   ),
                 ),
               ),
@@ -295,13 +302,11 @@ class PreferencesPage extends GetView<PreferencesController> {
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected
-                      ? ThemeColor.tertiaryColor
-                      : Colors.transparent,
+                  color: isSelected ? ThemeColor.tertiaryColor : Colors.transparent,
                   border: Border.all(
                     color: isSelected
                         ? ThemeColor.tertiaryColor
-                        : ThemeColor.textSecondaryColor,
+                        : ThemeColor.textSecondary,
                     width: 2,
                   ),
                 ),
@@ -334,7 +339,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -342,7 +347,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   Text(
                     lang.t('pref_age_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingExtraLarge),
@@ -354,7 +359,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                             lang.t('bs_age_min'),
                             style: ThemeColor.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: ThemeColor.textDarkColor,
+                              color: ThemeColor.textPrimary,
                             ),
                           ),
                         ),
@@ -365,7 +370,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                             lang.t('bs_age_max'),
                             style: ThemeColor.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: ThemeColor.textDarkColor,
+                              color: ThemeColor.textPrimary,
                             ),
                           ),
                         ),
@@ -385,7 +390,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                               horizontal: ThemeColor.paddingMedium,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: ThemeColor.cardBackground,
                               borderRadius: ThemeColor.extraLargeBorderRadius,
                               boxShadow: [
                                 BoxShadow(
@@ -431,7 +436,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                       child: Text(
                         'De ${controller.minAge.value} a ${controller.maxAge.value} ${lang.t('years')}',
                         style: ThemeColor.bodyMedium.copyWith(
-                          color: ThemeColor.textSecondaryColor,
+                          color: ThemeColor.textSecondary,
                         ),
                       ),
                     ),
@@ -442,7 +447,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingSmall.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
@@ -452,7 +457,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                           ? lang.t('no_limit')
                           : '${lang.t('pref_distance_up_to')} ${controller.distanceKm.value.toStringAsFixed(controller.distanceKm.value == controller.distanceKm.value.roundToDouble() ? 0 : 1)} km',
                       style: ThemeColor.bodyMedium.copyWith(
-                        color: ThemeColor.textSecondaryColor,
+                        color: ThemeColor.textSecondary,
                       ),
                     ),
                   ),
@@ -469,7 +474,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                               horizontal: ThemeColor.paddingExtraLarge * 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: ThemeColor.cardBackground,
                               borderRadius: ThemeColor.extraLargeBorderRadius,
                               boxShadow: [
                                 BoxShadow(
@@ -517,14 +522,14 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingSmall),
                   Text(
                     lang.t('pref_photos_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -559,7 +564,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                       child: Text(
                         '${controller.selectedPhotos.length}/${controller.maxPhotos} ${lang.t('photos')}',
                         style: ThemeColor.bodyMedium.copyWith(
-                          color: ThemeColor.textSecondaryColor,
+                          color: ThemeColor.textSecondary,
                         ),
                       ),
                     ),
@@ -590,8 +595,7 @@ class PreferencesPage extends GetView<PreferencesController> {
           height: 28,
           child: CircularProgressIndicator(
             strokeWidth: 2.5,
-            valueColor:
-                AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
+            valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
           ),
         ),
       ),
@@ -603,9 +607,9 @@ class PreferencesPage extends GetView<PreferencesController> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.mediumBorderRadius,
-            border: Border.all(color: ThemeColor.dividerColor, width: 1),
+            border: Border.all(color: ThemeColor.subtleBorder, width: 1),
           ),
           child: ClipRRect(
             borderRadius: ThemeColor.mediumBorderRadius,
@@ -641,12 +645,11 @@ class PreferencesPage extends GetView<PreferencesController> {
       onTap: controller.showPhotoOptions,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: ThemeColor.cardBackground,
           borderRadius: ThemeColor.mediumBorderRadius,
-          border: Border.all(color: ThemeColor.dividerColor, width: 1),
+          border: Border.all(color: ThemeColor.subtleBorder, width: 1),
         ),
-        child:
-            Icon(Icons.add, color: ThemeColor.textSecondaryColor, size: 32),
+        child: Icon(Icons.add, color: ThemeColor.textSecondary, size: 32),
       ),
     );
   }
@@ -669,7 +672,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -677,7 +680,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   Text(
                     lang.t('interests_page_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -688,23 +691,24 @@ class PreferencesPage extends GetView<PreferencesController> {
                       vertical: ThemeColor.paddingSmall,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: ThemeColor.cardBackground,
                       borderRadius: ThemeColor.mediumBorderRadius,
+                      border: Border.all(color: ThemeColor.subtleBorder),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.search, color: ThemeColor.textSecondaryColor),
+                        Icon(Icons.search, color: ThemeColor.textSecondary),
                         SizedBox(width: ThemeColor.paddingSmall),
                         Expanded(
                           child: TextField(
+                            style: TextStyle(color: ThemeColor.textPrimary),
                             decoration: InputDecoration(
                               hintText: lang.t('interests_search_hint'),
                               hintStyle: ThemeColor.bodyMedium.copyWith(
-                                color: ThemeColor.textSecondaryColor,
+                                color: ThemeColor.textSecondary,
                               ),
                               border: InputBorder.none,
                             ),
-                            style: ThemeColor.bodyMedium,
                           ),
                         ),
                       ],
@@ -718,14 +722,14 @@ class PreferencesPage extends GetView<PreferencesController> {
                         Text(
                           lang.t('interests_popular'),
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textDarkColor,
+                            color: ThemeColor.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           '${controller.selectedInterests.length}/${controller.maxInterests} ${lang.t('bs_interests_selected')}',
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       ],
@@ -736,8 +740,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     if (controller.isLoadingInterests.value) {
                       return Center(
                         child: Padding(
-                          padding:
-                              EdgeInsets.all(ThemeColor.paddingExtraLarge),
+                          padding: EdgeInsets.all(ThemeColor.paddingExtraLarge),
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
                               ThemeColor.primaryColor,
@@ -751,7 +754,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                         child: Text(
                           lang.t('pref_no_interests'),
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       );
@@ -776,12 +779,11 @@ class PreferencesPage extends GetView<PreferencesController> {
                     child: Text(
                       lang.t('interests_custom_hint'),
                       style: ThemeColor.bodySmall.copyWith(
-                        color: ThemeColor.textSecondaryColor,
+                        color: ThemeColor.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(height: ThemeColor.paddingMedium),
                   SizedBox(height: ThemeColor.paddingExtraLarge),
                 ],
               ),
@@ -807,10 +809,10 @@ class PreferencesPage extends GetView<PreferencesController> {
           vertical: ThemeColor.paddingSmall + 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+          color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.cardBackground,
           borderRadius: ThemeColor.circularBorderRadius,
           border: Border.all(
-            color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+            color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.subtleBorder,
           ),
         ),
         child: Row(
@@ -819,13 +821,13 @@ class PreferencesPage extends GetView<PreferencesController> {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? Colors.white : ThemeColor.textDarkColor,
+              color: isSelected ? Colors.white : ThemeColor.textPrimary,
             ),
             SizedBox(width: 6),
             Text(
               label,
               style: ThemeColor.bodyMedium.copyWith(
-                color: isSelected ? Colors.white : ThemeColor.textDarkColor,
+                color: isSelected ? Colors.white : ThemeColor.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -898,7 +900,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -906,7 +908,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                   Text(
                     lang.t('qualities_page_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -915,7 +917,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     () => Text(
                       '${lang.t('qualities_counter_label')}        ${controller.selectedQualities.length}/${controller.maxQualities} ${lang.t('bs_interests_selected')}',
                       style: ThemeColor.bodyMedium.copyWith(
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -925,8 +927,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     if (controller.isLoadingQualities.value) {
                       return Center(
                         child: Padding(
-                          padding:
-                              EdgeInsets.all(ThemeColor.paddingExtraLarge),
+                          padding: EdgeInsets.all(ThemeColor.paddingExtraLarge),
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
                               ThemeColor.primaryColor,
@@ -940,7 +941,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                         child: Text(
                           lang.t('pref_no_qualities'),
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       );
@@ -970,8 +971,7 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  Widget _buildQualityChip(
-      String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildQualityChip(String label, bool isSelected, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -980,16 +980,16 @@ class PreferencesPage extends GetView<PreferencesController> {
           vertical: ThemeColor.paddingMedium - 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+          color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.cardBackground,
           borderRadius: ThemeColor.circularBorderRadius,
           border: Border.all(
-            color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+            color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.subtleBorder,
           ),
         ),
         child: Text(
           label,
           style: ThemeColor.bodyMedium.copyWith(
-            color: isSelected ? Colors.white : ThemeColor.textDarkColor,
+            color: isSelected ? Colors.white : ThemeColor.textPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1039,9 +1039,8 @@ class PreferencesPage extends GetView<PreferencesController> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         ),
                       )
@@ -1102,8 +1101,7 @@ class PreferencesPage extends GetView<PreferencesController> {
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
                 )

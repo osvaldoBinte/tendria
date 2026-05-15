@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tendria/common/controller/startTutorial/start_tutorial_controller.dart';
-import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
-import 'package:tendria/common/controller/tutorial_controller.dart';
-import 'package:tendria/common/controller/updateProfile/update_profile_tutorial_controller.dart';
+import 'package:tendria/common/controller/theme_controller.dart';
+import 'package:tendria/common/tutorial/startTutorial/start_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/tutorial_controller.dart';
+import 'package:tendria/common/tutorial/updateProfile/update_profile_tutorial_controller.dart';
 import 'package:tendria/common/routes/router.dart';
 import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/services/translation_service.dart';
@@ -38,7 +39,11 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+
+        Get.lazyPut(() => ThemeController(), fenix: true);
+      return Obx(() { 
+      final themeCtrl = Get.find<ThemeController>();
+      return GetMaterialApp(
       
       locale: const Locale('es', 'ES'),
       supportedLocales: [const Locale('es', 'ES')],
@@ -48,7 +53,10 @@ class App extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       debugShowCheckedModeBanner: false,
-      theme: ThemeColor.themeData,
+     
+        themeMode: themeCtrl.isDarkMode.value ? ThemeMode.dark : ThemeMode.light,
+        theme: ThemeColor.themeData,
+        darkTheme: ThemeColor.darkThemeData,
       initialBinding: BindingsBuilder(() {
         Get.put(AuthService(), permanent: true);
         Get.put(usecaseConfig.loginUsecase!, permanent: true);
@@ -117,70 +125,22 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.logMatchUsecase!, permanent: true);
         Get.put(usecaseConfig.logLoginUsecase!, permanent: true);
 
-        Get.lazyPut(
-          () => LoginController(
-            loginUsecase: Get.find(),
-            saveTokenFcmUsecase: Get.find(), logLoginUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.put(
-          SignalRService(
-            connectSignalRUsecase: Get.find(),
-            disconnectSignalRUsecase: Get.find(),
-            joinChatUsecase: Get.find(),
-            leaveChatUsecase: Get.find(),
-            setupMessageListenerUsecase: Get.find(),
-            setOnDisconnectedCallbackUsecase: Get.find(),
+        Get.lazyPut(  () => LoginController( loginUsecase: Get.find(),saveTokenFcmUsecase: Get.find(), logLoginUsecase: Get.find(),), fenix: true,);
+        Get.put(SignalRService( connectSignalRUsecase: Get.find(),disconnectSignalRUsecase: Get.find(),joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(), setupMessageListenerUsecase: Get.find(),setOnDisconnectedCallbackUsecase: Get.find(),
             onMensajesLeidosUsecase: Get.find(),
             marcarMensajesLeidosUsecase: Get.find(),
           ),
           permanent: true,
         );
-        Get.lazyPut(
-          () => RegisterController(
-            createUserUsecase: Get.find(),
-            fetchQualitiesUsecase: Get.find(),
-            fetchInterestsUsecase: Get.find(), logRegisterUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => SplashController(
-            getUserUsecase: Get.find(),
-            updateLocationUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => PreferencesController(
-            preferencesUserUsecase: Get.find(),
-            uploadMediaUsecase: Get.find(),
-            fetchInterestsUsecase: Get.find(),
-            fetchQualitiesUsecase: Get.find(),
-            postInterestsUsecase: Get.find(),
-            postQualitiesUsecase: Get.find(),
-            uploadPicturePerfileUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => ProfileController(
-            getUserUsecase: Get.find(),
-            uploadMediaUsecase: Get.find(),
-            uploadPicturePerfileUsecase: Get.find(),
-            deleteMediaUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => StoryController(
-            fetchStoriesUsecase: Get.find(),
-            addLikeToStoryUsecase: Get.find(),
+        Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find(), logRegisterUsecase: Get.find(),), fenix: true,);
+        Get.lazyPut(() => SplashController(getUserUsecase: Get.find(),updateLocationUsecase: Get.find(),),fenix: true, );
+        Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(),uploadMediaUsecase: Get.find(),fetchInterestsUsecase: Get.find(),fetchQualitiesUsecase: Get.find(),postInterestsUsecase: Get.find(),
+            postQualitiesUsecase: Get.find(),uploadPicturePerfileUsecase: Get.find(),),fenix: true,);
+        Get.lazyPut(() => ProfileController( getUserUsecase: Get.find(),uploadMediaUsecase: Get.find(),uploadPicturePerfileUsecase: Get.find(), deleteMediaUsecase: Get.find(),),fenix: true,);
+        Get.lazyPut(() => StoryController(fetchStoriesUsecase: Get.find(), addLikeToStoryUsecase: Get.find(),
             fetchStoriesByIdUsecase: Get.find(),
             removeStoryUsecase: Get.find(),
-            createStroryUsecase: Get.find(),
-            setStoryAsSeenUsecase: Get.find(),
+            createStroryUsecase: Get.find(), setStoryAsSeenUsecase: Get.find(),
           ),
           fenix: true,
         );
@@ -257,10 +217,11 @@ class App extends StatelessWidget {
         );
         Get.lazyPut(() => LanguageController(), fenix: true);
         Get.put(TranslationService());
-      Get.lazyPut(() => TutorialController(), fenix: true);
-Get.lazyPut(() => ProfileTutorialController(), fenix: true);
-Get.lazyPut(() => StartTutorialController(), fenix: true);
-Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
+        Get.lazyPut(() => TutorialController(), fenix: true);
+        Get.lazyPut(() => ProfileTutorialController(), fenix: true);
+        Get.lazyPut(() => StartTutorialController(), fenix: true);
+        Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
+        
         Get.lazyPut(
           () => PurchaseController(
             getPurchasesUsecase: Get.find(),
@@ -274,5 +235,6 @@ Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
       getPages: AppPages.routes,
       unknownRoute: AppPages.unknownRoute,
     );
+      });
   }
 }

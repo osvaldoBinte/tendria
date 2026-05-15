@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
-import 'package:tendria/features/chat/domain/entities/chat_entity.dart'; 
+import 'package:tendria/features/chat/domain/entities/chat_entity.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/stories/presentation/page/storyring/my_story_ring_widget.dart';
 import 'package:tendria/features/stories/presentation/page/storyring/story_ring_widget.dart';
@@ -16,133 +16,135 @@ class MyMatchView extends GetView<MyMatchController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ThemeColor.backgroundColor,
-      body: SafeArea(
-        child: Column(
+    return Obx(() => Scaffold(
+          backgroundColor: ThemeColor.backgroundColor,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                Obx(() {
+                  if (controller.isSearching.value) {
+                    return _buildSearchBar();
+                  }
+                  return Divider(
+                    color: ThemeColor.dividerColor,
+                    height: 1,
+                    thickness: 1,
+                  );
+                }),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoading.value && controller.chats.isEmpty) {
+                      return _buildLoadingState();
+                    }
+
+                    if (controller.hasError.value && controller.chats.isEmpty) {
+                      return RefreshIndicator(
+                        onRefresh: controller.refreshChats,
+                        color: ThemeColor.primaryColor,
+                        backgroundColor: ThemeColor.cardBackground,
+                        child: CustomScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          slivers: [
+                            SliverFillRemaining(child: _buildErrorState())
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (controller.chats.isEmpty) {
+                      return RefreshIndicator(
+                        onRefresh: controller.refreshChats,
+                        color: ThemeColor.primaryColor,
+                        backgroundColor: ThemeColor.cardBackground,
+                        child: CustomScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          slivers: [
+                            SliverFillRemaining(child: _buildEmptyState())
+                          ],
+                        ),
+                      );
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: controller.refreshChats,
+                      color: ThemeColor.primaryColor,
+                      backgroundColor: ThemeColor.cardBackground,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          children: [
+                            if (!controller.isSearching.value) ...[
+                              _buildStoriesSection(),
+                              Container(
+                                height: 8,
+                                color: ThemeColor.backgroundColorfondo,
+                              ),
+                            ],
+                            _buildChatsHeader(),
+                            _buildChatsList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ));
+  }
+
+  // ==========================================
+  // HEADER
+  // ==========================================
+
+  Widget _buildHeader() {
+    return Obx(
+      () => AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: ThemeColor.paddingMedium,
+          vertical: ThemeColor.paddingSmall,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildHeader(),
-            Obx(() {
-              if (controller.isSearching.value) {
-                return _buildSearchBar();
-              }
-              return Divider(
-                color: ThemeColor.dividerColor,
-                height: 1,
-                thickness: 1,
-              );
-            }),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value && controller.chats.isEmpty) {
-                  return _buildLoadingState();
-                }
-
-                if (controller.hasError.value && controller.chats.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshChats,
-                    color: ThemeColor.primaryColor,
-                    backgroundColor: ThemeColor.surfaceColor,
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverFillRemaining(child: _buildErrorState()),
-                      ],
-                    ),
-                  );
-                }
-
-                if (controller.chats.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshChats,
-                    color: ThemeColor.primaryColor,
-                    backgroundColor: ThemeColor.surfaceColor,
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverFillRemaining(child: _buildEmptyState()),
-                      ],
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: controller.refreshChats,
-                  color: ThemeColor.primaryColor,
-                  backgroundColor: ThemeColor.surfaceColor,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      children: [
-                        if (!controller.isSearching.value) ...[
-                          _buildStoriesSection(),
-                          Container(
-                            height: 8,
-                            color: ThemeColor.backgroundColorfondo,
-                          ),
-                        ],
-                        _buildChatsHeader(),
-                        _buildChatsList(),
-                      ],
+            if (!controller.isSearching.value)
+              ThemeColor.widgetLogo(width: 100, height: 100)
+            else
+              const SizedBox.shrink(),
+            Row(
+              children: [
+                if (controller.isSilentLoading.value)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ThemeColor.primaryColor,
+                        ),
+                      ),
                     ),
                   ),
-                );
-              }),
+                IconButton(
+                  icon: Icon(
+                    controller.isSearching.value ? Icons.close : Icons.search,
+                    color: ThemeColor.iconColor,
+                    size: 28,
+                  ),
+                  onPressed: controller.toggleSearch,
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
- 
-
-  Widget _buildHeader() {
-  return Obx(
-    () => AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: EdgeInsets.symmetric(
-        horizontal: ThemeColor.paddingMedium,
-        vertical: ThemeColor.paddingSmall,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (!controller.isSearching.value)
-            Image.asset('assets/logo/logo.png', width: 100, height: 100)
-          else
-            const SizedBox.shrink(),
-          Row(
-            children: [
-              // ← Indicador silencioso
-              if (controller.isSilentLoading.value)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        ThemeColor.primaryColor,
-                      ),
-                    ),
-                  ),
-                ),
-              IconButton(
-                icon: Icon(
-                  controller.isSearching.value ? Icons.close : Icons.search,
-                  color: ThemeColor.textPrimaryColor,
-                  size: 28,
-                ),
-                onPressed: controller.toggleSearch,
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
   // ==========================================
   // SEARCH BAR
@@ -155,7 +157,7 @@ class MyMatchView extends GetView<MyMatchController> {
         vertical: ThemeColor.paddingSmall,
       ),
       decoration: BoxDecoration(
-        color: ThemeColor.surfaceColor,
+        color: ThemeColor.cardBackground,
         border: Border(
           bottom: BorderSide(color: ThemeColor.dividerColor, width: 1),
         ),
@@ -163,21 +165,19 @@ class MyMatchView extends GetView<MyMatchController> {
       child: TextField(
         autofocus: true,
         onChanged: controller.searchChats,
-        style: ThemeColor.bodyMedium,
+        style: ThemeColor.bodyMedium.copyWith(color: ThemeColor.textPrimary),
         decoration: InputDecoration(
           hintText: _l.t('search_hint'),
           hintStyle: ThemeColor.bodyMedium.copyWith(
-            color: ThemeColor.textSecondaryColor,
+            color: ThemeColor.textSecondary,
           ),
-          prefixIcon:
-              Icon(Icons.search, color: ThemeColor.textSecondaryColor),
+          prefixIcon: Icon(Icons.search, color: ThemeColor.textSecondary),
           suffixIcon: Obx(() {
             if (controller.searchQuery.value.isEmpty) {
               return const SizedBox.shrink();
             }
             return IconButton(
-              icon:
-                  Icon(Icons.clear, color: ThemeColor.textSecondaryColor),
+              icon: Icon(Icons.clear, color: ThemeColor.textSecondary),
               onPressed: controller.clearSearch,
             );
           }),
@@ -207,12 +207,13 @@ class MyMatchView extends GetView<MyMatchController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: ThemeColor.paddingMedium),
+            padding: EdgeInsets.symmetric(horizontal: ThemeColor.paddingMedium),
             child: Text(
               _l.t('stories'),
-              style: ThemeColor.headingSmall
-                  .copyWith(fontWeight: FontWeight.bold),
+              style: ThemeColor.headingSmall.copyWith(
+                fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimary,
+              ),
             ),
           ),
           SizedBox(height: ThemeColor.paddingMedium),
@@ -231,7 +232,8 @@ class MyMatchView extends GetView<MyMatchController> {
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: EdgeInsets.symmetric(
-                        horizontal: ThemeColor.paddingMedium),
+                      horizontal: ThemeColor.paddingMedium,
+                    ),
                     itemCount: totalUsers + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
@@ -243,7 +245,9 @@ class MyMatchView extends GetView<MyMatchController> {
                               width: 70,
                               child: Text(
                                 _l.t('my_story'),
-                                style: ThemeColor.caption,
+                                style: ThemeColor.caption.copyWith(
+                                  color: ThemeColor.textSecondary,
+                                ),
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -263,7 +267,9 @@ class MyMatchView extends GetView<MyMatchController> {
                             child: Text(
                               storyController.getUserName(userIndex) ??
                                   _l.t('user'),
-                              style: ThemeColor.caption,
+                              style: ThemeColor.caption.copyWith(
+                                color: ThemeColor.textSecondary,
+                              ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -285,8 +291,7 @@ class MyMatchView extends GetView<MyMatchController> {
   Widget _buildStoriesLoading() {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding:
-          EdgeInsets.symmetric(horizontal: ThemeColor.paddingMedium),
+      padding: EdgeInsets.symmetric(horizontal: ThemeColor.paddingMedium),
       itemCount: 5,
       itemBuilder: (context, index) {
         return Padding(
@@ -337,14 +342,18 @@ class MyMatchView extends GetView<MyMatchController> {
               children: [
                 Text(
                   _l.t('chats'),
-                  style: ThemeColor.headingSmall
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style: ThemeColor.headingSmall.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: ThemeColor.textPrimary,
+                  ),
                 ),
                 if (controller.filterPendingOnly.value) ...[
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: ThemeColor.primaryColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10),
@@ -381,7 +390,7 @@ class MyMatchView extends GetView<MyMatchController> {
                       Icons.tune,
                       color: controller.filterPendingOnly.value
                           ? ThemeColor.primaryColor
-                          : ThemeColor.textPrimaryColor,
+                          : ThemeColor.iconColor,
                     ),
                     onPressed: _showFilterBottomSheet,
                   ),
@@ -426,80 +435,83 @@ class MyMatchView extends GetView<MyMatchController> {
 
   void _showFilterBottomSheet() {
     Get.bottomSheet(
-      Obx(() => Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingLarge,
-              vertical: ThemeColor.paddingMedium,
-            ),
-            decoration: BoxDecoration(
-              color: ThemeColor.surfaceColor,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: EdgeInsets.only(
-                        bottom: ThemeColor.paddingMedium),
-                    decoration: BoxDecoration(
-                      color: ThemeColor.dividerColor,
-                      borderRadius: BorderRadius.circular(2),
+      Obx(
+        () => Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: ThemeColor.paddingLarge,
+            vertical: ThemeColor.paddingMedium,
+          ),
+          decoration: BoxDecoration(
+            color: ThemeColor.cardBackground,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.only(bottom: ThemeColor.paddingMedium),
+                  decoration: BoxDecoration(
+                    color: ThemeColor.subtleBorder,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                _l.t('filter_chats'),
+                style: ThemeColor.headingSmall.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: ThemeColor.textPrimary,
+                ),
+              ),
+              SizedBox(height: ThemeColor.paddingMedium),
+              _buildFilterOption(
+                icon: Icons.mark_chat_unread_outlined,
+                label: _l.t('filter_no_reply'),
+                description: _l.t('filter_no_reply_desc'),
+                isActive: controller.filterPendingOnly.value,
+                count: controller.pendingCount,
+                onTap: () {
+                  controller.togglePendingFilter();
+                  Get.back();
+                },
+              ),
+              SizedBox(height: ThemeColor.paddingMedium),
+              if (controller.filterPendingOnly.value)
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      controller.togglePendingFilter();
+                      Get.back();
+                    },
+                    icon: Icon(
+                      Icons.filter_alt_off,
+                      color: ThemeColor.primaryColor,
+                    ),
+                    label: Text(
+                      _l.t('clear_filters'),
+                      style: TextStyle(color: ThemeColor.primaryColor),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: ThemeColor.primaryColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: ThemeColor.paddingMedium,
+                      ),
                     ),
                   ),
                 ),
-                Text(
-                  _l.t('filter_chats'),
-                  style: ThemeColor.headingSmall
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: ThemeColor.paddingMedium),
-                _buildFilterOption(
-                  icon: Icons.mark_chat_unread_outlined,
-                  label: _l.t('filter_no_reply'),
-                  description: _l.t('filter_no_reply_desc'),
-                  isActive: controller.filterPendingOnly.value,
-                  count: controller.pendingCount,
-                  onTap: () {
-                    controller.togglePendingFilter();
-                    Get.back();
-                  },
-                ),
-                SizedBox(height: ThemeColor.paddingMedium),
-                if (controller.filterPendingOnly.value)
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        controller.togglePendingFilter();
-                        Get.back();
-                      },
-                      icon: Icon(Icons.filter_alt_off,
-                          color: ThemeColor.primaryColor),
-                      label: Text(
-                        _l.t('clear_filters'),
-                        style:
-                            TextStyle(color: ThemeColor.primaryColor),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side:
-                            BorderSide(color: ThemeColor.primaryColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                            vertical: ThemeColor.paddingMedium),
-                      ),
-                    ),
-                  ),
-                SizedBox(height: ThemeColor.paddingMedium),
-              ],
-            ),
-          )),
+              SizedBox(height: ThemeColor.paddingMedium),
+            ],
+          ),
+        ),
+      ),
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
     );
@@ -525,9 +537,7 @@ class MyMatchView extends GetView<MyMatchController> {
               : ThemeColor.backgroundColorfondo,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isActive
-                ? ThemeColor.primaryColor
-                : Colors.transparent,
+            color: isActive ? ThemeColor.primaryColor : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -537,7 +547,7 @@ class MyMatchView extends GetView<MyMatchController> {
               icon,
               color: isActive
                   ? ThemeColor.primaryColor
-                  : ThemeColor.textSecondaryColor,
+                  : ThemeColor.textSecondary,
             ),
             SizedBox(width: ThemeColor.paddingMedium),
             Expanded(
@@ -549,13 +559,13 @@ class MyMatchView extends GetView<MyMatchController> {
                     style: ThemeColor.subtitleLarge.copyWith(
                       color: isActive
                           ? ThemeColor.primaryColor
-                          : ThemeColor.textPrimaryColor,
+                          : ThemeColor.textPrimary,
                     ),
                   ),
                   Text(
                     description,
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -564,8 +574,8 @@ class MyMatchView extends GetView<MyMatchController> {
             ),
             if (count > 0)
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: ThemeColor.primaryColor,
                   borderRadius: BorderRadius.circular(10),
@@ -581,12 +591,10 @@ class MyMatchView extends GetView<MyMatchController> {
               ),
             const SizedBox(width: 8),
             Icon(
-              isActive
-                  ? Icons.check_circle
-                  : Icons.circle_outlined,
+              isActive ? Icons.check_circle : Icons.circle_outlined,
               color: isActive
                   ? ThemeColor.primaryColor
-                  : ThemeColor.textSecondaryColor,
+                  : ThemeColor.textSecondary,
             ),
           ],
         ),
@@ -609,11 +617,10 @@ class MyMatchView extends GetView<MyMatchController> {
       return ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-            horizontal: ThemeColor.paddingMedium),
+        padding: EdgeInsets.symmetric(horizontal: ThemeColor.paddingMedium),
         itemCount: chatsToShow.length,
-        separatorBuilder: (context, index) => Divider(
-            color: ThemeColor.dividerColor, height: 1, indent: 70),
+        separatorBuilder: (context, index) =>
+            Divider(color: ThemeColor.dividerColor, height: 1, indent: 70),
         itemBuilder: (context, index) {
           final chat = chatsToShow[index];
           return _buildChatItem(chat);
@@ -632,8 +639,7 @@ class MyMatchView extends GetView<MyMatchController> {
 
       if (isFiltering && hasQuery) {
         icon = Icons.search_off;
-        message =
-            '${_l.t('no_reply')} · "${controller.searchQuery.value}"';
+        message = '${_l.t('no_reply')} · "${controller.searchQuery.value}"';
       } else if (isFiltering) {
         icon = Icons.mark_chat_read_outlined;
         message = _l.t('all_caught_up');
@@ -650,13 +656,12 @@ class MyMatchView extends GetView<MyMatchController> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 48, color: ThemeColor.textSecondaryColor),
+            Icon(icon, size: 48, color: ThemeColor.textSecondary),
             SizedBox(height: ThemeColor.paddingMedium),
             Text(
               message,
               style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -664,12 +669,14 @@ class MyMatchView extends GetView<MyMatchController> {
               SizedBox(height: ThemeColor.paddingMedium),
               OutlinedButton.icon(
                 onPressed: controller.togglePendingFilter,
-                icon: Icon(Icons.filter_alt_off,
-                    color: ThemeColor.primaryColor, size: 18),
+                icon: Icon(
+                  Icons.filter_alt_off,
+                  color: ThemeColor.primaryColor,
+                  size: 18,
+                ),
                 label: Text(
                   _l.t('see_all'),
-                  style:
-                      TextStyle(color: ThemeColor.primaryColor),
+                  style: TextStyle(color: ThemeColor.primaryColor),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: ThemeColor.primaryColor),
@@ -697,15 +704,13 @@ class MyMatchView extends GetView<MyMatchController> {
     final ultimoMensaje = chat.ultimoMensaje;
 
     return InkWell(
-      onTap: () => controller.navigateToChat(
-          chat.chatId, chat.otroUsuario.nombre),
+      onTap: () =>
+          controller.navigateToChat(chat.chatId, chat.otroUsuario.nombre),
       child: Padding(
-        padding: EdgeInsets.symmetric(
-            vertical: ThemeColor.paddingSmall + 4),
+        padding: EdgeInsets.symmetric(vertical: ThemeColor.paddingSmall + 4),
         child: Row(
           children: [
-            _buildAvatar(
-                chat.otroUsuario.fotoUrl, chat.otroUsuario.isActive),
+            _buildAvatar(chat.otroUsuario.fotoUrl, chat.otroUsuario.isActive),
             SizedBox(width: ThemeColor.paddingMedium),
             Expanded(
               child: Column(
@@ -716,24 +721,26 @@ class MyMatchView extends GetView<MyMatchController> {
                       Expanded(
                         child: Text(
                           chat.otroUsuario.nombre,
-                          style: ThemeColor.subtitleLarge,
+                          style: ThemeColor.subtitleLarge.copyWith(
+                            color: ThemeColor.textPrimary,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (ultimoMensaje != null &&
-                          !ultimoMensaje.esPropio)
+                      if (ultimoMensaje != null && !ultimoMensaje.esPropio)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: ThemeColor.primaryColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             _l.t('your_turn'),
-                            style: ThemeColor.badgeText
-                                .copyWith(fontSize: 10),
+                            style: ThemeColor.badgeText.copyWith(fontSize: 10),
                           ),
                         ),
                     ],
@@ -742,7 +749,7 @@ class MyMatchView extends GetView<MyMatchController> {
                   Text(
                     ultimoMensaje?.mensaje ?? _l.t('start_chat'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -775,8 +782,7 @@ class MyMatchView extends GetView<MyMatchController> {
             margin: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                  color: ThemeColor.surfaceColor, width: 2),
+              border: Border.all(color: ThemeColor.cardBackground, width: 2),
             ),
             child: ClipOval(
               child: photoUrl != null && photoUrl.isNotEmpty
@@ -785,8 +791,7 @@ class MyMatchView extends GetView<MyMatchController> {
                       width: 52,
                       height: 52,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          _buildDefaultAvatar(),
+                      errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
                     )
                   : _buildDefaultAvatar(),
             ),
@@ -802,8 +807,7 @@ class MyMatchView extends GetView<MyMatchController> {
               decoration: BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
-                border: Border.all(
-                    color: ThemeColor.surfaceColor, width: 2),
+                border: Border.all(color: ThemeColor.cardBackground, width: 2),
               ),
             ),
           ),
@@ -814,8 +818,7 @@ class MyMatchView extends GetView<MyMatchController> {
   Widget _buildDefaultAvatar() {
     return Container(
       color: ThemeColor.backgroundColorfondo,
-      child: Icon(Icons.person,
-          size: 28, color: ThemeColor.textSecondaryColor),
+      child: Icon(Icons.person, size: 28, color: ThemeColor.textSecondary),
     );
   }
 
@@ -829,14 +832,15 @@ class MyMatchView extends GetView<MyMatchController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-                ThemeColor.primaryColor),
+            valueColor:
+                AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
           ),
           SizedBox(height: ThemeColor.paddingLarge),
           Text(
             _l.t('loading_chats'),
-            style: ThemeColor.bodyMedium
-                .copyWith(color: ThemeColor.textSecondaryColor),
+            style: ThemeColor.bodyMedium.copyWith(
+              color: ThemeColor.textSecondary,
+            ),
           ),
         ],
       ),
@@ -856,18 +860,26 @@ class MyMatchView extends GetView<MyMatchController> {
                 color: ThemeColor.errorColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.error_outline,
-                  size: 60, color: ThemeColor.errorColor),
+              child: Icon(
+                Icons.error_outline,
+                size: 60,
+                color: ThemeColor.errorColor,
+              ),
             ),
             SizedBox(height: ThemeColor.paddingLarge),
-            Text(_l.t('error_title'),
-                style: ThemeColor.headingSmall,
-                textAlign: TextAlign.center),
+            Text(
+              _l.t('error_title'),
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               controller.errorMessage.value,
-              style: ThemeColor.bodyMedium
-                  .copyWith(color: ThemeColor.textSecondaryColor),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: ThemeColor.paddingLarge),
@@ -900,25 +912,32 @@ class MyMatchView extends GetView<MyMatchController> {
                 color: ThemeColor.primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.chat_bubble_outline,
-                  size: 60, color: ThemeColor.primaryColor),
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: 60,
+                color: ThemeColor.primaryColor,
+              ),
             ),
             SizedBox(height: ThemeColor.paddingLarge),
-            Text(_l.t('empty_title_chats'),
-                style: ThemeColor.headingSmall,
-                textAlign: TextAlign.center),
+            Text(
+              _l.t('empty_title_chats'),
+              style: ThemeColor.headingSmall.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: ThemeColor.paddingSmall),
             Text(
               _l.t('empty_subtitle_chats'),
-              style: ThemeColor.bodyMedium
-                  .copyWith(color: ThemeColor.textSecondaryColor),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: ThemeColor.paddingLarge),
             ThemeColor.widgetButton(
               text: _l.t('explore'),
-              onPressed: () =>
-                  Get.offAllNamed(RoutesNames.preferencesPage),
+              onPressed: () => Get.offAllNamed(RoutesNames.preferencesPage),
               backgroundColor: ThemeColor.primaryColor,
               textColor: ThemeColor.textLightColor,
               padding: EdgeInsets.symmetric(

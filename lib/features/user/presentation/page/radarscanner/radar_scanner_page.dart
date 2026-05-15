@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:tendria/common/controller/tutorial_controller.dart';
-import 'package:tendria/common/controller/tutorial_overlay.dart';
+import 'package:tendria/common/tutorial/tutorial_controller.dart';
+import 'package:tendria/common/tutorial/tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
@@ -58,9 +58,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     )..repeat();
 
     tutorialCtrl.onScrollToTarget = _scrollToCurrentTarget;
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-    tutorialCtrl.notifyPageReady();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tutorialCtrl.notifyPageReady();
+    });
   }
 
   @override
@@ -78,10 +78,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     Future.delayed(const Duration(milliseconds: 100), () {
       final step = tutorialCtrl.currentStepData;
       if (step.targetKey == null) return;
-
       final ctx = step.targetKey!.currentContext;
       if (ctx == null) return;
-
       Scrollable.ensureVisible(
         ctx,
         duration: const Duration(milliseconds: 400),
@@ -90,7 +88,11 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       );
     });
   }
- 
+
+  // ==========================================
+  // PERMISSION STATE
+  // ==========================================
+
   Widget _buildLocationPermissionState() {
     return Center(
       child: Padding(
@@ -115,6 +117,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               _l.t('location_required_title'),
               style: ThemeColor.headingMedium.copyWith(
                 fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -122,7 +125,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             Text(
               _l.t('location_required_desc'),
               style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -161,7 +164,11 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
- 
+
+  // ==========================================
+  // NO MORE USERS STATE
+  // ==========================================
+
   Widget _buildNoMoreUsersState() {
     return Center(
       child: Padding(
@@ -186,6 +193,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               _l.t('no_more_profiles'),
               style: ThemeColor.headingMedium.copyWith(
                 fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -193,13 +201,13 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             Text(
               _l.t('no_more_profiles_desc'),
               style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
- 
+
             Obx(() {
               final profileCtrl = Get.find<ProfileController>();
               final km =
@@ -244,11 +252,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => controller.reloadFromStart(),
-
-                icon: Icon(
-                  Icons.refresh_rounded,
-                  color: ThemeColor.primaryColor,
-                ),
+                icon: Icon(Icons.refresh_rounded, color: ThemeColor.primaryColor),
                 label: Text(
                   _l.t('try_again'),
                   style: TextStyle(
@@ -270,7 +274,11 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
- 
+
+  // ==========================================
+  // MAIN CONTENT
+  // ==========================================
+
   Widget _buildMainContent() {
     return Stack(
       children: [
@@ -287,23 +295,15 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                 children: [
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                  Image.asset(
-                    'assets/logo/logo.png',
-                    width: 100,
-                    height: 100,
-                  ),
+                  ThemeColor.widgetLogo(width: 100, height: 100),
 
                   SizedBox(height: ThemeColor.paddingSmall),
 
                   Obx(() {
                     final profileCtrl = Get.find<ProfileController>();
                     final km =
-                        profileCtrl
-                            .userEntity
-                            .value
-                            ?.preferences
-                            ?.distancekm ??
-                        50;
+                        profileCtrl.userEntity.value?.preferences?.distancekm ??
+                            50;
                     return KeyedSubtree(
                       key: tutorialCtrl.distanceSliderKey,
                       child: _DistanceSlider(
@@ -322,7 +322,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           ? _l.t('searching')
                           : _l.t('nearby'),
                       style: ThemeColor.bodyMedium.copyWith(
-                        color: ThemeColor.textSecondaryColor,
+                        color: ThemeColor.textSecondary,
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,
@@ -348,12 +348,12 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           return Stack(
                             alignment: Alignment.center,
                             children: [
-                              Image.asset(
-                                'assets/gift/gitf.gif',
-                                width: size,
-                                height: size,
-                                fit: BoxFit.contain,
-                              ),
+                              _buildRippleEffect(),
+                              _buildRadarCircles(),
+                              _buildCrosshair(),
+                              _buildRadarSweep(),
+                              _buildRotatingScanLine(),
+                              _buildCenterLogo(),
                               _buildDetectedPoints(),
                             ],
                           );
@@ -439,7 +439,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             ),
           ),
         ),
- 
+
         Obx(
           () => tutorialCtrl.isVisible.value
               ? const TutorialOverlay()
@@ -448,26 +448,221 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ],
     );
   }
- 
+
+  // ==========================================
+  // BUILD
+  // ==========================================
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ThemeColor.backgroundColor,
-      body: Obx(() { 
-        if (controller.locationPermissionDenied.value) {
-          return _buildLocationPermissionState();
-        }
- 
-        if (controller.noMoreUsers.value ||
-            (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
-          return _buildNoMoreUsersState();
-        }
- 
-        return _buildMainContent();
-      }),
+    return Obx(() => Scaffold(
+          backgroundColor: ThemeColor.backgroundColor,
+          body: Obx(() {
+            if (controller.locationPermissionDenied.value) {
+              return _buildLocationPermissionState();
+            }
+
+            if (controller.noMoreUsers.value ||
+                (!controller.isLoading.value &&
+                    controller.nearbyUsers.isEmpty)) {
+              return _buildNoMoreUsersState();
+            }
+
+            return _buildMainContent();
+          }),
+        ));
+  }
+
+  // ==========================================
+  // RADAR WIDGETS
+  // ==========================================
+
+  Widget _buildRadarCircles() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        _radarCircle(350, 0.4, spread: 5),
+        _radarCircle(280, 0.5),
+        _radarCircle(200, 0.6),
+        _radarCircle(120, 0.7),
+        _radarCircle(50, 0.8),
+      ],
     );
   }
- 
+
+  Widget _buildCenterLogo() {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 85 + (_pulseController.value * 8),
+              height: 85 + (_pulseController.value * 8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ThemeColor.radarScanner.withOpacity(
+                  0.15 * (1 - _pulseController.value),
+                ),
+              ),
+            ),
+            Container(
+              width: 75,
+              height: 75,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: ThemeColor.radarScanner, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: ThemeColor.radarScanner.withOpacity(0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/logo/logo-radar.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _radarCircle(double size, double opacity, {double spread = 0}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: ThemeColor.radarScanner.withOpacity(opacity),
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCrosshair() {
+    final lineColors = [
+      Colors.transparent,
+      ThemeColor.radarScanner.withOpacity(0.3),
+      ThemeColor.radarScanner.withOpacity(0.7),
+      ThemeColor.radarScanner,
+      ThemeColor.radarScanner.withOpacity(0.7),
+      ThemeColor.radarScanner.withOpacity(0.3),
+      Colors.transparent,
+    ];
+    const stops = [0.0, 0.15, 0.35, 0.5, 0.65, 0.85, 1.0];
+    final shadow = BoxShadow(
+      color: ThemeColor.radarScanner.withOpacity(0.5),
+      blurRadius: 8,
+      spreadRadius: 1,
+    );
+
+    return Stack(
+      children: [
+        Positioned(
+          top: 175 - 1.5,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: lineColors,
+                stops: stops,
+              ),
+              boxShadow: [shadow],
+            ),
+          ),
+        ),
+        Positioned(
+          left: 175 - 1.5,
+          top: 0,
+          bottom: 0,
+          child: Container(
+            width: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: lineColors,
+                stops: stops,
+              ),
+              boxShadow: [shadow],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRadarSweep() {
+    return AnimatedBuilder(
+      animation: _radarController,
+      builder: (context, child) {
+        return Transform.rotate(
+          angle: _radarController.value * 2 * math.pi,
+          child: CustomPaint(
+            painter: RadarSweepPainter(),
+            size: const Size(350, 350),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRotatingScanLine() {
+    return AnimatedBuilder(
+      animation: _scanLineRotationController,
+      builder: (context, child) {
+        return Transform.rotate(
+          angle: _scanLineRotationController.value * 2 * math.pi,
+          child: CustomPaint(
+            painter: RotatingScanLinePainter(),
+            size: const Size(350, 350),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRippleEffect() {
+    return AnimatedBuilder(
+      animation: _rippleController,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: List.generate(3, (index) {
+            double delay = index * 0.33;
+            double progress = (_rippleController.value + delay) % 1.0;
+            return Opacity(
+              opacity: 1 - progress,
+              child: Container(
+                width: 350 * progress,
+                height: 350 * progress,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: ThemeColor.radarScanner.withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
 
   Widget _buildDetectedPoints() {
     return Obx(() {
@@ -475,7 +670,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       if (users.isEmpty) return const SizedBox.shrink();
 
       final points = _calculateUserPositions(users);
- 
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         tutorialCtrl.notifyUsersReady();
       });
@@ -565,7 +760,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: ThemeColor.backgroundColor.withOpacity(0.92),
+                        color: ThemeColor.cardBackground.withOpacity(0.92),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(8),
                           topRight: Radius.circular(8),
@@ -658,7 +853,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: ThemeColor.backgroundColor.withOpacity(0.9),
+                        color: ThemeColor.cardBackground.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: ThemeColor.radarScanner.withOpacity(0.5),
@@ -705,16 +900,14 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   Widget _avatarPlaceholder() {
     return Container(
       color: ThemeColor.radarScanner.withOpacity(0.3),
-      child: Icon(
-        Icons.person,
-        color: ThemeColor.radarScanner,
-        size: 20,
-      ),
+      child: Icon(Icons.person, color: ThemeColor.radarScanner, size: 20),
     );
   }
 }
 
- 
+// ==========================================
+// DISTANCE SLIDER
+// ==========================================
 
 class _DistanceSlider extends StatefulWidget {
   final double initialKm;
@@ -757,77 +950,82 @@ class _DistanceSliderState extends State<_DistanceSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingSmall),
-      padding: EdgeInsets.symmetric(
-        horizontal: ThemeColor.paddingMedium,
-        vertical: ThemeColor.paddingSmall,
-      ),
-      decoration: BoxDecoration(
-        color: ThemeColor.backgroundColor,
-        borderRadius: ThemeColor.largeBorderRadius,
-        border: Border.all(
-          color: ThemeColor.radarScanner.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Obx(() => Container(
+          margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingSmall),
+          padding: EdgeInsets.symmetric(
+            horizontal: ThemeColor.paddingMedium,
+            vertical: ThemeColor.paddingSmall,
+          ),
+          decoration: BoxDecoration(
+            color: ThemeColor.cardBackground,
+            borderRadius: ThemeColor.largeBorderRadius,
+            border: Border.all(
+              color: ThemeColor.radarScanner.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    Icons.radar,
-                    size: 16,
-                    color: ThemeColor.radarScanner,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.radar,
+                        size: 16,
+                        color: ThemeColor.radarScanner,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        widget.l.t('max_distance'),
+                        style: ThemeColor.bodySmall.copyWith(
+                          color: ThemeColor.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 6),
                   Text(
-                    widget.l.t('max_distance'),
+                    _label,
                     style: ThemeColor.bodySmall.copyWith(
-                      color: ThemeColor.textSecondaryColor,
-                      fontSize: 12,
+                      color: ThemeColor.radarScanner,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
-              Text(
-                _label,
-                style: ThemeColor.bodySmall.copyWith(
-                  color: ThemeColor.radarScanner,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: ThemeColor.radarScanner,
+                  inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
+                  thumbColor: ThemeColor.radarScanner,
+                  overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 8),
+                  trackHeight: 3,
+                  overlayShape:
+                      const RoundSliderOverlayShape(overlayRadius: 16),
+                ),
+                child: Slider(
+                  value: _current,
+                  min: 0.1,
+                  max: 1000,
+                  divisions: 9999,
+                  onChanged: (value) => setState(() => _current = value),
+                  onChangeEnd: (value) => widget.updater.updateDistance(value),
                 ),
               ),
             ],
           ),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: ThemeColor.radarScanner,
-              inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
-              thumbColor: ThemeColor.radarScanner,
-              overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-              trackHeight: 3,
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            ),
-            child: Slider(
-              value: _current,
-              min: 0.1,
-              max: 1000,
-              divisions: 9999,
-              onChanged: (value) => setState(() => _current = value),
-              onChangeEnd: (value) => widget.updater.updateDistance(value),
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }
- 
+
+// ==========================================
+// PULSING TOUCH ICON
+// ==========================================
 
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
@@ -897,7 +1095,10 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
     );
   }
 }
- 
+
+// ==========================================
+// PAINTERS
+// ==========================================
 
 class GridPainter extends CustomPainter {
   @override
@@ -926,10 +1127,10 @@ class RadarSweepPainter extends CustomPainter {
     final paint = Paint()
       ..shader = SweepGradient(
         colors: [
-          ThemeColor.radarScanner.withOpacity(0.0),
-          ThemeColor.radarScanner.withOpacity(0.3),
-          ThemeColor.radarScanner.withOpacity(0.6),
-          ThemeColor.radarScanner.withOpacity(0.0),
+          Colors.transparent,
+          Colors.transparent,
+          Colors.transparent,
+          Colors.transparent,
         ],
         stops: const [0.0, 0.3, 0.5, 1.0],
         startAngle: 0,

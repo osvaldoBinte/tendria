@@ -1,26 +1,101 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart'; 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tendria/common/controller/theme_controller.dart';
 
 class ThemeColor {
   // Colores principales - Tema de citas (Burdeos/Vino)
-  static const Color primaryColor = Color(0xFF4A141E); // Burdeos principal
+  //static const Color primaryColor = Color(0xFF4A141E); // Burdeos principal
   static const Color secondaryColor = Color(0xFF8B2C4B); // Burdeos oscuro
   static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
 
   static const Color accentColor = Color(0xFFB83A5E); // Rosa burdeos claro
-  static const Color radarScanner = Color.fromARGB(255, 103, 167, 93); // Burdeos principal
+  static const Color radarScanner = Color(0xFFB9141E); // Rojo intenso para radar scanner
 
   // Colores de fondo
-  static const Color backgroundColor = Colors.white;
   static const Color surfaceColor = Colors.white; // Superficies blancas
   static const Color cardColor = Colors.white; // Cards blancas
-  static final Color backgroundColorfondo = Color(0xFFEFEFEA);
+// static final Color backgroundColorfondo = Color(0xFFEFEFEA);
+  //static final Color backgroundColor = Colors.white;
+ static Color get primaryColor {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFFB9141E) :Color(0xFF4A141E);
+  } catch (_) {
+    return const Color(0xFF4A141E) ;
+  }
+}
+static Color get backgroundColor {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFF050709) : Colors.white;
+  } catch (_) {
+    return Colors.white;
+  }
+} static Color get subtleBorder {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? Colors.white24 : Colors.grey.shade300;
+  } catch (_) {
+    return Colors.grey.shade300;
+  }
+}
+ static Color get subtleBackground {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFF1E2226) : Colors.grey.shade100;
+  } catch (_) {
+    return Colors.grey.shade100;
+  }
+}
+static Color get backgroundColorfondo {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFF0F1215) : const Color(0xFFEFEFEA);
+  } catch (_) {
+    return const Color(0xFFEFEFEA);
+  }
+} 
+static Color get textPrimary {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? Colors.white : Colors.black87;
+  } catch (_) {
+    return Colors.black87;
+  }
+}
 
+static Color get textSecondary {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? Colors.white60 : const Color(0xFF5F6368);
+  } catch (_) {
+    return const Color(0xFF5F6368);
+  }
+}
+
+static Color get cardBackground {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFF0F1215) : Colors.white;
+  } catch (_) {
+    return Colors.white;
+  }
+}
+
+static Color get iconColor {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? Colors.white : Colors.black;
+  } catch (_) {
+    return Colors.black;
+  }
+}
   // Colores de texto
   static const Color textPrimaryColor = Colors.black87; // Texto principal
   static const Color textSecondaryColor = Color(0xFF5F6368); // Texto secundario
   static const Color textTertiaryColor = Color(0xFF656565); // Texto terciario
-  static const Color textLightColor = Colors.white; // Texto claro
+  static const Color textLightColor = Colors.white; 
   static const Color textDarkColor = Colors.black;
 
   // Colores de estado
@@ -35,9 +110,9 @@ static final Color loaddingwithOpacity3 = const Color.fromARGB(255, 180, 180, 18
 static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
 
   // Colores específicos de la app
-  static const Color badgeColor = primaryColor; // Color de badges "Tu turno"
-  static const Color distanceBadgeColor = primaryColor; // Badge de distancia
-  static const Color likeButtonColor = primaryColor; // Botón de like
+  static   Color badgeColor = primaryColor; // Color de badges "Tu turno"
+  static   Color distanceBadgeColor = primaryColor; // Badge de distancia
+  static   Color likeButtonColor = primaryColor; // Botón de like
   static const Color storyGradientStart = Color(
     0xFF8B2C4B,
   ); // Inicio gradiente historia
@@ -46,7 +121,7 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
   ); // Fin gradiente historia
 
   // Colores para navegación
-  static const Color navbarSelectedColor = primaryColor;
+  static   Color navbarSelectedColor = primaryColor;
   static final Color navbarUnselectedColor = Colors.grey.shade600;
 
   // Utilidades
@@ -198,7 +273,34 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
     color: textLightColor,
   );
 
-  // Theme Data
+static ThemeData get darkThemeData => ThemeData(
+  useMaterial3: true,
+  brightness: Brightness.dark,
+  primaryColor: primaryColor,
+  scaffoldBackgroundColor: const Color(0xFF050709),
+
+  colorScheme: ColorScheme.dark(
+    primary: primaryColor,
+    onPrimary: Colors.white,
+    secondary: secondaryColor,
+    surface: const Color(0xFF0F1215),
+    onSurface: Colors.white,
+    background: const Color(0xFF050709),
+    onBackground: Colors.white,
+  ),
+
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF0F1215),
+    foregroundColor: Colors.white,
+    elevation: 0,
+  ),
+
+  cardTheme: CardThemeData(
+    color: const Color(0xFF0F1215),
+    elevation: elevationSmall,
+    shape: RoundedRectangleBorder(borderRadius: mediumBorderRadius),
+  ),
+);
   static ThemeData get themeData => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -269,7 +371,7 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: mediumBorderRadius,
-        borderSide: const BorderSide(color: primaryColor, width: 1.5),
+        borderSide:  BorderSide(color: primaryColor, width: 1.5),
       ),
       labelStyle: const TextStyle(color: textSecondaryColor),
       hintStyle: TextStyle(color: textSecondaryColor.withOpacity(0.7)),
@@ -780,8 +882,20 @@ static Widget createBottomNavigationBar({
     ),
   );
 }
-  /// Widget reutilizable para campos de texto con label
-  /// Soporta email, password, text normal, etc.
+static Widget widgetLogo({double width = 100, double height = 100}) {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return Obx(() => Image.asset(
+          ctrl.isDarkMode.value
+              ? 'assets/logo/logo-radar-dark.png'
+              : 'assets/logo/logo.png',
+          width: width,
+          height: height,
+        ));
+  } catch (_) {
+    return Image.asset('assets/logo/logo.png', width: width, height: height);
+  }
+}
   static Widget createLabeledTextField({
     required String label,
     required TextEditingController controller,

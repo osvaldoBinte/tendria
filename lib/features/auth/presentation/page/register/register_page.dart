@@ -11,27 +11,31 @@ class RegisterPage extends GetView<RegisterController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ThemeColor.backgroundColorfondo,
-      body: SafeArea(
-        child: Obx(() {
-          switch (controller.currentStep.value) {
-            case RegistrationStep.basicInfo:
-              return _buildBasicInfoStep();
-            case RegistrationStep.personalInfo:
-              return _buildPersonalInfoStep();
-            case RegistrationStep.physicalInfo:
-              return _buildPhysicalInfoStep();
-            case RegistrationStep.interests:
-              return buildInterestsStep();
-            case RegistrationStep.qualities:
-              return buildQualitiesStep();
-          }
-        }),
-      ),
-    );
+    return Obx(() => Scaffold(
+          backgroundColor: ThemeColor.backgroundColorfondo,
+          body: SafeArea(
+            child: Obx(() {
+              switch (controller.currentStep.value) {
+                case RegistrationStep.basicInfo:
+                  return _buildBasicInfoStep();
+                case RegistrationStep.personalInfo:
+                  return _buildPersonalInfoStep();
+                case RegistrationStep.physicalInfo:
+                  return _buildPhysicalInfoStep();
+                case RegistrationStep.interests:
+                  return buildInterestsStep();
+                case RegistrationStep.qualities:
+                  return buildQualitiesStep();
+              }
+            }),
+          ),
+        ));
   }
- 
+
+  // ==========================================
+  // STEP 1 - INFO BÁSICA
+  // ==========================================
+
   Widget _buildBasicInfoStep() {
     return SingleChildScrollView(
       child: Padding(
@@ -46,7 +50,7 @@ class RegisterPage extends GetView<RegisterController> {
               style: ThemeColor.headingLarge.copyWith(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: ThemeColor.textDarkColor,
+                color: ThemeColor.textPrimary,
               ),
             ),
             SizedBox(height: ThemeColor.paddingSmall),
@@ -55,7 +59,7 @@ class RegisterPage extends GetView<RegisterController> {
                 Text(
                   mycontroller.t('register_have_account'),
                   style: ThemeColor.bodyMedium.copyWith(
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                 ),
                 GestureDetector(
@@ -83,6 +87,9 @@ class RegisterPage extends GetView<RegisterController> {
                 isRequired: true,
                 errorText: controller.nameErrorMessage.value,
                 showError: controller.nameError.value,
+                fillColor: ThemeColor.cardBackground,
+                labelColor: ThemeColor.textPrimary,
+                textColor: ThemeColor.textPrimary,
               ),
             ),
 
@@ -99,6 +106,9 @@ class RegisterPage extends GetView<RegisterController> {
                 isRequired: true,
                 errorText: controller.emailErrorMessage.value,
                 showError: controller.emailError.value,
+                fillColor: ThemeColor.cardBackground,
+                labelColor: ThemeColor.textPrimary,
+                textColor: ThemeColor.textPrimary,
               ),
             ),
 
@@ -115,12 +125,15 @@ class RegisterPage extends GetView<RegisterController> {
                 isRequired: true,
                 errorText: controller.passwordErrorMessage.value,
                 showError: controller.passwordError.value,
+                fillColor: ThemeColor.cardBackground,
+                labelColor: ThemeColor.textPrimary,
+                textColor: ThemeColor.textPrimary,
                 suffixIcon: IconButton(
                   icon: Icon(
                     controller.showPassword.value
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                   onPressed: () => controller.showPassword.toggle(),
                 ),
@@ -140,12 +153,15 @@ class RegisterPage extends GetView<RegisterController> {
                 isRequired: true,
                 errorText: controller.confirmPasswordErrorMessage.value,
                 showError: controller.confirmPasswordError.value,
+                fillColor: ThemeColor.cardBackground,
+                labelColor: ThemeColor.textPrimary,
+                textColor: ThemeColor.textPrimary,
                 suffixIcon: IconButton(
                   icon: Icon(
                     controller.showConfirmPassword.value
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                   onPressed: () => controller.showConfirmPassword.toggle(),
                 ),
@@ -157,7 +173,7 @@ class RegisterPage extends GetView<RegisterController> {
             Text(
               mycontroller.t('register_privacy'),
               style: ThemeColor.bodySmall.copyWith(
-                color: ThemeColor.textSecondaryColor,
+                color: ThemeColor.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -190,7 +206,11 @@ class RegisterPage extends GetView<RegisterController> {
       ),
     );
   }
- 
+
+  // ==========================================
+  // STEP 2 - INFO PERSONAL
+  // ==========================================
+
   Widget _buildPersonalInfoStep() {
     return Column(
       children: [
@@ -208,17 +228,17 @@ class RegisterPage extends GetView<RegisterController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
 
                   SizedBox(height: ThemeColor.paddingExtraLarge * 1.5),
- 
+
                   Text(
                     mycontroller.t('personal_dob'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -232,8 +252,9 @@ class RegisterPage extends GetView<RegisterController> {
                           vertical: ThemeColor.paddingMedium + 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: ThemeColor.cardBackground,
                           borderRadius: ThemeColor.mediumBorderRadius,
+                          border: Border.all(color: ThemeColor.subtleBorder),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -244,13 +265,13 @@ class RegisterPage extends GetView<RegisterController> {
                                   : mycontroller.t('personal_dob_placeholder'),
                               style: ThemeColor.bodyMedium.copyWith(
                                 color: controller.dateOfBirth.value != null
-                                    ? ThemeColor.textDarkColor
-                                    : ThemeColor.textSecondaryColor,
+                                    ? ThemeColor.textPrimary
+                                    : ThemeColor.textSecondary,
                               ),
                             ),
                             Icon(
                               Icons.calendar_today,
-                              color: ThemeColor.textSecondaryColor,
+                              color: ThemeColor.textSecondary,
                               size: 20,
                             ),
                           ],
@@ -264,12 +285,12 @@ class RegisterPage extends GetView<RegisterController> {
                   Text(
                     mycontroller.t('personal_gender'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   SizedBox(height: ThemeColor.paddingMedium),
- 
+
                   ...controller.genderOptions.map((option) {
                     return Padding(
                       padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
@@ -295,6 +316,9 @@ class RegisterPage extends GetView<RegisterController> {
                       errorText: controller.bioErrorMessage.value,
                       showError: controller.bioError.value,
                       borderRadius: ThemeColor.smallBorderRadius,
+                      fillColor: ThemeColor.cardBackground,
+                      labelColor: ThemeColor.textPrimary,
+                      textColor: ThemeColor.textPrimary,
                     ),
                   ),
                 ],
@@ -302,18 +326,12 @@ class RegisterPage extends GetView<RegisterController> {
             ),
           ),
         ),
-
         _buildNavigationButtons(),
       ],
     );
   }
 
-  Widget _buildGenderOption(
-    String text,
-    IconData icon,
-    String value, {
-    bool isCustom = false,
-  }) {
+  Widget _buildGenderOption(String text, IconData icon, String value) {
     return Obx(() {
       final isSelected = controller.selectedGender.value == value;
 
@@ -325,19 +343,17 @@ class RegisterPage extends GetView<RegisterController> {
             vertical: ThemeColor.paddingMedium + 2,
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.mediumBorderRadius,
             border: isSelected
                 ? Border.all(color: ThemeColor.tertiaryColor, width: 2)
-                : null,
+                : Border.all(color: ThemeColor.subtleBorder),
           ),
           child: Row(
             children: [
               Icon(
                 icon,
-                color: isSelected
-                    ? ThemeColor.tertiaryColor
-                    : ThemeColor.textSecondaryColor,
+                color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.textSecondary,
                 size: 24,
               ),
               SizedBox(width: ThemeColor.paddingMedium),
@@ -345,10 +361,8 @@ class RegisterPage extends GetView<RegisterController> {
                 child: Text(
                   text,
                   style: ThemeColor.bodyMedium.copyWith(
-                    color: ThemeColor.textDarkColor,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    color: ThemeColor.textPrimary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -357,13 +371,9 @@ class RegisterPage extends GetView<RegisterController> {
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isSelected
-                      ? ThemeColor.tertiaryColor
-                      : Colors.transparent,
+                  color: isSelected ? ThemeColor.tertiaryColor : Colors.transparent,
                   border: Border.all(
-                    color: isSelected
-                        ? ThemeColor.tertiaryColor
-                        : ThemeColor.textSecondaryColor,
+                    color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.textSecondary,
                     width: 2,
                   ),
                 ),
@@ -381,13 +391,7 @@ class RegisterPage extends GetView<RegisterController> {
   void _showDatePicker() async {
     final DateTime today = DateTime.now();
     final DateTime maxDate = DateTime(today.year - 18, today.month, today.day);
-
-    final DateTime initialDate = DateTime(
-      today.year - 25,
-      today.month,
-      today.day,
-    );
-
+    final DateTime initialDate = DateTime(today.year - 25, today.month, today.day);
     final DateTime minDate = DateTime(today.year - 100, today.month, today.day);
 
     final DateTime? picked = await showDatePicker(
@@ -401,8 +405,8 @@ class RegisterPage extends GetView<RegisterController> {
             colorScheme: ColorScheme.light(
               primary: ThemeColor.primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: ThemeColor.textDarkColor,
+              surface: ThemeColor.cardBackground,
+              onSurface: ThemeColor.textPrimary,
             ),
           ),
           child: child!,
@@ -414,7 +418,11 @@ class RegisterPage extends GetView<RegisterController> {
       controller.selectDateOfBirth(picked);
     }
   }
- 
+
+  // ==========================================
+  // STEP 3 - INFO FÍSICA
+  // ==========================================
+
   Widget _buildPhysicalInfoStep() {
     return Column(
       children: [
@@ -432,7 +440,7 @@ class RegisterPage extends GetView<RegisterController> {
                       style: ThemeColor.headingMedium.copyWith(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                         height: 1.3,
                       ),
                       textAlign: TextAlign.center,
@@ -441,19 +449,17 @@ class RegisterPage extends GetView<RegisterController> {
                     Text(
                       mycontroller.t('physical_height'),
                       style: ThemeColor.bodyMedium.copyWith(
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
-
               Expanded(child: _buildHeightPicker()),
             ],
           ),
         ),
-
         _buildNavigationButtons(showSkip: true),
       ],
     );
@@ -466,11 +472,9 @@ class RegisterPage extends GetView<RegisterController> {
         IgnorePointer(
           child: Container(
             height: 60,
-            margin: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingExtraLarge * 2,
-            ),
+            margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingExtraLarge * 2),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: ThemeColor.cardBackground,
               borderRadius: ThemeColor.extraLargeBorderRadius,
               boxShadow: [
                 BoxShadow(
@@ -482,7 +486,6 @@ class RegisterPage extends GetView<RegisterController> {
             ),
           ),
         ),
-
         ListWheelScrollView.useDelegate(
           controller: controller.heightScrollController,
           itemExtent: 60,
@@ -497,22 +500,16 @@ class RegisterPage extends GetView<RegisterController> {
             childCount: 96,
             builder: (context, index) {
               final height = 100 + index;
-
               return Obx(() {
                 final isSelected = height == controller.selectedHeight.value;
-
                 return Container(
                   height: 60,
                   alignment: Alignment.center,
                   child: Text(
                     '$height cm',
                     style: ThemeColor.bodyLarge.copyWith(
-                      color: isSelected
-                          ? ThemeColor.textDarkColor
-                          : ThemeColor.textSecondaryColor,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+                      color: isSelected ? ThemeColor.textPrimary : ThemeColor.textSecondary,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       fontSize: isSelected ? 20 : 16,
                     ),
                   ),
@@ -524,7 +521,11 @@ class RegisterPage extends GetView<RegisterController> {
       ],
     );
   }
- 
+
+  // ==========================================
+  // STEP 4 - INTERESES
+  // ==========================================
+
   Widget buildInterestsStep() {
     return Column(
       children: [
@@ -542,7 +543,7 @@ class RegisterPage extends GetView<RegisterController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -550,7 +551,7 @@ class RegisterPage extends GetView<RegisterController> {
                   Text(
                     mycontroller.t('interests_page_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -563,26 +564,24 @@ class RegisterPage extends GetView<RegisterController> {
                       vertical: ThemeColor.paddingSmall,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: ThemeColor.cardBackground,
                       borderRadius: ThemeColor.mediumBorderRadius,
+                      border: Border.all(color: ThemeColor.subtleBorder),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.search,
-                          color: ThemeColor.textSecondaryColor,
-                        ),
+                        Icon(Icons.search, color: ThemeColor.textSecondary),
                         SizedBox(width: ThemeColor.paddingSmall),
                         Expanded(
                           child: TextField(
+                            style: TextStyle(color: ThemeColor.textPrimary),
                             decoration: InputDecoration(
                               hintText: mycontroller.t('interests_search_hint'),
                               hintStyle: ThemeColor.bodyMedium.copyWith(
-                                color: ThemeColor.textSecondaryColor,
+                                color: ThemeColor.textSecondary,
                               ),
                               border: InputBorder.none,
                             ),
-                            style: ThemeColor.bodyMedium,
                           ),
                         ),
                       ],
@@ -598,14 +597,14 @@ class RegisterPage extends GetView<RegisterController> {
                         Text(
                           mycontroller.t('interests_popular'),
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textDarkColor,
+                            color: ThemeColor.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           '${controller.selectedInterests.length}/${controller.maxInterests} ${mycontroller.t('bs_interests_selected')}',
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       ],
@@ -620,9 +619,7 @@ class RegisterPage extends GetView<RegisterController> {
                         child: Padding(
                           padding: EdgeInsets.all(ThemeColor.paddingExtraLarge),
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              ThemeColor.primaryColor,
-                            ),
+                            valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
                           ),
                         ),
                       );
@@ -633,7 +630,7 @@ class RegisterPage extends GetView<RegisterController> {
                         child: Text(
                           mycontroller.t('bs_interests_load_error'),
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       );
@@ -644,8 +641,7 @@ class RegisterPage extends GetView<RegisterController> {
                         spacing: ThemeColor.paddingSmall,
                         runSpacing: ThemeColor.paddingSmall,
                         children: controller.interests.map((interest) {
-                          final isSelected = controller.selectedInterests
-                              .contains(interest.id);
+                          final isSelected = controller.selectedInterests.contains(interest.id);
                           return _buildInterestChip(
                             controller.getInterestLabel(interest.name),
                             _getInterestIcon(interest.name),
@@ -663,13 +659,11 @@ class RegisterPage extends GetView<RegisterController> {
                     child: Text(
                       mycontroller.t('interests_custom_hint'),
                       style: ThemeColor.bodySmall.copyWith(
-                        color: ThemeColor.textSecondaryColor,
+                        color: ThemeColor.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-
-                  SizedBox(height: ThemeColor.paddingMedium),
 
                   SizedBox(height: ThemeColor.paddingExtraLarge),
                 ],
@@ -677,18 +671,12 @@ class RegisterPage extends GetView<RegisterController> {
             ),
           ),
         ),
-
         _buildNavigationButtons(showSkip: true),
       ],
     );
   }
 
-  Widget _buildInterestChip(
-    String label,
-    IconData icon,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
+  Widget _buildInterestChip(String label, IconData icon, bool isSelected, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -697,10 +685,10 @@ class RegisterPage extends GetView<RegisterController> {
           vertical: ThemeColor.paddingSmall + 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+          color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.cardBackground,
           borderRadius: ThemeColor.circularBorderRadius,
           border: Border.all(
-            color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+            color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.subtleBorder,
           ),
         ),
         child: Row(
@@ -709,13 +697,13 @@ class RegisterPage extends GetView<RegisterController> {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? Colors.white : ThemeColor.textDarkColor,
+              color: isSelected ? Colors.white : ThemeColor.textPrimary,
             ),
             SizedBox(width: 6),
             Text(
               label,
               style: ThemeColor.bodyMedium.copyWith(
-                color: isSelected ? Colors.white : ThemeColor.textDarkColor,
+                color: isSelected ? Colors.white : ThemeColor.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -727,60 +715,53 @@ class RegisterPage extends GetView<RegisterController> {
 
   IconData _getInterestIcon(String interest) {
     final icons = {
-   
       'Pintura': Icons.brush,
       'Fotografía': Icons.camera_alt,
       'Arte': Icons.palette,
- 
       'Cine': Icons.movie,
       'Videojuegos': Icons.videogame_asset,
       'Anime': Icons.auto_awesome,
- 
       'Música en vivo': Icons.mic,
       'Rock': Icons.music_note,
       'Reggaetón': Icons.headphones,
       'Conciertos': Icons.music_note,
       'Festivales': Icons.festival,
       'Bailar': Icons.music_note,
- 
       'Gimnasio': Icons.fitness_center,
       'Correr': Icons.directions_run,
       'Yoga': Icons.self_improvement,
       'Meditación': Icons.spa,
       'Deportes': Icons.sports_soccer,
- 
       'Senderismo': Icons.terrain,
       'Viajar': Icons.flight_takeoff,
       'Playa': Icons.beach_access,
- 
       'Café': Icons.coffee,
       'Vino': Icons.wine_bar,
       'Cocinar': Icons.restaurant_menu,
       'Foodie': Icons.restaurant,
- 
       'Lectura': Icons.menu_book,
       'Libros': Icons.book,
       'Psicología': Icons.psychology,
       'Programación': Icons.code,
- 
       'Emprendimiento': Icons.rocket_launch,
       'Startups': Icons.trending_up,
       'Criptomonedas': Icons.currency_bitcoin,
       'Autos deportivos': Icons.directions_car,
       'Nómada digital': Icons.laptop_mac,
- 
       'Perros': Icons.pets,
       'Gatos': Icons.pets,
- 
       'Relación seria': Icons.favorite,
       'Algo casual': Icons.sentiment_satisfied_alt,
- 
       'Escribir': Icons.edit,
       'Museos y galerías': Icons.museum,
     };
-
     return icons[interest] ?? Icons.favorite;
-  } 
+  }
+
+  // ==========================================
+  // STEP 5 - CUALIDADES
+  // ==========================================
+
   Widget buildQualitiesStep() {
     return Column(
       children: [
@@ -798,7 +779,7 @@ class RegisterPage extends GetView<RegisterController> {
                     style: ThemeColor.headingLarge.copyWith(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: ThemeColor.textDarkColor,
+                      color: ThemeColor.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -806,7 +787,7 @@ class RegisterPage extends GetView<RegisterController> {
                   Text(
                     mycontroller.t('qualities_page_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondaryColor,
+                      color: ThemeColor.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -817,7 +798,7 @@ class RegisterPage extends GetView<RegisterController> {
                     () => Text(
                       '${mycontroller.t('qualities_counter_label')}  ${controller.selectedQualities.length}/${controller.maxQualities} ${mycontroller.t('bs_interests_selected')}',
                       style: ThemeColor.bodyMedium.copyWith(
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -831,9 +812,7 @@ class RegisterPage extends GetView<RegisterController> {
                         child: Padding(
                           padding: EdgeInsets.all(ThemeColor.paddingExtraLarge),
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              ThemeColor.primaryColor,
-                            ),
+                            valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primaryColor),
                           ),
                         ),
                       );
@@ -844,7 +823,7 @@ class RegisterPage extends GetView<RegisterController> {
                         child: Text(
                           mycontroller.t('error'),
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textSecondaryColor,
+                            color: ThemeColor.textSecondary,
                           ),
                         ),
                       );
@@ -854,8 +833,7 @@ class RegisterPage extends GetView<RegisterController> {
                       spacing: ThemeColor.paddingSmall,
                       runSpacing: ThemeColor.paddingSmall,
                       children: controller.qualities.map((quality) {
-                        final isSelected = controller.selectedQualities
-                            .contains(quality.id);
+                        final isSelected = controller.selectedQualities.contains(quality.id);
                         return _buildQualityChip(
                           controller.getQualityLabel(quality.name),
                           isSelected,
@@ -871,7 +849,6 @@ class RegisterPage extends GetView<RegisterController> {
             ),
           ),
         ),
-
         _buildNavigationButtons(showSkip: true, isLastStep: true),
       ],
     );
@@ -886,23 +863,27 @@ class RegisterPage extends GetView<RegisterController> {
           vertical: ThemeColor.paddingMedium - 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+          color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.cardBackground,
           borderRadius: ThemeColor.circularBorderRadius,
           border: Border.all(
-            color: isSelected ? ThemeColor.tertiaryColor : Colors.white,
+            color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.subtleBorder,
           ),
         ),
         child: Text(
           label,
           style: ThemeColor.bodyMedium.copyWith(
-            color: isSelected ? Colors.white : ThemeColor.textDarkColor,
+            color: isSelected ? Colors.white : ThemeColor.textPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),
       ),
     );
   }
- 
+
+  // ==========================================
+  // NAVEGACIÓN
+  // ==========================================
+
   Widget _buildNavigationButtons({
     bool showSkip = false,
     bool isLastStep = false,
@@ -939,7 +920,7 @@ class RegisterPage extends GetView<RegisterController> {
               child: Text(
                 mycontroller.t('nav_skip'),
                 style: ThemeColor.bodyMedium.copyWith(
-                  color: ThemeColor.textSecondaryColor,
+                  color: ThemeColor.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -949,13 +930,10 @@ class RegisterPage extends GetView<RegisterController> {
 
           Obx(() {
             final isLoading = controller.isLoading.value;
-
             return GestureDetector(
               onTap: isLoading
                   ? null
-                  : (isLastStep
-                        ? controller.onRegisterTap
-                        : controller.nextStep),
+                  : (isLastStep ? controller.onRegisterTap : controller.nextStep),
               child: Container(
                 width: 56,
                 height: 56,
@@ -972,9 +950,7 @@ class RegisterPage extends GetView<RegisterController> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         ),
                       )

@@ -122,6 +122,8 @@ flutter:
    - assets/successful.png
    - assets/logo/iosicon.jpg
    - assets/logo/icon.jpeg
+   - assets/logo/logo-radar.png
+   - assets/logo/logo-radar-dark.png
    - assets/tutorial/tutorial1.png
    - assets/tutorial/tutorial2.png
    - assets/tutorial/tutorial3.png

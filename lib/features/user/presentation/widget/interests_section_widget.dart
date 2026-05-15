@@ -16,18 +16,15 @@ class InterestsSectionWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<InterestsSectionWidget> createState() =>
-      _InterestsSectionWidgetState();
+  State<InterestsSectionWidget> createState() => _InterestsSectionWidgetState();
 }
 
 class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
   ProfileController get _profile => Get.find<ProfileController>();
-  UpdateProfileController get _update =>
-      Get.find<UpdateProfileController>();
+  UpdateProfileController get _update => Get.find<UpdateProfileController>();
   LanguageController get _l => Get.find<LanguageController>();
   TranslationService get _translator => Get.find<TranslationService>();
 
-  // Cache local: nombre original → traducción actual
   final RxMap<String, String> _translated = <String, String>{}.obs;
   String _lastLang = '';
 
@@ -72,7 +69,6 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
     return _translated[originalName] ?? originalName;
   }
 
-  /// El icono siempre usa el nombre en español (clave del mapa)
   IconData _getInterestIcon(String originalName) {
     const icons = {
       'Pintura': Icons.brush,
@@ -124,7 +120,6 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
     return Obx(() {
       final interests = _profile.interests;
 
-      // Disparar traducción si cambió el idioma
       final currentLang = _l.lang;
       if (currentLang != _lastLang) {
         WidgetsBinding.instance
@@ -138,11 +133,10 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
                 )
             : null,
         child: Container(
-          margin: EdgeInsets.symmetric(
-              horizontal: ThemeColor.paddingLarge),
+          margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
           padding: EdgeInsets.all(ThemeColor.paddingLarge),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ThemeColor.cardBackground,
             borderRadius: ThemeColor.largeBorderRadius,
             boxShadow: [ThemeColor.cardShadow],
           ),
@@ -157,7 +151,7 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
                       _l.t('interests_title'),
                       style: ThemeColor.subtitleLarge.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: ThemeColor.textDarkColor,
+                        color: ThemeColor.textPrimary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -165,7 +159,7 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: ThemeColor.textSecondaryColor,
+                    color: ThemeColor.textSecondary,
                   ),
                 ],
               ),
@@ -175,7 +169,7 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
               Text(
                 _l.t('interests_subtitle'),
                 style: ThemeColor.bodySmall.copyWith(
-                  color: ThemeColor.textSecondaryColor,
+                  color: ThemeColor.textSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
@@ -190,12 +184,10 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
                         runSpacing: ThemeColor.paddingSmall,
                         children: interests.take(4).map((interest) {
                           return _InterestChip(
-                            // label traducido, icon por nombre original
                             label: _getLabel(interest.name),
                             icon: _getInterestIcon(interest.name),
                             onDelete: widget.isEditable
-                                ? () => _update
-                                    .removeInterest(interest.id)
+                                ? () => _update.removeInterest(interest.id)
                                 : null,
                           );
                         }).toList(),
@@ -213,13 +205,13 @@ class _InterestsSectionWidgetState extends State<InterestsSectionWidget> {
         Icon(
           Icons.add_circle_outline,
           size: 18,
-          color: ThemeColor.textSecondaryColor,
+          color: ThemeColor.textSecondary,
         ),
         const SizedBox(width: 8),
         Text(
           _l.t('interests_add'),
           style: ThemeColor.bodySmall.copyWith(
-            color: ThemeColor.textSecondaryColor,
+            color: ThemeColor.textSecondary,
           ),
         ),
       ],
@@ -241,43 +233,46 @@ class _InterestChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: ThemeColor.paddingMedium,
-        vertical: ThemeColor.paddingSmall + 2,
-      ),
-      decoration: BoxDecoration(
-        color: ThemeColor.backgroundColorfondo,
-        borderRadius: ThemeColor.circularBorderRadius,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18, color: ThemeColor.textDarkColor),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              style: ThemeColor.bodyMedium.copyWith(
-                color: ThemeColor.textDarkColor,
-                fontWeight: FontWeight.w500,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+    return Obx(() => Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: ThemeColor.paddingMedium,
+            vertical: ThemeColor.paddingSmall + 2,
           ),
-          if (onDelete != null) ...[
-            const SizedBox(width: 6),
-            GestureDetector(
-              onTap: onDelete,
-              child: Icon(
-                Icons.close,
-                size: 16,
-                color: ThemeColor.textSecondaryColor,
+         decoration: BoxDecoration(
+  color: ThemeColor.backgroundColorfondo,
+  borderRadius: ThemeColor.circularBorderRadius,
+  border: Border.all(
+    color: ThemeColor.subtleBorder,
+  ),
+),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: ThemeColor.textPrimary),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-          ],
-        ],
-      ),
-    );
+              if (onDelete != null) ...[
+                const SizedBox(width: 6),
+                GestureDetector(
+                  onTap: onDelete,
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: ThemeColor.textSecondary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ));
   }
 }

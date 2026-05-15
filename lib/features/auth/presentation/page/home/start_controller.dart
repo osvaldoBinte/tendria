@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tendria/common/controller/tutorialPerfil/profile_tutorial_controller.dart';
-import 'package:tendria/common/controller/tutorial_controller.dart';
+import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_controller.dart';
+import 'package:tendria/common/tutorial/tutorial_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/features/like/presentation/page/liked_by_users_page.dart';
 import 'package:tendria/features/like/presentation/page/my_match_page.dart';

@@ -86,8 +86,7 @@ class PreferencesController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   ProfileController? _profileController;
   final RxString customGenderInput = ''.obs;
-
-  // ─── OPCIONES (labels traducidos en la Page, values fijos aquí) ───────────
+ 
 
   final List<Map<String, dynamic>> genderOptions = [
     {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},

@@ -25,6 +25,23 @@ class ThemeColor {
     return const Color(0xFF4A141E) ;
   }
 }
+static Color get toggleBackground {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFF2C2C3E) : const Color(0xFFE0E0E0);
+  } catch (_) {
+    return const Color(0xFFE0E0E0);
+  }
+}
+
+static Color get toggleThumb {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFFE0E0E0) : Color(0xFF2C2C3E);
+  } catch (_) {
+    return Colors.white;
+  }
+}
 static Color get backgroundColorRadart {
   try {
     final ctrl = Get.find<ThemeController>();
@@ -43,7 +60,7 @@ static Color get backgroundColor {
 } static Color get subtleBorder {
   try {
     final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? Colors.white24 : Colors.grey.shade300;
+    return ctrl.isDarkMode.value ? Colors.white24 : Colors.black12;
   } catch (_) {
     return Colors.grey.shade300;
   }

@@ -360,6 +360,7 @@ Future<void> rejectUser() async {
 
   try {
     isProcessingLike.value = true;
+    print(' use id ${currentProfile.value!.id }');
     await toggleLikeUsecase.execute(currentProfile.value!.id ?? 0, false);
     showInfoSnackbar(_l.t('nearby_next_profile'));
     nextUser();

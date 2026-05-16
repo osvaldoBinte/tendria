@@ -43,55 +43,57 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-          backgroundColor: ThemeColor.backgroundColorfondo,
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Obx(() {
-                  if (controller.isLoading.value &&
-                      controller.userEntity.value == null) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          ThemeColor.primaryColor,
-                        ),
-                      ),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: controller.loadUserProfile,
-                    color: ThemeColor.primaryColor,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        children: [
-                          _buildHeader(),
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          _buildPhotosSection(),
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          _buildBiographySection(),
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          InterestsSectionWidget(isEditable: true),
-                          SizedBox(height: ThemeColor.paddingLarge),
-                          QualitiesSectionWidget(isEditable: true),
-                          SizedBox(height: ThemeColor.paddingExtraLarge),
-                        ],
+    return Obx(
+      () => Scaffold(
+        backgroundColor: ThemeColor.backgroundColorfondo,
+        body: Stack(
+          children: [
+            SafeArea(
+              child: Obx(() {
+                if (controller.isLoading.value &&
+                    controller.userEntity.value == null) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        ThemeColor.primaryColor,
                       ),
                     ),
                   );
-                }),
-              ),
-              Obx(
-                () => tutorialCtrl.isVisible.value
-                    ? const ProfileTutorialOverlay()
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          ),
-        ));
+                }
+
+                return RefreshIndicator(
+                  onRefresh: controller.loadUserProfile,
+                  color: ThemeColor.primaryColor,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        _buildHeader(),
+                        SizedBox(height: ThemeColor.paddingLarge),
+                        SizedBox(height: ThemeColor.paddingLarge),
+                        _buildPhotosSection(),
+                        SizedBox(height: ThemeColor.paddingLarge),
+                        _buildBiographySection(),
+                        SizedBox(height: ThemeColor.paddingLarge),
+                        InterestsSectionWidget(isEditable: true),
+                        SizedBox(height: ThemeColor.paddingLarge),
+                        QualitiesSectionWidget(isEditable: true),
+                        SizedBox(height: ThemeColor.paddingExtraLarge),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+            Obx(
+              () => tutorialCtrl.isVisible.value
+                  ? const ProfileTutorialOverlay()
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildHeader() {
@@ -113,48 +115,103 @@ class _ProfilePageState extends State<ProfilePage> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  IconButton(
-                    key: tutorialCtrl.blockedUsersKey,
-                    icon: Icon(
-                      Icons.person_off,
-                      color: ThemeColor.iconColor,
-                    ),
-                    onPressed: controller.onViewBlockedUsers,
-                  ),
-                  IconButton(
-                    key: tutorialCtrl.notificationsKey,
-                    icon: Icon(
-                      Icons.notifications_none,
-                      color: ThemeColor.iconColor,
-                    ),
-                    onPressed: controller.onViewNotifications,
-                  ),
-                  IconButton(
-                    key: tutorialCtrl.editProfileKey,
-                    icon: Icon(Icons.edit, color: ThemeColor.iconColor),
-                    onPressed: controller.onHelpTap,
-                  ),
-                  // Botón tema oscuro/claro
-                  Obx(() => IconButton(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        key: tutorialCtrl.blockedUsersKey,
                         icon: Icon(
-                          _themeCtrl.isDarkMode.value
-                              ? Icons.light_mode_rounded
-                              : Icons.dark_mode_rounded,
+                          Icons.person_off,
                           color: ThemeColor.iconColor,
                         ),
-                        onPressed: _themeCtrl.toggleTheme,
-                      )),
-                  IconButton(
-                    key: tutorialCtrl.settingsKey,
-                    icon: Icon(
-                      Icons.settings_outlined,
-                      color: ThemeColor.iconColor,
-                    ),
-                    onPressed: controller.onSettingsTap,
+                        onPressed: controller.onViewBlockedUsers,
+                      ),
+                      IconButton(
+                        key: tutorialCtrl.notificationsKey,
+                        icon: Icon(
+                          Icons.notifications_none,
+                          color: ThemeColor.iconColor,
+                        ),
+                        onPressed: controller.onViewNotifications,
+                      ),
+                      IconButton(
+                        key: tutorialCtrl.editProfileKey,
+                        icon: Icon(Icons.edit, color: ThemeColor.iconColor),
+                        onPressed: controller.onHelpTap,
+                      ),
+                      IconButton(
+                        key: tutorialCtrl.settingsKey,
+                        icon: Icon(
+                          Icons.settings_outlined,
+                          color: ThemeColor.iconColor,
+                        ),
+                        onPressed: controller.onSettingsTap,
+                      ),
+                    ],
                   ),
+                  // Toggle debajo, alineado a la derecha
+                  Obx(() {
+                    final isDark = _themeCtrl.isDarkMode.value;
+                    return GestureDetector(
+                      onTap: _themeCtrl.toggleTheme,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        width: 72,
+                        height: 34,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: ThemeColor.toggleBackground,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 2),
+                                child: Icon(
+                                  Icons.wb_sunny_rounded,
+                                  size: 16,
+                                  color:ThemeColor.toggleThumb
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 2),
+                                child: Icon(
+                                  Icons.dark_mode_rounded,
+                                  size: 16,
+                                  color:ThemeColor.toggleThumb
+                                ),
+                              ),
+                            ),
+                            AnimatedAlign(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              alignment: isDark
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: ThemeColor.toggleThumb,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [ThemeColor.lightShadow],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ],
@@ -193,7 +250,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: ThemeColor.primaryColor.withOpacity(0.12),
+                                color: ThemeColor.primaryColor.withOpacity(
+                                  0.12,
+                                ),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(12),
                                   topRight: Radius.circular(12),
@@ -201,7 +260,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   bottomLeft: Radius.circular(4),
                                 ),
                                 border: Border.all(
-                                  color: ThemeColor.primaryColor.withOpacity(0.3),
+                                  color: ThemeColor.primaryColor.withOpacity(
+                                    0.3,
+                                  ),
                                   width: 1,
                                 ),
                               ),
@@ -223,8 +284,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   Icon(
                                     Icons.edit,
                                     size: 12,
-                                    color:
-                                        ThemeColor.primaryColor.withOpacity(0.6),
+                                    color: ThemeColor.primaryColor.withOpacity(
+                                      0.6,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -370,8 +432,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(
                     '$count / $max',
                     style: ThemeColor.bodySmall.copyWith(
-                      color:
-                          count < max ? ThemeColor.primaryColor : Colors.green,
+                      color: count < max
+                          ? ThemeColor.primaryColor
+                          : Colors.green,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -470,8 +533,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : const Icon(Icons.close, color: Colors.white, size: 14),

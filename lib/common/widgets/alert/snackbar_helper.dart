@@ -56,9 +56,9 @@ void showErrorSnackbar(String message) {
 }
 
 void showInfoSnackbar(String message) {
-  showSnackBar(message, ThemeColor.primaryColor);
+  showSnackBar(message, ThemeColor.infoColor);
 }
 
 void showWarningSnackbar(String message) {
-  showSnackBar(message, Colors.orange);
+  showSnackBar(message, ThemeColor.warningColor);
 }

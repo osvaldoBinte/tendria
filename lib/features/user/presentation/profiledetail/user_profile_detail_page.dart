@@ -631,10 +631,7 @@ class UserProfileDetailPage extends StatelessWidget {
       ),
     );
   }
-
-  // ==========================================
-  // BOTONES DE ACCIÓN
-  // ==========================================
+ 
 
   Widget _buildReporteButtons(UserProfileController controller) {
     return SafeArea(

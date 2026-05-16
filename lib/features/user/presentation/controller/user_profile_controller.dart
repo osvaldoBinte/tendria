@@ -187,6 +187,7 @@ bool get alreadyInteracted {
 
     try {
       isProcessingLike.value = true;
+      
       await toggleLikeUsecase.execute(userId.value, false);
       showInfoSnackbar('Usuario rechazado');
 

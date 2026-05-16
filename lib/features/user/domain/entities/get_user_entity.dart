@@ -15,6 +15,8 @@ class GetUserEntity {
   final List<QualitiesIdsEntity>? qualitiesIds;
   final List<InterestsIdsEntity>? interestsIds;
   final PreferencesEntity? preferences;
+  final LikeStatusEntity? likeStatus;
+  
   final String? status;
   final ChatEntity? chat;
   GetUserEntity({
@@ -27,6 +29,7 @@ class GetUserEntity {
      this.qualitiesIds,
      this.interestsIds,
       this.preferences,
+      this.likeStatus,
       this.dateofbirth,
       this.gender,
       this.primarylanguage,
@@ -36,6 +39,12 @@ class GetUserEntity {
       this.chat
   });
 
+}
+class LikeStatusEntity {
+  final bool id1DioLikeAId2;
+  final bool id2DioLikeAId1;
+
+  LikeStatusEntity({required this.id1DioLikeAId2, required this.id2DioLikeAId1});
 }
 class AssetEntity {
   final int id;

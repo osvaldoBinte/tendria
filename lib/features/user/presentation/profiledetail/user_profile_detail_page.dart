@@ -64,7 +64,9 @@ class UserProfileDetailPage extends StatelessWidget {
                     backgroundColor: ThemeColor.primaryColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                   child: const Text('Volver'),
                 ),
@@ -213,7 +215,7 @@ class UserProfileDetailPage extends StatelessWidget {
                               child: CircularProgressIndicator(
                                 value: progress.expectedTotalBytes != null
                                     ? progress.cumulativeBytesLoaded /
-                                        progress.expectedTotalBytes!
+                                          progress.expectedTotalBytes!
                                     : null,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   ThemeColor.primaryColor,
@@ -238,16 +240,15 @@ class UserProfileDetailPage extends StatelessWidget {
                           (index) => Expanded(
                             child: Container(
                               margin: EdgeInsets.only(
-                                right:
-                                    index < controller.userGallery.length - 1
-                                        ? 4
-                                        : 0,
+                                right: index < controller.userGallery.length - 1
+                                    ? 4
+                                    : 0,
                               ),
                               height: 3,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(2),
-                                color: controller.currentImageIndex.value ==
-                                        index
+                                color:
+                                    controller.currentImageIndex.value == index
                                     ? Colors.white
                                     : Colors.white.withOpacity(0.4),
                                 boxShadow: [ThemeColor.lightShadow],
@@ -268,10 +269,8 @@ class UserProfileDetailPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: ThemeColor.tertiaryColor,
                         borderRadius: BorderRadius.only(
-                          bottomLeft:
-                              Radius.circular(ThemeColor.largeRadius),
-                          bottomRight:
-                              Radius.circular(ThemeColor.largeRadius),
+                          bottomLeft: Radius.circular(ThemeColor.largeRadius),
+                          bottomRight: Radius.circular(ThemeColor.largeRadius),
                         ),
                         boxShadow: [ThemeColor.lightShadow],
                       ),
@@ -345,7 +344,7 @@ class UserProfileDetailPage extends StatelessWidget {
                                       gradient: LinearGradient(
                                         colors: [
                                           Color(0xFFE040FB),
-                                          Color(0xFFFF6D00)
+                                          Color(0xFFFF6D00),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -359,7 +358,8 @@ class UserProfileDetailPage extends StatelessWidget {
                                       ),
                                       padding: const EdgeInsets.all(1.5),
                                       child: ClipOval(
-                                        child: user.fotoUrl != null &&
+                                        child:
+                                            user.fotoUrl != null &&
                                                 user.fotoUrl!.isNotEmpty
                                             ? CachedNetworkImage(
                                                 imageUrl: user.fotoUrl!,
@@ -368,22 +368,22 @@ class UserProfileDetailPage extends StatelessWidget {
                                                 height: double.infinity,
                                                 placeholder: (_, __) =>
                                                     Container(
-                                                  color: Colors.grey[800],
-                                                  child: const Icon(
-                                                    Icons.person,
-                                                    color: Colors.white54,
-                                                    size: 24,
-                                                  ),
-                                                ),
+                                                      color: Colors.grey[800],
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white54,
+                                                        size: 24,
+                                                      ),
+                                                    ),
                                                 errorWidget: (_, __, ___) =>
                                                     Container(
-                                                  color: Colors.grey[800],
-                                                  child: const Icon(
-                                                    Icons.person,
-                                                    color: Colors.white54,
-                                                    size: 24,
-                                                  ),
-                                                ),
+                                                      color: Colors.grey[800],
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white54,
+                                                        size: 24,
+                                                      ),
+                                                    ),
                                               )
                                             : Container(
                                                 color: Colors.grey[800],
@@ -645,7 +645,7 @@ class UserProfileDetailPage extends StatelessWidget {
         child: Obx(() {
           final showReject = controller.showRejectButton;
           final isFemale = controller.isUserFemale;
-
+          final alreadyInteracted = controller.alreadyInteracted;
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -665,8 +665,7 @@ class UserProfileDetailPage extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              ThemeColor.textSecondaryColor.withOpacity(0.3),
+                          color: ThemeColor.textSecondaryColor.withOpacity(0.3),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -709,7 +708,8 @@ class UserProfileDetailPage extends StatelessWidget {
                 ),
 
               // Botón central: Like rosa (solo si showReject y es mujer)
-              if (showReject && isFemale)
+              // Botón central: Like rosa (solo si showReject, es mujer, y NO ha interactuado)
+              if (showReject && isFemale && !alreadyInteracted)
                 GestureDetector(
                   onTap: controller.sendLike,
                   child: Container(

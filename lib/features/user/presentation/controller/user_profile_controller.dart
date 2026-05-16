@@ -4,12 +4,12 @@ import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
-import 'package:tendria/features/facebookEvent/domain/usecase/log_view_profile_usecase.dart'; 
+import 'package:tendria/features/facebookEvent/domain/usecase/log_view_profile_usecase.dart';
 import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
-import 'package:tendria/features/user/domain/entities/get_user_entity.dart'; 
+import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/unlock/domain/usecase/block_user_usecase.dart';
@@ -20,13 +20,13 @@ class UserProfileController extends GetxController {
   final GetUserByIdUsecase getUserByIdUsecase;
   final ToggleLikeUsecase toggleLikeUsecase;
   final BlockUserUsecase blockUserUsecase;
-  final LogViewProfileUsecase logViewProfileUsecase;  
+  final LogViewProfileUsecase logViewProfileUsecase;
 
   UserProfileController({
     required this.getUserByIdUsecase,
     required this.toggleLikeUsecase,
     required this.blockUserUsecase,
-    required this.logViewProfileUsecase,  
+    required this.logViewProfileUsecase,
   });
 
   final RxBool isLoading = false.obs;
@@ -48,10 +48,15 @@ class UserProfileController extends GetxController {
   List<String> get userQualities =>
       currentUser.value?.qualitiesIds?.map((q) => q.name).toList() ?? [];
   List<String> get userGallery => _buildGallery(currentUser.value);
-bool get isUserFemale {
-  final profileController = Get.find<ProfileController>();
-  final g = profileController.gender.toLowerCase().trim();
-  return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
+  bool get isUserFemale {
+    final profileController = Get.find<ProfileController>();
+    final g = profileController.gender.toLowerCase().trim();
+    return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
+  }
+bool get alreadyInteracted {
+  final like = currentUser.value?.likeStatus;
+  if (like == null) return false;
+  return like.id1DioLikeAId2 || like.id2DioLikeAId1;
 }
   final RxInt goPerfilIndex = (-1).obs;
   @override
@@ -65,7 +70,9 @@ bool get isUserFemale {
       loadUserProfile(userId.value);
     }
     final index = args?['goPerfilIndex'];
- debugPrint('is mujer isUserFemale: $isUserFemale ${ currentUser.value?.gender?.toLowerCase()}');
+    debugPrint(
+      'is mujer isUserFemale: $isUserFemale ${currentUser.value?.gender?.toLowerCase()}',
+    );
     if (index is RxInt) {
       goPerfilIndex.value = index.value;
     } else if (index is int) {
@@ -96,15 +103,15 @@ bool get isUserFemale {
       final storyController = Get.find<StoryController>();
       final result = await storyController.fetchStoriesForUser(idUser);
       hasStories.value = result;
- 
-      await logViewProfileUsecase(targetUserId: idUser.toString());
 
+      await logViewProfileUsecase(targetUserId: idUser.toString());
     } catch (e) {
       print('Error cargando perfil de usuario: $e');
     } finally {
       isLoading.value = false;
     }
   }
+
   List<String> _buildGallery(GetUserEntity? user) {
     if (user == null) return [''];
     final gallery = <String>[];
@@ -161,13 +168,13 @@ bool get isUserFemale {
 
     try {
       isProcessingLike.value = true;
-      await toggleLikeUsecase.execute(userId.value?? 0, true);
+      await toggleLikeUsecase.execute(userId.value ?? 0, true);
       showSuccessSnackbar('¡Le diste like a $userName!');
-         final nearbyController = Get.find<NearbyUsersController>();
+      final nearbyController = Get.find<NearbyUsersController>();
       nearbyController.noMoreUsers.value = false;
       await nearbyController.loadNearbyUsers();
 
-      Get.offAllNamed(RoutesNames.nearbyProfilesPage);    
+      Get.offAllNamed(RoutesNames.nearbyProfilesPage);
     } catch (e) {
       showErrorSnackbar('Error al dar like: ${cleanExceptionMessage(e)}');
     } finally {

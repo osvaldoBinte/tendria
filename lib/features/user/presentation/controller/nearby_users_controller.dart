@@ -59,7 +59,11 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
   final g = profileController.gender.toLowerCase().trim();
   return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
 }
-
+bool get alreadyInteracted {
+  final like = currentProfile.value?.likeStatus;
+  if (like == null) return false;
+  return like.id1DioLikeAId2 || like.id2DioLikeAId1;
+}
   GetUserEntity? get currentUser {
     if (nearbyUsers.isEmpty || currentUserIndex.value >= nearbyUsers.length) {
       return null;
@@ -485,421 +489,403 @@ Future<void> rejectUser() async {
  
 
   void showUserPreviewDialog(GetUserEntity user, int userIndex) {
-    currentUserIndex.value = userIndex;
-    updateCurrentProfile();
+  currentUserIndex.value = userIndex;
+  updateCurrentProfile();
 
-    final gallery = _buildGallery(user);
-    final RxInt previewIndex = 0.obs;
-    final PageController previewPageController = PageController();
+  final gallery = _buildGallery(user);
+  final RxInt previewIndex = 0.obs;
+  final PageController previewPageController = PageController();
 
-    final storyController = Get.find<StoryController>();
-    final RxBool hasStories = (userHasStories[user.id] == true).obs;
+  final storyController = Get.find<StoryController>();
+  final RxBool hasStories = (userHasStories[user.id] == true).obs;
 
-    if (user.id != null && !userHasStories.containsKey(user.id)) {
-      storyController.fetchStoriesForUser(user.id!).then((result) {
-        userHasStories[user.id!] = result;
-        hasStories.value = result;
-      });
-    }
+  if (user.id != null && !userHasStories.containsKey(user.id)) {
+    storyController.fetchStoriesForUser(user.id!).then((result) {
+      userHasStories[user.id!] = result;
+      hasStories.value = result;
+    });
+  }
 
-    Get.dialog(
-      Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            color: ThemeColor.backgroundColor,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 320,
-                  child: Stack(
-                    children: [ 
-                      PageView.builder(
-                        controller: previewPageController,
-                        itemCount: gallery.length,
-                        onPageChanged: (i) => previewIndex.value = i,
-                        itemBuilder: (_, i) {
-                          final url = gallery[i];
-                          if (url.isEmpty) {
-                            return Container(
-                              color: ThemeColor.backgroundColorfondo,
-                              child: Icon(
-                                Icons.person,
-                                size: 80,
-                                color: ThemeColor.textSecondaryColor,
+  Get.dialog(
+    Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          color: ThemeColor.backgroundColorfondo,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+ 
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: SizedBox(
+                        height: 300,
+                        width: double.infinity,
+                        child: PageView.builder(
+                          controller: previewPageController,
+                          itemCount: gallery.length,
+                          onPageChanged: (i) => previewIndex.value = i,
+                          itemBuilder: (_, i) {
+                            final url = gallery[i];
+                            if (url.isEmpty) {
+                              return Container(
+                                color: ThemeColor.backgroundColorfondo,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 80,
+                                  color: ThemeColor.textSecondaryColor,
+                                ),
+                              );
+                            }
+                            return CachedNetworkImage(
+                              imageUrl: url,
+                              fit: BoxFit.contain,
+                              placeholder: (_, __) => Container(
+                                color: ThemeColor.backgroundColorfondo,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: ThemeColor.primaryColor,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (_, __, ___) => Container(
+                                color: ThemeColor.backgroundColorfondo,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 80,
+                                  color: ThemeColor.textSecondaryColor,
+                                ),
                               ),
                             );
-                          }
-                          return CachedNetworkImage(
-                            imageUrl: url,
-                            fit: BoxFit.contain,
-                            placeholder: (_, __) => Container(
-                              color: ThemeColor.backgroundColorfondo,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: ThemeColor.primaryColor,
-                                ),
-                              ),
-                            ),
-                            errorWidget: (_, __, ___) => Container(
-                              color: ThemeColor.backgroundColorfondo,
-                              child: Icon(
-                                Icons.person,
-                                size: 80,
-                                color: ThemeColor.textSecondaryColor,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
- 
-                      if (gallery.length > 1)
-                        Positioned(
-                          top: 12,
-                          left: 12,
-                          right: 12,
-                          child: Obx(
-                            () => Row(
-                              children: List.generate(gallery.length, (i) {
-                                return Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.only(
-                                      right: i < gallery.length - 1 ? 4 : 0,
-                                    ),
-                                    height: 3,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(2),
-                                      color: previewIndex.value == i
-                                          ? Colors.white
-                                          : Colors.white.withOpacity(0.4),
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
- 
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.7),
-                              ],
-                            ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${user.name ?? _l.t('user')}, ${user.age ?? 0}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    if (user.city != null &&
-                                        user.city!.isNotEmpty)
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.location_on,
-                                            size: 14,
-                                            color: Colors.white70,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            user.city!,
-                                            style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                              ),
- 
-                              Obx(() {
-                                if (!hasStories.value) {
-                                  return const SizedBox.shrink();
-                                }
-                                return GestureDetector(
-                                  onTap: () {
-                                    Get.back();
-                                    if (Get.context != null) {
-                                      showTargetUserStoryModal(
-                                        Get.context!,
-                                        userId: user.id!,
-                                        userName: user.name ?? _l.t('user'),
-                                        userPhoto: user.fotoUrl,
-                                      );
-                                    }
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 56,
-                                        height: 56,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Color(0xFFE040FB),
-                                              Color(0xFFFF6D00),
-                                            ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.all(2.5),
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.black,
-                                          ),
-                                          padding: const EdgeInsets.all(1.5),
-                                          child: ClipOval(
-                                            child:
-                                                user.fotoUrl != null &&
-                                                    user.fotoUrl!.isNotEmpty
-                                                ? CachedNetworkImage(
-                                                    imageUrl: user.fotoUrl!,
-                                                    fit: BoxFit.cover,
-                                                    width: double.infinity,
-                                                    height: double.infinity,
-                                                    placeholder: (_, __) =>
-                                                        Container(
-                                                          color:
-                                                              Colors.grey[800],
-                                                          child: const Icon(
-                                                            Icons.person,
-                                                            color:
-                                                                Colors.white54,
-                                                            size: 24,
-                                                          ),
-                                                        ),
-                                                    errorWidget: (_, __, ___) =>
-                                                        Container(
-                                                          color:
-                                                              Colors.grey[800],
-                                                          child: const Icon(
-                                                            Icons.person,
-                                                            color:
-                                                                Colors.white54,
-                                                            size: 24,
-                                                          ),
-                                                        ),
-                                                  )
-                                                : Container(
-                                                    color: Colors.grey[800],
-                                                    child: const Icon(
-                                                      Icons.person,
-                                                      color: Colors.white54,
-                                                      size: 24,
-                                                    ),
-                                                  ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        _l.t('stories'),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
+                          },
                         ),
                       ),
+                    ),
  
+                    if (gallery.length > 1)
                       Positioned(
                         top: 12,
+                        left: 12,
                         right: 12,
-                        child: GestureDetector(
-                          onTap: () => Get.back(),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 18,
-                            ),
+                        child: Obx(
+                          () => Row(
+                            children: List.generate(gallery.length, (i) {
+                              return Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.only(
+                                    right: i < gallery.length - 1 ? 4 : 0,
+                                  ),
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(2),
+                                    color: previewIndex.value == i
+                                        ? Colors.white
+                                        : Colors.white.withOpacity(0.4),
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
- 
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (user.bio != null &&
-                          user.bio!.isNotEmpty &&
-                          double.tryParse(user.bio!) == null) ...[
-                        Text(
-                          user.bio!,
-                          style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textTertiaryColor,
-                          ),
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 12),
-                      ],
 
-                      if (user.status != null && user.status!.isNotEmpty)
-                        Container(
-                          constraints: const BoxConstraints(maxWidth: 70),
-                          margin: const EdgeInsets.only(bottom: 3),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5,
-                            vertical: 2,
-                          ),
+                    // Botón cerrar
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: GestureDetector(
+                        onTap: () => Get.back(),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: ThemeColor.backgroundColor.withOpacity(0.92),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              topRight: Radius.circular(8),
-                              bottomRight: Radius.circular(8),
-                              bottomLeft: Radius.circular(2),
-                            ),
-                            border: Border.all(
-                              color: ThemeColor.radarScanner.withOpacity(0.6),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: ThemeColor.radarScanner.withOpacity(0.2),
-                                blurRadius: 4,
+                            color: Colors.black.withOpacity(0.4),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Story avatar
+                    Obx(() {
+                      if (!hasStories.value) return const SizedBox.shrink();
+                      return Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: GestureDetector(
+                          onTap: () {
+                            Get.back();
+                            if (Get.context != null) {
+                              showTargetUserStoryModal(
+                                Get.context!,
+                                userId: user.id!,
+                                userName: user.name ?? _l.t('user'),
+                                userPhoto: user.fotoUrl,
+                              );
+                            }
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xFFE040FB),
+                                      Color(0xFFFF6D00),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(2.5),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: ThemeColor.backgroundColor,
+                                  ),
+                                  padding: const EdgeInsets.all(1.5),
+                                  child: ClipOval(
+                                    child: user.fotoUrl != null &&
+                                            user.fotoUrl!.isNotEmpty
+                                        ? CachedNetworkImage(
+                                            imageUrl: user.fotoUrl!,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            placeholder: (_, __) => Container(
+                                              color: ThemeColor.backgroundColorfondo,
+                                              child: const Icon(
+                                                Icons.person,
+                                                color: Colors.white54,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            errorWidget: (_, __, ___) => Container(
+                                              color: ThemeColor.backgroundColorfondo,
+                                              child: const Icon(
+                                                Icons.person,
+                                                color: Colors.white54,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            color: ThemeColor.backgroundColorfondo,
+                                            child: const Icon(
+                                              Icons.person,
+                                              color: Colors.white54,
+                                              size: 20,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _l.t('stories'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
-                          child: Text(
-                            user.status!,
-                            style: TextStyle(
-                              color: ThemeColor.radarScanner,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
                         ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
  
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Get.back();
-                            Get.toNamed(
-                              RoutesNames.chatPage,
-                              arguments: {
-                                'userid': user.id,
-                                'name': user.name ?? _l.t('user'),
-                                'photo': user.fotoUrl,
-                                'MyPhoto': myProfileController.profilePhotoUrl,
-                                'goPerfilIndex': 1,
-                              },
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.chat_bubble_outline,
-                            color: Colors.white,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [ 
+                    Text(
+                      '${user.name ?? _l.t('user')}, ${user.age ?? 0}.',
+                      style: ThemeColor.headingMedium.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: ThemeColor.textPrimary,
                           ),
-                          label: Text(
-                            _l.t('nearby_send_message'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                    ),
+                    const SizedBox(height: 8),
+ 
+                    if (user.status != null && user.status!.isNotEmpty)
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 120),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: ThemeColor.backgroundColor.withOpacity(0.92),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                            bottomLeft: Radius.circular(2),
+                          ),
+                          border: Border.all(
+                            color: ThemeColor.radarScanner.withOpacity(0.6),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: ThemeColor.radarScanner.withOpacity(0.2),
+                              blurRadius: 4,
                             ),
+                          ],
+                        ),
+                        child: Text(
+                          user.status!,
+                          style: TextStyle(
+                            color: ThemeColor.radarScanner,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ThemeColor.primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
 
-                      const SizedBox(height: 8),
- 
-                      SizedBox(
-                        width: double.infinity,
-                        height: 44,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Get.back();
-                            Get.toNamed(
-                              RoutesNames.userProfileDetailPage,
-                              arguments: {'userId': user.id},
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: ThemeColor.primaryColor.withOpacity(0.5),
+                    // Bio
+                    if (user.bio != null &&
+                        user.bio!.isNotEmpty &&
+                        double.tryParse(user.bio!) == null) ...[
+                      Text(
+                        user.bio!,
+                        style: ThemeColor.bodyMedium.copyWith(
+                          color: ThemeColor.textTertiaryColor,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
+                    // Ciudad
+                    if (user.city != null && user.city!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 15,
+                              color: ThemeColor.textSecondaryColor,
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                            const SizedBox(width: 4),
+                            Text(
+                              user.city!,
+                              style: TextStyle(
+                                color: ThemeColor.textSecondaryColor,
+                                fontSize: 13,
+                              ),
                             ),
+                          ],
+                        ),
+                      ),
+
+                    // Botón Chat (primario)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Get.back();
+                          Get.toNamed(
+                            RoutesNames.chatPage,
+                            arguments: {
+                              'userid': user.id,
+                              'name': user.name ?? _l.t('user'),
+                              'photo': user.fotoUrl,
+                              'MyPhoto': myProfileController.profilePhotoUrl,
+                              'goPerfilIndex': 1,
+                            },
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.chat_bubble_outline,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          _l.t('nearby_send_message'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                           ),
-                          child: Text(
-                            _l.t('nearby_view_profile'),
-                            style: TextStyle(
-                              color: ThemeColor.primaryColor,
-                              fontSize: 14,
-                            ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ThemeColor.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Botón Ver perfil (secundario)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Get.back();
+                          Get.toNamed(
+                            RoutesNames.userProfileDetailPage,
+                            arguments: {'userId': user.id},
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: ThemeColor.primaryColor.withOpacity(0.5),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: Text(
+                          _l.t('nearby_view_profile'),
+                          style: TextStyle(
+                            color: ThemeColor.primaryColor,
+                            fontSize: 14,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-      barrierDismissible: true,
-    );
-  } 
+    ),
+    barrierDismissible: true,
+  );
+}
 
   Widget buildUserAvatarWithStory({
     required GetUserEntity user,

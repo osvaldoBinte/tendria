@@ -14,11 +14,10 @@ class ThemeController extends GetxController {
     _loadTheme();
   }
 
-  Future<void> _loadTheme() async {
-    final saved = await _prefs.loadPrefs(type: bool, key: _key);
-    isDarkMode.value = saved ?? false;
-  }
-
+Future<void> _loadTheme() async {
+  final saved = await _prefs.loadPrefs(type: bool, key: _key);
+  isDarkMode.value = saved ?? true;  
+}
   void toggleTheme() {
     isDarkMode.value = !isDarkMode.value;
     _prefs.savePrefs(type: bool, key: _key, value: isDarkMode.value);

@@ -17,7 +17,7 @@ class MyMatchView extends GetView<MyMatchController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-          backgroundColor: ThemeColor.backgroundColor,
+          backgroundColor: ThemeColor.backgroundColorfondo,
           body: SafeArea(
             child: Column(
               children: [

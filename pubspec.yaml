@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
-version: 1.0.31+31
+version: 2.0.31+31
 
 environment:
   sdk: ^3.8.1
@@ -43,7 +43,7 @@ dependencies:
   google_fonts: ^6.1.0
   image_picker: ^1.2.1
   ffmpeg_kit_flutter_new: ^4.1.0
-  video_player: ^2.10.1
+  video_player: ^2.11.1
   camera: ^0.11.2+1
   photo_manager: ^3.8.2
   cached_network_image: ^3.4.1
@@ -114,6 +114,7 @@ flutter:
    - .env
    - dev.env
    - assets/video/radarback.mp4
+   - assets/video/radarwhite.mp4
    - assets/logo/logo.png
    - assets/icons/home/perfil.png
    - assets/icons/home/parati.png

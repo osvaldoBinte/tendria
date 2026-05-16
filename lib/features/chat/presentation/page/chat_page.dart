@@ -167,11 +167,7 @@ class ChatPage extends GetView<ChatController> {
         color: ThemeColor.textSecondary,
       ),
     );
-  }
-
-  // ==========================================
-  // CONNECTION INDICATOR
-  // ==========================================
+  } 
 
   Widget _buildConnectionIndicator() {
     return Obx(() {

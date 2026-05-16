@@ -89,8 +89,7 @@ class NearbyUsersPage extends StatelessWidget {
         backgroundColor: ThemeColor.backgroundColorfondo,
         body: Obx(() {
           if (controller.noMoreUsers.value ||
-              (!controller.isLoading.value &&
-                  controller.nearbyUsers.isEmpty)) {
+              (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
             return _buildNoMoreUsersState(controller);
           }
 
@@ -155,10 +154,7 @@ class NearbyUsersPage extends StatelessWidget {
       );
     });
   }
-
-  // ==========================================
-  // LOCATION PERMISSION
-  // ==========================================
+ 
 
   Widget _buildLocationPermissionState() {
     return Center(
@@ -202,16 +198,17 @@ class NearbyUsersPage extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  final granted =
-                      await controller.checkLocationPermission();
+                  final granted = await controller.checkLocationPermission();
                   if (!granted) {
                     await Geolocator.openAppSettings();
                   } else {
                     controller.loadNearbyUsers();
                   }
                 },
-                icon: const Icon(Icons.location_on_rounded,
-                    color: Colors.white),
+                icon: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.white,
+                ),
                 label: Text(
                   _l.t('enable_location'),
                   style: const TextStyle(
@@ -233,10 +230,7 @@ class NearbyUsersPage extends StatelessWidget {
       ),
     );
   }
-
-  // ==========================================
-  // NO MORE USERS
-  // ==========================================
+ 
 
   Widget _buildNoMoreUsersState(NearbyUsersController controller) {
     return Center(
@@ -279,8 +273,7 @@ class NearbyUsersPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    Get.toNamed(RoutesNames.updateProfilePage),
+                onPressed: () => Get.toNamed(RoutesNames.updateProfilePage),
                 icon: const Icon(Icons.tune_rounded, color: Colors.white),
                 label: Text(
                   _l.t('modify_preferences'),
@@ -305,8 +298,10 @@ class NearbyUsersPage extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => controller.reloadFromStart(),
-                icon: Icon(Icons.refresh_rounded,
-                    color: ThemeColor.primaryColor),
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: ThemeColor.primaryColor,
+                ),
                 label: Text(
                   _l.t('try_again'),
                   style: TextStyle(
@@ -327,12 +322,7 @@ class NearbyUsersPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // ==========================================
-  // SLIVER APP BAR (galería)
-  // ==========================================
-
+  } 
   Widget _buildSliverAppBar(NearbyUsersController controller) {
     return Obx(() {
       final user = controller.currentProfile.value;
@@ -348,11 +338,9 @@ class NearbyUsersPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         flexibleSpace: FlexibleSpaceBar(
           background: Padding(
-            padding:
-                const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             child: ClipRRect(
-              borderRadius:
-                  const BorderRadius.all(Radius.circular(24)),
+              borderRadius: const BorderRadius.all(Radius.circular(24)),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -396,8 +384,7 @@ class NearbyUsersPage extends StatelessWidget {
                       );
                     },
                   ),
-
-                  // Indicadores de página
+ 
                   if (gallery.length > 1)
                     Positioned(
                       top: 16,
@@ -409,16 +396,13 @@ class NearbyUsersPage extends StatelessWidget {
                             return Expanded(
                               child: Container(
                                 margin: EdgeInsets.only(
-                                  right: index < gallery.length - 1
-                                      ? 4
-                                      : 0,
+                                  right: index < gallery.length - 1 ? 4 : 0,
                                 ),
                                 height: 3,
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(2),
-                                  color: controller
-                                              .currentImageIndex.value ==
+                                  borderRadius: BorderRadius.circular(2),
+                                  color:
+                                      controller.currentImageIndex.value ==
                                           index
                                       ? Colors.white
                                       : Colors.white.withOpacity(0.4),
@@ -430,8 +414,7 @@ class NearbyUsersPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                  // Info inferior
+ 
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -441,10 +424,8 @@ class NearbyUsersPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: ThemeColor.tertiaryColor,
                         borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(
-                              ThemeColor.largeRadius),
-                          bottomRight: Radius.circular(
-                              ThemeColor.largeRadius),
+                          bottomLeft: Radius.circular(ThemeColor.largeRadius),
+                          bottomRight: Radius.circular(ThemeColor.largeRadius),
                         ),
                         boxShadow: [ThemeColor.lightShadow],
                       ),
@@ -453,8 +434,7 @@ class NearbyUsersPage extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   '${user.name ?? 'Usuario'}, ${user.age ?? 0}',
@@ -487,14 +467,11 @@ class NearbyUsersPage extends StatelessWidget {
                               ],
                             ),
                           ),
-
-                          // Historia
+ 
                           Obx(() {
                             final hasStory =
-                                controller.userHasStories[user.id] ==
-                                    true;
-                            if (!hasStory)
-                              return const SizedBox.shrink();
+                                controller.userHasStories[user.id] == true;
+                            if (!hasStory) return const SizedBox.shrink();
 
                             return GestureDetector(
                               onTap: () {
@@ -502,8 +479,7 @@ class NearbyUsersPage extends StatelessWidget {
                                   showTargetUserStoryModal(
                                     Get.context!,
                                     userId: user.id!,
-                                    userName:
-                                        user.name ?? 'Usuario',
+                                    userName: user.name ?? 'Usuario',
                                     userPhoto: user.fotoUrl,
                                   );
                                 }
@@ -525,17 +501,16 @@ class NearbyUsersPage extends StatelessWidget {
                                         end: Alignment.bottomRight,
                                       ),
                                     ),
-                                    padding:
-                                        const EdgeInsets.all(2.5),
+                                    padding: const EdgeInsets.all(2.5),
                                     child: Container(
                                       decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: Colors.black,
                                       ),
-                                      padding:
-                                          const EdgeInsets.all(1.5),
+                                      padding: const EdgeInsets.all(1.5),
                                       child: ClipOval(
-                                        child: user.fotoUrl != null &&
+                                        child:
+                                            user.fotoUrl != null &&
                                                 user.fotoUrl!.isNotEmpty
                                             ? CachedNetworkImage(
                                                 imageUrl: user.fotoUrl!,
@@ -544,23 +519,22 @@ class NearbyUsersPage extends StatelessWidget {
                                                 height: double.infinity,
                                                 placeholder: (_, __) =>
                                                     Container(
-                                                  color: Colors.grey[800],
-                                                  child: const Icon(
-                                                    Icons.person,
-                                                    color: Colors.white54,
-                                                    size: 24,
-                                                  ),
-                                                ),
-                                                errorWidget:
-                                                    (_, __, ___) =>
-                                                        Container(
-                                                  color: Colors.grey[800],
-                                                  child: const Icon(
-                                                    Icons.person,
-                                                    color: Colors.white54,
-                                                    size: 24,
-                                                  ),
-                                                ),
+                                                      color: Colors.grey[800],
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white54,
+                                                        size: 24,
+                                                      ),
+                                                    ),
+                                                errorWidget: (_, __, ___) =>
+                                                    Container(
+                                                      color: Colors.grey[800],
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white54,
+                                                        size: 24,
+                                                      ),
+                                                    ),
                                               )
                                             : Container(
                                                 color: Colors.grey[800],
@@ -598,10 +572,7 @@ class NearbyUsersPage extends StatelessWidget {
       );
     });
   }
-
-  // ==========================================
-  // SECCIONES INFO
-  // ==========================================
+ 
 
   Widget _buildBioSection(NearbyUsersController controller) {
     return Obx(() {
@@ -649,7 +620,8 @@ class NearbyUsersPage extends StatelessWidget {
       final pref = controller.currentProfile.value?.preferences;
       if (pref == null) return const SizedBox.shrink();
 
-      final hasContent = (pref.connectiontype?.isNotEmpty == true) ||
+      final hasContent =
+          (pref.connectiontype?.isNotEmpty == true) ||
           (pref.searchgender?.isNotEmpty == true) ||
           (pref.agemin != null && pref.agemax != null);
       if (!hasContent) return const SizedBox.shrink();
@@ -680,11 +652,9 @@ class NearbyUsersPage extends StatelessWidget {
               runSpacing: 8,
               children: [
                 if (pref.connectiontype?.isNotEmpty == true)
-                  _buildPrefChip(
-                      Icons.favorite_border, pref.connectiontype!),
+                  _buildPrefChip(Icons.favorite_border, pref.connectiontype!),
                 if (pref.searchgender?.isNotEmpty == true)
-                  _buildPrefChip(
-                      Icons.people_outline, pref.searchgender!),
+                  _buildPrefChip(Icons.people_outline, pref.searchgender!),
                 if (pref.agemin != null && pref.agemax != null)
                   _buildPrefChip(
                     Icons.cake_outlined,
@@ -728,8 +698,7 @@ class NearbyUsersPage extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children:
-                  interests.map((i) => _buildChip(i.name)).toList(),
+              children: interests.map((i) => _buildChip(i.name)).toList(),
             ),
           ],
         ),
@@ -767,26 +736,21 @@ class NearbyUsersPage extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children:
-                  qualities.map((q) => _buildChip(q.name)).toList(),
+              children: qualities.map((q) => _buildChip(q.name)).toList(),
             ),
           ],
         ),
       );
     });
   }
-
-  // ==========================================
-  // CHIPS
-  // ==========================================
+ 
 
   Widget _buildPrefChip(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: ThemeColor.primaryColor.withOpacity(0.5)),
+        border: Border.all(color: ThemeColor.primaryColor.withOpacity(0.5)),
         color: ThemeColor.primaryColor.withOpacity(0.05),
       ),
       child: Row(
@@ -826,10 +790,6 @@ class NearbyUsersPage extends StatelessWidget {
     );
   }
 
-  // ==========================================
-  // BOTONES DE ACCIÓN
-  // ==========================================
-
   Widget _buildReporteButtons(NearbyUsersController controller) {
     return SafeArea(
       top: false,
@@ -840,6 +800,7 @@ class NearbyUsersPage extends StatelessWidget {
           final showReject = controller.showRejectButton;
           final isFemale = controller.isUserFemale;
 
+          final alreadyInteracted = controller.alreadyInteracted;
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -858,8 +819,7 @@ class NearbyUsersPage extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: ThemeColor.textSecondaryColor
-                              .withOpacity(0.3),
+                          color: ThemeColor.textSecondaryColor.withOpacity(0.3),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -887,8 +847,7 @@ class NearbyUsersPage extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              ThemeColor.primaryColor.withOpacity(0.4),
+                          color: ThemeColor.primaryColor.withOpacity(0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -902,17 +861,14 @@ class NearbyUsersPage extends StatelessWidget {
                   ),
                 ),
 
-              if (showReject && isFemale)
+              if (showReject && isFemale && !alreadyInteracted)
                 GestureDetector(
                   onTap: controller.sendLike,
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.pinkAccent,
-                          Colors.pink.shade300,
-                        ],
+                        colors: [Colors.pinkAccent, Colors.pink.shade300],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
@@ -946,8 +902,7 @@ class NearbyUsersPage extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              ThemeColor.errorColor.withOpacity(0.4),
+                          color: ThemeColor.errorColor.withOpacity(0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -967,10 +922,7 @@ class NearbyUsersPage extends StatelessWidget {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.red.shade700,
-                          Colors.red.shade400
-                        ],
+                        colors: [Colors.red.shade700, Colors.red.shade400],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [

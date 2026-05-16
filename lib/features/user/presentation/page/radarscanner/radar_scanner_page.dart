@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tendria/common/controller/theme_controller.dart';
 import 'package:tendria/common/tutorial/tutorial_controller.dart';
 import 'package:tendria/common/tutorial/tutorial_overlay.dart';
 import 'package:tendria/common/settings/language_controller.dart';
@@ -12,6 +13,7 @@ import 'package:tendria/features/user/presentation/controller/nearby_users_contr
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
+import 'package:video_player/video_player.dart';
 
 class RadarScannerScreen extends StatefulWidget {
   const RadarScannerScreen({Key? key}) : super(key: key);
@@ -331,7 +333,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                  LayoutBuilder(
+                 LayoutBuilder(
                     builder: (context, constraints) {
                       final size = math.min(constraints.maxWidth, 350.0);
                       return SizedBox(
@@ -348,12 +350,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           return Stack(
                             alignment: Alignment.center,
                             children: [
-                              _buildRippleEffect(),
-                              _buildRadarCircles(),
-                              _buildCrosshair(),
-                              _buildRadarSweep(),
-                              _buildRotatingScanLine(),
-                              _buildCenterLogo(),
+                             _RadarVideoBackground(size: size),
+
                               _buildDetectedPoints(),
                             ],
                           );
@@ -456,7 +454,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-          backgroundColor: ThemeColor.backgroundColor,
+          backgroundColor: ThemeColor.backgroundColorRadart,
           body: Obx(() {
             if (controller.locationPermissionDenied.value) {
               return _buildLocationPermissionState();
@@ -903,12 +901,91 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       child: Icon(Icons.person, color: ThemeColor.radarScanner, size: 20),
     );
   }
+}class _RadarVideoBackground extends StatefulWidget {
+  final double size;
+  const _RadarVideoBackground({required this.size});
+
+  @override
+  State<_RadarVideoBackground> createState() => _RadarVideoBackgroundState();
 }
 
-// ==========================================
-// DISTANCE SLIDER
-// ==========================================
+class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
+  late VideoPlayerController _controller;
+  late bool _wasDark;
 
+  String get _videoAsset {
+    final isDark = Get.find<ThemeController>().isDarkMode.value;
+    return isDark
+        ? 'assets/video/radarback.mp4'
+        : 'assets/video/radarwhite.mp4';
+  }
+
+  Future<void> _initController() async {
+    final controller = VideoPlayerController.asset(_videoAsset);
+    await controller.initialize();
+    controller.setLooping(true);
+    controller.play();
+
+    if (!mounted) {
+      controller.dispose();
+      return;
+    }
+
+    await _controller.dispose();
+    setState(() {
+      _controller = controller;
+      _wasDark = Get.find<ThemeController>().isDarkMode.value;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _wasDark = Get.find<ThemeController>().isDarkMode.value;
+    _controller = VideoPlayerController.asset(_videoAsset);
+    _controller.initialize().then((_) {
+      _controller.setLooping(true);
+      _controller.play();
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final isDark = Get.find<ThemeController>().isDarkMode.value;
+
+      // Si cambió el tema, reinicializa el video
+      if (isDark != _wasDark) {
+        _wasDark = isDark;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _initController());
+      }
+
+      if (!_controller.value.isInitialized) {
+        return SizedBox(width: widget.size, height: widget.size);
+      }
+
+      return SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: SizedBox(
+            width: _controller.value.size.width,
+            height: _controller.value.size.height,
+            child: VideoPlayer(_controller),
+          ),
+        ),
+      );
+    });
+  }
+}
 class _DistanceSlider extends StatefulWidget {
   final double initialKm;
   final UpdateProfileController updater;

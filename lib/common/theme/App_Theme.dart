@@ -25,6 +25,14 @@ class ThemeColor {
     return const Color(0xFF4A141E) ;
   }
 }
+static Color get backgroundColorRadart {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ? const Color(0xFF000000) : Colors.white;
+  } catch (_) {
+    return Colors.white;
+  }
+}
 static Color get backgroundColor {
   try {
     final ctrl = Get.find<ThemeController>();

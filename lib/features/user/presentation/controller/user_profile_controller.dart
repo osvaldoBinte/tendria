@@ -75,9 +75,11 @@ bool get alreadyInteracted {
       loadUserProfile(userId.value);
     }
     final index = args?['goPerfilIndex'];
+    debugPrint('user id from arguments: ${userId.value}, index: $index');
     debugPrint(
       'is mujer isUserFemale: $isUserFemale ${currentUser.value?.gender?.toLowerCase()}',
     );
+    debugPrint('alreadyInteracted: $alreadyInteracted likeStatus: ${currentUser.value?.likeStatus}');
     if (index is RxInt) {
       goPerfilIndex.value = index.value;
     } else if (index is int) {

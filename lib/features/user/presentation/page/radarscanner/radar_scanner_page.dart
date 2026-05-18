@@ -91,10 +91,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     });
   }
 
-  // ==========================================
-  // PERMISSION STATE
-  // ==========================================
-
   Widget _buildLocationPermissionState() {
     return Center(
       child: Padding(
@@ -144,7 +140,10 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                     controller.loadNearbyUsers();
                   }
                 },
-                icon: const Icon(Icons.location_on_rounded, color: Colors.white),
+                icon: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.white,
+                ),
                 label: Text(
                   _l.t('enable_location'),
                   style: const TextStyle(
@@ -166,10 +165,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
-
-  // ==========================================
-  // NO MORE USERS STATE
-  // ==========================================
 
   Widget _buildNoMoreUsersState() {
     return Center(
@@ -216,11 +211,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                   profileCtrl.userEntity.value?.preferences?.distancekm ?? 50;
               return KeyedSubtree(
                 key: tutorialCtrl.distanceSliderKey,
-                child: _DistanceSlider(
-                  initialKm: km,
-                  updater: _updater,
-                  l: _l,
-                ),
+                child: _DistanceSlider(initialKm: km, updater: _updater, l: _l),
               );
             }),
 
@@ -254,7 +245,10 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => controller.reloadFromStart(),
-                icon: Icon(Icons.refresh_rounded, color: ThemeColor.primaryColor),
+                icon: Icon(
+                  Icons.refresh_rounded,
+                  color: ThemeColor.primaryColor,
+                ),
                 label: Text(
                   _l.t('try_again'),
                   style: TextStyle(
@@ -276,10 +270,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       ),
     );
   }
-
-  // ==========================================
-  // MAIN CONTENT
-  // ==========================================
 
   Widget _buildMainContent() {
     return Stack(
@@ -305,7 +295,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                     final profileCtrl = Get.find<ProfileController>();
                     final km =
                         profileCtrl.userEntity.value?.preferences?.distancekm ??
-                            50;
+                        50;
                     return KeyedSubtree(
                       key: tutorialCtrl.distanceSliderKey,
                       child: _DistanceSlider(
@@ -333,7 +323,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
 
                   SizedBox(height: ThemeColor.paddingLarge),
 
-                 LayoutBuilder(
+                  LayoutBuilder(
                     builder: (context, constraints) {
                       final size = math.min(constraints.maxWidth, 350.0);
                       return SizedBox(
@@ -350,7 +340,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           return Stack(
                             alignment: Alignment.center,
                             children: [
-                             _RadarVideoBackground(size: size),
+                              _RadarVideoBackground(size: size),
 
                               _buildDetectedPoints(),
                             ],
@@ -382,8 +372,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                             borderRadius: ThemeColor.circularBorderRadius,
                           ),
                           elevation: 0,
-                          disabledBackgroundColor:
-                              ThemeColor.tertiaryColor.withOpacity(0.5),
+                          disabledBackgroundColor: ThemeColor.tertiaryColor
+                              .withOpacity(0.5),
                         ),
                         child: controller.isLoading.value
                             ? const SizedBox(
@@ -447,88 +437,24 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     );
   }
 
-  // ==========================================
-  // BUILD
-  // ==========================================
-
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-          backgroundColor: ThemeColor.backgroundColorRadart,
-          body: Obx(() {
-            if (controller.locationPermissionDenied.value) {
-              return _buildLocationPermissionState();
-            }
+    return Obx(
+      () => Scaffold(
+        backgroundColor: ThemeColor.backgroundColorRadart,
+        body: Obx(() {
+          if (controller.locationPermissionDenied.value) {
+            return _buildLocationPermissionState();
+          }
 
-            if (controller.noMoreUsers.value ||
-                (!controller.isLoading.value &&
-                    controller.nearbyUsers.isEmpty)) {
-              return _buildNoMoreUsersState();
-            }
+          if (controller.noMoreUsers.value ||
+              (!controller.isLoading.value && controller.nearbyUsers.isEmpty)) {
+            return _buildNoMoreUsersState();
+          }
 
-            return _buildMainContent();
-          }),
-        ));
-  }
-
-  // ==========================================
-  // RADAR WIDGETS
-  // ==========================================
-
-  Widget _buildRadarCircles() {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        _radarCircle(350, 0.4, spread: 5),
-        _radarCircle(280, 0.5),
-        _radarCircle(200, 0.6),
-        _radarCircle(120, 0.7),
-        _radarCircle(50, 0.8),
-      ],
-    );
-  }
-
-  Widget _buildCenterLogo() {
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 85 + (_pulseController.value * 8),
-              height: 85 + (_pulseController.value * 8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: ThemeColor.radarScanner.withOpacity(
-                  0.15 * (1 - _pulseController.value),
-                ),
-              ),
-            ),
-            Container(
-              width: 75,
-              height: 75,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: ThemeColor.radarScanner, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: ThemeColor.radarScanner.withOpacity(0.5),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/logo/logo-radar.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          return _buildMainContent();
+        }),
+      ),
     );
   }
 
@@ -543,122 +469,6 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
           width: 2,
         ),
       ),
-    );
-  }
-
-  Widget _buildCrosshair() {
-    final lineColors = [
-      Colors.transparent,
-      ThemeColor.radarScanner.withOpacity(0.3),
-      ThemeColor.radarScanner.withOpacity(0.7),
-      ThemeColor.radarScanner,
-      ThemeColor.radarScanner.withOpacity(0.7),
-      ThemeColor.radarScanner.withOpacity(0.3),
-      Colors.transparent,
-    ];
-    const stops = [0.0, 0.15, 0.35, 0.5, 0.65, 0.85, 1.0];
-    final shadow = BoxShadow(
-      color: ThemeColor.radarScanner.withOpacity(0.5),
-      blurRadius: 8,
-      spreadRadius: 1,
-    );
-
-    return Stack(
-      children: [
-        Positioned(
-          top: 175 - 1.5,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: 3,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: lineColors,
-                stops: stops,
-              ),
-              boxShadow: [shadow],
-            ),
-          ),
-        ),
-        Positioned(
-          left: 175 - 1.5,
-          top: 0,
-          bottom: 0,
-          child: Container(
-            width: 3,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: lineColors,
-                stops: stops,
-              ),
-              boxShadow: [shadow],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRadarSweep() {
-    return AnimatedBuilder(
-      animation: _radarController,
-      builder: (context, child) {
-        return Transform.rotate(
-          angle: _radarController.value * 2 * math.pi,
-          child: CustomPaint(
-            painter: RadarSweepPainter(),
-            size: const Size(350, 350),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRotatingScanLine() {
-    return AnimatedBuilder(
-      animation: _scanLineRotationController,
-      builder: (context, child) {
-        return Transform.rotate(
-          angle: _scanLineRotationController.value * 2 * math.pi,
-          child: CustomPaint(
-            painter: RotatingScanLinePainter(),
-            size: const Size(350, 350),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRippleEffect() {
-    return AnimatedBuilder(
-      animation: _rippleController,
-      builder: (context, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: List.generate(3, (index) {
-            double delay = index * 0.33;
-            double progress = (_rippleController.value + delay) % 1.0;
-            return Opacity(
-              opacity: 1 - progress,
-              child: Container(
-                width: 350 * progress,
-                height: 350 * progress,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: ThemeColor.radarScanner.withOpacity(0.5),
-                    width: 2,
-                  ),
-                ),
-              ),
-            );
-          }),
-        );
-      },
     );
   }
 
@@ -810,8 +620,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           ],
                         ),
                         child: ClipOval(
-                          child: user.fotoUrl != null &&
-                                  user.fotoUrl!.isNotEmpty
+                          child:
+                              user.fotoUrl != null && user.fotoUrl!.isNotEmpty
                               ? CachedNetworkImage(
                                   imageUrl: user.fotoUrl!,
                                   fit: BoxFit.cover,
@@ -862,9 +672,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            user.name ?? _l.t('user'),
+                            (user.name ?? _l.t('user')).split(' ').first,
                             style: TextStyle(
-                              color: ThemeColor.radarScanner,
+                              color: ThemeColor.toggleThumb,
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
@@ -876,7 +686,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                           Text(
                             '${user.age ?? 0} ${_l.t('years')}',
                             style: TextStyle(
-                              color: ThemeColor.radarScanner.withOpacity(0.7),
+                              color: ThemeColor.toggleThumb.withOpacity(0.7),
                               fontSize: 7,
                               fontWeight: FontWeight.w500,
                             ),
@@ -901,7 +711,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
       child: Icon(Icons.person, color: ThemeColor.radarScanner, size: 20),
     );
   }
-}class _RadarVideoBackground extends StatefulWidget {
+}
+
+class _RadarVideoBackground extends StatefulWidget {
   final double size;
   const _RadarVideoBackground({required this.size});
 
@@ -924,7 +736,7 @@ class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
     final controller = VideoPlayerController.asset(_videoAsset);
     await controller.initialize();
     controller.setLooping(true);
- //  controller.setVolume(0); 
+    controller.setVolume(0);
     controller.play();
 
     if (!mounted) {
@@ -946,7 +758,7 @@ class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
     _controller = VideoPlayerController.asset(_videoAsset);
     _controller.initialize().then((_) {
       _controller.setLooping(true);
-     // _controller.setVolume(0); 
+      _controller.setVolume(0);
       _controller.play();
       if (mounted) setState(() {});
     });
@@ -963,7 +775,6 @@ class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
     return Obx(() {
       final isDark = Get.find<ThemeController>().isDarkMode.value;
 
-      // Si cambió el tema, reinicializa el video
       if (isDark != _wasDark) {
         _wasDark = isDark;
         WidgetsBinding.instance.addPostFrameCallback((_) => _initController());
@@ -988,6 +799,7 @@ class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
     });
   }
 }
+
 class _DistanceSlider extends StatefulWidget {
   final double initialKm;
   final UpdateProfileController updater;
@@ -1029,82 +841,74 @@ class _DistanceSliderState extends State<_DistanceSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Container(
-          margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingSmall),
-          padding: EdgeInsets.symmetric(
-            horizontal: ThemeColor.paddingMedium,
-            vertical: ThemeColor.paddingSmall,
+    return Obx(
+      () => Container(
+        margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingSmall),
+        padding: EdgeInsets.symmetric(
+          horizontal: ThemeColor.paddingMedium,
+          vertical: ThemeColor.paddingSmall,
+        ),
+        decoration: BoxDecoration(
+          color: ThemeColor.cardBackground,
+          borderRadius: ThemeColor.largeBorderRadius,
+          border: Border.all(
+            color: ThemeColor.radarScanner.withOpacity(0.3),
+            width: 1,
           ),
-          decoration: BoxDecoration(
-            color: ThemeColor.cardBackground,
-            borderRadius: ThemeColor.largeBorderRadius,
-            border: Border.all(
-              color: ThemeColor.radarScanner.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.radar,
-                        size: 16,
-                        color: ThemeColor.radarScanner,
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.radar, size: 16, color: ThemeColor.radarScanner),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.l.t('max_distance'),
+                      style: ThemeColor.bodySmall.copyWith(
+                        color: ThemeColor.textSecondary,
+                        fontSize: 12,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        widget.l.t('max_distance'),
-                        style: ThemeColor.bodySmall.copyWith(
-                          color: ThemeColor.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    _label,
-                    style: ThemeColor.bodySmall.copyWith(
-                      color: ThemeColor.radarScanner,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
+                  ],
+                ),
+                Text(
+                  _label,
+                  style: ThemeColor.bodySmall.copyWith(
+                    color: ThemeColor.radarScanner,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
                   ),
-                ],
-              ),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: ThemeColor.radarScanner,
-                  inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
-                  thumbColor: ThemeColor.radarScanner,
-                  overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 8),
-                  trackHeight: 3,
-                  overlayShape:
-                      const RoundSliderOverlayShape(overlayRadius: 16),
                 ),
-                child: Slider(
-                  value: _current,
-                  min: 0.1,
-                  max: 1000,
-                  divisions: 9999,
-                  onChanged: (value) => setState(() => _current = value),
-                  onChangeEnd: (value) => widget.updater.updateDistance(value),
-                ),
+              ],
+            ),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: ThemeColor.radarScanner,
+                inactiveTrackColor: ThemeColor.radarScanner.withOpacity(0.2),
+                thumbColor: ThemeColor.radarScanner,
+                overlayColor: ThemeColor.radarScanner.withOpacity(0.15),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                trackHeight: 3,
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
               ),
-            ],
-          ),
-        ));
+              child: Slider(
+                value: _current,
+                min: 0.1,
+                max: 1000,
+                divisions: 9999,
+                onChanged: (value) => setState(() => _current = value),
+                onChangeEnd: (value) => widget.updater.updateDistance(value),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
-
-// ==========================================
-// PULSING TOUCH ICON
-// ==========================================
 
 class _PulsingTouchIcon extends StatefulWidget {
   final Color color;
@@ -1127,12 +931,14 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _scale = Tween(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
-    _opacity = Tween(begin: 0.7, end: 1.0).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scale = Tween(
+      begin: 0.85,
+      end: 1.15,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+    _opacity = Tween(
+      begin: 0.7,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -1174,10 +980,6 @@ class _PulsingTouchIconState extends State<_PulsingTouchIcon>
     );
   }
 }
-
-// ==========================================
-// PAINTERS
-// ==========================================
 
 class GridPainter extends CustomPainter {
   @override

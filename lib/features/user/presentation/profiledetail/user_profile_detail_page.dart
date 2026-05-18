@@ -223,8 +223,7 @@ class UserProfileDetailPage extends StatelessWidget {
                       );
                     },
                   ),
-
-                  // Indicadores de página
+ 
                   if (controller.userGallery.length > 1)
                     Positioned(
                       top: 16,
@@ -254,8 +253,7 @@ class UserProfileDetailPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                  // Info inferior
+ 
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -309,8 +307,7 @@ class UserProfileDetailPage extends StatelessWidget {
                               ],
                             ),
                           ),
-
-                          // Historia
+ 
                           Obx(() {
                             if (!controller.hasStories.value)
                               return const SizedBox.shrink();
@@ -417,11 +414,7 @@ class UserProfileDetailPage extends StatelessWidget {
       ),
     );
   }
-
-  // ==========================================
-  // SECCIONES INFO
-  // ==========================================
-
+ 
   Widget _buildBioSection(UserProfileController controller) {
     return Obx(
       () => Container(
@@ -577,12 +570,7 @@ class UserProfileDetailPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // ==========================================
-  // CHIPS
-  // ==========================================
-
+  } 
   Widget _buildPrefChip(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -640,8 +628,7 @@ class UserProfileDetailPage extends StatelessWidget {
           final alreadyInteracted = controller.alreadyInteracted;
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Izquierdo: X rechazar (showReject) o bloquear+reportar (!showReject)
+            children: [ 
               if (showReject)
                 GestureDetector(
                   onTap: controller.rejectUser,
@@ -793,7 +780,7 @@ class UserProfileDetailPage extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.orange.withOpacity(0.3),
+                          color: Colors.red.withOpacity(0.3),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
@@ -40,7 +41,8 @@ class UserProfileController extends GetxController {
   final RxBool isProcessingLike = false.obs;
   final RxBool isProcessingBlock = false.obs;
   final RxBool hasStories = false.obs;
-
+  final descError = false.obs;
+  LanguageController get _l => Get.find<LanguageController>();
   final Rxn<GetUserEntity> currentUser = Rxn<GetUserEntity>();
   final RxInt userId = 0.obs;
   late PageController pageController;
@@ -58,11 +60,13 @@ class UserProfileController extends GetxController {
     final g = profileController.gender.toLowerCase().trim();
     return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
   }
-bool get alreadyInteracted {
-  final like = currentUser.value?.likeStatus;
-  if (like == null) return false;
-  return like.id1DioLikeAId2 || like.id2DioLikeAId1;
-}
+
+  bool get alreadyInteracted {
+    final like = currentUser.value?.likeStatus;
+    if (like == null) return false;
+    return like.id1DioLikeAId2 || like.id2DioLikeAId1;
+  }
+
   final RxInt goPerfilIndex = (-1).obs;
   @override
   void onInit() {
@@ -79,7 +83,9 @@ bool get alreadyInteracted {
     debugPrint(
       'is mujer isUserFemale: $isUserFemale ${currentUser.value?.gender?.toLowerCase()}',
     );
-    debugPrint('alreadyInteracted: $alreadyInteracted likeStatus: ${currentUser.value?.likeStatus}');
+    debugPrint(
+      'alreadyInteracted: $alreadyInteracted likeStatus: ${currentUser.value?.likeStatus}',
+    );
     if (index is RxInt) {
       goPerfilIndex.value = index.value;
     } else if (index is int) {
@@ -194,7 +200,7 @@ bool get alreadyInteracted {
 
     try {
       isProcessingLike.value = true;
-      
+
       await toggleLikeUsecase.execute(userId.value, false);
       showInfoSnackbar('Usuario rechazado');
 
@@ -246,37 +252,36 @@ bool get alreadyInteracted {
 
   void skipUser() => Get.back();
 
-  void blockUser() {
-    if (Get.context == null) return;
-    showCustomAlert(
-      context: Get.context!,
-      title: 'Bloquear usuario',
-      message: '¿Estás seguro de que quieres bloquear a $userName?',
-      confirmText: 'Bloquear',
-      cancelText: 'Cancelar',
-      type: CustomAlertType.warning,
-      onConfirm: _confirmBlock,
-    );
-  }
+void blockUser() {
+  if (Get.context == null) return;
+  showCustomAlert(
+    context: Get.context!,
+    title: _l.t('nearby_block_title'),
+    message: '${_l.t('nearby_block_msg')} $userName?',
+    confirmText: _l.t('nearby_block_confirm'),
+    cancelText: _l.t('cancel'),
+    type: CustomAlertType.warning,
+    onConfirm: _confirmBlock,
+  );
+}
 
-  Future<void> _confirmBlock() async {
-    if (userId.value == 0 || isProcessingBlock.value) return;
-
-    try {
-      isProcessingBlock.value = true;
-      final name = userName;
-      await blockUserUsecase.execute(userId.value);
-      Get.find<MyMatchController>().loadChats();
-      Get.back();
-      showSuccessSnackbar('$name ha sido bloqueado');
-      Get.back();
-    } catch (e) {
-      showErrorSnackbar('Error al bloquear: ${cleanExceptionMessage(e)}');
-      Get.back();
-    } finally {
-      isProcessingBlock.value = false;
-    }
+Future<void> _confirmBlock() async {
+  if (userId.value == 0 || isProcessingBlock.value) return;
+  try {
+    isProcessingBlock.value = true;
+    final name = userName;
+    await blockUserUsecase.execute(userId.value);
+    Get.find<MyMatchController>().loadChats();
+    Get.back();
+    showSuccessSnackbar('$name ${_l.t('nearby_blocked')}');
+    Get.back();
+  } catch (e) {
+    showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
+    Get.back();
+  } finally {
+    isProcessingBlock.value = false;
   }
+}
 
   bool get showRejectButton {
     final chat = currentUser.value?.chat;
@@ -284,35 +289,39 @@ bool get alreadyInteracted {
     if (chat != null && chat.id != 0) return false;
     return true;
   }
-void reportAndBlockUser() {
-  if (Get.context == null) return;
-  _showReportBottomSheet(Get.context!, alsoBlock: true);
-}
-void reportUser() {
-  if (Get.context == null) return;
-  _showReportBottomSheet(Get.context!);
-}
 
+  void reportAndBlockUser() {
+    if (Get.context == null) return;
+    _showReportBottomSheet(Get.context!, alsoBlock: true);
+  }
+
+  void reportUser() {
+    if (Get.context == null) return;
+    _showReportBottomSheet(Get.context!);
+  }
 void _showReportBottomSheet(BuildContext context, {bool alsoBlock = false}) {
   final reasons = [
-    'Acoso o intimidación',
-    'Contenido inapropiado',
-    'Perfil falso o spam',
-    'Comportamiento ofensivo',
-    'Menor de edad',
-    'Otro',
+    _l.t('report_harassment'),
+    _l.t('report_inappropriate'),
+    _l.t('report_fake'),
+    _l.t('report_offensive'),
+    _l.t('report_minor'),
+    _l.t('report_other'),
   ];
 
   final selectedReason = RxnString();
   final descController = TextEditingController();
-  final shouldBlock = alsoBlock.obs; // ← toggle reactivo
+  final shouldBlock = alsoBlock.obs;
+  final shouldReport = true.obs;
+  final descError = false.obs;
+  final userName = (currentUser.value?.name ?? _l.t('user')).split(' ').first;
 
   Get.bottomSheet(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     Container(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
       ),
       decoration: BoxDecoration(
         color: ThemeColor.cardBackground,
@@ -320,203 +329,324 @@ void _showReportBottomSheet(BuildContext context, {bool alsoBlock = false}) {
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        child: Obx(() => SingleChildScrollView(  // ← agrega esto
-    child:Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(
-                  color: ThemeColor.subtleBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Reportar a $userName',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: ThemeColor.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Selecciona el motivo del reporte',
-              style: TextStyle(fontSize: 13, color: ThemeColor.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            // Opciones
-            ...reasons.map((reason) => GestureDetector(
-              onTap: () => selectedReason.value = reason,
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: selectedReason.value == reason
-                        ? ThemeColor.primaryColor
-                        : ThemeColor.subtleBorder,
-                    width: selectedReason.value == reason ? 1.5 : 1,
+        child: Obx(() => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: ThemeColor.subtleBorder,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  color: selectedReason.value == reason
-                      ? ThemeColor.primaryColor.withOpacity(0.06)
-                      : Colors.transparent,
                 ),
-                child: Row(
+              ),
+              const SizedBox(height: 16),
+
+              Text(
+                '${_l.t('report_title')} $userName',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ThemeColor.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _l.t('report_select_reason'),
+                style: TextStyle(fontSize: 13, color: ThemeColor.textSecondary),
+              ),
+              const SizedBox(height: 16),
+
+              // ── Selector Reportar / Solo bloquear (solo si alsoBlock) ──
+              if (alsoBlock) ...[
+                Row(
                   children: [
-                    Icon(
-                      selectedReason.value == reason
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_unchecked,
-                      size: 18,
-                      color: selectedReason.value == reason
-                          ? ThemeColor.primaryColor
-                          : ThemeColor.textSecondary,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => shouldReport.value = true,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: shouldReport.value
+                                ? ThemeColor.primaryColor.withOpacity(0.1)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: shouldReport.value
+                                  ? ThemeColor.primaryColor
+                                  : ThemeColor.subtleBorder,
+                              width: shouldReport.value ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.flag_rounded,
+                                color: shouldReport.value
+                                    ? ThemeColor.primaryColor
+                                    : ThemeColor.textSecondary,
+                                size: 20,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _l.t('report_send'),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: shouldReport.value
+                                      ? ThemeColor.primaryColor
+                                      : ThemeColor.textSecondary,
+                                  fontWeight: shouldReport.value
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      reason,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: ThemeColor.textPrimary,
-                        fontWeight: selectedReason.value == reason
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => shouldReport.value = false,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: !shouldReport.value
+                                ? Colors.red.withOpacity(0.08)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: !shouldReport.value
+                                  ? Colors.red.shade400
+                                  : ThemeColor.subtleBorder,
+                              width: !shouldReport.value ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.block_rounded,
+                                color: !shouldReport.value
+                                    ? Colors.red.shade400
+                                    : ThemeColor.textSecondary,
+                                size: 20,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _l.t('nearby_block_confirm'),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: !shouldReport.value
+                                      ? Colors.red.shade400
+                                      : ThemeColor.textSecondary,
+                                  fontWeight: !shouldReport.value
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            )),
-            const SizedBox(height: 8),
-            // Descripción opcional
-            TextField(
-              controller: descController,
-              maxLines: 3,
-              maxLength: 300,
-              style: TextStyle(fontSize: 14, color: ThemeColor.textPrimary),
-              decoration: InputDecoration(
-                hintText: 'Descripción adicional (opcional)',
-                hintStyle: TextStyle(color: ThemeColor.textSecondary, fontSize: 13),
-                filled: true,
-                fillColor: ThemeColor.backgroundColorfondo,
-                contentPadding: const EdgeInsets.all(12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: ThemeColor.subtleBorder),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: ThemeColor.subtleBorder),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: ThemeColor.primaryColor),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+                const SizedBox(height: 16),
+              ],
 
-            // ── Toggle bloquear (solo aparece cuando alsoBlock = true) ──
-            if (alsoBlock)
-              GestureDetector(
-                onTap: () => shouldBlock.value = !shouldBlock.value,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: shouldBlock.value
-                          ? Colors.red.shade400
-                          : ThemeColor.subtleBorder,
-                      width: shouldBlock.value ? 1.5 : 1,
-                    ),
-                    color: shouldBlock.value
-                        ? Colors.red.withOpacity(0.06)
-                        : Colors.transparent,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        shouldBlock.value
-                            ? Icons.check_box
-                            : Icons.check_box_outline_blank,
-                        size: 20,
-                        color: shouldBlock.value
-                            ? Colors.red.shade400
-                            : ThemeColor.textSecondary,
+              // ── Formulario de reporte (solo si shouldReport) ──
+              if (shouldReport.value) ...[
+                ...reasons.map((reason) => GestureDetector(
+                  onTap: () => selectedReason.value = reason,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selectedReason.value == reason
+                            ? ThemeColor.primaryColor
+                            : ThemeColor.subtleBorder,
+                        width: selectedReason.value == reason ? 1.5 : 1,
                       ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'También bloquear a $userName',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: ThemeColor.textPrimary,
-                              fontWeight: shouldBlock.value
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
+                      color: selectedReason.value == reason
+                          ? ThemeColor.primaryColor.withOpacity(0.06)
+                          : Colors.transparent,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          selectedReason.value == reason
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          size: 18,
+                          color: selectedReason.value == reason
+                              ? ThemeColor.primaryColor
+                              : ThemeColor.textSecondary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          reason,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: ThemeColor.textPrimary,
+                            fontWeight: selectedReason.value == reason
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
-                          Text(
-                            'No podrá contactarte ni ver tu perfil',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: ThemeColor.textSecondary,
-                            ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: descController,
+                  onChanged: (_) => descError.value = false,
+                  maxLines: 3,
+                  maxLength: 300,
+                  style: TextStyle(fontSize: 14, color: ThemeColor.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: _l.t('report_desc_hint'),
+                    hintStyle: TextStyle(color: ThemeColor.textSecondary, fontSize: 13),
+                    errorText: descError.value ? _l.t('report_desc_required') : null,
+                    filled: true,
+                    fillColor: ThemeColor.backgroundColorfondo,
+                    contentPadding: const EdgeInsets.all(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: ThemeColor.subtleBorder),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: ThemeColor.subtleBorder),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: ThemeColor.primaryColor),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: ThemeColor.errorColor),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: ThemeColor.errorColor, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Toggle también bloquear
+                if (alsoBlock)
+                  GestureDetector(
+                    onTap: () => shouldBlock.value = !shouldBlock.value,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: shouldBlock.value ? Colors.red.shade400 : ThemeColor.subtleBorder,
+                          width: shouldBlock.value ? 1.5 : 1,
+                        ),
+                        color: shouldBlock.value ? Colors.red.withOpacity(0.06) : Colors.transparent,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            shouldBlock.value ? Icons.check_box : Icons.check_box_outline_blank,
+                            size: 20,
+                            color: shouldBlock.value ? Colors.red.shade400 : ThemeColor.textSecondary,
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${_l.t('report_also_block')} $userName',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: ThemeColor.textPrimary,
+                                  fontWeight: shouldBlock.value ? FontWeight.w600 : FontWeight.normal,
+                                ),
+                              ),
+                              Text(
+                                _l.t('report_block_hint'),
+                                style: TextStyle(fontSize: 11, color: ThemeColor.textSecondary),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                const SizedBox(height: 16),
+              ],
 
-            const SizedBox(height: 16),
-            // Botón enviar
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: selectedReason.value == null
-                    ? null
-                    : () => _confirmReport(
-                          selectedReason.value!,
-                          descController.text.trim(),
-                          alsoBlock: shouldBlock.value, // ← usa el toggle
-                        ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: shouldBlock.value
-                      ? Colors.red.shade600
-                      : ThemeColor.primaryColor,
-                  disabledBackgroundColor: ThemeColor.subtleBorder,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              if (!shouldReport.value) const SizedBox(height: 8),
+
+              // ── Botón principal ──
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: shouldReport.value && selectedReason.value == null
+                      ? null
+                      : () {
+                          // Solo bloquear
+                          if (!shouldReport.value) {
+                            Get.back();
+                            _confirmBlock();
+                            return;
+                          }
+                          // Validar descripción
+                          if (descController.text.trim().isEmpty) {
+                            descError.value = true;
+                            return;
+                          }
+                          descError.value = false;
+                          _confirmReport(
+                            selectedReason.value!,
+                            descController.text.trim(),
+                            alsoBlock: shouldBlock.value,
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: !shouldReport.value
+                        ? Colors.red.shade600
+                        : shouldBlock.value
+                            ? Colors.red.shade600
+                            : ThemeColor.primaryColor,
+                    disabledBackgroundColor: ThemeColor.subtleBorder,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    !shouldReport.value
+                        ? _l.t('nearby_block_confirm')
+                        : shouldBlock.value
+                            ? _l.t('report_send_and_block')
+                            : _l.t('report_send'),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ),
-                child: Text(
-                  shouldBlock.value ? 'Reportar y bloquear' : 'Enviar reporte',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         )),
-        )
       ),
     ),
-
   );
 }
+
+
 
 Future<void> _confirmReport(String reason, String description, {bool alsoBlock = false}) async {
   try {
@@ -531,13 +661,13 @@ Future<void> _confirmReport(String reason, String description, {bool alsoBlock =
     if (alsoBlock) {
       await blockUserUsecase.execute(userId.value);
       Get.find<MyMatchController>().loadChats();
-      showSuccessSnackbar('$userName ha sido reportado y bloqueado');
+      showSuccessSnackbar('$userName ${_l.t('report_block_success')}');
       Get.back();
     } else {
-      showSuccessSnackbar('Reporte enviado. Revisaremos el perfil de $userName');
+      showSuccessSnackbar('${_l.t('report_success')} $userName');
     }
   } catch (e) {
-    showErrorSnackbar('Error: ${cleanExceptionMessage(e)}');
+    showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
   }
 }
 }

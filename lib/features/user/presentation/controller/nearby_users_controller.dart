@@ -13,8 +13,10 @@ import 'package:tendria/features/like/domain/entities/pending_chat_entity.dart';
 import 'package:tendria/features/like/presentation/controller/liked_by_users_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/stories/presentation/page/target_user_story_modal.dart';
+import 'package:tendria/features/user/domain/entities/create_reports_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
+import 'package:tendria/features/user/domain/usecase/create_reports_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
@@ -24,11 +26,14 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
   final FetchNearbyUsersUsecase fetchNearbyUsersUsecase;
   final ToggleLikeUsecase toggleLikeUsecase;
   final UpdateLocationUsecase updateLocationUsecase;  
+  final CreateReportsUserUsecase createReportsUserUsecase;
+  
 
   NearbyUsersController({
     required this.fetchNearbyUsersUsecase,
     required this.toggleLikeUsecase,
     required this.updateLocationUsecase,
+    required this.createReportsUserUsecase
   });
  
   LanguageController get _l => Get.find<LanguageController>();
@@ -245,7 +250,258 @@ Future<void> openAppSettings() async {
     isLoading.value = false;
   }
 }
+void reportAndBlockUser() {
+  if (Get.context == null) return;
+  _showReportBottomSheet(Get.context!, alsoBlock: true);
+}
 
+void reportUser() {
+  if (Get.context == null) return;
+  _showReportBottomSheet(Get.context!);
+}
+
+void _showReportBottomSheet(BuildContext context, {bool alsoBlock = false}) {
+  final reasons = [
+    _l.t('report_harassment'),
+    _l.t('report_inappropriate'),
+    _l.t('report_fake'),
+    _l.t('report_offensive'),
+    _l.t('report_minor'),
+    _l.t('report_other'),
+  ];
+
+  final selectedReason = RxnString();
+  final descController = TextEditingController();
+  final shouldBlock = alsoBlock.obs;
+  final descError = false.obs;
+  final userName = (currentProfile.value?.name ?? _l.t('user')).split(' ').first;
+
+  Get.bottomSheet(
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    Container(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: ThemeColor.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Obx(() => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: ThemeColor.subtleBorder,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '${_l.t('report_title')} $userName',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ThemeColor.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _l.t('report_select_reason'),
+                style: TextStyle(fontSize: 13, color: ThemeColor.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              ...reasons.map((reason) => GestureDetector(
+                onTap: () => selectedReason.value = reason,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: selectedReason.value == reason
+                          ? ThemeColor.primaryColor
+                          : ThemeColor.subtleBorder,
+                      width: selectedReason.value == reason ? 1.5 : 1,
+                    ),
+                    color: selectedReason.value == reason
+                        ? ThemeColor.primaryColor.withOpacity(0.06)
+                        : Colors.transparent,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        selectedReason.value == reason
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_unchecked,
+                        size: 18,
+                        color: selectedReason.value == reason
+                            ? ThemeColor.primaryColor
+                            : ThemeColor.textSecondary,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        reason,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: ThemeColor.textPrimary,
+                          fontWeight: selectedReason.value == reason
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descController,
+                onChanged: (_) => descError.value = false,
+                maxLines: 3,
+                maxLength: 300,
+                style: TextStyle(fontSize: 14, color: ThemeColor.textPrimary),
+                decoration: InputDecoration(
+                  hintText: _l.t('report_desc_hint'),
+                  hintStyle: TextStyle(color: ThemeColor.textSecondary, fontSize: 13),
+                  errorText: descError.value ? _l.t('report_desc_required') : null,
+                  filled: true,
+                  fillColor: ThemeColor.backgroundColorfondo,
+                  contentPadding: const EdgeInsets.all(12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColor.subtleBorder),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColor.subtleBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColor.primaryColor),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColor.errorColor),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ThemeColor.errorColor, width: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (alsoBlock)
+                GestureDetector(
+                  onTap: () => shouldBlock.value = !shouldBlock.value,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: shouldBlock.value ? Colors.red.shade400 : ThemeColor.subtleBorder,
+                        width: shouldBlock.value ? 1.5 : 1,
+                      ),
+                      color: shouldBlock.value ? Colors.red.withOpacity(0.06) : Colors.transparent,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          shouldBlock.value ? Icons.check_box : Icons.check_box_outline_blank,
+                          size: 20,
+                          color: shouldBlock.value ? Colors.red.shade400 : ThemeColor.textSecondary,
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${_l.t('report_also_block')} $userName',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: ThemeColor.textPrimary,
+                                fontWeight: shouldBlock.value ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                            ),
+                            Text(
+                              _l.t('report_block_hint'),
+                              style: TextStyle(fontSize: 11, color: ThemeColor.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: selectedReason.value == null
+                      ? null
+                      : () {
+                          if (descController.text.trim().isEmpty) {
+                            descError.value = true;
+                            return;
+                          }
+                          descError.value = false;
+                          _confirmReport(
+                            selectedReason.value!,
+                            descController.text.trim(),
+                            alsoBlock: shouldBlock.value,
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: shouldBlock.value ? Colors.red.shade600 : ThemeColor.primaryColor,
+                    disabledBackgroundColor: ThemeColor.subtleBorder,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    shouldBlock.value ? _l.t('report_send_and_block') : _l.t('report_send'),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )),
+      ),
+    ),
+  );
+}
+
+Future<void> _confirmReport(String reason, String description, {bool alsoBlock = false}) async {
+  final userId = currentProfile.value?.id ?? 0;
+  final userName = (currentProfile.value?.name ?? _l.t('user')).split(' ').first;
+  try {
+    Get.back();
+    await createReportsUserUsecase(
+      CreateReportsUserEntity(
+        reportedid: userId,
+        reason: reason,
+        description: description,
+      ),
+    );
+    if (alsoBlock) {
+      _confirmBlock();
+      showSuccessSnackbar('$userName ${_l.t('report_block_success')}');
+    } else {
+      showSuccessSnackbar('${_l.t('report_success')} $userName');
+    }
+  } catch (e) {
+    showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
+  }
+}
+ 
   Future<void> loadNextBatch() async {
     currentPage.value++;
     await loadNearbyUsers();
@@ -469,25 +725,6 @@ Future<void> rejectUser() async {
     }
   } 
 
-  void reportUser() {
-    if (Get.context == null) return;
-    showCustomAlert(
-      context: Get.context!,
-      title: _l.t('nearby_report_title'),
-      message: '${_l.t('nearby_report_msg')} ${currentProfile.value?.name}?',
-      confirmText: _l.t('nearby_report_confirm'),
-      cancelText: _l.t('cancel'),
-      type: CustomAlertType.warning,
-      onConfirm: _confirmReport,
-    );
-  }
-
-  void _confirmReport() {
-    showWarningSnackbar(
-      '${_l.t('nearby_report_thanks')} ${currentProfile.value?.name}',
-    );
-  }
- 
 
   void showUserPreviewDialog(GetUserEntity user, int userIndex) {
   currentUserIndex.value = userIndex;

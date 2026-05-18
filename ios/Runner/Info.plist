@@ -60,8 +60,8 @@
 	<string>Necesitamos permiso para guardar en tu galería las fotos o videos que tomes desde la app.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Necesitamos acceso a tu galería para que puedas seleccionar fotos o videos y usarlos en tus historias o foto de perfil.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Tu privacidad es importante. Usamos datos para mostrarte contenido relevante y mejorar tu experiencia en Tendria.</string>
+<!-- <key>NSUserTrackingUsageDescription</key>
+<string>Tu privacidad es importante. Usamos datos para mostrarte contenido relevante y mejorar tu experiencia en Tendria.</string> -->
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

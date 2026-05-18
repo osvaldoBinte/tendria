@@ -96,8 +96,12 @@ void onInit() {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefKey);
   }
-
-  UpdateProfileTutorialStep get currentStepData => steps[currentStep.value];
+UpdateProfileTutorialStep get currentStepData {
+  if (currentStep.value < 0 || currentStep.value >= steps.length) {
+    return steps.last;
+  }
+  return steps[currentStep.value];
+}  
   bool get isLastStep => currentStep.value == steps.length - 1;
 
   Rect? getTargetRect(GlobalKey key) {

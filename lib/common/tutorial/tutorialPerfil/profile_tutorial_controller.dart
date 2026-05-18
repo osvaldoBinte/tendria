@@ -127,8 +127,12 @@ Future<void> _checkAndShow() async {
     await prefs.remove(_prefKey);
   }
 
-  ProfileTutorialStep get currentStepData => steps[currentStep.value];
-  bool get isLastStep => currentStep.value == steps.length - 1;
+ProfileTutorialStep get currentStepData {
+  if (currentStep.value < 0 || currentStep.value >= steps.length) {
+    return steps.last;
+  }
+  return steps[currentStep.value];
+}  bool get isLastStep => currentStep.value == steps.length - 1;
 
   Rect? getTargetRect(GlobalKey key) {
     final ctx = key.currentContext;

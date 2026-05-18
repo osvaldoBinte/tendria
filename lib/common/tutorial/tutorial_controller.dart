@@ -157,8 +157,12 @@ Future<void> _checkAndShowTutorial() async {
     await prefs.remove(AppConstants.tutorialKey);
   }
  
-
-  TutorialStep get currentStepData => steps[currentStep.value];
+TutorialStep get currentStepData {
+  if (currentStep.value < 0 || currentStep.value >= steps.length) {
+    return steps.last;
+  }
+  return steps[currentStep.value];
+}
 
   bool get isLastStep => currentStep.value == steps.length - 1;
  

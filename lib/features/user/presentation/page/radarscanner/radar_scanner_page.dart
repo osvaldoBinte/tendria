@@ -76,21 +76,24 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     super.dispose();
   }
 
-  void _scrollToCurrentTarget() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      final step = tutorialCtrl.currentStepData;
-      if (step.targetKey == null) return;
-      final ctx = step.targetKey!.currentContext;
-      if (ctx == null) return;
-      Scrollable.ensureVisible(
-        ctx,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-        alignment: 0.3,
-      );
-    });
-  }
+void _scrollToCurrentTarget() {
+  Future.delayed(const Duration(milliseconds: 100), () { 
+    if (!mounted) return;
+    if (!tutorialCtrl.isVisible.value) return;
+    if (tutorialCtrl.currentStep.value >= tutorialCtrl.steps.length) return;
 
+    final step = tutorialCtrl.currentStepData;
+    if (step.targetKey == null) return;
+    final ctx = step.targetKey!.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+      alignment: 0.3,
+    );
+  });
+}
   Widget _buildLocationPermissionState() {
     return Center(
       child: Padding(

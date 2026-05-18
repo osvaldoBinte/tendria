@@ -924,6 +924,7 @@ class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
     final controller = VideoPlayerController.asset(_videoAsset);
     await controller.initialize();
     controller.setLooping(true);
+ //  controller.setVolume(0); 
     controller.play();
 
     if (!mounted) {
@@ -945,6 +946,7 @@ class _RadarVideoBackgroundState extends State<_RadarVideoBackground> {
     _controller = VideoPlayerController.asset(_videoAsset);
     _controller.initialize().then((_) {
       _controller.setLooping(true);
+     // _controller.setVolume(0); 
       _controller.play();
       if (mounted) setState(() {});
     });

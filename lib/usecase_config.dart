@@ -62,6 +62,7 @@ import 'package:tendria/features/unlock/domain/usecase/fetch_blocked_users_useca
 import 'package:tendria/features/unlock/domain/usecase/unblock_user_usecase.dart';
 import 'package:tendria/features/user/data/datasources/user_data_sources_imp.dart';
 import 'package:tendria/features/user/data/repositories/user_repository_imp.dart';
+import 'package:tendria/features/user/domain/usecase/create_reports_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/delete_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/delete_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
@@ -118,6 +119,7 @@ class UsecaseConfig {
   PutPreferencesUserUsecase? putPreferencesUserUsecase;
   UploadMediaUsecase? uploadMediaUsecase;
   DeleteMediaUsecase? deleteMediaUsecase;
+  CreateReportsUserUsecase? createReportsUserUsecase;
   UploadPicturePerfileUsecase? uploadPicturePerfileUsecase;
   UpdateUserUsecase? updateUserUsecase;
   GetBalanceUsecase? getBalanceUsecase;
@@ -211,6 +213,7 @@ class UsecaseConfig {
     putPreferencesUserUsecase = PutPreferencesUserUsecase(userRepository: userRepositoryImp!);
     uploadMediaUsecase = UploadMediaUsecase(userRepository: userRepositoryImp!);
     deleteMediaUsecase = DeleteMediaUsecase(userRepository: userRepositoryImp!);
+    createReportsUserUsecase = CreateReportsUserUsecase(userRepository: userRepositoryImp!);
     uploadPicturePerfileUsecase = UploadPicturePerfileUsecase(userRepository: userRepositoryImp!);
     addLikeToStoryUsecase = AddLikeToStoryUsecase(storiesRepository: storiesRepositoryImp!);
     createStroryUsecase = CreateStroryUsecase(storiesRepository: storiesRepositoryImp!);

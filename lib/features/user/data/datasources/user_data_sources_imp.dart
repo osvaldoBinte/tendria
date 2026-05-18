@@ -5,9 +5,11 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/common/errors/api_errors.dart';
+import 'package:tendria/features/user/data/model/create_reports_user_model.dart';
 import 'package:tendria/features/user/data/model/update_location_model.dart';
 import 'package:tendria/features/user/data/model/update_user_model.dart';
 import 'package:tendria/features/user/data/model/user_balance_model.dart';
+import 'package:tendria/features/user/domain/entities/create_reports_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
 import 'package:tendria/features/user/data/model/get_user_model.dart';
@@ -438,6 +440,37 @@ Future<void> uploadPicturePerfil(
           'Authorization': 'Bearer $token',
         },
         body: jsonEncode(UpdateUserModel.fromEntity(entity).toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        print('🌐 Error de red detectado');
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('$e');
+    }
+  }
+  Future<void> createReportsUser(CreateReportsUserEntity entity,String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/Reportes');
+
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(CreateReportsUserModel.fromEntity(entity).toJson()),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

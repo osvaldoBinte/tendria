@@ -74,6 +74,7 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.deleteUserUsecase!, permanent: true);
         Get.put(usecaseConfig.preferencesUserUsecase!, permanent: true);
         Get.put(usecaseConfig.putPreferencesUserUsecase!, permanent: true);
+        Get.put(usecaseConfig.createReportsUserUsecase!, permanent: true);
         Get.put(usecaseConfig.deleteMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadPicturePerfileUsecase!, permanent: true);
@@ -179,7 +180,7 @@ class App extends StatelessWidget {
           () => UserProfileController(
             getUserByIdUsecase: Get.find(),
             toggleLikeUsecase: Get.find(),
-            blockUserUsecase: Get.find(), logViewProfileUsecase:  Get.find(),
+            blockUserUsecase: Get.find(), logViewProfileUsecase:  Get.find(), createReportsUserUsecase: Get.find(),
           ),
           fenix: true,
         );

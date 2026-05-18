@@ -1,3 +1,4 @@
+import 'package:tendria/features/user/domain/entities/create_reports_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
@@ -19,4 +20,5 @@ abstract class UserRepository {
     Future<void> deleteUser();
     Future<void>updateLocation(UpdateLocationEntity entity);
     Future<UserBalanceEntity> getuserbalance();
+    Future<void> createReportsUser(CreateReportsUserEntity entity);
 }

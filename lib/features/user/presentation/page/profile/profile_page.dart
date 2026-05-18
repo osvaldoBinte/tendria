@@ -250,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: ThemeColor.primaryColor.withOpacity(
+                                color: ThemeColor.colorstatus.withOpacity(
                                   0.12,
                                 ),
                                 borderRadius: const BorderRadius.only(
@@ -260,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   bottomLeft: Radius.circular(4),
                                 ),
                                 border: Border.all(
-                                  color: ThemeColor.primaryColor.withOpacity(
+                                  color: ThemeColor.colorstatus.withOpacity(
                                     0.3,
                                   ),
                                   width: 1,
@@ -273,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     child: Text(
                                       status,
                                       style: ThemeColor.bodySmall.copyWith(
-                                        color: ThemeColor.primaryColor,
+                                        color: ThemeColor.colorstatus,
                                         fontWeight: FontWeight.w500,
                                       ),
                                       maxLines: 2,
@@ -284,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   Icon(
                                     Icons.edit,
                                     size: 12,
-                                    color: ThemeColor.primaryColor.withOpacity(
+                                    color: ThemeColor.colorstatus.withOpacity(
                                       0.6,
                                     ),
                                   ),

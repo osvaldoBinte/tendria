@@ -982,12 +982,12 @@ Future<void> rejectUser() async {
                             bottomLeft: Radius.circular(2),
                           ),
                           border: Border.all(
-                            color: ThemeColor.radarScanner.withOpacity(0.6),
+                            color: ThemeColor.colorstatus.withOpacity(0.6),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: ThemeColor.radarScanner.withOpacity(0.2),
+                              color: ThemeColor.colorstatus.withOpacity(0.2),
                               blurRadius: 4,
                             ),
                           ],
@@ -995,7 +995,7 @@ Future<void> rejectUser() async {
                         child: Text(
                           user.status!,
                           style: TextStyle(
-                            color: ThemeColor.radarScanner,
+                            color: ThemeColor.colorstatus,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),

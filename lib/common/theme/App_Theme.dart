@@ -50,6 +50,14 @@ static Color get backgroundColorRadart {
     return Colors.white;
   }
 }
+static Color get colorstatus {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return ctrl.isDarkMode.value ?Colors.white: Color(0xFF4A141E);
+  } catch (_) {
+    return Colors.white;
+  }
+}
 static Color get backgroundColor {
   try {
     final ctrl = Get.find<ThemeController>();

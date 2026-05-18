@@ -460,21 +460,7 @@ void _scrollToCurrentTarget() {
       ),
     );
   }
-
-  Widget _radarCircle(double size, double opacity, {double spread = 0}) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: ThemeColor.radarScanner.withOpacity(opacity),
-          width: 2,
-        ),
-      ),
-    );
-  }
-
+ 
   Widget _buildDetectedPoints() {
     return Obx(() {
       final users = controller.currentRadarUsers;
@@ -579,12 +565,12 @@ void _scrollToCurrentTarget() {
                           bottomLeft: Radius.circular(2),
                         ),
                         border: Border.all(
-                          color: ThemeColor.radarScanner.withOpacity(0.6),
+                          color: ThemeColor.colorstatus.withOpacity(0.6),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: ThemeColor.radarScanner.withOpacity(0.2),
+                            color: ThemeColor.colorstatus.withOpacity(0.2),
                             blurRadius: 4,
                           ),
                         ],
@@ -592,7 +578,7 @@ void _scrollToCurrentTarget() {
                       child: Text(
                         user.status!,
                         style: TextStyle(
-                          color: ThemeColor.radarScanner,
+                          color: ThemeColor.colorstatus,
                           fontSize: 7,
                           fontWeight: FontWeight.w500,
                         ),

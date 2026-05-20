@@ -617,214 +617,183 @@ class UserProfileDetailPage extends StatelessWidget {
   }
 
   Widget _buildReporteButtons(UserProfileController controller) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        child: Obx(() {
-          final showReject = controller.showRejectButton;
-          final isFemale = controller.isUserFemale;
-          final alreadyInteracted = controller.alreadyInteracted;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [ 
-              if (showReject)
-                GestureDetector(
-                  onTap: controller.rejectUser,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          ThemeColor.textSecondaryColor,
-                          ThemeColor.textSecondaryColor.withOpacity(0.8),
-                        ],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: ThemeColor.textSecondaryColor.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
+  return SafeArea(
+    top: false,
+    child: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      child: Obx(() {
+        final showReject = controller.showRejectButton;
+        final alreadyInteracted = controller.alreadyInteracted;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (showReject)
+              GestureDetector(
+                onTap: controller.rejectUser,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColor.textSecondaryColor,
+                        ThemeColor.textSecondaryColor.withOpacity(0.8),
                       ],
                     ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: ThemeColor.textLightColor,
-                      size: 32,
-                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColor.textSecondaryColor.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                )
-              else
-                GestureDetector(
-                  onTap: controller.reportAndBlockUser,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade700, Colors.red.shade400],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.block_rounded,
-                      color: ThemeColor.textLightColor,
-                      size: 28,
-                    ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
                   ),
                 ),
-
-              if (showReject) ...[
-                if (isFemale) ...[
-                  GestureDetector(
-                    onTap: controller.sendMensaje,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            ThemeColor.primaryColor,
-                            ThemeColor.primaryColor.withOpacity(0.8),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: ThemeColor.primaryColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: ThemeColor.textLightColor,
-                        size: 32,
-                      ),
+              )
+            else
+              GestureDetector(
+                onTap: controller.reportAndBlockUser,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.red.shade700, Colors.red.shade400],
                     ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  if (!alreadyInteracted)
-                    GestureDetector(
-                      onTap: controller.sendLike,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.pinkAccent, Colors.pink.shade300],
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.pink.withOpacity(0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.waving_hand_rounded,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                    ),
-                ] else ...[
-                  GestureDetector(
-                    onTap: controller.sendMensaje,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            ThemeColor.primaryColor,
-                            ThemeColor.primaryColor.withOpacity(0.8),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: ThemeColor.primaryColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: ThemeColor.textLightColor,
-                        size: 32,
-                      ),
-                    ),
+                  child: Icon(
+                    Icons.block_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 28,
                   ),
-                ],
-              ],
+                ),
+              ),
 
-              if (showReject)
-                GestureDetector(
-                  onTap: controller.reportUser,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade700, Colors.red.shade400],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
+            if (showReject) ...[
+              GestureDetector(
+                onTap: controller.sendMensaje,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColor.primaryColor,
+                        ThemeColor.primaryColor.withOpacity(0.8),
                       ],
                     ),
-                    child: Icon(
-                      Icons.block_rounded,
-                      color: ThemeColor.textLightColor,
-                      size: 28,
-                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColor.primaryColor.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                )
-              else
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
+                  ),
+                ),
+              ),
+              if (!alreadyInteracted)
                 GestureDetector(
-                  onTap: controller.sendMensaje,
+                  onTap: controller.sendLike,
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          ThemeColor.primaryColor,
-                          ThemeColor.primaryColor.withOpacity(0.8),
-                        ],
+                        colors: [Colors.pinkAccent, Colors.pink.shade300],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: ThemeColor.primaryColor.withOpacity(0.4),
+                          color: Colors.pink.withOpacity(0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.favorite_rounded,
-                      color: ThemeColor.textLightColor,
+                    child: const Icon(
+                      Icons.waving_hand_rounded,
+                      color: Colors.white,
                       size: 32,
                     ),
                   ),
                 ),
             ],
-          );
-        }),
-      ),
-    );
-  }
+
+            if (showReject)
+              GestureDetector(
+                onTap: controller.reportUser,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.red.shade700, Colors.red.shade400],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.block_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 28,
+                  ),
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: controller.sendMensaje,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeColor.primaryColor,
+                        ThemeColor.primaryColor.withOpacity(0.8),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ThemeColor.primaryColor.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: ThemeColor.textLightColor,
+                    size: 32,
+                  ),
+                ),
+              ),
+          ],
+        );
+      }),
+    ),
+  );
+}
 }

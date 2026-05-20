@@ -1,13 +1,14 @@
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 
 class UpdateLocationModel extends UpdateLocationEntity {
-  UpdateLocationModel({required super.latitude, required super.longitude, required super.city});
+  UpdateLocationModel({required super.latitude, required super.longitude, required super.city, required super.country});
 
   factory UpdateLocationModel.fromJson(Map<String, dynamic> json) {
     return UpdateLocationModel(
       latitude: json['latitude'],
       longitude: json['longitude'],
       city: json['city'],
+      country: json['pais'],
     );
   }
   factory UpdateLocationModel.fromEntity(UpdateLocationEntity entity) {
@@ -15,6 +16,7 @@ class UpdateLocationModel extends UpdateLocationEntity {
       latitude: entity.latitude,
       longitude: entity.longitude,
       city: entity.city,
+      country: entity.country,
     );
   }
   Map<String, dynamic> toJson() {
@@ -22,6 +24,8 @@ class UpdateLocationModel extends UpdateLocationEntity {
       'lat': latitude,
       'lng': longitude,
       'ciudad': city,
+      'pais': country,
+
     };
   }
 }

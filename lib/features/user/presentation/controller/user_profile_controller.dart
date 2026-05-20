@@ -55,11 +55,7 @@ class UserProfileController extends GetxController {
   List<String> get userQualities =>
       currentUser.value?.qualitiesIds?.map((q) => q.name).toList() ?? [];
   List<String> get userGallery => _buildGallery(currentUser.value);
-  bool get isUserFemale {
-    final profileController = Get.find<ProfileController>();
-    final g = profileController.gender.toLowerCase().trim();
-    return g == 'mujer' || g == 'femenino' || g == 'female' || g == 'Mujer';
-  }
+
 
   bool get alreadyInteracted {
     final like = currentUser.value?.likeStatus;
@@ -80,9 +76,7 @@ class UserProfileController extends GetxController {
     }
     final index = args?['goPerfilIndex'];
     debugPrint('user id from arguments: ${userId.value}, index: $index');
-    debugPrint(
-      'is mujer isUserFemale: $isUserFemale ${currentUser.value?.gender?.toLowerCase()}',
-    );
+    
     debugPrint(
       'alreadyInteracted: $alreadyInteracted likeStatus: ${currentUser.value?.likeStatus}',
     );

@@ -73,21 +73,22 @@ class SplashController extends GetxController {
     );
 
     if (placemarks.isNotEmpty) {
-      final place = placemarks.first;
-
-      // Jerarquía de fallback para obtener la ciudad principal
+      final place = placemarks.first; 
       final city = _resolveCity(place);
 
       if (city.isNotEmpty) {
-        print('city : $city');
-        await updateLocationUsecase.execute(
-          UpdateLocationEntity(
-            latitude: position.latitude,
-            longitude: position.longitude,
-            city: city,
-          ),
-        );
-      }
+  final country = place.country?.trim() ?? '';
+  
+  print('city: $city | country: $country');
+  await updateLocationUsecase.execute(
+    UpdateLocationEntity(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      city: city,
+      country: country,
+    ),
+  );
+}
     }
   } catch (e) {
     print('Error obteniendo ubicación: $e');

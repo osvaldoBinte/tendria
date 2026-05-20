@@ -787,7 +787,7 @@ class NearbyUsersPage extends StatelessWidget {
     );
   }
 
- Widget _buildReporteButtons(NearbyUsersController controller) {
+  Widget _buildReporteButtons(NearbyUsersController controller) {
   return SafeArea(
     top: false,
     child: Container(
@@ -805,12 +805,7 @@ class NearbyUsersPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.textSecondaryColor,
-                        ThemeColor.textSecondaryColor.withOpacity(0.8),
-                      ],
-                    ),
+                    gradient:ThemeColor.closeroundedGradient,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -833,9 +828,7 @@ class NearbyUsersPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.red.shade700, Colors.red.shade400],
-                    ),
+                    gradient: ThemeColor.blockroundedGradient,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -859,12 +852,7 @@ class NearbyUsersPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.primaryColor,
-                        ThemeColor.primaryColor.withOpacity(0.8),
-                      ],
-                    ),
+                    gradient: ThemeColor.favoriteroundedGradient,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -887,9 +875,7 @@ class NearbyUsersPage extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.pinkAccent, Colors.pink.shade300],
-                      ),
+                      gradient:ThemeColor.wavinghandroundedGradient,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -914,9 +900,7 @@ class NearbyUsersPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.red.shade700, Colors.red.shade400],
-                    ),
+                    gradient: ThemeColor.blockroundedGradient,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -939,12 +923,7 @@ class NearbyUsersPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ThemeColor.primaryColor,
-                        ThemeColor.primaryColor.withOpacity(0.8),
-                      ],
-                    ),
+                    gradient:ThemeColor.favoriteroundedGradient,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(

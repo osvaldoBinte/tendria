@@ -43,8 +43,7 @@ class PreferencesController extends GetxController {
   });
 
   LanguageController get _l => Get.find<LanguageController>();
-
-  // ─── ESTADO ──────────────────────────────────────────────────────────────────
+ 
 
   final Rx<PreferencesStep> currentStep = PreferencesStep.genderPreference.obs;
   final RxInt currentStepIndex = 0.obs;

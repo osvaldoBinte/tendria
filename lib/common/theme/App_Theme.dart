@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tendria/common/controller/theme_controller.dart';
 
@@ -10,125 +10,147 @@ class ThemeColor {
   static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
 
   static const Color accentColor = Color(0xFFB83A5E); // Rosa burdeos claro
-  static const Color radarScanner = Color(0xFFB9141E); // Rojo intenso para radar scanner
+  static const Color radarScanner = Color(
+    0xFFB9141E,
+  ); // Rojo intenso para radar scanner
 
   // Colores de fondo
   static const Color surfaceColor = Colors.white; // Superficies blancas
   static const Color cardColor = Colors.white; // Cards blancas
-// static final Color backgroundColorfondo = Color(0xFFEFEFEA);
+  // static final Color backgroundColorfondo = Color(0xFFEFEFEA);
   //static final Color backgroundColor = Colors.white;
- static Color get primaryColor {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFFB9141E) :Color(0xFF4A141E);
-  } catch (_) {
-    return const Color(0xFF4A141E) ;
+  static Color get primaryColor {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value
+          ? const Color(0xFFB9141E)
+          : Color(0xFF4A141E);
+    } catch (_) {
+      return const Color(0xFF4A141E);
+    }
   }
-}
-static Color get toggleBackground {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFF2C2C3E) : const Color(0xFFE0E0E0);
-  } catch (_) {
-    return const Color(0xFFE0E0E0);
-  }
-}
 
-static Color get toggleThumb {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFFE0E0E0) : Color(0xFF2C2C3E);
-  } catch (_) {
-    return Colors.white;
+  static Color get toggleBackground {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value
+          ? const Color(0xFF2C2C3E)
+          : const Color(0xFFE0E0E0);
+    } catch (_) {
+      return const Color(0xFFE0E0E0);
+    }
   }
-}
-static Color get backgroundColorRadart {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFF000000) : Colors.white;
-  } catch (_) {
-    return Colors.white;
-  }
-}
-static Color get colorstatus {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ?Colors.white: Color(0xFF4A141E);
-  } catch (_) {
-    return Colors.white;
-  }
-}
-static Color get backgroundColor {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFF050709) : Colors.white;
-  } catch (_) {
-    return Colors.white;
-  }
-} static Color get subtleBorder {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? Colors.white24 : Colors.black12;
-  } catch (_) {
-    return Colors.grey.shade300;
-  }
-}
- static Color get subtleBackground {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFF1E2226) : Colors.grey.shade100;
-  } catch (_) {
-    return Colors.grey.shade100;
-  }
-}
-static Color get backgroundColorfondo {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFF0F1215) : const Color(0xFFEFEFEA);
-  } catch (_) {
-    return const Color(0xFFEFEFEA);
-  }
-} 
-static Color get textPrimary {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? Colors.white : Colors.black87;
-  } catch (_) {
-    return Colors.black87;
-  }
-}
 
-static Color get textSecondary {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? Colors.white60 : const Color(0xFF5F6368);
-  } catch (_) {
-    return const Color(0xFF5F6368);
+  static Color get toggleThumb {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value
+          ? const Color(0xFFE0E0E0)
+          : Color(0xFF2C2C3E);
+    } catch (_) {
+      return Colors.white;
+    }
   }
-}
 
-static Color get cardBackground {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? const Color(0xFF0F1215) : Colors.white;
-  } catch (_) {
-    return Colors.white;
+  static Color get backgroundColorRadart {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? const Color(0xFF000000) : Colors.white;
+    } catch (_) {
+      return Colors.white;
+    }
   }
-}
 
-static Color get iconColor {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return ctrl.isDarkMode.value ? Colors.white : Colors.black;
-  } catch (_) {
-    return Colors.black;
+  static Color get colorstatus {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? Colors.white : Color(0xFF4A141E);
+    } catch (_) {
+      return Colors.white;
+    }
   }
-}
+
+  static Color get backgroundColor {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? const Color(0xFF050709) : Colors.white;
+    } catch (_) {
+      return Colors.white;
+    }
+  }
+
+  static Color get subtleBorder {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? Colors.white24 : Colors.black12;
+    } catch (_) {
+      return Colors.grey.shade300;
+    }
+  }
+
+  static Color get subtleBackground {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value
+          ? const Color(0xFF1E2226)
+          : Colors.grey.shade100;
+    } catch (_) {
+      return Colors.grey.shade100;
+    }
+  }
+
+  static Color get backgroundColorfondo {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value
+          ? const Color(0xFF0F1215)
+          : const Color(0xFFEFEFEA);
+    } catch (_) {
+      return const Color(0xFFEFEFEA);
+    }
+  }
+
+  static Color get textPrimary {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? Colors.white : Colors.black87;
+    } catch (_) {
+      return Colors.black87;
+    }
+  }
+
+  static Color get textSecondary {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? Colors.white60 : const Color(0xFF5F6368);
+    } catch (_) {
+      return const Color(0xFF5F6368);
+    }
+  }
+
+  static Color get cardBackground {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? const Color(0xFF0F1215) : Colors.white;
+    } catch (_) {
+      return Colors.white;
+    }
+  }
+
+  static Color get iconColor {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value ? Colors.white : Colors.black;
+    } catch (_) {
+      return Colors.black;
+    }
+  }
+
   // Colores de texto
   static const Color textPrimaryColor = Colors.black87; // Texto principal
   static const Color textSecondaryColor = Color(0xFF5F6368); // Texto secundario
   static const Color textTertiaryColor = Color(0xFF656565); // Texto terciario
-  static const Color textLightColor = Colors.white; 
+  static const Color textLightColor = Colors.white;
   static const Color textDarkColor = Colors.black;
 
   // Colores de estado
@@ -137,15 +159,25 @@ static Color get iconColor {
   static const Color errorColor = Color(0xFFFF3B3B); // Rojo error
   static const Color infoColor = Color(0xFF2196F3); // Azul información
   static const Color onlineColor = Color(0xFF4CAF50); // Verde online
-//loading 
-static final Color loaddingwithOpacity1 = const Color.fromARGB(255, 200, 200, 200).withOpacity(0.15);
-static final Color loaddingwithOpacity3 = const Color.fromARGB(255, 180, 180, 180).withOpacity(0.35);
-static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
+  //loading
+  static final Color loaddingwithOpacity1 = const Color.fromARGB(
+    255,
+    200,
+    200,
+    200,
+  ).withOpacity(0.15);
+  static final Color loaddingwithOpacity3 = const Color.fromARGB(
+    255,
+    180,
+    180,
+    180,
+  ).withOpacity(0.35);
+  static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
 
   // Colores específicos de la app
-  static   Color badgeColor = primaryColor; // Color de badges "Tu turno"
-  static   Color distanceBadgeColor = primaryColor; // Badge de distancia
-  static   Color likeButtonColor = primaryColor; // Botón de like
+  static Color badgeColor = primaryColor; // Color de badges "Tu turno"
+  static Color distanceBadgeColor = primaryColor; // Badge de distancia
+  static Color likeButtonColor = primaryColor; // Botón de like
   static const Color storyGradientStart = Color(
     0xFF8B2C4B,
   ); // Inicio gradiente historia
@@ -154,7 +186,7 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
   ); // Fin gradiente historia
 
   // Colores para navegación
-  static   Color navbarSelectedColor = primaryColor;
+  static Color navbarSelectedColor = primaryColor;
   static final Color navbarUnselectedColor = Colors.grey.shade600;
 
   // Utilidades
@@ -225,7 +257,26 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-
+  static LinearGradient get closeroundedGradient => LinearGradient(
+    colors: [Color(0xFF000000), Color(0xFF737373)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static LinearGradient get blockroundedGradient => LinearGradient(
+    colors: [Color(0xFFff3131), Color(0xFFff914d)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static LinearGradient get favoriteroundedGradient => LinearGradient(
+    colors:  [Color(0xFFFF5757), Color(0xFFff52af)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static LinearGradient get wavinghandroundedGradient => LinearGradient(
+    colors: [Color(0xFF5170ff), Color(0xFFff66c4)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
   static LinearGradient get storyGradient => LinearGradient(
     colors: [storyGradientStart, storyGradientEnd],
     begin: Alignment.topRight,
@@ -306,34 +357,34 @@ static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
     color: textLightColor,
   );
 
-static ThemeData get darkThemeData => ThemeData(
-  useMaterial3: true,
-  brightness: Brightness.dark,
-  primaryColor: primaryColor,
-  scaffoldBackgroundColor: const Color(0xFF050709),
+  static ThemeData get darkThemeData => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    primaryColor: primaryColor,
+    scaffoldBackgroundColor: const Color(0xFF050709),
 
-  colorScheme: ColorScheme.dark(
-    primary: primaryColor,
-    onPrimary: Colors.white,
-    secondary: secondaryColor,
-    surface: const Color(0xFF0F1215),
-    onSurface: Colors.white,
-    background: const Color(0xFF050709),
-    onBackground: Colors.white,
-  ),
+    colorScheme: ColorScheme.dark(
+      primary: primaryColor,
+      onPrimary: Colors.white,
+      secondary: secondaryColor,
+      surface: const Color(0xFF0F1215),
+      onSurface: Colors.white,
+      background: const Color(0xFF050709),
+      onBackground: Colors.white,
+    ),
 
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF0F1215),
-    foregroundColor: Colors.white,
-    elevation: 0,
-  ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF0F1215),
+      foregroundColor: Colors.white,
+      elevation: 0,
+    ),
 
-  cardTheme: CardThemeData(
-    color: const Color(0xFF0F1215),
-    elevation: elevationSmall,
-    shape: RoundedRectangleBorder(borderRadius: mediumBorderRadius),
-  ),
-);
+    cardTheme: CardThemeData(
+      color: const Color(0xFF0F1215),
+      elevation: elevationSmall,
+      shape: RoundedRectangleBorder(borderRadius: mediumBorderRadius),
+    ),
+  );
   static ThemeData get themeData => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -404,7 +455,7 @@ static ThemeData get darkThemeData => ThemeData(
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: mediumBorderRadius,
-        borderSide:  BorderSide(color: primaryColor, width: 1.5),
+        borderSide: BorderSide(color: primaryColor, width: 1.5),
       ),
       labelStyle: const TextStyle(color: textSecondaryColor),
       hintStyle: TextStyle(color: textSecondaryColor.withOpacity(0.7)),
@@ -490,26 +541,23 @@ static ThemeData get darkThemeData => ThemeData(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: hasStory && !isViewed ? storyGradient : null,
-        border:
-            !hasStory || isViewed
-                ? Border.all(color: Colors.grey[300]!, width: borderWidth)
-                : null,
+        border: !hasStory || isViewed
+            ? Border.all(color: Colors.grey[300]!, width: borderWidth)
+            : null,
         boxShadow: [storyShadow],
       ),
       child: Container(
         margin: EdgeInsets.all(hasStory && !isViewed ? 3 : 0),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border:
-              hasStory && !isViewed
-                  ? Border.all(color: Colors.white, width: borderWidth)
-                  : null,
+          border: hasStory && !isViewed
+              ? Border.all(color: Colors.white, width: borderWidth)
+              : null,
         ),
         child: ClipOval(child: child),
       ),
     );
   }
-
 
   static Widget widgetButton({
     VoidCallback? onPressed,
@@ -808,126 +856,132 @@ static ThemeData get darkThemeData => ThemeData(
       ),
     );
   }
-// En ThemeColor — SIN Obx, solo retorna el widget directamente
-static Widget createMainScaffold({
-  required Widget body,
-  required int currentIndex,
-  required Function(int) onNavigationTap,
-  required List<String> iconPaths,
-  List<String>? labels,
-  Color? backgroundColor,
-  Color? bottomNavBackgroundColor,
-  Widget? floatingActionButton,
-  FloatingActionButtonLocation? floatingActionButtonLocation,
-  List<Key?>? navKeys,
-}) {
-  return Scaffold(
-    backgroundColor: backgroundColor ?? ThemeColor.backgroundColorfondo,
-    body: body,
-    floatingActionButton: floatingActionButton,
-    floatingActionButtonLocation: floatingActionButtonLocation,
-    bottomNavigationBar: createBottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onNavigationTap,
-      iconPaths: iconPaths,
-      labels: labels,
-      navKeys: navKeys,
-    ),
-  );
-}
 
-static Widget createBottomNavigationBar({
-  required int currentIndex,
-  required Function(int) onTap,
-  required List<String> iconPaths,
-  List<String>? labels,
-  Color? backgroundColor,
-  Color? selectedItemColor,
-  Color? unselectedItemColor,
-  List<Key?>? navKeys,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: ThemeColor.cardBackground,  // ← getter reactivo, funciona porque el Obx padre lo envuelve
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.3),
-          spreadRadius: 0,
-          blurRadius: 4,
-          offset: const Offset(0, -2),
-        ),
-      ],
-    ),
-    child: SafeArea(
-      child: SizedBox(
-        height: 70,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(iconPaths.length, (index) {
-            final isSelected = currentIndex == index;
-            return KeyedSubtree(
-              key: navKeys != null && index < navKeys.length
-                  ? navKeys[index]
-                  : null,
-              child: GestureDetector(
-                onTap: () => onTap(index),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 16,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        iconPaths[index],
-                        width: 26,
-                        height: 26,
-                        fit: BoxFit.contain,
-                        color: isSelected
-                            ? ThemeColor.textPrimary
-                            : ThemeColor.textSecondary,
-                      ),
-                      if (labels != null && index < labels.length) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          labels[index],
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? ThemeColor.textPrimary
-                                : ThemeColor.textSecondary,
-                          ),
+  // En ThemeColor — SIN Obx, solo retorna el widget directamente
+  static Widget createMainScaffold({
+    required Widget body,
+    required int currentIndex,
+    required Function(int) onNavigationTap,
+    required List<String> iconPaths,
+    List<String>? labels,
+    Color? backgroundColor,
+    Color? bottomNavBackgroundColor,
+    Widget? floatingActionButton,
+    FloatingActionButtonLocation? floatingActionButtonLocation,
+    List<Key?>? navKeys,
+  }) {
+    return Scaffold(
+      backgroundColor: backgroundColor ?? ThemeColor.backgroundColorfondo,
+      body: body,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
+      bottomNavigationBar: createBottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: onNavigationTap,
+        iconPaths: iconPaths,
+        labels: labels,
+        navKeys: navKeys,
+      ),
+    );
+  }
+
+  static Widget createBottomNavigationBar({
+    required int currentIndex,
+    required Function(int) onTap,
+    required List<String> iconPaths,
+    List<String>? labels,
+    Color? backgroundColor,
+    Color? selectedItemColor,
+    Color? unselectedItemColor,
+    List<Key?>? navKeys,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: ThemeColor
+            .cardBackground, // ← getter reactivo, funciona porque el Obx padre lo envuelve
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 0,
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          height: 70,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(iconPaths.length, (index) {
+              final isSelected = currentIndex == index;
+              return KeyedSubtree(
+                key: navKeys != null && index < navKeys.length
+                    ? navKeys[index]
+                    : null,
+                child: GestureDetector(
+                  onTap: () => onTap(index),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 16,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          iconPaths[index],
+                          width: 26,
+                          height: 26,
+                          fit: BoxFit.contain,
+                          color: isSelected
+                              ? ThemeColor.textPrimary
+                              : ThemeColor.textSecondary,
                         ),
+                        if (labels != null && index < labels.length) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            labels[index],
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? ThemeColor.textPrimary
+                                  : ThemeColor.textSecondary,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ),
-    ),
-  );
-}
-static Widget widgetLogo({double width = 100, double height = 100}) {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return Obx(() => Image.asset(
+    );
+  }
+
+  static Widget widgetLogo({double width = 100, double height = 100}) {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return Obx(
+        () => Image.asset(
           ctrl.isDarkMode.value
               ? 'assets/logo/logo-radar-dark.png'
               : 'assets/logo/logo.png',
           width: width,
           height: height,
-        ));
-  } catch (_) {
-    return Image.asset('assets/logo/logo.png', width: width, height: height);
+        ),
+      );
+    } catch (_) {
+      return Image.asset('assets/logo/logo.png', width: width, height: height);
+    }
   }
-}
+
   static Widget createLabeledTextField({
     required String label,
     required TextEditingController controller,

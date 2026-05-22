@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tendria/common/controller/theme_controller.dart';
@@ -981,129 +982,128 @@ class ThemeColor {
       return Image.asset('assets/logo/logo.png', width: width, height: height);
     }
   }
-
-  static Widget createLabeledTextField({
-    required String label,
-    required TextEditingController controller,
-    FocusNode? focusNode,
-    String? hintText,
-    TextInputType keyboardType = TextInputType.text,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    void Function(String)? onSubmitted,
-    void Function(String)? onChanged,
-    bool enabled = true,
-    int maxLines = 1,
-    String? errorText,
-    bool showError = false,
-    EdgeInsets? contentPadding,
-    Color? fillColor,
-    Color? labelColor,
-    Color? textColor,
-    Color? hintColor,
-    Color? borderColor,
-    Color? focusedBorderColor,
-    BorderRadius? borderRadius,
-    TextStyle? labelStyle,
-    TextStyle? textStyle,
-    TextStyle? hintStyle,
-    double? labelSpacing,
-    bool isRequired = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Label
-        Row(
-          children: [
+static Widget createLabeledTextField({
+  required String label,
+  required TextEditingController controller,
+  FocusNode? focusNode,
+  String? hintText,
+  TextInputType keyboardType = TextInputType.text,
+  bool obscureText = false,
+  Widget? suffixIcon,
+  void Function(String)? onSubmitted,
+  void Function(String)? onChanged,
+  bool enabled = true,
+  int maxLines = 1,
+  String? errorText,
+  bool showError = false,
+  EdgeInsets? contentPadding,
+  Color? fillColor,
+  Color? labelColor,
+  Color? textColor,
+  Color? hintColor,
+  Color? borderColor,
+  Color? focusedBorderColor,
+  BorderRadius? borderRadius,
+  TextStyle? labelStyle,
+  TextStyle? textStyle,
+  TextStyle? hintStyle,
+  double? labelSpacing,
+  bool isRequired = false,
+  List<TextInputFormatter>? inputFormatters,  
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Text(
+            label,
+            style:
+                labelStyle ??
+                bodyMedium.copyWith(
+                  color: labelColor ?? textDarkColor,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          if (isRequired)
             Text(
-              label,
-              style:
-                  labelStyle ??
-                  bodyMedium.copyWith(
-                    color: labelColor ?? textDarkColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-            if (isRequired)
-              Text(
-                ' *',
-                style: TextStyle(
-                  color: errorColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              ' *',
+              style: TextStyle(
+                color: errorColor,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
-          ],
-        ),
-        SizedBox(height: labelSpacing ?? paddingSmall),
+            ),
+        ],
+      ),
+      SizedBox(height: labelSpacing ?? paddingSmall),
 
-        // TextField
-        TextField(
-          controller: controller,
-          focusNode: focusNode,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          onSubmitted: onSubmitted,
-          onChanged: onChanged,
-          enabled: enabled,
-          maxLines: maxLines,
-          style:
-              textStyle ??
-              bodyMedium.copyWith(color: textColor ?? textDarkColor),
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle:
-                hintStyle ??
-                bodyMedium.copyWith(color: hintColor ?? textSecondaryColor),
-            errorText: showError ? errorText : null,
-            errorStyle: bodySmall.copyWith(color: errorColor, height: 1.5),
-            filled: true,
-            fillColor: fillColor ?? surfaceColor,
-            contentPadding:
-                contentPadding ??
-                EdgeInsets.symmetric(
-                  horizontal: paddingLarge,
-                  vertical: paddingMedium,
-                ),
-            suffixIcon: suffixIcon,
-            border: OutlineInputBorder(
-              borderRadius: borderRadius ?? circularBorderRadius,
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? circularBorderRadius,
-              borderSide: showError
-                  ? BorderSide(color: errorColor, width: 1.5)
-                  : BorderSide.none,
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? circularBorderRadius,
-              borderSide: BorderSide(
-                color: (borderColor ?? dividerColor).withOpacity(0.5),
-                width: 1,
+      TextField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        onSubmitted: onSubmitted,
+        onChanged: onChanged,
+        enabled: enabled,
+        maxLines: maxLines,
+        inputFormatters: inputFormatters, // ✅ Agrega esto
+        style:
+            textStyle ??
+            bodyMedium.copyWith(color: textColor ?? textDarkColor),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle:
+              hintStyle ??
+              bodyMedium.copyWith(color: hintColor ?? textSecondaryColor),
+          errorText: showError ? errorText : null,
+          errorStyle: bodySmall.copyWith(color: errorColor, height: 1.5),
+          filled: true,
+          fillColor: fillColor ?? surfaceColor,
+          contentPadding:
+              contentPadding ??
+              EdgeInsets.symmetric(
+                horizontal: paddingLarge,
+                vertical: paddingMedium,
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? circularBorderRadius,
-              borderSide: BorderSide(
-                color: showError
-                    ? errorColor
-                    : (focusedBorderColor ?? primaryColor),
-                width: 1.5,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? circularBorderRadius,
-              borderSide: BorderSide(color: errorColor, width: 1.5),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: borderRadius ?? circularBorderRadius,
-              borderSide: BorderSide(color: errorColor, width: 2),
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: borderRadius ?? circularBorderRadius,
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: borderRadius ?? circularBorderRadius,
+            borderSide: showError
+                ? BorderSide(color: errorColor, width: 1.5)
+                : BorderSide.none,
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: borderRadius ?? circularBorderRadius,
+            borderSide: BorderSide(
+              color: (borderColor ?? dividerColor).withOpacity(0.5),
+              width: 1,
             ),
           ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: borderRadius ?? circularBorderRadius,
+            borderSide: BorderSide(
+              color: showError
+                  ? errorColor
+                  : (focusedBorderColor ?? primaryColor),
+              width: 1.5,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: borderRadius ?? circularBorderRadius,
+            borderSide: BorderSide(color: errorColor, width: 1.5),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: borderRadius ?? circularBorderRadius,
+            borderSide: BorderSide(color: errorColor, width: 2),
+          ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }

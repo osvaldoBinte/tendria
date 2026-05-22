@@ -95,8 +95,35 @@ class RegisterController extends GetxController {
   final RxString nameErrorMessage = ''.obs;
   final RxString bioErrorMessage = ''.obs;
 
-  final RxInt selectedHeight = 170.obs;
+  final RxInt selectedHeight = 170.obs; 
+bool _containsNumericWord(String text) {
+  final lower = text.toLowerCase().trim();
 
+  const numericRoots =
+    r'(cero|un[oa]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|'
+    r'diez|once|doce|trece|catorce|quince|dieci|veint|'
+    r'treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|'
+    r'cien(to)?|doscient|trescient|cuatrocient|quinient|'
+    r'seiscient|setecient|ochocient|novecient|mil|millon?e?s?|'
+    r'zero|one|two|three|four|five|six|seven|eight|nine|ten|'
+    r'eleven|twelve|thir(teen|ty)?|four(teen|ty)?|fif(teen|ty)?|'
+    r'six(teen|ty)?|seven(teen|ty)?|eigh(teen|ty)?|nine(teen|ty)?|'
+    r'twenty|hundred|thousand|million|billion)';
+
+  final singlePattern = RegExp(
+    r'\b' + numericRoots + r'\b',
+    caseSensitive: false,
+    unicode: true,
+  );
+
+  final concatenatedPattern = RegExp(
+    numericRoots + numericRoots + r'+',
+    caseSensitive: false,
+    unicode: true,
+  );
+
+  return singlePattern.hasMatch(lower) || concatenatedPattern.hasMatch(lower);
+}
   final List<Map<String, dynamic>> genderOptions = [
     {'label': 'Masculino', 'value': 'Hombre', 'icon': Icons.male},
     {'label': 'Femenino', 'value': 'Mujer', 'icon': Icons.female},
@@ -216,10 +243,7 @@ class RegisterController extends GetxController {
       isLoadingInterests.value = false;
     }
   }
-
-  // ==========================================
-  // TRADUCCIÓN DE CATÁLOGOS
-  // ==========================================
+ 
 
   Future<void> _waitForTranslator() async {
     print(
@@ -243,8 +267,7 @@ class RegisterController extends GetxController {
     }
 
     await _waitForTranslator();
-
-    // Verificar qué idioma detecta
+ 
     final lang = _l.lang;
     print(
       '[RegisterController] 🌍 Idioma detectado por LanguageController: "$lang"',
@@ -297,10 +320,7 @@ class RegisterController extends GetxController {
   String getInterestLabel(String name) => translatedInterests[name] ?? name;
 
   String getQualityLabel(String name) => translatedQualities[name] ?? name;
-
-  // ==========================================
-  // NAVEGACIÓN ENTRE PASOS
-  // ==========================================
+ 
 
   void nextStep() {
     if (_validateCurrentStep()) {
@@ -332,10 +352,7 @@ class RegisterController extends GetxController {
       }
     }
   }
-
-  // ==========================================
-  // VALIDACIONES POR PASO
-  // ==========================================
+ 
 
   bool _validateCurrentStep() {
     switch (currentStep.value) {
@@ -388,40 +405,45 @@ class RegisterController extends GetxController {
     return isValid;
   }
 
-  bool _validatePersonalInfo() {
-    if (dateOfBirth.value == null) {
-      showErrorSnackbar(_l.t('val_dob_required'));
-      return false;
-    }
-
-    if (selectedGender.value.isEmpty) {
-      showErrorSnackbar(_l.t('val_gender_required'));
-      return false;
-    }
-
-    if (selectedGender.value == 'Otro' &&
-        customGenderController.text.trim().isEmpty) {
-      showErrorSnackbar(_l.t('val_custom_gender_required'));
-      return false;
-    }
-
-    if (bioController.text.trim().isEmpty) {
-      showErrorSnackbar(_l.t('val_bio_required'));
-      return false;
-    }
-
-    if (bioController.text.trim().length < 10) {
-      showErrorSnackbar(_l.t('val_bio_min'));
-      return false;
-    }
-
-    if (bioController.text.length > 500) {
-      showErrorSnackbar(_l.t('val_bio_max'));
-      return false;
-    }
-
-    return true;
+ bool _validatePersonalInfo() {
+  if (dateOfBirth.value == null) {
+    showErrorSnackbar(_l.t('val_dob_required'));
+    return false;
   }
+
+  if (selectedGender.value.isEmpty) {
+    showErrorSnackbar(_l.t('val_gender_required'));
+    return false;
+  }
+
+  if (selectedGender.value == 'Otro' &&
+      customGenderController.text.trim().isEmpty) {
+    showErrorSnackbar(_l.t('val_custom_gender_required'));
+    return false;
+  }
+
+  if (bioController.text.trim().isEmpty) {
+    showErrorSnackbar(_l.t('val_bio_required'));
+    return false;
+  }
+
+  if (bioController.text.trim().length < 10) {
+    showErrorSnackbar(_l.t('val_bio_min'));
+    return false;
+  }
+
+  if (bioController.text.length > 500) {
+    showErrorSnackbar(_l.t('val_bio_max'));
+    return false;
+  }
+ 
+  if (_containsNumericWord(bioController.text.trim())) {
+    showErrorSnackbar(_l.t('bs_no_numbers'));
+    return false;
+  }
+
+  return true;
+}
 
   bool _validatePhysicalInfo() {
     if (heightController.text.isEmpty) {
@@ -445,32 +467,34 @@ class RegisterController extends GetxController {
     }
     return true;
   }
-
-  // ==========================================
-  // VALIDACIONES EN TIEMPO REAL
-  // ==========================================
+ 
 
   void _validateBio() {
-    bioCharCount.value = bioController.text.length;
+  bioCharCount.value = bioController.text.length;
 
-    if (bioController.text.isEmpty) {
-      bioError.value = true;
-      bioErrorMessage.value = _l.t('val_bio_required');
-      return;
-    }
-    if (bioController.text.length < 10) {
-      bioError.value = true;
-      bioErrorMessage.value = _l.t('val_min_10');
-      return;
-    }
-    if (bioController.text.length > 500) {
-      bioError.value = true;
-      bioErrorMessage.value = _l.t('val_max_500');
-      return;
-    }
-
-    bioError.value = false;
+  if (bioController.text.isEmpty) {
+    bioError.value = true;
+    bioErrorMessage.value = _l.t('val_bio_required');
+    return;
   }
+  if (bioController.text.length < 10) {
+    bioError.value = true;
+    bioErrorMessage.value = _l.t('val_min_10');
+    return;
+  }
+  if (bioController.text.length > 500) {
+    bioError.value = true;
+    bioErrorMessage.value = _l.t('val_max_500');
+    return;
+  } 
+  if (_containsNumericWord(bioController.text)) {
+    bioError.value = true;
+    bioErrorMessage.value = _l.t('bs_no_numbers');
+    return;
+  }
+
+  bioError.value = false;
+}
 
   void _validateName() {
     if (nameController.text.isEmpty) {

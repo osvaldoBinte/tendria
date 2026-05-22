@@ -50,6 +50,7 @@ class LanguageController extends GetxController {
       'connection_type': 'Tipo de conexión',
       'delete_account': 'Eliminar cuenta',
       'no_limit': 'Máximo',
+      "bs_no_numbers": "no puede contener números",
 
       // ── ProfilePage ────────────────────────────────
       'profile': 'Perfil',
@@ -424,23 +425,23 @@ class LanguageController extends GetxController {
       'liked_by_error_title': 'Error al cargar likes',
       'liked_by_loading': 'Cargando likes...',
 
-      //reportar 
+      //reportar
       'report_title': 'Reportar a',
-'report_select_reason': 'Selecciona el motivo del reporte',
-'report_harassment': 'Acoso o intimidación',
-'report_inappropriate': 'Contenido inapropiado',
-'report_fake': 'Perfil falso o spam',
-'report_offensive': 'Comportamiento ofensivo',
-'report_minor': 'Menor de edad',
-'report_other': 'Otro',
-'report_desc_hint': 'Descripción (requerida)',
-'report_desc_required': 'La descripción es requerida',
-'report_also_block': 'También bloquear a',
-'report_block_hint': 'No podrá contactarte ni ver tu perfil',
-'report_send': 'Enviar reporte',
-'report_send_and_block': 'Reportar y bloquear',
-'report_success': 'Reporte enviado. Revisaremos el perfil de',
-'report_block_success': 'ha sido reportado y bloqueado',
+      'report_select_reason': 'Selecciona el motivo del reporte',
+      'report_harassment': 'Acoso o intimidación',
+      'report_inappropriate': 'Contenido inapropiado',
+      'report_fake': 'Perfil falso o spam',
+      'report_offensive': 'Comportamiento ofensivo',
+      'report_minor': 'Menor de edad',
+      'report_other': 'Otro',
+      'report_desc_hint': 'Descripción (requerida)',
+      'report_desc_required': 'La descripción es requerida',
+      'report_also_block': 'También bloquear a',
+      'report_block_hint': 'No podrá contactarte ni ver tu perfil',
+      'report_send': 'Enviar reporte',
+      'report_send_and_block': 'Reportar y bloquear',
+      'report_success': 'Reporte enviado. Revisaremos el perfil  de',
+      'report_block_success': 'ha sido reportado y bloqueado',
     },
     'Inglés': {
       // ── UpdateProfilePage ──────────────────────────
@@ -454,6 +455,7 @@ class LanguageController extends GetxController {
       'connection_type': 'Connection Type',
       'delete_account': 'Delete Account',
       'no_limit': 'No limit',
+      "bs_no_numbers": "cannot contain numbers",
 
       // ── ProfilePage ────────────────────────────────
       'profile': 'Profile',
@@ -812,21 +814,22 @@ class LanguageController extends GetxController {
 
       //reportar
       'report_title': 'Report',
-'report_select_reason': 'Select the reason for the report',
-'report_harassment': 'Harassment or intimidation',
-'report_inappropriate': 'Inappropriate content',
-'report_fake': 'Fake profile or spam',
-'report_offensive': 'Offensive behavior',
-'report_minor': 'Minor',
-'report_other': 'Other',
-'report_desc_hint': 'Description (required)',
-'report_desc_required': 'Description is required',
-'report_also_block': 'Also block',
-'report_block_hint': 'They won\'t be able to contact you or see your profile',
-'report_send': 'Send report',
-'report_send_and_block': 'Report and block',
-'report_success': 'Report sent. We will review the profile of',
-'report_block_success': 'has been reported and blocked',
+      'report_select_reason': 'Select the reason for the report',
+      'report_harassment': 'Harassment or intimidation',
+      'report_inappropriate': 'Inappropriate content',
+      'report_fake': 'Fake profile or spam',
+      'report_offensive': 'Offensive behavior',
+      'report_minor': 'Minor',
+      'report_other': 'Other',
+      'report_desc_hint': 'Description (required)',
+      'report_desc_required': 'Description is required',
+      'report_also_block': 'Also block',
+      'report_block_hint':
+          'They won\'t be able to contact you or see your profile',
+      'report_send': 'Send report',
+      'report_send_and_block': 'Report and block',
+      'report_success': 'Report sent. We will review the profile of',
+      'report_block_success': 'has been reported and blocked',
     },
   };
 }

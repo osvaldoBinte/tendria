@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
 import 'package:tendria/common/services/auth_service.dart';
@@ -8,6 +9,7 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/custom_alert_type.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
+import 'package:tendria/common/widgets/alert/snackbar_helper_getx.dart';
 import 'package:tendria/features/catalog/domain/entities/catalog_entity.dart';
 import 'package:tendria/features/catalog/domain/usecase/delete_interests_usecase.dart';
 import 'package:tendria/features/catalog/domain/usecase/delete_qualities_usecase.dart';
@@ -72,15 +74,42 @@ class UpdateProfileController extends GetxController {
   TranslationService get _translator => Get.find<TranslationService>();
   LanguageController get _l => Get.find<LanguageController>();
 
-  // ==========================================
-  // HELPERS DE TRADUCCIÓN
-  // ==========================================
+    bool containsNumericWord(String text) {
+      final lower = text.toLowerCase().trim();
 
+      const numericRoots =
+          r'(cero|un[oa]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|'
+          r'diez|once|doce|trece|catorce|quince|dieci|veint|'
+          r'treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|'
+          r'cien(to)?|doscient|trescient|cuatrocient|quinient|'
+          r'seiscient|setecient|ochocient|novecient|mil|millon?e?s?|'
+          r'zero|one|two|three|four|five|six|seven|eight|nine|ten|'
+          r'eleven|twelve|thir(teen|ty)?|four(teen|ty)?|fif(teen|ty)?|'
+          r'six(teen|ty)?|seven(teen|ty)?|eigh(teen|ty)?|nine(teen|ty)?|'
+          r'twenty|hundred|thousand|million|billion)';
+
+      final singlePattern = RegExp(
+        r'\b' + numericRoots + r'\b',
+        caseSensitive: false,
+        unicode: true,
+      );
+
+      final concatenatedPattern = RegExp(
+        numericRoots + numericRoots + r'+',
+        caseSensitive: false,
+        unicode: true,
+      );
+
+      return singlePattern.hasMatch(lower) ||
+          concatenatedPattern.hasMatch(lower);
+    }
   Future<void> _translateInterestsCatalog() async {
     if (allInterests.isEmpty) return;
     final lang = _l.lang;
     if (lang == 'Español') {
-      translatedInterests.assignAll({for (var i in allInterests) i.name: i.name});
+      translatedInterests.assignAll({
+        for (var i in allInterests) i.name: i.name,
+      });
       return;
     }
     final names = allInterests.map((i) => i.name).toList();
@@ -96,7 +125,9 @@ class UpdateProfileController extends GetxController {
     if (allQualities.isEmpty) return;
     final lang = _l.lang;
     if (lang == 'Español') {
-      translatedQualities.assignAll({for (var q in allQualities) q.name: q.name});
+      translatedQualities.assignAll({
+        for (var q in allQualities) q.name: q.name,
+      });
       return;
     }
     final names = allQualities.map((q) => q.name).toList();
@@ -111,14 +142,12 @@ class UpdateProfileController extends GetxController {
   String _getInterestLabel(String name) => translatedInterests[name] ?? name;
   String _getQualityLabel(String name) => translatedQualities[name] ?? name;
 
-  // ==========================================
-  // ALTURA
-  // ==========================================
-
   void showEditHeight(String currentValue) {
     final int initialHeight = int.tryParse(currentValue) ?? 170;
     final initialIndex = (initialHeight - 154).clamp(0, 95);
-    final heightScrollController = FixedExtentScrollController(initialItem: initialIndex);
+    final heightScrollController = FixedExtentScrollController(
+      initialItem: initialIndex,
+    );
     final RxInt selectedHeight = initialHeight.obs;
 
     if (Get.context != null) {
@@ -145,7 +174,9 @@ class UpdateProfileController extends GetxController {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    _buildWheelHighlight(horizontal: ThemeColor.paddingExtraLarge * 2),
+                    _buildWheelHighlight(
+                      horizontal: ThemeColor.paddingExtraLarge * 2,
+                    ),
                     ListWheelScrollView.useDelegate(
                       controller: heightScrollController,
                       itemExtent: 60,
@@ -173,10 +204,12 @@ class UpdateProfileController extends GetxController {
                 ),
               ),
               SizedBox(height: ThemeColor.paddingMedium),
-              _buildSaveButton(onPressed: () {
-                Get.back();
-                updateHeight(selectedHeight.value.toString());
-              }),
+              _buildSaveButton(
+                onPressed: () {
+                  Get.back();
+                  updateHeight(selectedHeight.value.toString());
+                },
+              ),
               SizedBox(height: ThemeColor.paddingMedium),
             ],
           ),
@@ -185,15 +218,15 @@ class UpdateProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // GÉNERO
-  // ==========================================
-
   void showEditGender(String currentValue) {
     final List<Map<String, dynamic>> genderOptions = [
       {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
       {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
-      {'label': 'Persona no binaria', 'value': 'No_binario', 'icon': Icons.transgender},
+      {
+        'label': 'Persona no binaria',
+        'value': 'No_binario',
+        'icon': Icons.transgender,
+      },
     ];
 
     final RxString selected = currentValue.obs;
@@ -207,7 +240,9 @@ class UpdateProfileController extends GetxController {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             child: Column(
@@ -220,23 +255,27 @@ class UpdateProfileController extends GetxController {
                 SizedBox(height: ThemeColor.paddingSmall),
                 _buildBsSubtitle(_l.t('bs_gender_subtitle')),
                 SizedBox(height: ThemeColor.paddingExtraLarge),
-                ...genderOptions.map((option) => Padding(
-                      padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
-                      child: Obx(() {
-                        final isSelected = selected.value == option['value'];
-                        return _buildRadioOption(
-                          label: option['label'],
-                          icon: option['icon'] as IconData,
-                          isSelected: isSelected,
-                          onTap: () => selected.value = option['value'],
-                        );
-                      }),
-                    )),
+                ...genderOptions.map(
+                  (option) => Padding(
+                    padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
+                    child: Obx(() {
+                      final isSelected = selected.value == option['value'];
+                      return _buildRadioOption(
+                        label: option['label'],
+                        icon: option['icon'] as IconData,
+                        isSelected: isSelected,
+                        onTap: () => selected.value = option['value'],
+                      );
+                    }),
+                  ),
+                ),
                 SizedBox(height: ThemeColor.paddingLarge),
-                _buildSaveButton(onPressed: () {
-                  Get.back();
-                  updateGender(selected.value);
-                }),
+                _buildSaveButton(
+                  onPressed: () {
+                    Get.back();
+                    updateGender(selected.value);
+                  },
+                ),
                 SizedBox(height: ThemeColor.paddingMedium),
               ],
             ),
@@ -245,10 +284,6 @@ class UpdateProfileController extends GetxController {
       );
     }
   }
-
-  // ==========================================
-  // IDIOMA
-  // ==========================================
 
   void showEditLanguage(String currentValue) {
     _showSelectionBottomSheet(
@@ -281,7 +316,9 @@ class UpdateProfileController extends GetxController {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             child: Column(
@@ -294,54 +331,58 @@ class UpdateProfileController extends GetxController {
                 SizedBox(height: ThemeColor.paddingSmall),
                 _buildBsSubtitle(subtitle),
                 SizedBox(height: ThemeColor.paddingExtraLarge),
-                ...options.map((option) => Padding(
-                      padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
-                      child: Obx(() {
-                        final isSelected = selected.value == option['value'];
-                        return GestureDetector(
-                          onTap: () => selected.value = option['value']!,
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
+                ...options.map(
+                  (option) => Padding(
+                    padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
+                    child: Obx(() {
+                      final isSelected = selected.value == option['value'];
+                      return GestureDetector(
+                        onTap: () => selected.value = option['value']!,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? ThemeColor.primaryColor
+                                  : ThemeColor.textSecondaryColor,
+                            ),
+                            color: isSelected
+                                ? ThemeColor.primaryColor.withOpacity(0.1)
+                                : Colors.transparent,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  option['label']!,
+                                  style: ThemeColor.bodyMedium.copyWith(
+                                    color: ThemeColor.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                isSelected
+                                    ? Icons.radio_button_checked
+                                    : Icons.radio_button_off,
                                 color: isSelected
                                     ? ThemeColor.primaryColor
                                     : ThemeColor.textSecondaryColor,
                               ),
-                              color: isSelected
-                                  ? ThemeColor.primaryColor.withOpacity(0.1)
-                                  : Colors.transparent,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    option['label']!,
-                                    style: ThemeColor.bodyMedium.copyWith(
-                                      color: ThemeColor.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                Icon(
-                                  isSelected
-                                      ? Icons.radio_button_checked
-                                      : Icons.radio_button_off,
-                                  color: isSelected
-                                      ? ThemeColor.primaryColor
-                                      : ThemeColor.textSecondaryColor,
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
-                        );
-                      }),
-                    )),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
                 SizedBox(height: ThemeColor.paddingLarge),
-                _buildSaveButton(onPressed: () {
-                  Get.back();
-                  onSave(selected.value);
-                }),
+                _buildSaveButton(
+                  onPressed: () {
+                    Get.back();
+                    onSave(selected.value);
+                  },
+                ),
                 SizedBox(height: ThemeColor.paddingMedium),
               ],
             ),
@@ -350,10 +391,6 @@ class UpdateProfileController extends GetxController {
       );
     }
   }
-
-  // ==========================================
-  // INTERESES
-  // ==========================================
 
   Future<void> showEditInterests(List<int> currentIds) async {
     if (allInterests.isEmpty) {
@@ -400,54 +437,64 @@ class UpdateProfileController extends GetxController {
                     SizedBox(height: ThemeColor.paddingSmall),
                     _buildBsSubtitle(_l.t('bs_interests_subtitle')),
                     SizedBox(height: ThemeColor.paddingMedium),
-                    Obx(() => Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _l.t('bs_interests_counter'),
-                              style: ThemeColor.bodyMedium.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: ThemeColor.textPrimary,
-                              ),
+                    Obx(
+                      () => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _l.t('bs_interests_counter'),
+                            style: ThemeColor.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: ThemeColor.textPrimary,
                             ),
-                            Text(
-                              '${tempSelectedInterests.length}/$maxInterests ${_l.t('bs_interests_selected')}',
-                              style: ThemeColor.bodyMedium.copyWith(
-                                color: ThemeColor.textSecondary,
-                              ),
+                          ),
+                          Text(
+                            '${tempSelectedInterests.length}/$maxInterests ${_l.t('bs_interests_selected')}',
+                            style: ThemeColor.bodyMedium.copyWith(
+                              color: ThemeColor.textSecondary,
                             ),
-                          ],
-                        )),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  padding: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
-                  child: Obx(() => Wrap(
-                        spacing: ThemeColor.paddingSmall,
-                        runSpacing: ThemeColor.paddingSmall,
-                        children: allInterests.map((interest) {
-                          final isSelected = tempSelectedInterests.contains(interest.id);
-                          return _buildInterestChipSheet(
-                            label: _getInterestLabel(interest.name),
-                            icon: _getInterestIcon(interest.name),
-                            isSelected: isSelected,
-                            onTap: () => _toggleTempInterest(interest.id),
-                          );
-                        }).toList(),
-                      )),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ThemeColor.paddingLarge,
+                  ),
+                  child: Obx(
+                    () => Wrap(
+                      spacing: ThemeColor.paddingSmall,
+                      runSpacing: ThemeColor.paddingSmall,
+                      children: allInterests.map((interest) {
+                        final isSelected = tempSelectedInterests.contains(
+                          interest.id,
+                        );
+                        return _buildInterestChipSheet(
+                          label: _getInterestLabel(interest.name),
+                          icon: _getInterestIcon(interest.name),
+                          isSelected: isSelected,
+                          onTap: () => _toggleTempInterest(interest.id),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               ),
               Container(
                 padding: EdgeInsets.all(ThemeColor.paddingLarge),
-                child: Obx(() => _buildSaveButton(
-                      isLoading: isSavingInterests.value,
-                      onPressed: isSavingInterests.value
-                          ? null
-                          : () async => await _saveInterests(),
-                    )),
+                child: Obx(
+                  () => _buildSaveButton(
+                    isLoading: isSavingInterests.value,
+                    onPressed: isSavingInterests.value
+                        ? null
+                        : () async => await _saveInterests(),
+                  ),
+                ),
               ),
             ],
           ),
@@ -472,8 +519,12 @@ class UpdateProfileController extends GetxController {
     try {
       isSavingInterests.value = true;
       final currentIds = _profile.interests.map((i) => i.id).toList();
-      final newIds = tempSelectedInterests.where((id) => !currentIds.contains(id)).toList();
-      final removedIds = currentIds.where((id) => !tempSelectedInterests.contains(id)).toList();
+      final newIds = tempSelectedInterests
+          .where((id) => !currentIds.contains(id))
+          .toList();
+      final removedIds = currentIds
+          .where((id) => !tempSelectedInterests.contains(id))
+          .toList();
 
       if (newIds.isEmpty && removedIds.isEmpty) {
         showSuccessSnackbar(_l.t('snack_no_changes'));
@@ -481,21 +532,20 @@ class UpdateProfileController extends GetxController {
         return;
       }
       if (newIds.isNotEmpty) await postInterestsUsecase.execute(newIds);
-      if (removedIds.isNotEmpty) await deleteInterestsUsecase.execute(removedIds);
+      if (removedIds.isNotEmpty)
+        await deleteInterestsUsecase.execute(removedIds);
       await _profile.loadUserProfile();
       Get.back();
       showSuccessSnackbar(_l.t('bs_interests_saved'));
     } catch (e) {
       Get.back();
-      showErrorSnackbar('${_l.t('snack_could_not_save_interests')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_save_interests')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isSavingInterests.value = false;
     }
   }
-
-  // ==========================================
-  // CUALIDADES
-  // ==========================================
 
   Future<void> showEditQualities(List<int> currentIds) async {
     if (allQualities.isEmpty) {
@@ -541,42 +591,52 @@ class UpdateProfileController extends GetxController {
                     SizedBox(height: ThemeColor.paddingSmall),
                     _buildBsSubtitle(_l.t('bs_qualities_subtitle')),
                     SizedBox(height: ThemeColor.paddingMedium),
-                    Obx(() => Text(
-                          '${_l.t('bs_qualities_counter')}   ${tempSelectedQualities.length}/$maxQualities ${_l.t('bs_interests_selected')}',
-                          style: ThemeColor.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: ThemeColor.textPrimary,
-                          ),
-                        )),
+                    Obx(
+                      () => Text(
+                        '${_l.t('bs_qualities_counter')}   ${tempSelectedQualities.length}/$maxQualities ${_l.t('bs_interests_selected')}',
+                        style: ThemeColor.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: ThemeColor.textPrimary,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  padding: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),
-                  child: Obx(() => Wrap(
-                        spacing: ThemeColor.paddingSmall,
-                        runSpacing: ThemeColor.paddingSmall,
-                        children: allQualities.map((quality) {
-                          final isSelected = tempSelectedQualities.contains(quality.id);
-                          return _buildQualityChipSheet(
-                            label: _getQualityLabel(quality.name),
-                            isSelected: isSelected,
-                            onTap: () => _toggleTempQuality(quality.id),
-                          );
-                        }).toList(),
-                      )),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ThemeColor.paddingLarge,
+                  ),
+                  child: Obx(
+                    () => Wrap(
+                      spacing: ThemeColor.paddingSmall,
+                      runSpacing: ThemeColor.paddingSmall,
+                      children: allQualities.map((quality) {
+                        final isSelected = tempSelectedQualities.contains(
+                          quality.id,
+                        );
+                        return _buildQualityChipSheet(
+                          label: _getQualityLabel(quality.name),
+                          isSelected: isSelected,
+                          onTap: () => _toggleTempQuality(quality.id),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               ),
               Container(
                 padding: EdgeInsets.all(ThemeColor.paddingLarge),
-                child: Obx(() => _buildSaveButton(
-                      isLoading: isSavingQualities.value,
-                      onPressed: isSavingQualities.value
-                          ? null
-                          : () async => await _saveQualities(),
-                    )),
+                child: Obx(
+                  () => _buildSaveButton(
+                    isLoading: isSavingQualities.value,
+                    onPressed: isSavingQualities.value
+                        ? null
+                        : () async => await _saveQualities(),
+                  ),
+                ),
               ),
             ],
           ),
@@ -601,8 +661,12 @@ class UpdateProfileController extends GetxController {
     try {
       isSavingQualities.value = true;
       final currentIds = _profile.qualities.map((q) => q.id).toList();
-      final newIds = tempSelectedQualities.where((id) => !currentIds.contains(id)).toList();
-      final removedIds = currentIds.where((id) => !tempSelectedQualities.contains(id)).toList();
+      final newIds = tempSelectedQualities
+          .where((id) => !currentIds.contains(id))
+          .toList();
+      final removedIds = currentIds
+          .where((id) => !tempSelectedQualities.contains(id))
+          .toList();
 
       if (newIds.isEmpty && removedIds.isEmpty) {
         showSuccessSnackbar(_l.t('snack_no_changes'));
@@ -610,25 +674,26 @@ class UpdateProfileController extends GetxController {
         return;
       }
       if (newIds.isNotEmpty) await postQualitiesUsecase.execute(newIds);
-      if (removedIds.isNotEmpty) await deleteQualitiesUsecase.execute(removedIds);
+      if (removedIds.isNotEmpty)
+        await deleteQualitiesUsecase.execute(removedIds);
       await _profile.loadUserProfile();
       Get.back();
       showSuccessSnackbar(_l.t('bs_qualities_saved'));
     } catch (e) {
       Get.back();
-      showErrorSnackbar('${_l.t('snack_could_not_save_qualities')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_save_qualities')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isSavingQualities.value = false;
     }
   }
 
-  // ==========================================
-  // BIOGRAFÍA
-  // ==========================================
-
   void showEditBio(String currentValue) {
-    final TextEditingController textController =
-        TextEditingController(text: currentValue);
+    final TextEditingController textController = TextEditingController(
+      text: currentValue,
+    );
+
 
     if (Get.context != null) {
       showModalBottomSheet(
@@ -639,7 +704,9 @@ class UpdateProfileController extends GetxController {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             child: Column(
@@ -658,6 +725,9 @@ class UpdateProfileController extends GetxController {
                   maxLines: 5,
                   maxLength: 300,
                   style: TextStyle(color: ThemeColor.textPrimary),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(RegExp(r'[0-9]')),
+                  ],
                   decoration: InputDecoration(
                     hintText: _l.t('bs_bio_hint'),
                     hintStyle: ThemeColor.bodyMedium.copyWith(
@@ -680,10 +750,18 @@ class UpdateProfileController extends GetxController {
                   ),
                 ),
                 SizedBox(height: ThemeColor.paddingLarge),
-                _buildSaveButton(onPressed: () {
-                  Get.back();
-                  updateBio(textController.text.trim());
-                }),
+                _buildSaveButton(
+                  onPressed: () {
+                    final text = textController.text.trim();
+                    if (containsNumericWord(text)) {
+                      showErrorSnackbarGetx(_l.t('bs_no_numbers'));
+
+                      return;
+                    }
+                    Get.back();
+                    updateBio(text);
+                  },
+                ),
                 SizedBox(height: ThemeColor.paddingMedium),
               ],
             ),
@@ -693,13 +771,10 @@ class UpdateProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // ESTADO
-  // ==========================================
-
   void showEditStatus(String currentValue) {
-    final TextEditingController textController =
-        TextEditingController(text: currentValue);
+    final TextEditingController textController = TextEditingController(
+      text: currentValue,
+    );
 
     if (Get.context != null) {
       showModalBottomSheet(
@@ -710,7 +785,9 @@ class UpdateProfileController extends GetxController {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             child: Column(
@@ -728,7 +805,10 @@ class UpdateProfileController extends GetxController {
                   autofocus: true,
                   maxLines: 2,
                   maxLength: 20,
-                  style: TextStyle(color: ThemeColor.textPrimary),
+                  style: TextStyle(color: ThemeColor.textPrimary), 
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(RegExp(r'[0-9]')),
+                  ],
                   decoration: InputDecoration(
                     hintText: _l.t('bs_status_hint'),
                     hintStyle: ThemeColor.bodyMedium.copyWith(
@@ -751,10 +831,17 @@ class UpdateProfileController extends GetxController {
                   ),
                 ),
                 SizedBox(height: ThemeColor.paddingLarge),
-                _buildSaveButton(onPressed: () {
-                  Get.back();
-                  updateStatus(textController.text.trim());
-                }),
+                _buildSaveButton(
+                  onPressed: () {
+                    final text = textController.text.trim(); 
+                    if (containsNumericWord(text)) {
+                      showErrorSnackbarGetx(_l.t('bs_no_numbers'));
+                      return;
+                    }
+                    Get.back();
+                    updateStatus(text);
+                  },
+                ),
                 SizedBox(height: ThemeColor.paddingMedium),
               ],
             ),
@@ -763,10 +850,6 @@ class UpdateProfileController extends GetxController {
       );
     }
   }
-
-  // ==========================================
-  // FECHA DE NACIMIENTO
-  // ==========================================
 
   void showEditDateOfBirth(String currentValue) {
     DateTime initialDate = DateTime(2000, 1, 1);
@@ -808,7 +891,10 @@ class UpdateProfileController extends GetxController {
               SizedBox(height: ThemeColor.paddingExtraLarge),
               _buildBsTitle(_l.t('bs_dob_title')),
               SizedBox(height: ThemeColor.paddingSmall),
-              _buildBsSubtitle(_l.t('bs_dob_subtitle'), textAlign: TextAlign.center),
+              _buildBsSubtitle(
+                _l.t('bs_dob_subtitle'),
+                textAlign: TextAlign.center,
+              ),
               SizedBox(height: ThemeColor.paddingLarge),
               Expanded(
                 child: Stack(
@@ -821,10 +907,14 @@ class UpdateProfileController extends GetxController {
                           child: _buildDateWheel(
                             itemCount: 31,
                             initialIndex: initialDate.day - 1,
-                            labelBuilder: (i) => '${(i + 1).toString().padLeft(2, '0')}',
+                            labelBuilder: (i) =>
+                                '${(i + 1).toString().padLeft(2, '0')}',
                             onChanged: (i) {
                               selectedDate.value = DateTime(
-                                  selectedDate.value.year, selectedDate.value.month, i + 1);
+                                selectedDate.value.year,
+                                selectedDate.value.month,
+                                i + 1,
+                              );
                             },
                           ),
                         ),
@@ -835,7 +925,10 @@ class UpdateProfileController extends GetxController {
                             labelBuilder: (i) => _monthName(i + 1),
                             onChanged: (i) {
                               selectedDate.value = DateTime(
-                                  selectedDate.value.year, i + 1, selectedDate.value.day);
+                                selectedDate.value.year,
+                                i + 1,
+                                selectedDate.value.day,
+                              );
                             },
                           ),
                         ),
@@ -846,7 +939,10 @@ class UpdateProfileController extends GetxController {
                             labelBuilder: (i) => '${minYear + i}',
                             onChanged: (i) {
                               selectedDate.value = DateTime(
-                                  minYear + i, selectedDate.value.month, selectedDate.value.day);
+                                minYear + i,
+                                selectedDate.value.month,
+                                selectedDate.value.day,
+                              );
                             },
                           ),
                         ),
@@ -856,17 +952,19 @@ class UpdateProfileController extends GetxController {
                 ),
               ),
               SizedBox(height: ThemeColor.paddingMedium),
-              _buildSaveButton(onPressed: () {
-                final date = selectedDate.value;
-                final formatted =
-                    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-                if (selectedDate.value.isAfter(maxDate)) {
-                  showErrorSnackbar(_l.t('bs_dob_age_error'));
-                  return;
-                }
-                Get.back();
-                updateDateOfBirth(formatted);
-              }),
+              _buildSaveButton(
+                onPressed: () {
+                  final date = selectedDate.value;
+                  final formatted =
+                      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+                  if (selectedDate.value.isAfter(maxDate)) {
+                    showErrorSnackbar(_l.t('bs_dob_age_error'));
+                    return;
+                  }
+                  Get.back();
+                  updateDateOfBirth(formatted);
+                },
+              ),
               SizedBox(height: ThemeColor.paddingMedium),
             ],
           ),
@@ -875,15 +973,15 @@ class UpdateProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // BUSCO
-  // ==========================================
-
   void showEditSearchGender(String currentValue) {
     final List<Map<String, dynamic>> options = [
       {'label': 'Hombres', 'value': 'Hombre', 'icon': Icons.male},
       {'label': 'Mujeres', 'value': 'Mujer', 'icon': Icons.female},
-      {'label': 'Persona no binaria', 'value': 'No_binario', 'icon': Icons.transgender},
+      {
+        'label': 'Persona no binaria',
+        'value': 'No_binario',
+        'icon': Icons.transgender,
+      },
       {'label': 'Todos', 'value': 'Todos', 'icon': Icons.people},
     ];
 
@@ -898,7 +996,9 @@ class UpdateProfileController extends GetxController {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             child: Column(
@@ -911,23 +1011,27 @@ class UpdateProfileController extends GetxController {
                 SizedBox(height: ThemeColor.paddingSmall),
                 _buildBsSubtitle(_l.t('bs_search_gender_subtitle')),
                 SizedBox(height: ThemeColor.paddingExtraLarge),
-                ...options.map((option) => Padding(
-                      padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
-                      child: Obx(() {
-                        final isSelected = selected.value == option['value'];
-                        return _buildRadioOption(
-                          label: option['label'],
-                          icon: option['icon'] as IconData,
-                          isSelected: isSelected,
-                          onTap: () => selected.value = option['value'],
-                        );
-                      }),
-                    )),
+                ...options.map(
+                  (option) => Padding(
+                    padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
+                    child: Obx(() {
+                      final isSelected = selected.value == option['value'];
+                      return _buildRadioOption(
+                        label: option['label'],
+                        icon: option['icon'] as IconData,
+                        isSelected: isSelected,
+                        onTap: () => selected.value = option['value'],
+                      );
+                    }),
+                  ),
+                ),
                 SizedBox(height: ThemeColor.paddingLarge),
-                _buildSaveButton(onPressed: () {
-                  Get.back();
-                  updateSearchGender(selected.value);
-                }),
+                _buildSaveButton(
+                  onPressed: () {
+                    Get.back();
+                    updateSearchGender(selected.value);
+                  },
+                ),
                 SizedBox(height: ThemeColor.paddingMedium),
               ],
             ),
@@ -956,7 +1060,9 @@ class UpdateProfileController extends GetxController {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         builder: (context) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             child: Column(
@@ -969,64 +1075,75 @@ class UpdateProfileController extends GetxController {
                 SizedBox(height: ThemeColor.paddingSmall),
                 _buildBsSubtitle(_l.t('bs_connection_subtitle')),
                 SizedBox(height: ThemeColor.paddingExtraLarge),
-                ...options.map((option) => Padding(
-                      padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
-                      child: Obx(() {
-                        final isSelected = selected.value == option['value'];
-                        return InkWell(
-                          onTap: () => selected.value = option['value']!,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: ThemeColor.paddingLarge,
-                              vertical: ThemeColor.paddingMedium + 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: ThemeColor.cardBackground,
-                              borderRadius: ThemeColor.mediumBorderRadius,
-                              border: isSelected
-                                  ? Border.all(color: ThemeColor.primaryColor, width: 2)
-                                  : Border.all(color: ThemeColor.subtleBorder),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    option['label']!,
-                                    style: ThemeColor.bodyMedium.copyWith(
-                                      color: ThemeColor.textPrimary,
-                                    ),
+                ...options.map(
+                  (option) => Padding(
+                    padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
+                    child: Obx(() {
+                      final isSelected = selected.value == option['value'];
+                      return InkWell(
+                        onTap: () => selected.value = option['value']!,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: ThemeColor.paddingLarge,
+                            vertical: ThemeColor.paddingMedium + 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ThemeColor.cardBackground,
+                            borderRadius: ThemeColor.mediumBorderRadius,
+                            border: isSelected
+                                ? Border.all(
+                                    color: ThemeColor.primaryColor,
+                                    width: 2,
+                                  )
+                                : Border.all(color: ThemeColor.subtleBorder),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  option['label']!,
+                                  style: ThemeColor.bodyMedium.copyWith(
+                                    color: ThemeColor.textPrimary,
                                   ),
                                 ),
-                                Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
+                              ),
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isSelected
+                                      ? ThemeColor.primaryColor
+                                      : Colors.transparent,
+                                  border: Border.all(
                                     color: isSelected
                                         ? ThemeColor.primaryColor
-                                        : Colors.transparent,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? ThemeColor.primaryColor
-                                          : ThemeColor.textSecondaryColor,
-                                      width: 2,
-                                    ),
+                                        : ThemeColor.textSecondaryColor,
+                                    width: 2,
                                   ),
-                                  child: isSelected
-                                      ? Icon(Icons.circle, color: Colors.white, size: 12)
-                                      : null,
                                 ),
-                              ],
-                            ),
+                                child: isSelected
+                                    ? Icon(
+                                        Icons.circle,
+                                        color: Colors.white,
+                                        size: 12,
+                                      )
+                                    : null,
+                              ),
+                            ],
                           ),
-                        );
-                      }),
-                    )),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
                 SizedBox(height: ThemeColor.paddingLarge),
-                _buildSaveButton(onPressed: () {
-                  Get.back();
-                  updateConnectionType(selected.value);
-                }),
+                _buildSaveButton(
+                  onPressed: () {
+                    Get.back();
+                    updateConnectionType(selected.value);
+                  },
+                ),
                 SizedBox(height: ThemeColor.paddingMedium),
               ],
             ),
@@ -1036,18 +1153,16 @@ class UpdateProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // RANGO DE EDAD
-  // ==========================================
-
   void showEditAgeRange(int currentMin, int currentMax) {
     final RxInt selectedMin = currentMin.obs;
     final RxInt selectedMax = currentMax.obs;
 
-    final minScrollController =
-        FixedExtentScrollController(initialItem: (currentMin - 18).clamp(0, 62));
-    final maxScrollController =
-        FixedExtentScrollController(initialItem: (currentMax - 18).clamp(0, 62));
+    final minScrollController = FixedExtentScrollController(
+      initialItem: (currentMin - 18).clamp(0, 62),
+    );
+    final maxScrollController = FixedExtentScrollController(
+      initialItem: (currentMax - 18).clamp(0, 62),
+    );
 
     if (Get.context != null) {
       showModalBottomSheet(
@@ -1067,10 +1182,12 @@ class UpdateProfileController extends GetxController {
               SizedBox(height: ThemeColor.paddingExtraLarge),
               _buildBsTitle(_l.t('bs_age_range_title')),
               SizedBox(height: ThemeColor.paddingSmall),
-              Obx(() => _buildBsSubtitle(
-                    'De ${selectedMin.value} a ${selectedMax.value} ${_l.t('years')}',
-                    textAlign: TextAlign.center,
-                  )),
+              Obx(
+                () => _buildBsSubtitle(
+                  'De ${selectedMin.value} a ${selectedMax.value} ${_l.t('years')}',
+                  textAlign: TextAlign.center,
+                ),
+              ),
               SizedBox(height: ThemeColor.paddingLarge),
               Row(
                 children: [
@@ -1142,10 +1259,12 @@ class UpdateProfileController extends GetxController {
                 ),
               ),
               SizedBox(height: ThemeColor.paddingMedium),
-              _buildSaveButton(onPressed: () {
-                Get.back();
-                updateAgeRange(selectedMin.value, selectedMax.value);
-              }),
+              _buildSaveButton(
+                onPressed: () {
+                  Get.back();
+                  updateAgeRange(selectedMin.value, selectedMax.value);
+                },
+              ),
               SizedBox(height: ThemeColor.paddingMedium),
             ],
           ),
@@ -1153,10 +1272,6 @@ class UpdateProfileController extends GetxController {
       );
     }
   }
-
-  // ==========================================
-  // DISTANCIA
-  // ==========================================
 
   void showEditDistance(int currentDistanceKm) {
     int initialIndex;
@@ -1204,8 +1319,8 @@ class UpdateProfileController extends GetxController {
                 final label = idx == 1008
                     ? _l.t('bs_no_limit_distance')
                     : idx < 9
-                        ? 'Hasta ${(idx + 1) * 100} metros'
-                        : 'Hasta ${idx - 9 + 1} km';
+                    ? 'Hasta ${(idx + 1) * 100} metros'
+                    : 'Hasta ${idx - 9 + 1} km';
                 return _buildBsSubtitle(label, textAlign: TextAlign.center);
               }),
               SizedBox(height: ThemeColor.paddingLarge),
@@ -1213,7 +1328,9 @@ class UpdateProfileController extends GetxController {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    _buildWheelHighlight(horizontal: ThemeColor.paddingExtraLarge * 2),
+                    _buildWheelHighlight(
+                      horizontal: ThemeColor.paddingExtraLarge * 2,
+                    ),
                     _buildDateWheel(
                       itemCount: 1009,
                       initialIndex: initialIndex,
@@ -1226,10 +1343,12 @@ class UpdateProfileController extends GetxController {
                 ),
               ),
               SizedBox(height: ThemeColor.paddingMedium),
-              _buildSaveButton(onPressed: () {
-                Get.back();
-                updateDistance(kmForIndex(selectedIndex.value));
-              }),
+              _buildSaveButton(
+                onPressed: () {
+                  Get.back();
+                  updateDistance(kmForIndex(selectedIndex.value));
+                },
+              ),
               SizedBox(height: ThemeColor.paddingMedium),
             ],
           ),
@@ -1238,43 +1357,57 @@ class UpdateProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // UPDATE MÉTODOS
-  // ==========================================
+  Future<void> updateStatus(String status) async => await _updateUser(
+    UpdateUserEntity(status: status),
+    _l.t('snack_status_saved'),
+  );
 
-  Future<void> updateStatus(String status) async =>
-      await _updateUser(UpdateUserEntity(status: status), _l.t('snack_status_saved'));
-
-  Future<void> updateHeight(String height) async =>
-      await _updateUser(UpdateUserEntity(heightcm: height), _l.t('snack_height_saved'));
+  Future<void> updateHeight(String height) async => await _updateUser(
+    UpdateUserEntity(heightcm: height),
+    _l.t('snack_height_saved'),
+  );
 
   Future<void> updateBio(String bio) async =>
       await _updateUser(UpdateUserEntity(bio: bio), _l.t('snack_bio_saved'));
 
-  Future<void> updateGender(String gender) async =>
-      await _updateUser(UpdateUserEntity(gender: gender), _l.t('snack_gender_saved'));
+  Future<void> updateGender(String gender) async => await _updateUser(
+    UpdateUserEntity(gender: gender),
+    _l.t('snack_gender_saved'),
+  );
 
-  Future<void> updateLanguage(String language) async =>
-      await _updateUser(UpdateUserEntity(primarylanguage: language), _l.t('snack_language_saved'));
+  Future<void> updateLanguage(String language) async => await _updateUser(
+    UpdateUserEntity(primarylanguage: language),
+    _l.t('snack_language_saved'),
+  );
 
-  Future<void> updateDateOfBirth(String date) async =>
-      await _updateUser(UpdateUserEntity(dateofbirth: date), _l.t('snack_dob_saved'));
+  Future<void> updateDateOfBirth(String date) async => await _updateUser(
+    UpdateUserEntity(dateofbirth: date),
+    _l.t('snack_dob_saved'),
+  );
 
   Future<void> updateSearchGender(String searchGender) async =>
       await _updatePreferences(
-          PreferencesEntity(searchgender: searchGender), _l.t('snack_search_gender_saved'));
+        PreferencesEntity(searchgender: searchGender),
+        _l.t('snack_search_gender_saved'),
+      );
 
   Future<void> updateConnectionType(String connectionType) async =>
       await _updatePreferences(
-          PreferencesEntity(connectiontype: connectionType), _l.t('snack_connection_saved'));
+        PreferencesEntity(connectiontype: connectionType),
+        _l.t('snack_connection_saved'),
+      );
 
   Future<void> updateAgeRange(int agemin, int agemax) async =>
       await _updatePreferences(
-          PreferencesEntity(agemin: agemin, agemax: agemax), _l.t('snack_age_range_saved'));
+        PreferencesEntity(agemin: agemin, agemax: agemax),
+        _l.t('snack_age_range_saved'),
+      );
 
   Future<void> updateDistance(double distancekm) async =>
       await _updatePreferences(
-          PreferencesEntity(distancekm: distancekm), _l.t('snack_distance_saved'));
+        PreferencesEntity(distancekm: distancekm),
+        _l.t('snack_distance_saved'),
+      );
 
   Future<void> updateCity(String city) async {
     try {
@@ -1312,13 +1445,18 @@ class UpdateProfileController extends GetxController {
       nearbyController.loadNearbyUsers();
       showSuccessSnackbar(successMsg);
     } catch (e) {
-      showErrorSnackbar('${_l.t('snack_could_not_update')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_update')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isUpdating.value = false;
     }
   }
 
-  Future<void> _updatePreferences(PreferencesEntity entity, String successMsg) async {
+  Future<void> _updatePreferences(
+    PreferencesEntity entity,
+    String successMsg,
+  ) async {
     try {
       isUpdating.value = true;
       final current = _profile.userEntity.value?.preferences;
@@ -1335,15 +1473,13 @@ class UpdateProfileController extends GetxController {
       nearbyController.loadNearbyUsers();
       showSuccessSnackbar(successMsg);
     } catch (e) {
-      showErrorSnackbar('${_l.t('snack_could_not_update')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_update')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isUpdating.value = false;
     }
   }
-
-  // ==========================================
-  // DELETE
-  // ==========================================
 
   Future<void> removeInterest(int interestId) async {
     try {
@@ -1352,7 +1488,9 @@ class UpdateProfileController extends GetxController {
       await _profile.loadUserProfile();
       showSuccessSnackbar(_l.t('snack_interest_removed'));
     } catch (e) {
-      showErrorSnackbar('${_l.t('snack_could_not_delete')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_delete')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isDeletingInterest.value = false;
     }
@@ -1365,15 +1503,13 @@ class UpdateProfileController extends GetxController {
       await _profile.loadUserProfile();
       showSuccessSnackbar(_l.t('snack_quality_removed'));
     } catch (e) {
-      showErrorSnackbar('${_l.t('snack_could_not_delete')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_delete')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isDeletingQuality.value = false;
     }
   }
-
-  // ==========================================
-  // DELETE ACCOUNT
-  // ==========================================
 
   Future<void> deleteAccount() async {
     try {
@@ -1382,7 +1518,9 @@ class UpdateProfileController extends GetxController {
       await AuthService().logout();
       Get.offAllNamed(RoutesNames.loginPage);
     } catch (e) {
-      showErrorSnackbar('${_l.t('snack_could_not_delete')}: ${cleanExceptionMessage(e)}');
+      showErrorSnackbar(
+        '${_l.t('snack_could_not_delete')}: ${cleanExceptionMessage(e)}',
+      );
     } finally {
       isUpdating.value = false;
     }
@@ -1405,10 +1543,6 @@ class UpdateProfileController extends GetxController {
       );
     }
   }
-
-  // ==========================================
-  // WIDGETS REUTILIZABLES
-  // ==========================================
 
   Widget _buildHandle() {
     return Center(
@@ -1435,7 +1569,10 @@ class UpdateProfileController extends GetxController {
     );
   }
 
-  Widget _buildBsSubtitle(String text, {TextAlign textAlign = TextAlign.start}) {
+  Widget _buildBsSubtitle(
+    String text, {
+    TextAlign textAlign = TextAlign.start,
+  }) {
     return Text(
       text,
       style: ThemeColor.bodyMedium.copyWith(
@@ -1520,27 +1657,37 @@ class UpdateProfileController extends GetxController {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? ThemeColor.primaryColor : ThemeColor.subtleBorder,
+            color: isSelected
+                ? ThemeColor.primaryColor
+                : ThemeColor.subtleBorder,
           ),
-          color: isSelected ? ThemeColor.primaryColor.withOpacity(0.1) : Colors.transparent,
+          color: isSelected
+              ? ThemeColor.primaryColor.withOpacity(0.1)
+              : Colors.transparent,
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: isSelected ? ThemeColor.primaryColor : ThemeColor.textSecondary,
+              color: isSelected
+                  ? ThemeColor.primaryColor
+                  : ThemeColor.textSecondary,
               size: 22,
             ),
             SizedBox(width: ThemeColor.paddingMedium),
             Expanded(
               child: Text(
                 label,
-                style: ThemeColor.bodyMedium.copyWith(color: ThemeColor.textPrimary),
+                style: ThemeColor.bodyMedium.copyWith(
+                  color: ThemeColor.textPrimary,
+                ),
               ),
             ),
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: isSelected ? ThemeColor.primaryColor : ThemeColor.textSecondary,
+              color: isSelected
+                  ? ThemeColor.primaryColor
+                  : ThemeColor.textSecondary,
             ),
           ],
         ),
@@ -1554,7 +1701,9 @@ class UpdateProfileController extends GetxController {
     required String Function(int index) labelBuilder,
     required void Function(int index) onChanged,
   }) {
-    final scrollController = FixedExtentScrollController(initialItem: initialIndex);
+    final scrollController = FixedExtentScrollController(
+      initialItem: initialIndex,
+    );
     final RxInt selected = initialIndex.obs;
 
     return ListWheelScrollView.useDelegate(
@@ -1570,23 +1719,34 @@ class UpdateProfileController extends GetxController {
       childDelegate: ListWheelChildBuilderDelegate(
         childCount: itemCount,
         builder: (context, index) {
-          return Obx(() => _buildWheelItem(
-                label: labelBuilder(index),
-                isSelected: index == selected.value,
-              ));
+          return Obx(
+            () => _buildWheelItem(
+              label: labelBuilder(index),
+              isSelected: index == selected.value,
+            ),
+          );
         },
       ),
     );
   }
 
   String _monthName(int month) {
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
     return months[month - 1];
   }
-
-  // ==========================================
-  // CHIPS
-  // ==========================================
 
   Widget _buildInterestChipSheet({
     required String label,
@@ -1602,10 +1762,14 @@ class UpdateProfileController extends GetxController {
           vertical: ThemeColor.paddingSmall + 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.cardBackground,
+          color: isSelected
+              ? ThemeColor.tertiaryColor
+              : ThemeColor.cardBackground,
           borderRadius: ThemeColor.circularBorderRadius,
           border: Border.all(
-            color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.subtleBorder,
+            color: isSelected
+                ? ThemeColor.tertiaryColor
+                : ThemeColor.subtleBorder,
           ),
         ),
         child: Row(
@@ -1643,10 +1807,14 @@ class UpdateProfileController extends GetxController {
           vertical: ThemeColor.paddingMedium - 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.cardBackground,
+          color: isSelected
+              ? ThemeColor.tertiaryColor
+              : ThemeColor.cardBackground,
           borderRadius: ThemeColor.circularBorderRadius,
           border: Border.all(
-            color: isSelected ? ThemeColor.tertiaryColor : ThemeColor.subtleBorder,
+            color: isSelected
+                ? ThemeColor.tertiaryColor
+                : ThemeColor.subtleBorder,
           ),
         ),
         child: Text(
@@ -1659,10 +1827,6 @@ class UpdateProfileController extends GetxController {
       ),
     );
   }
-
-  // ==========================================
-  // ICON HELPER
-  // ==========================================
 
   IconData _getInterestIcon(String interest) {
     const icons = {

@@ -36,7 +36,7 @@ void showSnackBar(String message, Color color) {
       backgroundColor: color,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      // 👇 Margen para posicionarla arriba
+ 
       margin: EdgeInsets.only(
         top: topPadding + 8,
         left: 16,

@@ -435,7 +435,7 @@ class UserProfileController extends GetxController {
                                     color: !shouldReport.value
                                         ? Colors.red.shade400
                                         : ThemeColor.textSecondary,
-                                    size: 20,
+                                   size: 32,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(

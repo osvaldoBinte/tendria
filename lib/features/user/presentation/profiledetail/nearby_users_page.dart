@@ -841,7 +841,7 @@ class NearbyUsersPage extends StatelessWidget {
                   child: Icon(
                     Icons.block_rounded,
                     color: ThemeColor.textLightColor,
-                    size: 28,
+                    size: 32,
                   ),
                 ),
               ),
@@ -913,7 +913,7 @@ class NearbyUsersPage extends StatelessWidget {
                   child: Icon(
                     Icons.block_rounded,
                     color: ThemeColor.textLightColor,
-                    size: 28,
+                  size: 32,
                   ),
                 ),
               )

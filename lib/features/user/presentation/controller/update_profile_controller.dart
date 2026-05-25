@@ -74,35 +74,44 @@ class UpdateProfileController extends GetxController {
   TranslationService get _translator => Get.find<TranslationService>();
   LanguageController get _l => Get.find<LanguageController>();
 
-    bool containsNumericWord(String text) {
-      final lower = text.toLowerCase().trim();
+bool containsNumericWord(String text) {
+  final lower = text.toLowerCase().trim();
 
-      const numericRoots =
-          r'(cero|un[oa]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|'
-          r'diez|once|doce|trece|catorce|quince|dieci|veint|'
-          r'treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|'
-          r'cien(to)?|doscient|trescient|cuatrocient|quinient|'
-          r'seiscient|setecient|ochocient|novecient|mil|millon?e?s?|'
-          r'zero|one|two|three|four|five|six|seven|eight|nine|ten|'
-          r'eleven|twelve|thir(teen|ty)?|four(teen|ty)?|fif(teen|ty)?|'
-          r'six(teen|ty)?|seven(teen|ty)?|eigh(teen|ty)?|nine(teen|ty)?|'
-          r'twenty|hundred|thousand|million|billion)';
+   const falsePositives = {
+    'una', 'un', 'uno',   
+    'once',              
+                        
+  };
 
-      final singlePattern = RegExp(
-        r'\b' + numericRoots + r'\b',
-        caseSensitive: false,
-        unicode: true,
-      );
+  const numericRoots =
+      r'(cero|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|'
+      r'diez|once|doce|trece|catorce|quince|dieci|veint|'
+      r'treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|'
+      r'cien(to)?|doscient|trescient|cuatrocient|quinient|'
+      r'seiscient|setecient|ochocient|novecient|mil|millon?e?s?|'
+      r'zero|one|two|three|four|five|six|seven|eight|nine|ten|'
+      r'eleven|twelve|thir(teen|ty)?|four(teen|ty)?|fif(teen|ty)?|'
+      r'six(teen|ty)?|seven(teen|ty)?|eigh(teen|ty)?|nine(teen|ty)?|'
+      r'twenty|hundred|thousand|million|billion)';
+ 
+  if (RegExp(r'\d').hasMatch(lower)) return true;
 
-      final concatenatedPattern = RegExp(
-        numericRoots + numericRoots + r'+',
-        caseSensitive: false,
-        unicode: true,
-      );
+  final singlePattern = RegExp(
+    r'\b' + numericRoots + r'\b',
+    caseSensitive: false,
+    unicode: true,
+  );
 
-      return singlePattern.hasMatch(lower) ||
-          concatenatedPattern.hasMatch(lower);
+  final matches = singlePattern.allMatches(lower);
+  for (final match in matches) {
+    final word = match.group(0)!.toLowerCase();
+    if (!falsePositives.contains(word)) {
+      return true;
     }
+  }
+
+  return false;
+}
   Future<void> _translateInterestsCatalog() async {
     if (allInterests.isEmpty) return;
     final lang = _l.lang;

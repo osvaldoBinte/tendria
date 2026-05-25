@@ -94,10 +94,7 @@ class MyMatchView extends GetView<MyMatchController> {
           ),
         ));
   }
-
-  // ==========================================
-  // HEADER
-  // ==========================================
+ 
 
   Widget _buildHeader() {
     return Obx(
@@ -145,10 +142,7 @@ class MyMatchView extends GetView<MyMatchController> {
       ),
     );
   }
-
-  // ==========================================
-  // SEARCH BAR
-  // ==========================================
+ 
 
   Widget _buildSearchBar() {
     return Container(
@@ -194,11 +188,7 @@ class MyMatchView extends GetView<MyMatchController> {
         ),
       ),
     );
-  }
-
-  // ==========================================
-  // STORIES
-  // ==========================================
+  } 
 
   Widget _buildStoriesSection() {
     return Container(
@@ -321,10 +311,7 @@ class MyMatchView extends GetView<MyMatchController> {
       },
     );
   }
-
-  // ==========================================
-  // CHATS HEADER
-  // ==========================================
+ 
 
   Widget _buildChatsHeader() {
     return Obx(() {
@@ -428,10 +415,7 @@ class MyMatchView extends GetView<MyMatchController> {
       );
     });
   }
-
-  // ==========================================
-  // FILTER BOTTOM SHEET
-  // ==========================================
+ 
 
   void _showFilterBottomSheet() {
     Get.bottomSheet(
@@ -601,10 +585,7 @@ class MyMatchView extends GetView<MyMatchController> {
       ),
     );
   }
-
-  // ==========================================
-  // CHATS LIST
-  // ==========================================
+ 
 
   Widget _buildChatsList() {
     return Obx(() {
@@ -695,10 +676,7 @@ class MyMatchView extends GetView<MyMatchController> {
       );
     });
   }
-
-  // ==========================================
-  // CHAT ITEM
-  // ==========================================
+ 
 
   Widget _buildChatItem(ChatEntity chat) {
     final ultimoMensaje = chat.ultimoMensaje;
@@ -762,10 +740,7 @@ class MyMatchView extends GetView<MyMatchController> {
       ),
     );
   }
-
-  // ==========================================
-  // AVATAR
-  // ==========================================
+ 
 
   Widget _buildAvatar(String? photoUrl, bool? isActive) {
     return Stack(
@@ -821,10 +796,7 @@ class MyMatchView extends GetView<MyMatchController> {
       child: Icon(Icons.person, size: 28, color: ThemeColor.textSecondary),
     );
   }
-
-  // ==========================================
-  // ESTADOS
-  // ==========================================
+ 
 
   Widget _buildLoadingState() {
     return Center(

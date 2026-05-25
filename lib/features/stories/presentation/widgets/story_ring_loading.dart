@@ -48,12 +48,12 @@ class _StoryRingLoadingState extends State<StoryRingLoading>
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: _buildRing(), // 👈 usamos la función del ring
+                child: _buildRing(),
               );
             },
           ),
         )
-      : _buildRing(); // 👈 solo uno
+      : _buildRing();
 }
 Widget _buildRing() {
   return AnimatedBuilder(

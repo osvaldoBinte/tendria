@@ -17,10 +17,7 @@ import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:image_picker/image_picker.dart';
- 
-// ─────────────────────────────────────────────
-// StoryText
-// ─────────────────────────────────────────────
+  
 class StoryText {
   final String text;
   final Color color;
@@ -55,43 +52,35 @@ class StoryText {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-// CreateStoryController
-// ─────────────────────────────────────────────
+ 
 class CreateStoryController extends GetxController {
-  // Camera
+  
   Rx<CameraController?> cameraController = Rx<CameraController?>(null);
   final RxList<CameraDescription> cameras = <CameraDescription>[].obs;
   final RxBool isCameraInitialized = false.obs;
   final RxBool isFrontCamera = false.obs;
 
-  // Recording
+ 
   final RxBool isRecording = false.obs;
   final RxInt recordingSeconds = 0.obs;
   Timer? recordingTimer;
   static const int maxRecordingSeconds = 30;
-
-  // Captured content
+ 
   final Rx<File?> capturedFile = Rx<File?>(null);
   final Rx<String?> contentType = Rx<String?>(null);
   VideoPlayerController? videoController;
-
-  // Video ready flag
+ 
   final RxBool isVideoReady = false.obs;
-
-  // Gallery
+ 
   final RxList<AssetEntity> galleryAssets = <AssetEntity>[].obs;
   final RxBool isLoadingGallery = false.obs;
-
-  // Textos
+ 
   final RxList<StoryText> storyTexts = <StoryText>[].obs;
   final Rx<String?> selectedTextId = Rx<String?>(null);
 
   final GlobalKey repaintBoundaryKey = GlobalKey();
   final RxBool isProcessingVideo = false.obs;
-
-  // Editor de texto
+ 
   final RxBool isEditingText = false.obs;
   final RxString editingTextId = ''.obs;
   final RxString currentEditText = ''.obs;
@@ -99,24 +88,16 @@ class CreateStoryController extends GetxController {
   final RxString currentEditAlign = 'center'.obs;
   final RxString currentEditStyle = 'none'.obs;
   final RxBool _isDraggingText = false.obs;
-
-  // ✅ Tamaño de pantalla capturado desde _buildPreviewScreen() en la UI.
-  // Necesario para calcular la escala correcta del texto en FFmpeg.
+ 
   double previewScreenWidth  = 0;
   double previewScreenHeight = 0;
-
-  // ─────────────────────────────────────────────
-  // Constantes de contentType
-  // ─────────────────────────────────────────────
+ 
   static const String kVideo  = 'Video';
   static const String kImagen = 'Foto';
 
   bool get _isVideo  => contentType.value == kVideo;
   bool get _isImagen => contentType.value == kImagen;
-
-  // ─────────────────────────────────────────────
-  // Lifecycle
-  // ─────────────────────────────────────────────
+  
 
   @override
   void onInit() {
@@ -132,10 +113,7 @@ class CreateStoryController extends GetxController {
     recordingTimer?.cancel();
     super.onClose();
   }
-
-  // ─────────────────────────────────────────────
-  // Text editor
-  // ─────────────────────────────────────────────
+ 
 
   void openTextEditor({String? textId}) {
     if (textId != null) {
@@ -223,10 +201,7 @@ class CreateStoryController extends GetxController {
   void selectText(String? textId) {
     selectedTextId.value = textId;
   }
-
-  // ─────────────────────────────────────────────
-  // Captura con textos
-  // ─────────────────────────────────────────────
+ 
 
 Future<File?> captureStoryWithTexts() async {
   debugPrint('═══════════════════════════════════');
@@ -245,7 +220,7 @@ Future<File?> captureStoryWithTexts() async {
 
     if (_isVideo) {
       debugPrint('🎬 VIDEO → processVideoWithTexts()');
-      return await processVideoWithTexts(); // ← llama al método correcto con return
+      return await processVideoWithTexts(); 
     }
 
     debugPrint('🖼️ IMAGEN → _captureImageWithTexts()');
@@ -285,10 +260,7 @@ Future<File?> captureStoryWithTexts() async {
     debugPrint('✅ Story image saved: $imagePath');
     return imageFile;
   }
-
-  // ─────────────────────────────────────────────
-  // FFmpeg — texto sobre video con escala correcta
-  // ─────────────────────────────────────────────
+ 
 
   Future<File?> processVideoWithTexts() async {
     if (capturedFile.value == null || storyTexts.isEmpty) {
@@ -314,8 +286,7 @@ Future<File?> captureStoryWithTexts() async {
       final directory = await getTemporaryDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final outputPath = '${directory.path}/story_video_$timestamp.mp4';
-
-      // ── Resolución real del video ─────────────
+ 
       double videoWidth  = 1080;
       double videoHeight = 1920;
 
@@ -326,21 +297,7 @@ Future<File?> captureStoryWithTexts() async {
       } else {
         debugPrint('⚠️ VideoController no inicializado, usando ${videoWidth}x$videoHeight por defecto');
       }
-
-      // ── Factor de escala pantalla → video ─────
-      //
-      // El texto se posicionó visualmente en Flutter sobre una pantalla
-      // de (previewScreenWidth x previewScreenHeight) píxeles LÓGICOS.
-      // El video tiene (videoWidth x videoHeight) píxeles REALES.
-      //
-      // Para que el texto tenga el mismo tamaño visual relativo en el
-      // video hay que multiplicar el fontSize por:
-      //   scaleX = videoWidth  / previewScreenWidth
-      //
-      // Ejemplo: pantalla 390px lógicos, video 1080px reales
-      //   scaleX = 1080 / 390 ≈ 2.77
-      //   fontSize en video = 28 * 2.77 ≈ 77px  ← se ve igual que en pantalla
-      //
+ 
       final double screenW =
           previewScreenWidth  > 0 ? previewScreenWidth  : 390.0;
       final double screenH =
@@ -351,15 +308,13 @@ Future<File?> captureStoryWithTexts() async {
 
       debugPrint('📐 Pantalla lógica : ${screenW}x$screenH');
       debugPrint('📐 scaleX=$scaleX  scaleY=$scaleY');
-
-      // ── Construir filtros de texto ─────────────
+ 
       const fontPath = '/system/fonts/Roboto-Regular.ttf';
       final List<String> textFilters = [];
 
       for (int i = 0; i < storyTexts.length; i++) {
         final st = storyTexts[i];
-
-        // Posición en píxeles de video
+ 
         final int xPos = (st.position.dx * videoWidth).toInt();
         final int yPos = (st.position.dy * videoHeight).toInt();
 
@@ -367,11 +322,7 @@ Future<File?> captureStoryWithTexts() async {
             .toRadixString(16)
             .padLeft(8, '0')
             .substring(2);
-
-        // ✅ Cálculo correcto del tamaño de fuente:
-        //   28.0   → fontSize base en Flutter (igual que en DraggableStoryText)
-        //   st.scale → zoom que el usuario aplicó con pinch gesture
-        //   scaleX  → factor de conversión de pantalla a video
+ 
         final double fontSizeF = 28.0 * st.scale * scaleX;
         final int    fontSize  = fontSizeF.clamp(10.0, 600.0).toInt();
 
@@ -417,8 +368,7 @@ Future<File?> captureStoryWithTexts() async {
 
       final String allFilters = textFilters.join(',');
       debugPrint('🔧 ${textFilters.length} filtro(s) generados');
-
-      // ── Ejecutar FFmpeg ────────────────────────
+ 
       final String command =
           '-i "${inputFile.path}" '
           '-vf "$allFilters" '
@@ -465,10 +415,7 @@ Future<File?> captureStoryWithTexts() async {
       return capturedFile.value;
     }
   }
-
-  // ─────────────────────────────────────────────
-  // Camera
-  // ─────────────────────────────────────────────
+ 
 
 Future<void> initializeCamera() async {
   try {
@@ -535,10 +482,7 @@ Future<void> initializeCamera() async {
     await old?.dispose();
     await initializeCamera();
   }
-
-  // ─────────────────────────────────────────────
-  // Recording
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> startRecording() async {
     if (cameraController.value == null ||
@@ -617,11 +561,7 @@ Future<void> initializeCamera() async {
     selectedTextId.value = null;
     previewScreenWidth  = 0;
     previewScreenHeight = 0;
-  }
-
-  // ─────────────────────────────────────────────
-  // Gallery
-  // ─────────────────────────────────────────────
+  } 
 
   Future<void> loadGalleryAssets() async {
     isLoadingGallery.value = true;
@@ -652,19 +592,16 @@ Future<void> selectFromGallery(AssetEntity asset) async {
 
     debugPrint('📌 contentType = ${contentType.value}');
 
-    if (contentType.value == kVideo) {
-      // Primero asignar el archivo original para que exista
+    if (contentType.value == kVideo) { 
       capturedFile.value = file;
       showInfoSnackbar('Procesando video...');
-
-      // Convertir a MP4 antes de inicializar el player
+ 
       final File? mp4File = await convertToMp4(file);
       capturedFile.value = mp4File ?? file;
 
       debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
       await initializeVideoController();
-    } else {
-      // Imagen: convertir a PNG
+    } else { 
       final File? pngFile = await convertToPng(file);
       capturedFile.value = pngFile ?? file;
       debugPrint('📌 capturedFile = ${capturedFile.value?.path}');
@@ -707,10 +644,7 @@ Future<void> selectFromImagePicker() async {
     showErrorSnackbar('No se pudo seleccionar el archivo');
   }
 }
-
-  // ─────────────────────────────────────────────
-  // Video controller
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> initializeVideoController() async {
     if (capturedFile.value == null || contentType.value != kVideo) return;
@@ -761,10 +695,7 @@ Future<void> selectFromImagePicker() async {
       showErrorSnackbar('No se pudo cargar el video. Intenta de nuevo.');
     }
   }
-
-  // ─────────────────────────────────────────────
-  // FFmpeg helpers
-  // ─────────────────────────────────────────────
+ 
 
   Future<File?> convertToMp4(File inputFile) async {
     try {

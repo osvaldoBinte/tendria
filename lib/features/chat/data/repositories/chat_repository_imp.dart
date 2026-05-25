@@ -15,9 +15,7 @@ class ChatRepositoryImp implements ChatRepository {
   ChatRepositoryImp({
     required this.chatDataSourcesImp,
    
-  });
-
-  // ============ REST API METHODS ============
+  }); 
 
   @override
   Future<ChatEntity> chatmensaje(int chatid) async {
@@ -38,8 +36,7 @@ class ChatRepositoryImp implements ChatRepository {
     return chatDataSourcesImp.getmychats(token);
   }
   
-  
-  // ============ SIGNALR METHODS ============
+   
 
   @override
   Future<void> connectSignalR(String token) async {

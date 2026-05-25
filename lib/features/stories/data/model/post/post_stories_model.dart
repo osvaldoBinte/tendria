@@ -8,18 +8,14 @@ class PostStoriesModel extends PostStoriesEntity {
     required super.contentType,
     required super.file,
   });
-
-  /// Crear modelo desde entidad
+ 
   factory PostStoriesModel.fromEntity(PostStoriesEntity entity) {
     return PostStoriesModel(
       contentType: entity.contentType,
       file: entity.file,
     );
   }
-
-  // -------------------------------------------------------
-  // 🔹 Agregar campos al request
-  // -------------------------------------------------------
+ 
   void addFieldsToRequest(http.MultipartRequest request) {
     request.fields['TipoContenido'] = contentType; 
  
@@ -50,7 +46,7 @@ class PostStoriesModel extends PostStoriesEntity {
 
     request.files.add(
       await http.MultipartFile.fromPath(
-        'Archivo',   // nombre del campo esperado por tu API
+        'Archivo',
         file,
         filename: fileName,
         contentType: mimeType,
@@ -61,8 +57,7 @@ class PostStoriesModel extends PostStoriesEntity {
   }
 
   MediaType? _getMediaType(String ext) {
-    switch (ext) {
-      // IMÁGENES
+    switch (ext) { 
       case 'jpg':
       case 'jpeg':
         return MediaType('image', 'jpeg');
@@ -72,8 +67,7 @@ class PostStoriesModel extends PostStoriesEntity {
         return MediaType('image', 'gif');
       case 'webp':
         return MediaType('image', 'webp');
-
-      // VIDEOS
+ 
       case 'mp4':
         return MediaType('video', 'mp4');
       case 'mov':

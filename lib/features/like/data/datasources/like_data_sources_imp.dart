@@ -102,8 +102,7 @@ Future<void> toggleLike(int userId, bool liked, String token) async {
         'liked': liked,
       }),
     );
-
-    // PRINTS PARA DEBUG
+ 
     print('STATUS CODE: ${response.statusCode}');
     print('RESPONSE BODY: ${response.body}');
 
@@ -116,8 +115,7 @@ Future<void> toggleLike(int userId, bool liked, String token) async {
     throw exception;
 
   } catch (e) {
-
-    // PRINT DEL ERROR
+ 
     print('ERROR EN toggleLike: $e');
 
     if (e is SocketException ||

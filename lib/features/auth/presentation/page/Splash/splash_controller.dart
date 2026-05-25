@@ -95,10 +95,7 @@ class SplashController extends GetxController {
   }
 }
 
-String _resolveCity(Placemark place) {
-  // subAdministrativeArea suele ser "Tuxtla Gutiérrez" (municipio)
-  // locality puede ser el barrio/colonia o la ciudad abreviada
-  // administrativeArea es el estado (Chiapas) — demasiado amplio
+String _resolveCity(Placemark place) { 
 
   final subAdmin = place.subAdministrativeArea?.trim() ?? '';
   final locality = place.locality?.trim() ?? '';
@@ -163,7 +160,7 @@ Future<void> _requestCameraPermission() async {
     final controller = CameraController(
       cameras.first,
       ResolutionPreset.medium,
-      enableAudio: true, // ← pide cámara Y micrófono juntos
+      enableAudio: true, 
     );
 
     await controller.initialize();

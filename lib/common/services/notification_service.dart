@@ -101,8 +101,7 @@ class NotificationService {
 await _localNotifications.initialize(settings:
   initSettings,
   onDidReceiveNotificationResponse: (NotificationResponse response) {
-    print('🔔 Notificación tocada: ${response.payload}');
-    // ✅ Aquí sí navegamos, porque el usuario tocó el banner
+    print('🔔 Notificación tocada: ${response.payload}'); 
     if (response.payload != null) {
       try {
         final data = jsonDecode(response.payload!) as Map<String, dynamic>;

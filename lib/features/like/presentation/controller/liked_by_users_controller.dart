@@ -24,8 +24,7 @@ class LikedByUsersController extends GetxController {
     required this.logMatchUsecase,
     required this.getLikeByUsersUsecase,
   });
-
-  // Tab activo: 0 = Chats pendientes, 1 = Likes recibidos
+ 
   final RxInt activeTab = 0.obs;
 
   final RxList<PendingChatEntity> pendingChats = <PendingChatEntity>[].obs;
@@ -48,8 +47,7 @@ class LikedByUsersController extends GetxController {
   void switchTab(int index) {
     activeTab.value = index;
   }
-
-  // ── Chats pendientes ──────────────────────────────
+ 
 
   Future<void> loadPendingChats() async {
     try {
@@ -67,16 +65,14 @@ class LikedByUsersController extends GetxController {
   }
 
   Future<void> refreshPendingChats() async => loadPendingChats();
-
-  // ── Likes recibidos ───────────────────────────────
+ 
 
   Future<void> loadLikedByUsers() async {
     try {
       isLoadingLikes.value = true;
       hasErrorLikes.value = false;
       errorMessageLikes.value = '';
-      // postId 0 = todos los likes hacia mi usuario (ajusta según tu API)
-      final result = await getLikeByUsersUsecase.execute(0);
+       final result = await getLikeByUsersUsecase.execute(0);
       likedByUsers.value = result;
     } catch (e) {
       hasErrorLikes.value = true;
@@ -87,8 +83,7 @@ class LikedByUsersController extends GetxController {
   }
 
   Future<void> refreshLikedByUsers() async => loadLikedByUsers();
-
-  // ── Navegación ────────────────────────────────────
+ 
 
   void navigateToUserProfile(int userId) {
     Get.toNamed(
@@ -98,8 +93,7 @@ class LikedByUsersController extends GetxController {
   }
 
   void navigateToProfile(int userId) => navigateToUserProfile(userId);
-
-  // ── Unlock chat ───────────────────────────────────
+ 
 
   Future<void> unlockChat(PendingChatEntity chat) async {
     _showUnlockConfirmation(chat);

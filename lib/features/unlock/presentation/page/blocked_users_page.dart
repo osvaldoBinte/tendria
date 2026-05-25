@@ -152,7 +152,6 @@ class BlockedUsersPage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Avatar
                 Stack(
                   children: [
                     CircleAvatar(

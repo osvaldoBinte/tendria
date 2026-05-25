@@ -887,7 +887,7 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
                           ),
                         ),
 
-                      // Botón cerrar
+                      
                       Positioned(
                         top: 10,
                         right: 10,
@@ -908,7 +908,7 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
                         ),
                       ),
 
-                      // Story avatar
+                      
                       Obx(() {
                         if (!hasStories.value) return const SizedBox.shrink();
                         return Positioned(
@@ -1063,7 +1063,7 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
                           ),
                         ),
 
-                      // Bio
+                   
                       if (user.bio != null &&
                           user.bio!.isNotEmpty &&
                           double.tryParse(user.bio!) == null) ...[
@@ -1078,7 +1078,6 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
                         const SizedBox(height: 10),
                       ],
 
-                      // Ciudad
                       if (user.city != null && user.city!.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 14),
@@ -1101,7 +1100,6 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
                           ),
                         ),
 
-                      // Botón Chat (primario)
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -1143,7 +1141,6 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
 
                       const SizedBox(height: 8),
 
-                      // Botón Ver perfil (secundario)
                       SizedBox(
                         width: double.infinity,
                         height: 44,

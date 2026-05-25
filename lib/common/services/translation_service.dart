@@ -13,21 +13,9 @@ class TranslationService extends GetxService {
   final Map<String, String> _cacheEs = {};
 
   final RxBool isReady = false.obs;
-
-  // ==========================================
-  // IDIOMA ACTIVO (delega todo a LanguageController)
-  // ==========================================
-
-  /// Devuelve el idioma activo:
-  /// 1. Perfil del usuario (ProfileController.primarylanguage)
-  /// 2. Locale del dispositivo como fallback
-  /// 3. 'Inglés' si ninguno aplica
+ 
   String get _currentLanguage => Get.find<LanguageController>().lang;
-
-  // ==========================================
-  // INIT
-  // ==========================================
-
+ 
   @override
   void onInit() {
     super.onInit();
@@ -68,22 +56,13 @@ class TranslationService extends GetxService {
     } catch (e) {
       print('Error iniciando traducción: $e');
     }
-  }
-
-  // ==========================================
-  // TRADUCCIÓN
-  // ==========================================
-
-  /// Traduce un texto al idioma activo del usuario.
-  /// No necesitas pasarle el idioma — lo detecta solo.
+  } 
   Future<String> translate(String text, [String? targetLanguage]) async {
     if (text.isEmpty) return text;
     if (!isReady.value) return text;
-
-    // Si no se pasa idioma, usa el del usuario automáticamente
+ 
     final lang = targetLanguage ?? _currentLanguage;
-
-    // Si el idioma es español y los datos ya vienen en español → no traducir
+ 
     if (lang == 'Español') return text;
 
     if (lang == 'Inglés') {
@@ -97,24 +76,18 @@ class TranslationService extends GetxService {
       _cacheEs[text] = result;
       return result;
     }
-  }
-
-  /// Traduce una lista de textos al idioma activo del usuario.
+  } 
   Future<List<String>> translateList(
       List<String> texts, [String? targetLanguage]) async {
     if (!isReady.value) return texts;
 
     final lang = targetLanguage ?? _currentLanguage;
-
-    // Si es español, devuelve tal cual sin traducir
+ 
     if (lang == 'Español') return texts;
 
     return Future.wait(texts.map((t) => translate(t, lang)));
   }
-
-  // ==========================================
-  // CLOSE
-  // ==========================================
+ 
 
   @override
   void onClose() {

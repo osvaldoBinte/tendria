@@ -6,7 +6,6 @@ class BalanceController extends GetxController {
   final GetBalanceUsecase getBalanceUsecase;
   BalanceController({required this.getBalanceUsecase});
 
-  // Estado
   final Rx<UserBalanceEntity?> balance = Rx<UserBalanceEntity?>(null);
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
@@ -30,7 +29,6 @@ class BalanceController extends GetxController {
     }
   }
 
-  // Getters de conveniencia
   double get currentBalance => balance.value?.balance ?? 0.0;
   double get chatCost => balance.value?.costChat ?? 0.0;
   bool get hasBalance => balance.value != null;

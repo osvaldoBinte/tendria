@@ -44,8 +44,7 @@ class TargetUserStoryModal extends StatefulWidget {
 class _TargetUserStoryModalState extends State<TargetUserStoryModal>
     with TickerProviderStateMixin {
   final StoryController controller = Get.find<StoryController>();
-
-  // ✅ Workers de GetX como alternativa a Obx
+ 
   late final Worker _modalActiveWorker;
   late final Worker _storyIndexWorker;
 

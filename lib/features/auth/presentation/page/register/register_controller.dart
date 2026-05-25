@@ -275,8 +275,7 @@ bool _containsNumericWord(String text) {
 
     final names = interests.map((i) => i.name).toList();
     print('[RegisterController] 📋 Nombres a traducir: $names');
-
-    // translateList() sin parámetro → TranslationService usa _currentLanguage internamente
+ 
     final results = await _translator.translateList(names);
     print('[RegisterController] 📋 Resultados traducidos: $results');
 

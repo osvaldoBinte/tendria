@@ -54,8 +54,7 @@ class _StartPageState extends State<StartPage> {
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         )),
-
-        // Overlay encima de todo
+ 
         Obx(
           () => tutorialCtrl.isVisible.value
               ? const StartTutorialOverlay()

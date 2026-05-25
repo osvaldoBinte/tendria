@@ -1,5 +1,4 @@
-// lib/features/chat/presentation/page/chat_controller.dart
-
+ 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/errors/convert_message.dart';
@@ -34,12 +33,10 @@ class ChatController extends GetxController {
     required this.sendMessageUsecase,
     required this.authService,
   });
-
-  // ── UI ──
+ 
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
-
-  // ── Estado ──
+ 
   BalanceController get balanceController => Get.find<BalanceController>();
   final mensajes = RxList<MensajeEntity>([]);
   final Rx<UsuarioChatEntity?> otroUsuario = Rx<UsuarioChatEntity?>(null);
@@ -68,10 +65,7 @@ class ChatController extends GetxController {
   DateTime pointerDownTime = DateTime.now();
 
   late final SignalRService _signalRService;
-
-  // ─────────────────────────────────────────
-  //  LIFECYCLE
-  // ─────────────────────────────────────────
+ 
 
   @override
   void onInit() {
@@ -97,10 +91,7 @@ class ChatController extends GetxController {
 
     super.onClose();
   }
-
-  // ─────────────────────────────────────────
-  //  SETUP SIGNALR
-  // ─────────────────────────────────────────
+ 
 
   void _setupSignalR() {
     isSignalRConnected.value = _signalRService.isConnected.value;
@@ -139,11 +130,7 @@ class ChatController extends GetxController {
     } catch (e) {
       print('⚠️ Error re-suscribiéndose al chat #$chatId: $e');
     }
-  }
-
-  // ─────────────────────────────────────────e
-  //  ARGUMENTS
-  // ─────────────────────────────────────────
+  } 
 
   void _loadArguments() {
     final args = Get.arguments as Map<String, dynamic>?;
@@ -160,10 +147,7 @@ class ChatController extends GetxController {
       otroUsuario.value = args!['otroUsuario'] as UsuarioChatEntity;
     }
   }
-
-  // ─────────────────────────────────────────
-  //  MENSAJES LEÍDOS
-  // ─────────────────────────────────────────
+ 
 
   Future<void> _marcarComoLeidos() async {
     if (chatId == null) return;
@@ -190,10 +174,7 @@ class ChatController extends GetxController {
       return m;
     }).toList();
   }
-
-  // ─────────────────────────────────────────
-  //  MENSAJES ENTRANTES
-  // ─────────────────────────────────────────
+ 
 
   void _handleIncomingMessage(MensajeEntity mensaje) {
     if (mensajes.any((m) => m.id == mensaje.id)) return;
@@ -221,10 +202,7 @@ class ChatController extends GetxController {
             scrollController.position.pixels) <
         100;
   }
-
-  // ─────────────────────────────────────────
-  //  CARGAR MENSAJES
-  // ─────────────────────────────────────────
+ 
 
   Future<void> loadChatMessages() async {
     if (chatId == null) return;
@@ -257,10 +235,7 @@ class ChatController extends GetxController {
   }
 
   Future<void> refreshChat() => loadChatMessages();
-
-  // ─────────────────────────────────────────
-  //  ENVIAR MENSAJES
-  // ─────────────────────────────────────────
+ 
 
   void _onMessageChanged() {
     if (isNewConversation.value && firstMessageSent.value) {
@@ -332,30 +307,23 @@ class ChatController extends GetxController {
     try {
       isSending.value = true;
       messageController.clear();
-
-      // ── Paso 1: verificar conexión ────────────────────────────────────
-      // Si no está conectado, intentar reconectar antes de enviar.
-      // El botón de enviar ya muestra un spinner mientras isSending = true,
-      // así que el usuario ve feedback inmediato.
+ 
       if (!_signalRService.isConnected.value) {
         print('📡 Sin conexión — esperando antes de enviar...');
         try {
           await _signalRService.waitUntilConnected(
             timeout: const Duration(seconds: 15),
           );
-        } catch (e) {
-          // No se pudo conectar: devolver el texto y mostrar error
+        } catch (e) { 
           messageController.text = message;
           isSending.value = false;
           showErrorSnackbar('Sin conexión. Verifica tu internet e inténtalo de nuevo.');
           return;
         }
       }
-
-      // ── Paso 2: enviar ────────────────────────────────────────────────
+ 
       final postEntity = PostChatEntity(chatId: chatId!, menssage: message);
-      await sendMessageUsecase.execute(postEntity);
-      // El mensaje real llegará por SignalR via _handleIncomingMessage
+      await sendMessageUsecase.execute(postEntity); 
     } catch (e) {
       messageController.text = message;
       print('Error enviando mensaje: $e');
@@ -378,10 +346,7 @@ class ChatController extends GetxController {
     );
     mensajes.value = [...mensajes, nuevo];
   }
-
-  // ─────────────────────────────────────────
-  //  RECONEXIÓN MANUAL (botón UI)
-  // ─────────────────────────────────────────
+ 
 
   Future<void> retrySignalRConnection() async {
     if (isSignalRConnected.value || isRetrying.value) return;
@@ -397,10 +362,7 @@ class ChatController extends GetxController {
       isRetrying.value = false;
     }
   }
-
-  // ─────────────────────────────────────────
-  //  UTILIDADES
-  // ─────────────────────────────────────────
+ 
 
   void scrollToBottom() {
     if (scrollController.hasClients) {

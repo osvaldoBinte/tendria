@@ -1,5 +1,4 @@
-// lib/features/chat/presentation/page/connect.dart
-
+ 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -45,14 +44,8 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
   int _reconnectAttempts = 0;
   static const int _maxReconnectAttempts = 8;
 
-  bool _isConnecting = false;
-  // Completer activo SOLO mientras hay una conexión en curso.
-  // Se crea justo antes de conectar y se nullea al terminar.
-  Completer<void>? _connectCompleter;
-
-  // ─────────────────────────────────────────
-  //  LIFECYCLE
-  // ─────────────────────────────────────────
+  bool _isConnecting = false; 
+  Completer<void>? _connectCompleter; 
 
   @override
   void onInit() {
@@ -83,10 +76,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
     print('🔄 Reconectando tras volver al primer plano...');
     await _reconnect();
   }
-
-  // ─────────────────────────────────────────
-  //  CONEXIÓN
-  // ─────────────────────────────────────────
+ 
 
   Future<void> _connectIfAuthenticated() async {
     final token = await authService.getToken();
@@ -102,8 +92,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
     }
     await _doConnect(token);
   }
-
-  /// Lógica de conexión pura. Siempre crea y completa _connectCompleter.
+ 
   Future<void> _doConnect(String token) async {
     _isConnecting = true;
     _connectCompleter = Completer<void>();
@@ -129,8 +118,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       _connectCompleter = null;
     }
   }
-
-  /// Espera al completer activo con timeout de 20 s.
+ 
   Future<void> _awaitCompleter() async {
     final c = _connectCompleter;
     if (c == null || c.isCompleted) return;
@@ -138,10 +126,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       await c.future.timeout(const Duration(seconds: 20));
     } catch (_) {}
   }
-
-  // ─────────────────────────────────────────
-  //  RECONEXIÓN
-  // ─────────────────────────────────────────
+ 
 
   void _onUnexpectedDisconnect() {
     if (isReconnecting.value || _isConnecting) return;
@@ -177,8 +162,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       return;
     }
 
-    _isConnecting = true;
-    // ✅ Crear SIEMPRE un completer nuevo antes de usarlo
+    _isConnecting = true; 
     _connectCompleter = Completer<void>();
 
     try {
@@ -190,8 +174,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       isConnected.value = true;
       isReconnecting.value = false;
       _reconnectAttempts = 0;
-
-      // ✅ Completar ANTES de cualquier await posterior
+ 
       _connectCompleter!.complete();
 
       await _rejoinActiveChats();
@@ -199,9 +182,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
     } catch (e) {
       isConnected.value = false;
       print('❌ Reintento $_reconnectAttempts falló: $e');
-
-      // ✅ Completar con error y limpiar ANTES de llamar _scheduleReconnect
-      //    para evitar que el próximo intento encuentre un completer viejo.
+ 
       if (!_connectCompleter!.isCompleted) {
         _connectCompleter!.completeError(e);
       }
@@ -211,8 +192,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       await _scheduleReconnect();
       return;
     }
-
-    // Path feliz: limpiar al final
+ 
     _connectCompleter = null;
     _isConnecting = false;
   }
@@ -227,17 +207,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       }
     }
   }
-
-  // ─────────────────────────────────────────
-  //  waitUntilConnected — usado por ChatController al enviar mensajes
-  // ─────────────────────────────────────────
-
-  /// Espera hasta que SignalR esté conectado o lanza excepción por timeout.
-  /// Orden de prioridad:
-  ///   1. Ya conectado → retorna inmediatamente.
-  ///   2. Hay conexión en curso → espera a que termine.
-  ///   3. No hay conexión → intenta activamente.
-  ///   4. Espera cambio reactivo en isConnected.
+ 
   Future<void> waitUntilConnected({
     Duration timeout = const Duration(seconds: 20),
   }) async {
@@ -253,8 +223,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       if (token != null) await _doConnect(token);
       if (isConnected.value) return;
     }
-
-    // Espera reactiva como último recurso
+ 
     final waiter = Completer<void>();
     ever(isConnected, (bool connected) {
       if (connected && !waiter.isCompleted) waiter.complete();
@@ -266,10 +235,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
           throw Exception('Timeout: no se pudo conectar a SignalR'),
     );
   }
-
-  // ─────────────────────────────────────────
-  //  SUSCRIPCIONES
-  // ─────────────────────────────────────────
+ 
 
   Future<void> subscribeToChat(
       int chatId, Function(MensajeEntity) callback) async {
@@ -304,23 +270,14 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
       _globalListener = callback;
 
   void removeGlobalListener() => _globalListener = null;
-
-  // ─────────────────────────────────────────
-  //  ENRUTAMIENTO
-  // ─────────────────────────────────────────
+ 
 
   void _routeMessage(MensajeEntity mensaje) {
     _chatListeners[mensaje.chatId]?.call(mensaje);
     _globalListener?.call(mensaje);
-  }
-
-  // Callback vacío para onMensajesLeidos en connect/reconnect
-  // (el usecase ya enruta al datasource directamente)
+  } 
   void _noop(DateTime _) {}
-
-  // ─────────────────────────────────────────
-  //  LOGOUT
-  // ─────────────────────────────────────────
+ 
 
   Future<void> disconnect() async {
     _reconnectAttempts = _maxReconnectAttempts;
@@ -342,11 +299,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
     await disconnectSignalRUsecase.execute();
     isConnected.value = false;
     print('✅ SignalR desconectado por logout');
-  }
-
-  // ─────────────────────────────────────────
-  //  MENSAJES LEÍDOS
-  // ─────────────────────────────────────────
+  } 
 
   Future<void> marcarMensajesLeidos(int chatId, int otroUserId) async {
     if (!isConnected.value) return;
@@ -355,11 +308,7 @@ class SignalRService extends GetxService with WidgetsBindingObserver {
 
   void escucharMensajesLeidos(Function(DateTime) callback) {
     onMensajesLeidosUsecase.execute(callback);
-  }
-
-  // ─────────────────────────────────────────
-  //  RETRY MANUAL (UI)
-  // ─────────────────────────────────────────
+  } 
 
   Future<void> retryConnection() async {
     if (isConnected.value || _isConnecting) return;

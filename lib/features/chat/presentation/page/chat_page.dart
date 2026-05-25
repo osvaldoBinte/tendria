@@ -62,10 +62,7 @@ class ChatPage extends GetView<ChatController> {
           ),
         ));
   }
-
-  // ==========================================
-  // APP BAR
-  // ==========================================
+ 
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -213,10 +210,7 @@ class ChatPage extends GetView<ChatController> {
       );
     });
   }
-
-  // ==========================================
-  // BODY
-  // ==========================================
+ 
 
   Widget _buildBody() {
     return Stack(
@@ -242,10 +236,7 @@ class ChatPage extends GetView<ChatController> {
       ],
     );
   }
-
-  // ==========================================
-  // MESSAGES LIST
-  // ==========================================
+ 
 
   Widget _buildMessagesList() {
     return RefreshIndicator(
@@ -414,10 +405,7 @@ class ChatPage extends GetView<ChatController> {
       ),
     );
   }
-
-  // ==========================================
-  // MESSAGE INPUT
-  // ==========================================
+ 
 
   Widget _buildMessageInput() {
     return Obx(() {
@@ -672,11 +660,7 @@ class ChatPage extends GetView<ChatController> {
       );
     });
   }
-
-  // ==========================================
-  // ESTADOS
-  // ==========================================
-
+ 
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

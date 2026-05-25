@@ -23,8 +23,7 @@ class LoginController extends GetxController {
   final LoginUsecase loginUsecase;
   final SaveTokenFcmUsecase saveTokenFcmUsecase;
   final LogLoginUsecase logLoginUsecase;
-
-  // ← único cambio estructural
+ 
   LanguageController get _l => Get.find<LanguageController>();
 
   LoginController({
@@ -153,7 +152,7 @@ class LoginController extends GetxController {
         context: Get.context!,
         title: title,
         message: message,
-        confirmText: _l.t('accept'),   // ← antes: 'Aceptar' hardcodeado
+        confirmText: _l.t('accept'),   
         type: CustomAlertType.error,
         onConfirm: onDismiss,
       );
@@ -163,8 +162,8 @@ class LoginController extends GetxController {
   bool _validateFields() {
     if (emailController.text.isEmpty) {
       _showErrorAlert(
-        _l.t('login_warning'),        // ← antes: 'Advertencia'
-        _l.t('login_val_email'),      // ← antes: 'Por favor, ingresa tu usuario'
+        _l.t('login_warning'),       
+        _l.t('login_val_email'),     
       );
       return false;
     }
@@ -172,7 +171,7 @@ class LoginController extends GetxController {
     if (passwordController.text.isEmpty) {
       _showErrorAlert(
         _l.t('login_warning'),
-        _l.t('login_val_password'),   // ← antes: 'Por favor, ingresa tu contraseña'
+        _l.t('login_val_password'),   
       );
       return false;
     }

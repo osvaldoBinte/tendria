@@ -41,7 +41,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
  @override
 Widget build(BuildContext context) {
-  return Stack(                          // ← Stack envuelve todo
+  return Stack(                         
     children: [
       Scaffold(
         backgroundColor: ThemeColor.backgroundColorfondo,
@@ -92,8 +92,7 @@ Widget build(BuildContext context) {
           }),
         ),
       ),
-
-      // ← Overlay encima del Scaffold completo (incluyendo AppBar)
+ 
       Obx(
         () => tutorialCtrl.isVisible.value
             ? const UpdateProfileTutorialOverlay()
@@ -104,8 +103,7 @@ Widget build(BuildContext context) {
 }
   Widget _buildEditSection() {
     return Column(
-      children: [
-        // ← key en los primeros dos items
+      children: [ 
         _buildItem(
           key: tutorialCtrl.ageRangeKey,
           _l.t('age_range'),
@@ -139,7 +137,7 @@ Widget build(BuildContext context) {
           },
         ),
         SizedBox(height: ThemeColor.paddingMedium),
-        // El resto sin key
+      
         _buildItem(_l.t('height'), () => '${controller.heightcm} cm',
             onTap: () => _updater.showEditHeight(controller.heightcm.toString())),
         SizedBox(height: ThemeColor.paddingMedium),
@@ -172,12 +170,12 @@ Widget build(BuildContext context) {
   Widget _buildItem(
     String title,
     String Function() valueBuilder, {
-    Key? key,                         // ← parámetro key opcional
+    Key? key,                        
     VoidCallback? onTap,
   }) {
     return Obx(() {
       return GestureDetector(
-        key: key,                     // ← asignado aquí
+        key: key,                  
         onTap: onTap,
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: ThemeColor.paddingLarge),

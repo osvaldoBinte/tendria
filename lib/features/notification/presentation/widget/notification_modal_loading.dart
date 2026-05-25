@@ -122,8 +122,7 @@ class _NotificationLoadingState extends State<NotificatioLoading>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
-                      // Mensaje línea 1
+                       
                       _buildShimmerBox(
                         child: Container(
                           height: 12,

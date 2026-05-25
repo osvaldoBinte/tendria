@@ -105,7 +105,6 @@ class PreferencesController extends GetxController {
     {'label': 'Conexiones sin ataduras', 'value': 'casual'},
   ];
 
-  // ─── INIT ─────────────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
@@ -123,7 +122,6 @@ class PreferencesController extends GetxController {
     super.onClose();
   }
 
-  // ─── INICIALIZACIÓN ───────────────────────────────────────────────────────────
 
   Future<void> _initializeController() async {
     try {
@@ -219,7 +217,6 @@ class PreferencesController extends GetxController {
     if (!hasQualities) availableSteps.add(PreferencesStep.qualities);
   }
 
-  // ─── CATÁLOGOS ────────────────────────────────────────────────────────────────
 
   Future<void> _loadCatalogs() async {
     await Future.wait([_loadInterests(), _loadQualities()]);
@@ -249,7 +246,6 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ─── NAVEGACIÓN ───────────────────────────────────────────────────────────────
 
   void nextStep() {
     if (validateCurrentStep()) {
@@ -267,7 +263,6 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ─── VALIDACIONES ─────────────────────────────────────────────────────────────
 
   bool validateCurrentStep() {
     switch (currentStep.value) {
@@ -330,7 +325,6 @@ class PreferencesController extends GetxController {
     return true;
   }
 
-  // ─── SELECCIÓN ────────────────────────────────────────────────────────────────
 
   void selectGenderPreference(String gender) {
     selectedGenderPreference.value = gender;
@@ -374,7 +368,6 @@ class PreferencesController extends GetxController {
     }
   }
 
-  // ─── FOTOS ────────────────────────────────────────────────────────────────────
 
   Future<String> _ensureValidImageFormat(String originalPath) async {
     final ext = originalPath.toLowerCase();
@@ -651,13 +644,11 @@ class PreferencesController extends GetxController {
     );
   }
 
-  // ─── SUBMIT ───────────────────────────────────────────────────────────────────
 
   Future<void> submitPreferences() async {
     try {
       isLoading.value = true;
 
-      // ── Fotos ──
       if (currentStep.value == PreferencesStep.photos) {
         if (selectedPhotos.length < minPhotos) {
           _showErrorAlert(
@@ -685,7 +676,7 @@ class PreferencesController extends GetxController {
         }
       }
 
-      // ── Intereses ──
+    
       if (currentStep.value == PreferencesStep.interests) {
         if (selectedInterests.isEmpty) {
           _showErrorAlert(
@@ -703,7 +694,6 @@ class PreferencesController extends GetxController {
         }
       }
 
-      // ── Cualidades ──
       if (currentStep.value == PreferencesStep.qualities) {
         if (selectedQualities.isEmpty) {
           _showErrorAlert(
@@ -716,7 +706,6 @@ class PreferencesController extends GetxController {
         print('⭐ ${selectedQualities.length} cualidades seleccionadas');
       }
 
-      // ── Preferencias ──
       if (!preferencesAlreadySent.value &&
           currentStep.value == PreferencesStep.ageRange &&
           selectedGenderPreference.value.isNotEmpty &&
@@ -735,7 +724,7 @@ class PreferencesController extends GetxController {
         preferencesAlreadySent.value = true;
       }
 
-      // ── Avanzar o finalizar ──
+  
       if (currentStepIndex.value < availableSteps.length - 1) {
         print('➡️ Avanzando al siguiente paso...');
         currentStepIndex.value++;
@@ -767,8 +756,6 @@ class PreferencesController extends GetxController {
       isUploadingPhotos.value = false;
     }
   }
-
-  // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
   void _showErrorAlert(String title, String message, {VoidCallback? onDismiss}) {
     if (Get.context != null) {

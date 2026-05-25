@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
-import 'package:tendria/framework/preferences_service.dart'; // ajusta el import
+import 'package:tendria/framework/preferences_service.dart';  
 
 class ThemeController extends GetxController {
   final _prefs = PreferencesUser();

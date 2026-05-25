@@ -35,10 +35,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
           ),
         ));
   }
-
-  // ==========================================
-  // HEADER
-  // ==========================================
+ 
 
   Widget _buildHeader() {
     return Container(
@@ -132,10 +129,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       ),
     );
   }
-
-  // ==========================================
-  // TAB SWITCH
-  // ==========================================
+ 
 
   Widget _buildTabSwitch() {
     return Obx(() => Container(
@@ -229,10 +223,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       ),
     );
   }
-
-  // ==========================================
-  // SECCIÓN CHATS PENDIENTES
-  // ==========================================
+ 
 
   Widget _buildPendingChatsSection() {
     if (controller.isLoading.value && controller.pendingChats.isEmpty) {
@@ -267,10 +258,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       child: _buildChatGrid(),
     );
   }
-
-  // ==========================================
-  // SECCIÓN LIKES RECIBIDOS
-  // ==========================================
+ 
 
   Widget _buildLikesSection() {
     if (controller.isLoadingLikes.value && controller.likedByUsers.isEmpty) {
@@ -368,8 +356,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                           : _buildDefaultAvatar(),
                     ),
                   ),
-
-                  // Badge tiempo
+ 
                   Positioned(
                     top: 8,
                     right: 8,
@@ -390,8 +377,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                       ),
                     ),
                   ),
-
-                  // Badge corazón
+ 
                   Positioned(
                     top: 8,
                     left: 8,
@@ -405,8 +391,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                           color: Colors.white, size: 16),
                     ),
                   ),
-
-                  // Gradiente inferior
+ 
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -428,8 +413,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
                 ],
               ),
             ),
-
-            // Info inferior
+ 
             Padding(
               padding: EdgeInsets.all(ThemeColor.paddingSmall),
               child: Column(
@@ -466,10 +450,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       ),
     );
   }
-
-  // ==========================================
-  // GRID CHATS
-  // ==========================================
+ 
 
   Widget _buildChatGrid() {
     return GridView.builder(
@@ -661,11 +642,7 @@ class LikedByUsersView extends GetView<LikedByUsersController> {
       ),
     );
   }
-
-  // ==========================================
-  // ESTADOS
-  // ==========================================
-
+ 
   Widget _buildLoadingState() {
     return Center(
       child: Column(

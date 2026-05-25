@@ -152,7 +152,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ],
                   ),
-                  // Toggle debajo, alineado a la derecha
                   Obx(() {
                     final isDark = _themeCtrl.isDarkMode.value;
                     return GestureDetector(

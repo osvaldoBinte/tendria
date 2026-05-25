@@ -44,14 +44,13 @@ final Map<String, VideoPlayerController> _preloadedVideos = {};
   final RxList<StoryEntity> myStories = <StoryEntity>[].obs;
   final RxBool isLoadingMyStory = false.obs;
   final RxBool hasMyStory = false.obs;
-final Map<String, bool> _preloadedUrls = {}; // url -> está inicializado
+final Map<String, bool> _preloadedUrls = {}; 
 
   final RxInt currentMyStoryIndex = 0.obs;
   final RxInt currentUserIndex = 0.obs;
   final RxInt currentStoryIndex = 0.obs;
   final RxBool isCreatingStory = false.obs;
-
-  // ── Historias de usuario específico (para preview de otros usuarios) ──
+ 
   final RxList<StoryEntity> targetUserStories = <StoryEntity>[].obs;
   final RxBool isLoadingTargetStories = false.obs;
   final RxBool isViewingTargetUserStory = false.obs;
@@ -84,8 +83,7 @@ static const String kImagen = 'Foto';
     if (currentMyStoryIndex.value >= myStories.length) return null;
     return myStories[currentMyStoryIndex.value];
   }
-
-  /// Historia activa del usuario objetivo (preview desde NearbyUsers)
+ 
   StoryEntity? get currentTargetStory {
     if (!isModalActive.value) return null;
     if (targetUserStories.isEmpty) return null;
@@ -137,8 +135,7 @@ Future<void> preloadStoriesContent() async {
       CachedNetworkImageProvider(userStory.fotoPerfilUrl)
           .resolve(const ImageConfiguration());
     }
-
-    // ✅ Precarga TODAS las historias, no solo la primera
+ 
     for (final story in userStory.historias) {
       if (story.tipoContenido.toLowerCase() != StoryController.kVideo) {
         CachedNetworkImageProvider(story.urlContenido)
@@ -148,8 +145,7 @@ Future<void> preloadStoriesContent() async {
       }
     }
   }
-
-  // Precarga mis historias
+ 
   for (final story in myStories) {
     if (story.tipoContenido.toLowerCase() != StoryController.kVideo) {
       CachedNetworkImageProvider(story.urlContenido)
@@ -175,12 +171,7 @@ Future<void> _preloadVideo(String url) async {
 }
 
 
-  // ─────────────────────────────────────────────
-  //  NUEVO: Cargar historias de un usuario por ID
-  // ─────────────────────────────────────────────
-
-  /// Obtiene las historias de un usuario específico (que NO es el propio).
-  /// Retorna `true` si ese usuario tiene al menos una historia.
+ 
   Future<bool> fetchStoriesForUser(int userId) async {
     try {
       isLoadingTargetStories.value = true;
@@ -195,8 +186,7 @@ Future<void> _preloadVideo(String url) async {
       return false;
     }
   }
-
-  /// Inicializa el modal apuntando a las historias del usuario objetivo.
+ 
   void initializeTargetUserStoryModal(TickerProvider vsync) {
     isModalActive.value = true;
     isViewingTargetUserStory.value = true;
@@ -258,10 +248,7 @@ Future<void> _preloadVideo(String url) async {
     }
     return 0.0;
   }
-
-  // ─────────────────────────────────────────────
-  //  VIDEO
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> initializeVideoIfNeeded() async {
     final story = isViewingTargetUserStory.value
@@ -281,8 +268,7 @@ Future<void> _preloadVideo(String url) async {
   }
   
 Future<void> _initializeVideo(String videoUrl) async {
-  try {
-    // ✅ Pausa y desconecta el anterior SIN usar el objeto después
+  try { 
     if (videoController != null) {
       final old = videoController!;
       videoController = null;
@@ -290,12 +276,10 @@ Future<void> _initializeVideo(String videoUrl) async {
       old.pause();
       old.dispose();
     }
-
-    // Siempre crea un controlador nuevo (el cache de red lo hace rápido)
+ 
     final ctrl = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
     await ctrl.initialize();
-
-    // ✅ Verifica que el widget sigue montado antes de asignar
+ 
     if (!isModalActive.value) {
       ctrl.dispose();
       return;
@@ -328,10 +312,10 @@ Future<void> _initializeVideo(String videoUrl) async {
 void disposeVideo() {
   if (videoController != null) {
     final old = videoController!;
-    videoController = null;           // ✅ Desconecta PRIMERO
+    videoController = null;           
     isVideoInitialized.value = false;
     old.pause();
-    old.dispose();                    // ✅ Luego destruye
+    old.dispose();             
   }
   isVideoInitialized.value = false;
 }
@@ -351,10 +335,7 @@ void disposeVideo() {
       setStoryDuration(_defaultStoryDuration);
     }
   }
-
-  // ─────────────────────────────────────────────
-  //  SORTING / HELPERS
-  // ─────────────────────────────────────────────
+ 
 
   List<StoryEntity> _sortStoriesByDate(List<StoryEntity> stories) {
     final sortedStories = List<StoryEntity>.from(stories);
@@ -368,11 +349,7 @@ void disposeVideo() {
     });
     return sortedStories;
   }
-
-  // ─────────────────────────────────────────────
-  //  MODAL – MI HISTORIA
-  // ─────────────────────────────────────────────
-
+ 
   void initializeMyStoryModal(TickerProvider vsync) {
     isModalActive.value = true;
     isViewingMyStory.value = true;
@@ -383,10 +360,7 @@ void disposeVideo() {
     _setupProgressController(vsync);
     initializeVideoIfNeeded();
   }
-
-  // ─────────────────────────────────────────────
-  //  MODAL – HISTORIA DE OTROS (lista general)
-  // ─────────────────────────────────────────────
+ 
 
   void initializeStoryModal(int userIndex, TickerProvider vsync) {
     isModalActive.value = true;
@@ -398,15 +372,11 @@ void disposeVideo() {
     initializeVideoIfNeeded();
     _markCurrentStoryAsSeen();
   }
-
-  // ─────────────────────────────────────────────
-  //  DISPOSE MODAL
-  // ─────────────────────────────────────────────
+ 
 
 void disposeStoryModal() {
-  isModalActive.value = false;        // ✅ Primero marca inactivo
-
-  // ✅ Patrón seguro: desconectar referencia ANTES de dispose
+  isModalActive.value = false;      
+ 
   if (videoController != null) {
     final old = videoController!;
     videoController = null;
@@ -435,10 +405,7 @@ void disposeStoryModal() {
     disposeStoryModal();
     Get.back();
   }
-
-  // ─────────────────────────────────────────────
-  //  FETCH
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> fetchStories() async {
     try {
@@ -486,10 +453,7 @@ void disposeStoryModal() {
       isLoadingMyStory.value = false;
     }
   }
-
-  // ─────────────────────────────────────────────
-  //  CREATE / DELETE
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> createStory(File file, String contentType) async {
     try {
@@ -539,10 +503,7 @@ void disposeStoryModal() {
       showErrorSnackbar('No se pudo eliminar la historia');
     }
   }
-
-  // ─────────────────────────────────────────────
-  //  NAVIGATION – MIS HISTORIAS
-  // ─────────────────────────────────────────────
+ 
 
   void nextMyStory() async {
     if (currentMyStoryIndex.value + 1 < myStories.length) {
@@ -574,10 +535,7 @@ void disposeStoryModal() {
       Get.back();
     }
   }
-
-  // ─────────────────────────────────────────────
-  //  NAVIGATION – HISTORIAS GENERALES
-  // ─────────────────────────────────────────────
+ 
 
   void nextStory() async {
     if (currentStoryIndex.value + 1 < currentUserStories.length) {
@@ -619,10 +577,7 @@ void disposeStoryModal() {
       await checkAndUpdateVideo(currentStory!);
     }
   }
-
-  // ─────────────────────────────────────────────
-  //  PROGRESS
-  // ─────────────────────────────────────────────
+ 
 
   void _setupProgressController(TickerProvider vsync) {
     progressController?.dispose();
@@ -676,10 +631,7 @@ void disposeStoryModal() {
     }
     return 0.0;
   }
-
-  // ─────────────────────────────────────────────
-  //  PAUSE / RESUME
-  // ─────────────────────────────────────────────
+ 
 
   void pauseStory() {
     progressController?.stop();
@@ -690,10 +642,7 @@ void disposeStoryModal() {
     progressController?.forward();
     videoController?.play();
   }
-
-  // ─────────────────────────────────────────────
-  //  LIKE / SEEN
-  // ─────────────────────────────────────────────
+  
 
   Future<void> likeStory() async {
     if (currentStory == null) return;
@@ -773,10 +722,7 @@ void disposeStoryModal() {
       debugPrint('Error marking story as seen: $e');
     }
   }
-
-  // ─────────────────────────────────────────────
-  //  UTILS
-  // ─────────────────────────────────────────────
+ 
 
   String getContentType(String filePath) {
     final extension = filePath.toLowerCase().split('.').last;

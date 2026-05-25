@@ -34,10 +34,7 @@ class RegisterPage extends GetView<RegisterController> {
       ),
     );
   }
-
-  // ==========================================
-  // STEP 1 - INFO BÁSICA
-  // ==========================================
+ 
 
   Widget _buildBasicInfoStep() {
     return SingleChildScrollView(
@@ -432,10 +429,7 @@ class RegisterPage extends GetView<RegisterController> {
       controller.selectDateOfBirth(picked);
     }
   }
-
-  // ==========================================
-  // STEP 3 - INFO FÍSICA
-  // ==========================================
+ 
 
   Widget _buildPhysicalInfoStep() {
     return Column(
@@ -541,10 +535,7 @@ class RegisterPage extends GetView<RegisterController> {
       ],
     );
   }
-
-  // ==========================================
-  // STEP 4 - INTERESES
-  // ==========================================
+ 
 
   Widget buildInterestsStep() {
     return Column(
@@ -789,10 +780,7 @@ class RegisterPage extends GetView<RegisterController> {
     };
     return icons[interest] ?? Icons.favorite;
   }
-
-  // ==========================================
-  // STEP 5 - CUALIDADES
-  // ==========================================
+ 
 
   Widget buildQualitiesStep() {
     return Column(
@@ -918,10 +906,7 @@ class RegisterPage extends GetView<RegisterController> {
       ),
     );
   }
-
-  // ==========================================
-  // NAVEGACIÓN
-  // ==========================================
+ 
 
   Widget _buildNavigationButtons({
     bool showSkip = false,

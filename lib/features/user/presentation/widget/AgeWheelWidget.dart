@@ -1,4 +1,4 @@
-// En preferences_page.dart, reemplaza _buildAgeWheel con esto:
+ 
 
 import 'package:flutter/widgets.dart';
 import 'package:tendria/common/theme/App_Theme.dart';

@@ -1,4 +1,4 @@
-// lib/features/chat/data/datasources/chat_datasources_imp.dart
+ 
 
 import 'dart:async';
 import 'dart:convert';
@@ -22,8 +22,7 @@ class ChatDataSourcesImp {
   Function(MensajeEntity)? _onMessageReceived;
   Function(DateTime)? _onMensajesLeidosCallback;
   VoidCallback? _onDisconnectedCallback;
-
-  // ============ REST API METHODS ============
+ 
 
   Future<void> sendmessage(PostChatEntity entity, String token) async {
     try {
@@ -98,23 +97,19 @@ class ChatDataSourcesImp {
       throw Exception('$e');
     }
   }
-
-  // ============ SIGNALR METHODS ============
+ 
 
   Future<void> connectSignalR(String token) async {
-    // Si ya está conectado, no hacer nada
-    if (_hubConnection?.state == HubConnectionState.Connected) {
+     if (_hubConnection?.state == HubConnectionState.Connected) {
       print('⚠️ SignalR ya está conectado');
       return;
     }
-
-    // Detener y limpiar conexión anterior si existe
+ 
     await _cleanupConnection();
 
     final hubUrl = '$defaultApiServer/chathub';
     print('🔌 Conectando SignalR a $hubUrl...');
-
-    // ⚠️ SIN withAutomaticReconnect — lo maneja SignalRService
+ 
     _hubConnection = HubConnectionBuilder()
         .withUrl(
           hubUrl,
@@ -127,21 +122,18 @@ class ChatDataSourcesImp {
         )
         .build();
 
-    // Registrar eventos de lifecycle
-    _hubConnection!.onclose(({Exception? error}) {
+     _hubConnection!.onclose(({Exception? error}) {
       print('❌ SignalR cerrado: ${error?.toString() ?? 'sin error'}');
       _onDisconnectedCallback?.call();
     });
 
-    // Registrar listeners de mensajes ANTES de conectar
-    _registerAllListeners();
+     _registerAllListeners();
 
     await _hubConnection!.start();
     print('✅ SignalR conectado - ID: ${_hubConnection!.connectionId}');
   }
 
-  /// Limpia la conexión anterior de forma segura
-  Future<void> _cleanupConnection() async {
+   Future<void> _cleanupConnection() async {
     if (_hubConnection == null) return;
     try {
       final conn = _hubConnection;
@@ -151,9 +143,7 @@ class ChatDataSourcesImp {
       print('⚠️ Error limpiando conexión anterior: $e');
     }
   }
-
-  /// Registra todos los listeners sobre la conexión actual.
-  /// Se llama tras conectar y tras reconectar.
+ 
   void _registerAllListeners() {
     if (_hubConnection == null) return;
 
@@ -200,12 +190,10 @@ class ChatDataSourcesImp {
     return _hubConnection?.state == HubConnectionState.Connected;
   }
 
-  void setOnDisconnectedCallback(VoidCallback callback) {
-    // Guardamos la referencia para re-asignarla tras reconexión
+  void setOnDisconnectedCallback(VoidCallback callback) { 
     _onDisconnectedCallback = callback;
   }
-
-  // ── Marcar como leídos ──
+ 
   Future<void> marcarMensajesLeidos(int chatId, int otroUserId) async {
     try {
       if (_hubConnection?.state != HubConnectionState.Connected) return;
@@ -214,18 +202,15 @@ class ChatDataSourcesImp {
       print('❌ Error en MarcarComoLeidos: $e');
     }
   }
-
-  // ── Registrar listener MensajesLeidos ──
+ 
   void onMensajesLeidos(Function(DateTime leidoEn) callback) {
-    _onMensajesLeidosCallback = callback;
-    // Si la conexión ya existe, registrar de inmediato
+    _onMensajesLeidosCallback = callback; 
     if (_hubConnection != null) {
       _hubConnection!.off('MensajesLeidos');
       _hubConnection!.on('MensajesLeidos', _handleMensajesLeidos);
     }
   }
-
-  // ============ HANDLERS PRIVADOS ============
+ 
 
   void _handleReceiveMessage(List<Object?>? arguments) {
     try {

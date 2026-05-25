@@ -1,4 +1,4 @@
-// lib/features/user/presentation/controller/profile_controller.dart
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,7 +28,6 @@ class ProfileController extends GetxController {
     required this.deleteMediaUsecase,
   });
 
-  // Estados
   final RxBool isLoading = false.obs;
   final RxBool isUploadingPhoto = false.obs;
   final RxBool isUploadingProfilePhoto = false.obs;
@@ -147,7 +146,6 @@ class ProfileController extends GetxController {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header con título
                 Container(
                   padding: EdgeInsets.all(ThemeColor.paddingLarge),
                   decoration: BoxDecoration(
@@ -337,16 +335,14 @@ class ProfileController extends GetxController {
     try {
       isUploadingProfilePhoto.value = true;
 
-      // Guardar URL vieja para limpiar su cache
       final oldUrl = userEntity.value?.fotoUrl ?? '';
-      final oldCacheKey = Uri.tryParse(oldUrl)?.path ?? oldUrl; // 👈
+      final oldCacheKey = Uri.tryParse(oldUrl)?.path ?? oldUrl;
 
       await uploadPicturePerfileUsecase.execute(photoPath);
       await loadUserProfile();
 
-      // Limpiar cache de la foto anterior para que muestre la nueva
       if (oldCacheKey.isNotEmpty) {
-        await CachedNetworkImage.evictFromCache(oldCacheKey); // 👈
+        await CachedNetworkImage.evictFromCache(oldCacheKey); 
       }
 
       _showSuccessAlert(
@@ -386,7 +382,7 @@ class ProfileController extends GetxController {
       customWidget: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
+          
           Container(
             padding: EdgeInsets.all(ThemeColor.paddingLarge),
             decoration: BoxDecoration(
@@ -429,7 +425,6 @@ class ProfileController extends GetxController {
             ),
           ),
 
-          // Opciones
           Padding(
             padding: EdgeInsets.all(ThemeColor.paddingMedium),
             child: Column(
@@ -462,7 +457,6 @@ class ProfileController extends GetxController {
     );
   }
 
-  /// Selección múltiple de imágenes de galería
   Future<void> pickMultipleImagesFromGallery() async {
     final remaining = maxPhotos - assets.length;
     if (remaining <= 0) return;
@@ -476,7 +470,6 @@ class ProfileController extends GetxController {
 
       if (images.isEmpty) return;
 
-      // Limitar a las que caben
       final toUpload = images.take(remaining).toList();
 
       if (images.length > remaining) {
@@ -494,7 +487,6 @@ class ProfileController extends GetxController {
     }
   }
 
-  /// Sube múltiples fotos en una sola llamada
   Future<void> uploadMultiplePhotos(List<String> paths) async {
     if (paths.isEmpty) return;
 
@@ -571,7 +563,6 @@ class ProfileController extends GetxController {
       final mediaEntity = UploadMediaEntity(mediaPath: photoPath);
       await uploadMediaUsecase.execute([mediaEntity]);
 
-      // Recargar perfil para obtener la nueva foto
       await loadUserProfile();
 
       showSuccessSnackbar('Tu foto se ha agregado correctamente');

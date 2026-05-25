@@ -330,7 +330,7 @@ class UserProfileController extends GetxController {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Handle
+                  
                   Center(
                     child: Container(
                       width: 40,
@@ -361,7 +361,6 @@ class UserProfileController extends GetxController {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Selector Reportar / Solo bloquear (solo si alsoBlock) ──
                   if (alsoBlock) ...[
                     Row(
                       children: [
@@ -461,7 +460,6 @@ class UserProfileController extends GetxController {
                     const SizedBox(height: 16),
                   ],
 
-                  // ── Formulario de reporte (solo si shouldReport) ──
                   if (shouldReport.value) ...[
                     ...reasons.map(
                       (reason) => GestureDetector(
@@ -566,7 +564,6 @@ class UserProfileController extends GetxController {
                     ),
                     const SizedBox(height: 12),
 
-                    // Toggle también bloquear
                     if (alsoBlock)
                       GestureDetector(
                         onTap: () => shouldBlock.value = !shouldBlock.value,
@@ -630,7 +627,6 @@ class UserProfileController extends GetxController {
 
                   if (!shouldReport.value) const SizedBox(height: 8),
 
-                  // ── Botón principal ──
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -638,13 +634,11 @@ class UserProfileController extends GetxController {
                           shouldReport.value && selectedReason.value == null
                           ? null
                           : () {
-                              // Solo bloquear
                               if (!shouldReport.value) {
                                 Get.back();
                                 _confirmBlock();
                                 return;
                               }
-                              // Validar descripción
                               if (descController.text.trim().isEmpty) {
                                 descError.value = true;
                                 return;

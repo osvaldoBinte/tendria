@@ -59,8 +59,7 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
   void _onLongPressEnd(LongPressEndDetails details) {
     setState(() => _isPressed = false);
     _scaleController.reverse();
-    
-    // Mostrar foto grande con opción de cambiar
+     
     final ProfileController userController = Get.find<ProfileController>();
     _showProfilePhotoDialog(userController);
   }
@@ -84,8 +83,7 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
           child: Scaffold(
             backgroundColor: Colors.transparent,
             body: Stack(
-              children: [
-                // Foto de perfil grande centrada
+              children: [ 
                 Center(
                   child: Hero(
                     tag: 'profile_photo',
@@ -174,8 +172,7 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                     ),
                   ),
                 ),
-
-                // Botón de cerrar (arriba izquierda)
+ 
                 Positioned(
                   top: 16,
                   left: 16,
@@ -197,7 +194,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                   ),
                 ),
 
-                // Nombre del usuario (arriba)
                 Positioned(
                   top: 20,
                   left: 0,
@@ -220,7 +216,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                   ),
                 ),
 
-                // Botón de cambiar foto (abajo centro)
                 Positioned(
                   bottom: 40,
                   left: 0,
@@ -348,7 +343,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
             scale: _scaleAnimation.value,
             child: Stack(
               children: [
-                // Anillo de historia
                 Hero(
                   tag: 'profile_photo',
                   child: ThemeColor.createStoryRing(
@@ -359,7 +353,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                   ),
                 ),
 
-                // Overlay de mantener presionado
                 if (_isPressed)
                   Positioned.fill(
                     child: Container(
@@ -377,7 +370,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                     ),
                   ),
 
-                // Botón de agregar historia
                 if (!_isPressed)
                   Positioned(
                     right: 0,
@@ -403,7 +395,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                     ),
                   ),
 
-                // Contador de historias
                 if (storyController.myStories.length > 1 && !_isPressed)
                   Positioned(
                     right: 0,
@@ -467,7 +458,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                   ),
                 ),
 
-                // Overlay de mantener presionado
                 if (_isPressed)
                   Positioned.fill(
                     child: Container(
@@ -485,7 +475,6 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
                     ),
                   ),
 
-                // Botón de agregar
                 if (!_isPressed)
                   Positioned(
                     right: 0,
@@ -527,7 +516,7 @@ class _MyStoryRingWidgetState extends State<MyStoryRingWidget>
   }
 
   if (imageUrl != null && imageUrl.isNotEmpty) {
-    final cacheKey = Uri.tryParse(imageUrl)?.path ?? imageUrl; // 👈
+    final cacheKey = Uri.tryParse(imageUrl)?.path ?? imageUrl; 
 
     return ClipOval(
       child: CachedNetworkImage(

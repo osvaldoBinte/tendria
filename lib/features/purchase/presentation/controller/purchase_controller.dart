@@ -31,9 +31,7 @@ class PurchaseController extends GetxController {
   final RxString successMessage = ''.obs;
   final RxList<PurchaseEntity> products = <PurchaseEntity>[].obs;
   final RxString selectedProductId = ''.obs;
-
-  // productId → { 'price': '$100', 'currency': 'MXN' }
-  // currency viene directo del SDK de Apple/Google, nunca del locale del dispositivo
+ 
   final RxMap<String, Map<String, String>> storePrices =
       <String, Map<String, String>>{}.obs;
 
@@ -53,10 +51,7 @@ class PurchaseController extends GetxController {
     _purchaseSubscription?.cancel();
     super.onClose();
   }
-
-  // ─────────────────────────────────────────────
-  // INIT IAP
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> _initIAP() async {
     print('🚀 Inicializando IAP...');
@@ -94,10 +89,7 @@ class PurchaseController extends GetxController {
 
     print('✅ IAP inicializado y stream escuchando');
   }
-
-  // ─────────────────────────────────────────────
-  // CARGAR PRODUCTOS
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> loadProducts() async {
     try {
@@ -118,10 +110,7 @@ class PurchaseController extends GetxController {
       isLoadingProducts.value = false;
     }
   }
-
-  // ─────────────────────────────────────────────
-  // FETCH PRECIOS DE TIENDA
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> _fetchStorePrices(List<PurchaseEntity> productList) async {
     if (!_iapAvailable || productList.isEmpty) {
@@ -149,8 +138,7 @@ class PurchaseController extends GetxController {
 
       for (final detail in response.productDetails) {
         String currency = '';
-
-        // Obtener el currencyCode real desde el SDK, NO del locale del dispositivo
+ 
         if (Platform.isIOS && detail is AppStoreProductDetails) {
           currency =
               detail.skProduct.priceLocale.currencyCode ?? '';
@@ -168,8 +156,8 @@ class PurchaseController extends GetxController {
         }
 
         prices[detail.id] = {
-          'price': detail.price,     // ej: "$100"
-          'currency': currency,      // ej: "MXN"
+          'price': detail.price,   
+          'currency': currency,    
         };
 
         print(
@@ -181,20 +169,8 @@ class PurchaseController extends GetxController {
           '✅ Precios de tienda cargados: ${prices.length}/${productList.length}');
     } catch (e) {
       print('🔥 Excepción al consultar precios de tienda: $e');
-      // No lanzar — la UI usará product.price como fallback
-    }
-  }
-
-  // ─────────────────────────────────────────────
-  // DISPLAY PRICE
-  // ─────────────────────────────────────────────
-
-  /// Devuelve el precio formateado para mostrar en la UI.
-  ///
-  /// Prioridad:
-  ///   1. Precio real de la tienda con currency del SDK → "$100 MXN"
-  ///   2. Fallback: precio del backend sin currency → "$100"
-  ///   3. Sin precio → "—"
+     }
+  } 
   String displayPrice(PurchaseEntity product) {
     final data = storePrices[product.productId];
     print('🏷️ displayPrice [${product.productId}] → data: $data');
@@ -203,9 +179,7 @@ class PurchaseController extends GetxController {
       final price = data['price'] ?? '';
       final currency = data['currency'] ?? '';
 
-      if (price.isNotEmpty) {
-        // Si el precio ya incluye el código (ej: "MX$100.00"), devolver tal cual
-        // Si no, agregar el código al final: "$100 MXN"
+      if (price.isNotEmpty) { 
         final result = currency.isNotEmpty && !price.contains(currency)
             ? '$price $currency'
             : price;
@@ -213,8 +187,7 @@ class PurchaseController extends GetxController {
         return result;
       }
     }
-
-    // Fallback: precio del backend
+ 
     if (product.price != null) {
       final fallback = '\$${product.price}';
       print('   ⚠️ Usando fallback backend: $fallback');
@@ -224,10 +197,7 @@ class PurchaseController extends GetxController {
     print('   ❌ Sin precio disponible');
     return '—';
   }
-
-  // ─────────────────────────────────────────────
-  // COMPRAR PRODUCTO
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> buyProduct(PurchaseEntity product) async {
     print('💳 buyProduct llamado: ${product.productId}');
@@ -291,10 +261,7 @@ class PurchaseController extends GetxController {
       showErrorSnackbar('Error al iniciar la compra');
     }
   }
-
-  // ─────────────────────────────────────────────
-  // STREAM DE COMPRAS
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
     print('🔔 _onPurchaseUpdate con ${purchases.length} compra(s)');
@@ -340,10 +307,7 @@ class PurchaseController extends GetxController {
       }
     }
   }
-
-  // ─────────────────────────────────────────────
-  // VERIFICAR Y ENTREGAR
-  // ─────────────────────────────────────────────
+ 
 
   Future<void> _verifyAndDeliver(PurchaseDetails purchase) async {
     print(
@@ -371,8 +335,7 @@ class PurchaseController extends GetxController {
     showErrorSnackbar('Error interno al procesar la compra');
     return;
   }
-
-  // ✅ transactionId en lugar de base64 del receipt
+ 
   final skPaymentTransaction = purchase.skPaymentTransaction;
   final transactionId = skPaymentTransaction.transactionIdentifier;
   final originalTransactionId =
@@ -409,10 +372,7 @@ class PurchaseController extends GetxController {
     successMessage.value = '';
   }
 }
-
-// ─────────────────────────────────────────────
-// DELEGATE iOS
-// ─────────────────────────────────────────────
+ 
 
 class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
   @override

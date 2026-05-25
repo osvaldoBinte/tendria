@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/alert/animated_success_check.dart';
+
 enum CustomAlertType { info, confirm, warning, success, error }
 
 class CustomAlertDialog extends StatelessWidget {
@@ -22,7 +23,7 @@ class CustomAlertDialog extends StatelessWidget {
   final String? licensePlate;
   final int? totalTrips;
   final String? profileImageUrl;
- 
+
   const CustomAlertDialog({
     Key? key,
     required this.title,
@@ -45,18 +46,14 @@ class CustomAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 0,
       backgroundColor: Colors.transparent,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxHeight = MediaQuery.of(context).size.height * 0.85;
           return Container(
-            constraints: BoxConstraints(
-              maxHeight: maxHeight,
-            ),
+            constraints: BoxConstraints(maxHeight: maxHeight),
             child: type == CustomAlertType.info
                 ? _buildInfoDialog(context)
                 : _buildStandardDialog(context),
@@ -101,7 +98,9 @@ class CustomAlertDialog extends StatelessWidget {
                     right: 0,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -137,17 +136,11 @@ class CustomAlertDialog extends StatelessWidget {
                     ),
                     Text(
                       licensePlate ?? '',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                     Text(
                       '${totalTrips ?? 0} viajes',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -187,7 +180,7 @@ class CustomAlertDialog extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: ThemeColor.primaryColor, 
+                backgroundColor: ThemeColor.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -196,10 +189,7 @@ class CustomAlertDialog extends StatelessWidget {
               onPressed: onConfirm ?? () => Navigator.of(context).pop(),
               child: Text(
                 confirmText,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
           ),
@@ -207,11 +197,11 @@ class CustomAlertDialog extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildStandardDialog(BuildContext context) {
     Color headerColor;
     Widget headerContent;
-    
+
     switch (type) {
       case CustomAlertType.success:
         headerColor = ThemeColor.successColor;
@@ -223,7 +213,7 @@ class CustomAlertDialog extends StatelessWidget {
         break;
       case CustomAlertType.warning:
         headerColor = ThemeColor.primaryColor;
-        headerContent = const AnimatedScanningWaves(); 
+        headerContent = const AnimatedScanningWaves();
         break;
       case CustomAlertType.confirm:
       default:
@@ -250,7 +240,7 @@ class CustomAlertDialog extends StatelessWidget {
             ),
             child: Center(child: headerContent),
           ),
-          
+
           Flexible(
             child: SingleChildScrollView(
               child: Column(
@@ -269,8 +259,8 @@ class CustomAlertDialog extends StatelessWidget {
                                 color: type == CustomAlertType.success
                                     ? ThemeColor.successColor
                                     : type == CustomAlertType.error
-                                        ? ThemeColor.errorColor
-                                        : ThemeColor.textPrimaryColor, 
+                                    ? ThemeColor.errorColor
+                                    : ThemeColor.textPrimaryColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -285,7 +275,7 @@ class CustomAlertDialog extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                   if (customWidget != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -295,9 +285,8 @@ class CustomAlertDialog extends StatelessWidget {
               ),
             ),
           ),
-          
-          // ✅ Después
-if (confirmText.isNotEmpty || cancelText?.isNotEmpty == true)
+
+          if (confirmText.isNotEmpty || cancelText?.isNotEmpty == true)
             Container(
               padding: const EdgeInsets.all(16.0),
               child: _buildButtons(context),
@@ -309,11 +298,11 @@ if (confirmText.isNotEmpty || cancelText?.isNotEmpty == true)
 
   Widget _buildButtons(BuildContext context) {
     final buttonColor = type == CustomAlertType.error
-        ? ThemeColor.errorColor 
+        ? ThemeColor.errorColor
         : type == CustomAlertType.success
-            ? ThemeColor.successColor
-            : ThemeColor.primaryColor;
-        
+        ? ThemeColor.successColor
+        : ThemeColor.primaryColor;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -325,12 +314,7 @@ if (confirmText.isNotEmpty || cancelText?.isNotEmpty == true)
                 foregroundColor: ThemeColor.textSecondaryColor,
               ),
               onPressed: onCancel ?? () => Navigator.of(context).pop(),
-              child: Text(
-                cancelText!,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
+              child: Text(cancelText!, style: const TextStyle(fontSize: 14)),
             ),
           ),
           SizedBox(width: 8),
@@ -347,10 +331,7 @@ if (confirmText.isNotEmpty || cancelText?.isNotEmpty == true)
             onPressed: onConfirm ?? () => Navigator.of(context).pop(),
             child: Text(
               confirmText,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.white),
             ),
           ),
         ),
@@ -371,7 +352,7 @@ class _AnimatedGearsState extends State<AnimatedGears>
   late AnimationController _gearController;
   late Animation<double> _gear1Rotation;
   late Animation<double> _gear2Rotation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -413,7 +394,7 @@ class _AnimatedGearsState extends State<AnimatedGears>
             );
           },
         ),
-       
+
         Positioned(
           top: -5,
           right: -5,
@@ -431,7 +412,7 @@ class _AnimatedGearsState extends State<AnimatedGears>
             },
           ),
         ),
-    
+
         ..._buildWorkParticles(),
       ],
     );
@@ -448,7 +429,7 @@ class _AnimatedGearsState extends State<AnimatedGears>
           final x = math.cos(angle) * radius;
           final y = math.sin(angle) * radius;
           final opacity = math.sin(progress * math.pi);
-          
+
           return Positioned(
             left: x,
             top: y,
@@ -495,7 +476,7 @@ class _AnimatedScanningWavesState extends State<AnimatedScanningWaves>
   late AnimationController _scanController;
   late Animation<double> _waveAnimation;
   late Animation<double> _scanAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -535,11 +516,7 @@ class _AnimatedScanningWavesState extends State<AnimatedScanningWaves>
           builder: (context, child) {
             return Transform.rotate(
               angle: _scanAnimation.value * math.pi * 2,
-              child: Icon(
-                Icons.radar,
-                size: 32,
-                color: Colors.white,
-              ),
+              child: Icon(Icons.radar, size: 32, color: Colors.white),
             );
           },
         ),
@@ -555,7 +532,7 @@ class _AnimatedScanningWavesState extends State<AnimatedScanningWaves>
         final progress = (_waveAnimation.value - delay) % 1.0;
         final opacity = (1 - progress).clamp(0.0, 1.0);
         final scale = progress * 3 + 0.5;
-        
+
         return Transform.scale(
           scale: scale,
           child: Opacity(
@@ -564,10 +541,7 @@ class _AnimatedScanningWavesState extends State<AnimatedScanningWaves>
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.white,
-                  width: 2,
-                ),
+                border: Border.all(color: Colors.white, width: 2),
                 shape: BoxShape.circle,
               ),
             ),
@@ -584,23 +558,21 @@ class _AnimatedScanningWavesState extends State<AnimatedScanningWaves>
     super.dispose();
   }
 }
+
 class ShoppingItem {
   final IconData icon;
   final Color color;
   final Offset offset;
 
-  ShoppingItem({
-    required this.icon,
-    required this.color,
-    required this.offset,
-  });
+  ShoppingItem({required this.icon, required this.color, required this.offset});
 }
 
 class AnimatedExclamationMark extends StatefulWidget {
   const AnimatedExclamationMark({Key? key}) : super(key: key);
 
   @override
-  _AnimatedExclamationMarkState createState() => _AnimatedExclamationMarkState();
+  _AnimatedExclamationMarkState createState() =>
+      _AnimatedExclamationMarkState();
 }
 
 class _AnimatedExclamationMarkState extends State<AnimatedExclamationMark>
@@ -611,7 +583,7 @@ class _AnimatedExclamationMarkState extends State<AnimatedExclamationMark>
   late Animation<double> _rotateAnimation;
   late Animation<Color?> _colorAnimation;
   final List<Particle> _particles = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -632,57 +604,71 @@ class _AnimatedExclamationMarkState extends State<AnimatedExclamationMark>
 
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.3)
-            .chain(CurveTween(curve: Curves.easeOutQuad)),
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 1.3,
+        ).chain(CurveTween(curve: Curves.easeOutQuad)),
         weight: 40,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.3, end: 0.9)
-            .chain(CurveTween(curve: Curves.easeInQuad)),
+        tween: Tween<double>(
+          begin: 1.3,
+          end: 0.9,
+        ).chain(CurveTween(curve: Curves.easeInQuad)),
         weight: 30,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.9, end: 1.0)
-            .chain(CurveTween(curve: Curves.elasticOut)),
+        tween: Tween<double>(
+          begin: 0.9,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.elasticOut)),
         weight: 30,
       ),
     ]).animate(_mainController);
 
     _rotateAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0, end: 0.1)
-            .chain(CurveTween(curve: Curves.easeOutQuad)),
+        tween: Tween<double>(
+          begin: 0,
+          end: 0.1,
+        ).chain(CurveTween(curve: Curves.easeOutQuad)),
         weight: 40,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.1, end: -0.1)
-            .chain(CurveTween(curve: Curves.easeInOutQuad)),
+        tween: Tween<double>(
+          begin: 0.1,
+          end: -0.1,
+        ).chain(CurveTween(curve: Curves.easeInOutQuad)),
         weight: 30,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: -0.1, end: 0)
-            .chain(CurveTween(curve: Curves.elasticOut)),
+        tween: Tween<double>(
+          begin: -0.1,
+          end: 0,
+        ).chain(CurveTween(curve: Curves.elasticOut)),
         weight: 30,
       ),
     ]).animate(_mainController);
 
-    _colorAnimation = ColorTween(
-      begin: Colors.white,
-      end: Colors.white.withOpacity(0.7),
-    ).animate(CurvedAnimation(
-      parent: _mainController,
-      curve: Curves.easeInOut,
-    ));
+    _colorAnimation =
+        ColorTween(
+          begin: Colors.white,
+          end: Colors.white.withOpacity(0.7),
+        ).animate(
+          CurvedAnimation(parent: _mainController, curve: Curves.easeInOut),
+        );
   }
 
   void _generateParticles() {
     final random = math.Random();
     for (int i = 0; i < 8; i++) {
-      _particles.add(Particle(
-        speed: random.nextDouble() * 2 + 1,
-        theta: random.nextDouble() * math.pi * 2,
-        radius: random.nextDouble() * 20 + 10,
-      ));
+      _particles.add(
+        Particle(
+          speed: random.nextDouble() * 2 + 1,
+          theta: random.nextDouble() * math.pi * 2,
+          radius: random.nextDouble() * 20 + 10,
+        ),
+      );
     }
   }
 
@@ -730,7 +716,7 @@ class _AnimatedExclamationMarkState extends State<AnimatedExclamationMark>
           final progress = _particleController.value;
           final opacity = (1 - progress).clamp(0.0, 1.0);
           final scale = (1 - progress * 0.5).clamp(0.0, 1.0);
-          
+
           return Positioned(
             left: math.cos(particle.theta) * particle.radius * progress * 2,
             top: math.sin(particle.theta) * particle.radius * progress * 2,
@@ -774,11 +760,7 @@ class Particle {
   final double theta;
   final double radius;
 
-  Particle({
-    required this.speed,
-    required this.theta,
-    required this.radius,
-  });
+  Particle({required this.speed, required this.theta, required this.radius});
 }
 
 class SuccessParticle {
@@ -813,7 +795,7 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
   late Animation<double> _circleAnimation;
   late Animation<double> _scaleAnimation;
   final List<SuccessParticle> _particles = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -850,18 +832,24 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
 
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: 1.1)
-            .chain(CurveTween(curve: Curves.easeOutQuad)),
+        tween: Tween<double>(
+          begin: 0.0,
+          end: 1.1,
+        ).chain(CurveTween(curve: Curves.easeOutQuad)),
         weight: 40,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.1, end: 0.95)
-            .chain(CurveTween(curve: Curves.easeInOutQuad)),
+        tween: Tween<double>(
+          begin: 1.1,
+          end: 0.95,
+        ).chain(CurveTween(curve: Curves.easeInOutQuad)),
         weight: 30,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.95, end: 1.0)
-            .chain(CurveTween(curve: Curves.elasticOut)),
+        tween: Tween<double>(
+          begin: 0.95,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.elasticOut)),
         weight: 30,
       ),
     ]).animate(_circleController);
@@ -871,13 +859,15 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
     final random = math.Random();
     for (int i = 0; i < 12; i++) {
       final double angle = i * (math.pi * 2) / 12;
-      _particles.add(SuccessParticle(
-        color: ThemeColor.successColor,
-        angle: angle,
-        distance: random.nextDouble() * 15 + 25,
-        size: random.nextDouble() * 5 + 3,
-        duration: random.nextDouble() * 0.3 + 0.7,
-      ));
+      _particles.add(
+        SuccessParticle(
+          color: ThemeColor.successColor,
+          angle: angle,
+          distance: random.nextDouble() * 15 + 25,
+          size: random.nextDouble() * 5 + 3,
+          duration: random.nextDouble() * 0.3 + 0.7,
+        ),
+      );
     }
   }
 
@@ -899,7 +889,7 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
         alignment: Alignment.center,
         children: [
           ..._buildParticles(),
-          
+
           AnimatedBuilder(
             animation: _scaleAnimation,
             builder: (context, child) {
@@ -923,7 +913,7 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
               );
             },
           ),
-          
+
           AnimatedBuilder(
             animation: _checkAnimation,
             builder: (context, child) {
@@ -950,7 +940,7 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
           final progress = _particlesController.value;
           final distance = particle.distance * progress;
           final opacity = (1 - progress) * particle.duration;
-          
+
           return Positioned(
             left: 50 + (math.cos(particle.angle) * distance),
             top: 50 + (math.sin(particle.angle) * distance),
@@ -987,44 +977,43 @@ class _AnimatedSuccessCheckState extends State<AnimatedSuccessCheck>
   }
 }
 
-
 void showCustomAlert({
-    required BuildContext context,
-    required String title,
-    required String message,
-    required String confirmText,
-    String? cancelText,
-    VoidCallback? onConfirm,
-    VoidCallback? onCancel,
-    String? imagePath,
-    required CustomAlertType type,
-    Widget? customWidget,
-  }) {
- showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), 
-          child: Center(
-            child: Material(
-              type: MaterialType.transparency,
-              child: CustomAlertDialog(
-                title: title,
-                message: message,
-                confirmText: confirmText,
-                cancelText: cancelText,
-                onConfirm: onConfirm,
-                onCancel: onCancel,
-                imagePath: imagePath,
-                type: type,
-                customWidget: customWidget,
-              ),
+  required BuildContext context,
+  required String title,
+  required String message,
+  required String confirmText,
+  String? cancelText,
+  VoidCallback? onConfirm,
+  VoidCallback? onCancel,
+  String? imagePath,
+  required CustomAlertType type,
+  Widget? customWidget,
+}) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionDuration: const Duration(milliseconds: 400),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Center(
+          child: Material(
+            type: MaterialType.transparency,
+            child: CustomAlertDialog(
+              title: title,
+              message: message,
+              confirmText: confirmText,
+              cancelText: cancelText,
+              onConfirm: onConfirm,
+              onCancel: onCancel,
+              imagePath: imagePath,
+              type: type,
+              customWidget: customWidget,
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
 }

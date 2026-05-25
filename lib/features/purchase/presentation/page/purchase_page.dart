@@ -45,7 +45,7 @@ class PurchasePage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Título
+        
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
                   child: Text(
@@ -67,7 +67,7 @@ class PurchasePage extends StatelessWidget {
                   ),
                 ),
 
-                // Contenido principal
+            
                 if (controller.isLoadingProducts.value)
                   Expanded(
                     child: Center(
@@ -100,8 +100,7 @@ class PurchasePage extends StatelessWidget {
                   ),
 
                 const SizedBox(height: 8),
-
-                // Método de pago
+  
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                   child: Text(
@@ -117,8 +116,7 @@ class PurchasePage extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 20),
-
-                // Botón comprar
+ 
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
                   child: Obx(() {
@@ -175,10 +173,7 @@ class PurchasePage extends StatelessWidget {
           }),
         ));
   }
-
-  // ==========================================
-  // PRODUCT TILE
-  // ==========================================
+ 
 
   Widget _buildProductTile(
       PurchaseController controller, PurchaseEntity product) {
@@ -244,11 +239,7 @@ class PurchasePage extends StatelessWidget {
       );
     });
   }
-
-  // ==========================================
-  // PLATFORM BADGE
-  // ==========================================
-
+ 
   Widget _buildPlatformBadge() {
     final isIOS = Platform.isIOS;
     return _PaymentChip(
@@ -257,10 +248,7 @@ class PurchasePage extends StatelessWidget {
       selected: true,
     );
   }
-
-  // ==========================================
-  // EMPTY STATE
-  // ==========================================
+ 
 
   Widget _buildEmptyState(PurchaseController controller) {
     return Center(
@@ -289,10 +277,7 @@ class PurchasePage extends StatelessWidget {
       ),
     );
   }
-
-  // ==========================================
-  // SNACKBAR
-  // ==========================================
+ 
 
   void _showSnackbar(BuildContext context, String message,
       {required bool isError}) {
@@ -313,10 +298,7 @@ class PurchasePage extends StatelessWidget {
     );
   }
 }
-
-// ==========================================
-// PAYMENT CHIP
-// ==========================================
+ 
 
 class _PaymentChip extends StatelessWidget {
   const _PaymentChip({

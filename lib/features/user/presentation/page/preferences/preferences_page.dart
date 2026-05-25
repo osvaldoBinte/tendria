@@ -68,7 +68,6 @@ class PreferencesPage extends GetView<PreferencesController> {
         ));
   }
 
-  // ─── GENDER PREFERENCE ───────────────────────────────────────────────────────
 
   Widget _buildGenderPreferenceStep() {
     return Column(
@@ -198,7 +197,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     });
   }
 
-  // ─── CONNECTION TYPE ──────────────────────────────────────────────────────────
 
   Widget _buildConnectionTypeStep() {
     return Column(
@@ -321,7 +319,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     });
   }
 
-  // ─── AGE RANGE ────────────────────────────────────────────────────────────────
 
   Widget _buildAgeRangeStep() {
     return Column(
@@ -504,7 +501,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ─── PHOTOS ───────────────────────────────────────────────────────────────────
 
   Widget _buildPhotosStep() {
     return Column(
@@ -654,7 +650,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ─── INTERESTS ────────────────────────────────────────────────────────────────
 
   Widget _buildInterestsStep() {
     return Column(
@@ -882,7 +877,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     return icons[interest] ?? Icons.favorite;
   }
 
-  // ─── QUALITIES ────────────────────────────────────────────────────────────────
 
   Widget _buildQualitiesStep() {
     return Column(
@@ -997,7 +991,6 @@ class PreferencesPage extends GetView<PreferencesController> {
     );
   }
 
-  // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 
   Widget _buildNavigationButtons() {
     return Container(

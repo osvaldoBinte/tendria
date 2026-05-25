@@ -8,8 +8,7 @@ import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/stories/presentation/page/create_story_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-//import 'package:photo_manager/photo_manager.dart';
+import 'package:google_fonts/google_fonts.dart'; 
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
 
@@ -674,8 +673,7 @@ Widget _buildPreviewHeader() {
                 child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
               ),
             ),
-            Obx(() {
-              // ✅ Usar la constante correcta del controller
+            Obx(() { 
               final isPhoto = controller.contentType.value == CreateStoryController.kImagen;
               final isVideoReady = controller.isVideoReady.value;
               final showPublish = isPhoto || isVideoReady;

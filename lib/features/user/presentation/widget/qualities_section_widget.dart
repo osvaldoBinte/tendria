@@ -1,4 +1,4 @@
-// lib/features/user/presentation/widgets/qualities_section_widget.dart
+ 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/services/translation_service.dart';

@@ -5,15 +5,13 @@ import 'package:tendria/features/user/presentation/controller/profile_controller
 class LanguageController extends GetxController {
   String get deviceLanguage => _deviceLanguage;
 
-  String get _deviceLanguage {
-    // Obtiene el locale del dispositivo (ej: "es", "en", "fr")
+  String get _deviceLanguage { 
     final locale = WidgetsBinding.instance.platformDispatcher.locale;
     final languageCode = locale.languageCode;
 
     if (languageCode == 'es') return 'Español';
     if (languageCode == 'en') return 'Inglés';
-
-    // Cualquier otro idioma → Inglés por defecto
+ 
     return 'Inglés';
   }
 

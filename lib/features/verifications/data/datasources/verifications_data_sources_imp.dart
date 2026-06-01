@@ -55,7 +55,7 @@ class VerificationsDataSourcesImp {
     String token,
   ) async {
     try {
-      Uri url = Uri.parse('$defaultApiServer/Reportes');
+      Uri url = Uri.parse('$defaultApiServer/Verifications');
 
       final response = await http.post(
         url,

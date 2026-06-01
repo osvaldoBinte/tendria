@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart'; 
+import 'package:tendria/common/widgets/alert/snackbar_helper_getx.dart';
 import 'package:tendria/features/verifications/presentation/page/selfie_camera_page.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:tendria/features/verifications/domain/entities/get_verification_entity.dart';
@@ -126,7 +127,7 @@ class VerificationController extends GetxController {
       final result = await getVerificationUsecase.call();
       verifications.assignAll(result);
     } catch (e) {
-      _showError('No se pudieron cargar las verificaciones');
+      showErrorSnackbarGetx('No se pudieron cargar las verificaciones');
     } finally {
       isLoadingVerifications.value = false;
     }
@@ -142,11 +143,11 @@ class VerificationController extends GetxController {
   Future<void> submitPhone() async {
     final numero = phoneController.text.trim();
     if (numero.isEmpty) {
-      _showError('Ingresa tu número de teléfono');
+      showErrorSnackbarGetx('Ingresa tu número de teléfono');
       return;
     }
     if (selectedCountry.value.isEmpty) {
-      _showError('Selecciona tu país');
+      showErrorSnackbarGetx('Selecciona tu país');
       return;
     }
     try {
@@ -164,9 +165,9 @@ class VerificationController extends GetxController {
       );
       await loadVerifications();
       Get.back();
-      _showSuccess('Teléfono enviado para verificación');
+      showSuccessSnackbarGetx('Teléfono enviado para verificación');
     } catch (e) {
-      _showError('$e');
+      showErrorSnackbarGetx ('$e');
     } finally {
       isSubmittingPhone.value = false;
     }
@@ -192,25 +193,25 @@ class VerificationController extends GetxController {
   Future<void> openSocialProfile() async {
     final url = generatedSocialUrl.value;
     if (url.isEmpty) {
-      _showError('Ingresa tu nombre de usuario primero');
+      showErrorSnackbarGetx('Ingresa tu nombre de usuario primero');
       return;
     }
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      _showError('No se pudo abrir el navegador');
+      showErrorSnackbarGetx('No se pudo abrir el navegador');
     }
   }
 
   Future<void> submitSocial() async {
     final username = usernameController.text.trim();
     if (username.isEmpty) {
-      _showError('Ingresa tu nombre de usuario');
+      showErrorSnackbarGetx('Ingresa tu nombre de usuario');
       return;
     }
     if (generatedSocialUrl.value.isEmpty) {
-      _showError('La URL no se pudo generar');
+      showErrorSnackbarGetx('La URL no se pudo generar');
       return;
     }
     try {
@@ -228,9 +229,9 @@ class VerificationController extends GetxController {
       );
       await loadVerifications();
       Get.back();
-      _showSuccess('Red social enviada para verificación');
+      showSuccessSnackbarGetx('Red social enviada para verificación');
     } catch (e) {
-      _showError('$e');
+      showErrorSnackbarGetx('$e');
     } finally {
       isSubmittingSocial.value = false;
     }
@@ -248,11 +249,11 @@ class VerificationController extends GetxController {
 
   Future<void> submitSelfie(String profilePhotoUrl) async {
     if (selfieFile.value == null) {
-      _showError('Toma una selfie primero');
+      showErrorSnackbarGetx('Toma una selfie primero');
       return;
     }
     if (profilePhotoUrl.isEmpty) {
-      _showError('No tienes foto de perfil configurada');
+      showErrorSnackbarGetx('No tienes foto de perfil configurada');
       return;
     }
     try {
@@ -265,41 +266,12 @@ class VerificationController extends GetxController {
       );
       await loadVerifications();
       Get.back();
-      _showSuccess('Selfie enviada para verificación');
+      showSuccessSnackbarGetx('Selfie enviada para verificación');
     } catch (e) {
-      _showError('$e');
+      showErrorSnackbarGetx('$e');
     } finally {
       isSubmittingSelfie.value = false;
     }
   }
- 
-  void _showError(String msg) {
-    if (Get.context != null) {
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: const Color(0xFFFF3B3B),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-    }
-  }
-
-  void _showSuccess(String msg) {
-    if (Get.context != null) {
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: const Color(0xFF4CAF50),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-    }
-  }
+  
 }

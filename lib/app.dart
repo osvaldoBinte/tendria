@@ -28,6 +28,7 @@ import 'package:tendria/features/user/presentation/controller/preferences_contro
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
 import 'package:tendria/features/user/presentation/controller/user_profile_controller.dart';
+import 'package:tendria/features/verifications/presentation/controller/verification_controller.dart';
 import 'package:tendria/usecase_config.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -125,6 +126,9 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.logRegisterUsecase!, permanent: true);
         Get.put(usecaseConfig.logMatchUsecase!, permanent: true);
         Get.put(usecaseConfig.logLoginUsecase!, permanent: true);
+        Get.put(usecaseConfig.verificationUsecase!, permanent: true);
+        Get.put(usecaseConfig.verificationSelfieUsecase!, permanent: true);
+        Get.put(usecaseConfig.getVerificationUsecase!, permanent: true);
 
         Get.lazyPut(  () => LoginController( loginUsecase: Get.find(),saveTokenFcmUsecase: Get.find(), logLoginUsecase: Get.find(),), fenix: true,);
         Get.put(SignalRService( connectSignalRUsecase: Get.find(),disconnectSignalRUsecase: Get.find(),joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(), setupMessageListenerUsecase: Get.find(),setOnDisconnectedCallbackUsecase: Get.find(),
@@ -231,6 +235,13 @@ class App extends StatelessWidget {
           ),
           fenix: true,
         );
+        Get.lazyPut(
+          () => VerificationController(
+            verificationUsecase: Get.find(),
+            verificationSelfieUsecase: Get.find(),
+            getVerificationUsecase: Get.find(),
+          ),
+          fenix: true,  );
       }),
 
       getPages: AppPages.routes,

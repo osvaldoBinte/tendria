@@ -75,6 +75,11 @@ import 'package:tendria/features/user/domain/usecase/update_location_usecase.dar
 import 'package:tendria/features/user/domain/usecase/update_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_picture_perfile_usecase.dart';
+import 'package:tendria/features/verifications/data/datasources/verifications_data_sources_imp.dart';
+import 'package:tendria/features/verifications/data/repositories/verifications_repository_imp.dart';
+import 'package:tendria/features/verifications/domain/usecase/get_verification_usecase.dart';
+import 'package:tendria/features/verifications/domain/usecase/verification_selfie_usecase.dart';
+import 'package:tendria/features/verifications/domain/usecase/verification_usecase.dart';
 
 class UsecaseConfig {
   AuthDataSourceImp? authDataSourceImp;
@@ -86,6 +91,7 @@ class UsecaseConfig {
   UnlockDatasourcesImp? unlockDataSourcesImp;
   PurchaseDataSourcesImp? purchaseDataSourcesImp;
   FacebookDatasourcesImp? facebookDatasourcesImp;
+  VerificationsDataSourcesImp? verificationsDataSourcesImp;
   
   NotificationDataSourcesImp? notificationDataSourcesImp;
 
@@ -99,6 +105,7 @@ class UsecaseConfig {
   PurchaseRepositoryImp? purchaseRepositoryImp;
    NotificationRepositoryImp? notificationRepositoryImp;
    FacebookRepositoryImpl? facebookRepositoryImp;
+   VerificationsRepositoryImp? verificationsRepositoryImp;
 
   LoginUsecase? loginUsecase;
   CreateUserUsecase? createUserUsecase;
@@ -172,6 +179,10 @@ class UsecaseConfig {
    LogMatchUsecase? logMatchUsecase;
    LogLoginUsecase? logLoginUsecase;
 
+   VerificationUsecase? verificationUsecase;
+   VerificationSelfieUsecase? verificationSelfieUsecase;
+    GetVerificationUsecase? getVerificationUsecase;
+
   UsecaseConfig(){
     authDataSourceImp = AuthDataSourceImp();
     userDataSourcesImp = UserDataSourcesImp();
@@ -183,6 +194,7 @@ class UsecaseConfig {
     notificationDataSourcesImp = NotificationDataSourcesImp();
     purchaseDataSourcesImp = PurchaseDataSourcesImp();
     facebookDatasourcesImp = FacebookDatasourcesImp();
+    verificationsDataSourcesImp = VerificationsDataSourcesImp();
     notificationRepositoryImp = NotificationRepositoryImp(notificationDataSourcesImp: notificationDataSourcesImp!);
     authRepositoryImp = AuthRepositoryImp(authDataSourceImp: authDataSourceImp!);
     catalogRepositoryImp = CatalogRepositoryImp(catalogDataSourcesImp: catalogDataSourcesImp!);
@@ -193,8 +205,11 @@ class UsecaseConfig {
     unlockRepositoryImp = UnlockRepositoryImp(unlockDatasourcesImp: unlockDataSourcesImp!);
     purchaseRepositoryImp = PurchaseRepositoryImp(purchaseDataSourcesImp: purchaseDataSourcesImp!);
     facebookRepositoryImp = FacebookRepositoryImpl(facebookDatasourcesImp: facebookDatasourcesImp!);
+    verificationsRepositoryImp = VerificationsRepositoryImp(verificationsDataSourcesImp: verificationsDataSourcesImp!);
     loginUsecase = LoginUsecase(authRepository: authRepositoryImp!);
-    
+    verificationUsecase = VerificationUsecase(verificationsRepository: verificationsRepositoryImp!);
+    verificationSelfieUsecase = VerificationSelfieUsecase(verificationsRepository: verificationsRepositoryImp!);
+    getVerificationUsecase = GetVerificationUsecase(verificationsRepository: verificationsRepositoryImp!);
     createUserUsecase = CreateUserUsecase(authRepository: authRepositoryImp!);
     fetchInterestsUsecase = FetchInterestsUsecase(catalogRepository: catalogRepositoryImp!);
     fetchQualitiesUsecase = FetchQualitiesUsecase(catalogRepository: catalogRepositoryImp!);

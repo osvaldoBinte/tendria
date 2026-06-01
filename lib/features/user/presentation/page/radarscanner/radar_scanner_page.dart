@@ -13,6 +13,7 @@ import 'package:tendria/features/user/presentation/controller/nearby_users_contr
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
+import 'package:tendria/features/verifications/presentation/controller/verification_controller.dart';
 import 'package:video_player/video_player.dart';
 
 class RadarScannerScreen extends StatefulWidget {
@@ -28,6 +29,8 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
   late AnimationController _pulseController;
   late AnimationController _rippleController;
   late AnimationController _scanLineRotationController;
+  final VerificationController _verificationCtrl =
+      Get.find<VerificationController>();
 
   final ScrollController _scrollController = ScrollController();
   final UpdateProfileController _updater = Get.find<UpdateProfileController>();
@@ -76,24 +79,176 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
     super.dispose();
   }
 
-void _scrollToCurrentTarget() {
-  Future.delayed(const Duration(milliseconds: 100), () { 
-    if (!mounted) return;
-    if (!tutorialCtrl.isVisible.value) return;
-    if (tutorialCtrl.currentStep.value >= tutorialCtrl.steps.length) return;
+  void _scrollToCurrentTarget() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      if (!tutorialCtrl.isVisible.value) return;
+      if (tutorialCtrl.currentStep.value >= tutorialCtrl.steps.length) return;
 
-    final step = tutorialCtrl.currentStepData;
-    if (step.targetKey == null) return;
-    final ctx = step.targetKey!.currentContext;
-    if (ctx == null) return;
-    Scrollable.ensureVisible(
-      ctx,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
-      alignment: 0.3,
+      final step = tutorialCtrl.currentStepData;
+      if (step.targetKey == null) return;
+      final ctx = step.targetKey!.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        alignment: 0.3,
+      );
+    });
+  }
+
+  Widget _buildVerificationGate() {
+    const required = ['selfie', 'telefono', 'red_social'];
+
+    final missing = required
+        .where((tipo) => !_verificationCtrl.isVerified(tipo))
+        .toList();
+
+    final labels = {
+      'selfie': 'Selfie',
+      'telefono': 'Teléfono',
+      'red_social': 'Red social',
+    };
+
+    final icons = {
+      'selfie': Icons.face,
+      'telefono': Icons.phone,
+      'red_social': Icons.share,
+    };
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: ThemeColor.primaryColor.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.verified_user_outlined,
+                size: 72,
+                color: ThemeColor.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Verifica tu perfil para usar el radar',
+              style: ThemeColor.headingMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Necesitas completar todas las verificaciones antes de buscar personas cercanas.',
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textSecondary,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+
+            ...missing.map(
+              (tipo) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ThemeColor.cardBackground,
+                    borderRadius: ThemeColor.mediumBorderRadius,
+                    border: Border.all(
+                      color: ThemeColor.warningColor.withOpacity(0.4),
+                      width: 1.2,
+                    ),
+                    boxShadow: [ThemeColor.lightShadow],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: ThemeColor.warningColor.withOpacity(0.1),
+                          borderRadius: ThemeColor.smallBorderRadius,
+                        ),
+                        child: Icon(
+                          icons[tipo],
+                          color: ThemeColor.warningColor,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              labels[tipo]!,
+                              style: ThemeColor.bodyMedium.copyWith(
+                                color: ThemeColor.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              'Sin verificar',
+                              style: ThemeColor.caption.copyWith(
+                                color: ThemeColor.warningColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.radio_button_unchecked,
+                        color: ThemeColor.warningColor,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Get.toNamed(RoutesNames.verificationPage),
+                icon: const Icon(Icons.shield_outlined, color: Colors.white),
+                label: const Text(
+                  'Verificar mi perfil',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ThemeColor.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-  });
-}
+  }
+
   Widget _buildLocationPermissionState() {
     return Center(
       child: Padding(
@@ -446,6 +601,16 @@ void _scrollToCurrentTarget() {
       () => Scaffold(
         backgroundColor: ThemeColor.backgroundColorRadart,
         body: Obx(() {
+          final allVerified = [
+            'selfie',
+            'telefono',
+            'red_social',
+          ].every((t) => _verificationCtrl.isVerified(t));
+
+          if (!allVerified && !_verificationCtrl.isLoadingVerifications.value) {
+            return _buildVerificationGate();
+          }
+
           if (controller.locationPermissionDenied.value) {
             return _buildLocationPermissionState();
           }
@@ -460,7 +625,7 @@ void _scrollToCurrentTarget() {
       ),
     );
   }
- 
+
   Widget _buildDetectedPoints() {
     return Obx(() {
       final users = controller.currentRadarUsers;

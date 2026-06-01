@@ -17,6 +17,7 @@ import 'package:tendria/features/user/presentation/page/radarscanner/radar_scann
 import 'package:tendria/features/user/presentation/profiledetail/nearby_users_page.dart';
 import 'package:tendria/features/user/presentation/page/preferences/preferences_page.dart';
 import 'package:tendria/features/user/presentation/profiledetail/user_profile_detail_page.dart';
+import 'package:tendria/features/verifications/presentation/page/verification_page.dart';
 class AppPages {
   static final routes = [
    
@@ -35,7 +36,8 @@ class AppPages {
         GetPage(name: RoutesNames.blockedUsersPage, page: () => BlockedUsersPage()),
         GetPage(name: RoutesNames.updateProfilePage, page: () => UpdateProfilePage()), 
         GetPage (name: RoutesNames.notificationPage, page: () => NotificationPage()),
-        GetPage(name: RoutesNames.purchasePage, page: () =>PurchasePage())
+        GetPage(name: RoutesNames.purchasePage, page: () =>PurchasePage()),
+        GetPage(name: RoutesNames.verificationPage, page: () => VerificationPage())
   ];
 
   static final unknownRoute = GetPage(

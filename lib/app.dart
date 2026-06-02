@@ -111,12 +111,13 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.blockUserUsecase!, permanent: true);
         Get.put(usecaseConfig.unblockUserUsecase!, permanent: true);
         Get.put(usecaseConfig.updateLocationUsecase!, permanent: true);
+        Get.put(usecaseConfig.searchCityUsecase!, permanent: true);
+        Get.put(usecaseConfig.deactivateTripUsecase!, permanent: true);
+        Get.put(usecaseConfig.updateCityUsecase!, permanent: true);
+        
 
         Get.put(usecaseConfig.getnotificationUsecase!, permanent: true);
-        Get.put(
-          usecaseConfig.markAllNotificationsAsReadUsecase!,
-          permanent: true,
-        );
+        Get.put(usecaseConfig.markAllNotificationsAsReadUsecase!,permanent: true,);
         Get.put(usecaseConfig.saveTokenFcmUsecase!, permanent: true);
         Get.put(usecaseConfig.purchaseAppleUsecase!, permanent: true);
         Get.put(usecaseConfig.purchaseGoogleUsecase!, permanent: true);
@@ -132,91 +133,31 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.getVerificationUsecase!, permanent: true);
 
         Get.lazyPut(  () => LoginController( loginUsecase: Get.find(),saveTokenFcmUsecase: Get.find(), logLoginUsecase: Get.find(),), fenix: true,);
-        Get.put(SignalRService( connectSignalRUsecase: Get.find(),disconnectSignalRUsecase: Get.find(),joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(), setupMessageListenerUsecase: Get.find(),setOnDisconnectedCallbackUsecase: Get.find(),
-            onMensajesLeidosUsecase: Get.find(),
-            marcarMensajesLeidosUsecase: Get.find(),
-          ),
-          permanent: true,
-        );
+        Get.put(SignalRService( connectSignalRUsecase: Get.find(),disconnectSignalRUsecase: Get.find(),joinChatUsecase: Get.find(),leaveChatUsecase: Get.find(), setupMessageListenerUsecase: Get.find(),setOnDisconnectedCallbackUsecase: Get.find(),  onMensajesLeidosUsecase: Get.find(),
+            marcarMensajesLeidosUsecase: Get.find(), ), permanent: true, );
         Get.lazyPut(() => RegisterController(createUserUsecase: Get.find(), fetchQualitiesUsecase: Get.find(), fetchInterestsUsecase: Get.find(), logRegisterUsecase: Get.find(),), fenix: true,);
         Get.lazyPut(() => SplashController(getUserUsecase: Get.find(),updateLocationUsecase: Get.find(),),fenix: true, );
         Get.lazyPut(() => PreferencesController(preferencesUserUsecase: Get.find(),uploadMediaUsecase: Get.find(),fetchInterestsUsecase: Get.find(),fetchQualitiesUsecase: Get.find(),postInterestsUsecase: Get.find(),
             postQualitiesUsecase: Get.find(),uploadPicturePerfileUsecase: Get.find(),),fenix: true,);
         Get.lazyPut(() => ProfileController( getUserUsecase: Get.find(),uploadMediaUsecase: Get.find(),uploadPicturePerfileUsecase: Get.find(), deleteMediaUsecase: Get.find(),),fenix: true,);
-        Get.lazyPut(() => StoryController(fetchStoriesUsecase: Get.find(), addLikeToStoryUsecase: Get.find(),
-            fetchStoriesByIdUsecase: Get.find(),
-            removeStoryUsecase: Get.find(),
-            createStroryUsecase: Get.find(), setStoryAsSeenUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
+        Get.lazyPut(() => StoryController(fetchStoriesUsecase: Get.find(), addLikeToStoryUsecase: Get.find(), fetchStoriesByIdUsecase: Get.find(), removeStoryUsecase: Get.find(),createStroryUsecase: Get.find(), setStoryAsSeenUsecase: Get.find(), ),fenix: true,);
         //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
-        Get.lazyPut(
-          () => NearbyUsersController(
-            fetchNearbyUsersUsecase: Get.find(),
-            toggleLikeUsecase: Get.find(), updateLocationUsecase: Get.find(), createReportsUserUsecase:  Get.find(),
-          ),
-          fenix: true,
-        );
+        Get.lazyPut(() => NearbyUsersController( fetchNearbyUsersUsecase: Get.find(),
+            toggleLikeUsecase: Get.find(), updateLocationUsecase: Get.find(), createReportsUserUsecase:  Get.find(), deactivateTripUsecase:  Get.find(), updateCityUsecase:  Get.find(), searchCityUsecase: Get.find(), ),fenix: true,);
         Get.lazyPut(
           () => MyMatchController(getMyChatsUsecase: Get.find()),
         fenix: true,
         );
 
-        Get.lazyPut(
-          () => ChatController(
-            getChatMensajeUsecase: Get.find(),
-            sendMessageUsecase: Get.find(),
-            authService: Get.find(),
-            startConversationsUsecase: Get.find(),
-            paymentsChatUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => LikedByUsersController(
-            getPendingLikedChatsUsecase: Get.find(),
-            unlockChatUsecase: Get.find(), logMatchUsecase:  Get.find(), getLikeByUsersUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
+        Get.lazyPut( () => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find(),
+            authService: Get.find(),startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find(),), fenix: true, );
+        Get.lazyPut(  () => LikedByUsersController(getPendingLikedChatsUsecase: Get.find(), unlockChatUsecase: Get.find(), logMatchUsecase:  Get.find(), getLikeByUsersUsecase: Get.find(),),  fenix: true,);
         //    Get.lazyPut(() => StartConversationsController(startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
-        Get.lazyPut(
-          () => UserProfileController(
-            getUserByIdUsecase: Get.find(),
-            toggleLikeUsecase: Get.find(),
-            blockUserUsecase: Get.find(), logViewProfileUsecase:  Get.find(), createReportsUserUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => BlockedUsersController(
-            fetchBlockedUsersUsecase: Get.find(),
-            unblockUserUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => UpdateProfileController(
-            deleteInterestsUsecase: Get.find(),
-            deleteQualitiesUsecase: Get.find(),
-            updateUserUsecase: Get.find(),
-            fetchInterestsUsecase: Get.find(),
-            fetchQualitiesUsecase: Get.find(),
-            postInterestsUsecase: Get.find(),
-            postQualitiesUsecase: Get.find(),
-            putPreferencesUserUsecase: Get.find(),
-            deleteUserUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => NotificationController(
-            getNotificationUsecase: Get.find(),
-            markAllNotificationsAsReadUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
+        Get.lazyPut(() => UserProfileController( getUserByIdUsecase: Get.find(), toggleLikeUsecase: Get.find(), blockUserUsecase: Get.find(), logViewProfileUsecase:  Get.find(), createReportsUserUsecase: Get.find(),),fenix: true,);
+        Get.lazyPut(() => BlockedUsersController( fetchBlockedUsersUsecase: Get.find(), unblockUserUsecase: Get.find(), ),fenix: true,);
+        Get.lazyPut(  () => UpdateProfileController( deleteInterestsUsecase: Get.find(),deleteQualitiesUsecase: Get.find(),  updateUserUsecase: Get.find(),  fetchInterestsUsecase: Get.find(),
+            fetchQualitiesUsecase: Get.find(),  postInterestsUsecase: Get.find(),  postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(),  deleteUserUsecase: Get.find(),),fenix: true,);
+        Get.lazyPut( () => NotificationController(getNotificationUsecase: Get.find(),markAllNotificationsAsReadUsecase: Get.find(),), fenix: true, );
         Get.lazyPut(
           () => BalanceController(getBalanceUsecase: Get.find()),
           fenix: true,
@@ -229,21 +170,8 @@ class App extends StatelessWidget {
         Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
         Get.lazyPut(() =>StartController(updateLocationUsecase: Get.find()), fenix: true);
         
-        Get.lazyPut(
-          () => PurchaseController(
-            getPurchasesUsecase: Get.find(),
-            purchaseAppleUsecase: Get.find(),
-            purchaseGoogleUsecase: Get.find(),
-          ),
-          fenix: true,
-        );
-        Get.lazyPut(
-          () => VerificationController(
-            verificationUsecase: Get.find(),
-            verificationSelfieUsecase: Get.find(),
-            getVerificationUsecase: Get.find(),
-          ),
-          fenix: true,  );
+        Get.lazyPut(  () => PurchaseController(  getPurchasesUsecase: Get.find(),  purchaseAppleUsecase: Get.find(), purchaseGoogleUsecase: Get.find(),  ), fenix: true,  );
+        Get.lazyPut( () => VerificationController(  verificationUsecase: Get.find(), verificationSelfieUsecase: Get.find(), getVerificationUsecase: Get.find(), ),  fenix: true,  );
       }),
 
       getPages: AppPages.routes,

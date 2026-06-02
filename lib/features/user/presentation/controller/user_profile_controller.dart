@@ -692,7 +692,7 @@ class UserProfileController extends GetxController {
   }) async {
     try {
       Get.back();
-      await createReportsUserUsecase(
+      await createReportsUserUsecase.execute(
         CreateReportsUserEntity(
           reportedid: userId.value,
           reason: reason,

@@ -15,7 +15,9 @@ abstract class UserRepository {
     Future<void> uploadPicturePerfile(String file);
     Future<GetUserEntity> getuserbyid(int iduser);
     Future<void> updateUser(UpdateUserEntity entity);
-
+    Future<List<UpdateLocationEntity>> searchcity(String city);
+    Future<void> deactivateTrip();
+    Future<void> updateCity(UpdateLocationEntity entity);
     Future<void> deleteMedia(int mediaId);
     Future<void> deleteUser();
     Future<void>updateLocation(UpdateLocationEntity entity);

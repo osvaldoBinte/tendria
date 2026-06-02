@@ -47,7 +47,7 @@ class ProfileController extends GetxController {
     }
     return _cachedProfilePhotoUrl.value;
   }
-
+  bool get isTravelMode => userEntity.value?.isTravelMode ?? false;
   String get profileBio => userEntity.value?.bio ?? '';
   String get gender => userEntity.value?.gender ?? '';
   String get primarylanguage => userEntity.value?.primarylanguage ?? '';

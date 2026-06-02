@@ -260,7 +260,7 @@ Future<void> deleteMedia(int mediaId, String token) async {
     ApiExceptionCustom exception = ApiExceptionCustom(response: response);
     exception.validateMesage();
     throw exception;
-  } catch (e, stackTrace) {
+  } catch (e) {
 
     if (e is SocketException ||
         e is http.ClientException ||
@@ -397,7 +397,100 @@ Future<void> uploadPicturePerfil(
 }
 
 
+  Future<List<UpdateLocationEntity>> searchcity(String city,String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/buscar-ciudad?query=$city');
 
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+         
+      );
+
+    if (response.statusCode == 200||response.statusCode == 201) {
+        final dataUTF8 = utf8.decode(response.bodyBytes);
+        final List data = jsonDecode(dataUTF8);
+        return data.map((json) => UpdateLocationModel.fromJson(json)).toList();
+      }
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        print('🌐 Error de red detectado');
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('$e');
+    }
+  }
+
+  Future<void> updateCity(UpdateLocationEntity entity,String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/cambiar-ciudad');
+
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(UpdateLocationModel.fromEntity(entity).toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        print('🌐 Error de red detectado');
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('$e');
+    }
+  }
+  Future<void> deactivateTrip(String token) async{
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/desactivar-viaje');
+
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        print('🌐 Error de red detectado');
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('$e');
+    }
+  }
   Future<void> updateLocation(UpdateLocationEntity entity,String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/actualizar-ubicacion');

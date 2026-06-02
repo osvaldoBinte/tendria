@@ -16,6 +16,7 @@ class GetUserEntity {
   final List<InterestsIdsEntity>? interestsIds;
   final PreferencesEntity? preferences;
   final LikeStatusEntity? likeStatus;
+  final bool? isTravelMode;
   
   final String? status;
   final ChatEntity? chat;
@@ -36,7 +37,8 @@ class GetUserEntity {
       this.heightcm,
       this.city,
       this.status,
-      this.chat
+      this.chat,
+      this.isTravelMode,
   });
 
 }

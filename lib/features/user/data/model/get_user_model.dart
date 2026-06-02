@@ -20,6 +20,7 @@ class GetUserModel extends GetUserEntity {
     super.gender,
     super.primarylanguage,
     super.heightcm,
+    super.isTravelMode,
   });
   factory GetUserModel.fromJson(Map<String, dynamic> json) {
     return GetUserModel(
@@ -34,6 +35,7 @@ class GetUserModel extends GetUserEntity {
       status: json['status'],
       city: json['ciudad'],
       bio: json['bio'],
+      isTravelMode: json['modo_viaje'] ,
 
       assets: (json['media'] as List<dynamic>?)
           ?.map(

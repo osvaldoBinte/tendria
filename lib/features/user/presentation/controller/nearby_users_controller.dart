@@ -17,8 +17,11 @@ import 'package:tendria/features/user/domain/entities/create_reports_user_entity
 import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/usecase/create_reports_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/deactivate_trip_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
 import 'package:tendria/features/like/domain/usecase/toggle_like_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/search_city_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/update_city_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 
@@ -27,12 +30,19 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
   final ToggleLikeUsecase toggleLikeUsecase;
   final UpdateLocationUsecase updateLocationUsecase;
   final CreateReportsUserUsecase createReportsUserUsecase;
+  final DeactivateTripUsecase deactivateTripUsecase;
+  final UpdateCityUsecase updateCityUsecase;
+  final SearchCityUsecase searchCityUsecase;
+
 
   NearbyUsersController({
     required this.fetchNearbyUsersUsecase,
     required this.toggleLikeUsecase,
     required this.updateLocationUsecase,
     required this.createReportsUserUsecase,
+    required this.deactivateTripUsecase,
+    required this.updateCityUsecase,
+    required this.searchCityUsecase
   });
 
   LanguageController get _l => Get.find<LanguageController>();
@@ -86,6 +96,7 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     pageController = PageController();
     loadNearbyUsers();
+    print(  myProfileController.isTravelMode);
   }
 
   @override
@@ -100,8 +111,226 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       _checkPermissionOnResume();
     }
-  }
+  } 
 
+Future<void> deactivateTrip() async {
+  try {
+    isLoading.value = true;
+    await deactivateTripUsecase.execute(); 
+    await _updateUserLocation(); 
+    await myProfileController.loadUserProfile();
+    currentPage.value = 1;
+    await loadNearbyUsers();
+    showSuccessSnackbar(_l.t('travel_mode_deactivated'));
+  } catch (e) {
+    showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
+  } finally {
+    isLoading.value = false;
+  }
+}
+ 
+
+final RxList<UpdateLocationEntity> cityResults = <UpdateLocationEntity>[].obs;
+final RxBool isSearchingCity = false.obs;
+
+Future<void> searchCity(String query) async {
+  if (query.trim().isEmpty) {
+    cityResults.clear();
+    return;
+  }
+  try {
+    isSearchingCity.value = true;
+    final results = await searchCityUsecase.execute(query.trim());
+    cityResults.value = results;
+  } catch (e) {
+    cityResults.clear();
+    showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
+  } finally {
+    isSearchingCity.value = false;
+  }
+}
+
+Future<void> selectCity(UpdateLocationEntity location, [BuildContext? ctx]) async {
+  try {
+    Get.back(); 
+    isLoading.value = true;
+    await updateCityUsecase.execute(location);
+    currentPage.value = 1;
+    await loadNearbyUsers();
+ 
+    await myProfileController.loadUserProfile();
+    if (ctx != null && ctx.mounted) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text('${_l.t('city_updated')}: ${location.city}'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      showSuccessSnackbar('${_l.t('city_updated')}: ${location.city}');
+    }
+  } catch (e) {
+    showErrorSnackbar('${_l.t('error')}: ${cleanExceptionMessage(e)}');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+void showCitySearchSheet() {
+  cityResults.clear();
+  final TextEditingController searchCtrl = TextEditingController(); 
+  final scaffoldContext = Get.context!;
+
+  Get.bottomSheet(
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    Container(
+      height: MediaQuery.of(Get.context!).size.height * 0.75,
+      decoration: BoxDecoration(
+        color: ThemeColor.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [ 
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: ThemeColor.subtleBorder,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              _l.t('search_city_title'),
+              style: ThemeColor.headingMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: ThemeColor.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12), 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextField(
+              controller: searchCtrl,
+              autofocus: true,
+              style: TextStyle(color: ThemeColor.textPrimary),
+              decoration: InputDecoration(
+                hintText: _l.t('search_city_hint'),
+                hintStyle: TextStyle(color: ThemeColor.textSecondary),
+                prefixIcon: Icon(Icons.search, color: ThemeColor.textSecondary),
+                suffixIcon: Obx(() => isSearchingCity.value
+                    ? Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 16, height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: ThemeColor.primaryColor,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink()),
+                filled: true,
+                fillColor: ThemeColor.backgroundColorfondo,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: ThemeColor.subtleBorder),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: ThemeColor.subtleBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: ThemeColor.primaryColor),
+                ),
+              ),
+              onChanged: (v) => searchCity(v),
+            ),
+          ),
+          const SizedBox(height: 8), 
+          Expanded(
+            child: Obx(() {
+              if (cityResults.isEmpty && !isSearchingCity.value) {
+                return Center(
+                  child: Text(
+                    searchCtrl.text.isEmpty
+                        ? _l.t('search_city_prompt')
+                        : _l.t('search_city_no_results'),
+                    style: TextStyle(color: ThemeColor.textSecondary),
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20, vertical: 8,
+                ),
+                itemCount: cityResults.length,
+                separatorBuilder: (_, __) => Divider(
+                  color: ThemeColor.subtleBorder,
+                  height: 1,
+                ),
+                itemBuilder: (_, i) {
+                  final city = cityResults[i];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 4, vertical: 4,
+                    ),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: ThemeColor.primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.location_city_rounded,
+                        color: ThemeColor.primaryColor,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      city.city,
+                      style: TextStyle(
+                        color: ThemeColor.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                    subtitle: Text(
+                      city.country,
+                      style: TextStyle(
+                        color: ThemeColor.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: ThemeColor.textSecondary,
+                    ),
+         
+                            onTap: () => selectCity(city, scaffoldContext), 
+                  );
+                },
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
+}
   Future<void> _checkPermissionOnResume() async {
     final permission = await Geolocator.checkPermission();
     final hasPermission =
@@ -543,7 +772,7 @@ class NearbyUsersController extends GetxController with WidgetsBindingObserver {
         .first;
     try {
       Get.back();
-      await createReportsUserUsecase(
+      await createReportsUserUsecase.execute(
         CreateReportsUserEntity(
           reportedid: userId,
           reason: reason,

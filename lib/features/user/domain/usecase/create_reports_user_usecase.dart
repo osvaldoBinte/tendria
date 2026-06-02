@@ -4,7 +4,7 @@ import 'package:tendria/features/user/domain/repositories/user_repository.dart';
 class CreateReportsUserUsecase {
   final UserRepository userRepository;
   CreateReportsUserUsecase({required this.userRepository});
-  Future<void> call(CreateReportsUserEntity entity) async {
+  Future<void> execute(CreateReportsUserEntity entity) async {
     return await userRepository.createReportsUser(entity);
   }
 }

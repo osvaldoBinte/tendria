@@ -90,4 +90,22 @@ class UserRepositoryImp extends UserRepository {
     final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
     return await userDataSourcesImp.createReportsUser(entity, token);
   }
+  
+  @override
+  Future<List<UpdateLocationEntity>> searchcity(String city) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.searchcity(city, token);
+  }
+  
+  @override
+  Future<void> deactivateTrip() async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.deactivateTrip(token);
+  }
+  
+  @override
+  Future<void> updateCity(UpdateLocationEntity entity) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await userDataSourcesImp.updateCity(entity, token);
+  }
 }

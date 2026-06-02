@@ -63,6 +63,7 @@ import 'package:tendria/features/unlock/domain/usecase/unblock_user_usecase.dart
 import 'package:tendria/features/user/data/datasources/user_data_sources_imp.dart';
 import 'package:tendria/features/user/data/repositories/user_repository_imp.dart';
 import 'package:tendria/features/user/domain/usecase/create_reports_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/deactivate_trip_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/delete_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/delete_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/fetch_nearby_users_usecase.dart';
@@ -71,6 +72,8 @@ import 'package:tendria/features/user/domain/usecase/get_user_by_id_usecase.dart
 import 'package:tendria/features/user/domain/usecase/get_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/preferences_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/put_preferences_user_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/search_city_usecase.dart';
+import 'package:tendria/features/user/domain/usecase/update_city_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/update_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
@@ -119,6 +122,9 @@ class UsecaseConfig {
   
   GetUserUsecase? getUserUsecase;
   UpdateLocationUsecase? updateLocationUsecase;
+  SearchCityUsecase? searchCityUsecase;
+  DeactivateTripUsecase? deactivateTripUsecase;
+  UpdateCityUsecase? updateCityUsecase;
   DeleteUserUsecase?deleteUserUsecase;
   GetUserByIdUsecase? getUserByIdUsecase;
   FetchNearbyUsersUsecase? fetchNearbyUsersUsecase;
@@ -220,6 +226,9 @@ class UsecaseConfig {
     updateUserUsecase = UpdateUserUsecase(userRepository: userRepositoryImp!);
     getUserByIdUsecase = GetUserByIdUsecase(userRepository: userRepositoryImp!);
     updateLocationUsecase = UpdateLocationUsecase(userRepository: userRepositoryImp!);
+    searchCityUsecase = SearchCityUsecase(userRepository: userRepositoryImp!);
+    deactivateTripUsecase = DeactivateTripUsecase(userRepository: userRepositoryImp!);
+      updateCityUsecase = UpdateCityUsecase(userRepository: userRepositoryImp!);
     deleteUserUsecase = DeleteUserUsecase(userRepository: userRepositoryImp!);
     fetchNearbyUsersUsecase = FetchNearbyUsersUsecase(userRepository: userRepositoryImp!);
     postInterestsUsecase = PostInterestsUsecase(catalogRepository: catalogRepositoryImp!);

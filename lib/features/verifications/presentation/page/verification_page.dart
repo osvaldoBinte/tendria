@@ -48,7 +48,7 @@ class _VerificationPageState extends State<VerificationPage>
     _fadeController.dispose();
     super.dispose();
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +106,7 @@ class _VerificationPageState extends State<VerificationPage>
       ),
     );
   }
- 
+
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: ThemeColor.backgroundColor,
@@ -123,7 +123,7 @@ class _VerificationPageState extends State<VerificationPage>
       systemOverlayStyle: SystemUiOverlayStyle.dark,
     );
   }
- 
+
   Widget _buildHeader() {
     return Obx(() {
       final verified = controller.verifiedCount;
@@ -158,8 +158,9 @@ class _VerificationPageState extends State<VerificationPage>
                     child: LinearProgressIndicator(
                       value: verified / total,
                       backgroundColor: Colors.white24,
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
                       minHeight: 6,
                     ),
                   ),
@@ -192,7 +193,7 @@ class _VerificationPageState extends State<VerificationPage>
       );
     });
   }
- 
+
   Widget _buildVerificationCard({
     required String tipo,
     required IconData icon,
@@ -315,10 +316,7 @@ class _VerificationPageState extends State<VerificationPage>
     });
   }
 
-  String? _subtitleFromVerification(
-    String tipo,
-    GetVerificationEntity? v,
-  ) {
+  String? _subtitleFromVerification(String tipo, GetVerificationEntity? v) {
     if (v == null) return null;
     switch (tipo) {
       case 'telefono':
@@ -336,7 +334,7 @@ class _VerificationPageState extends State<VerificationPage>
     }
     return null;
   }
- 
+
   Widget _buildBenefitsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,7 +404,7 @@ class _VerificationPageState extends State<VerificationPage>
       ),
     );
   }
- 
+
   void _showPhoneSheet() {
     controller.clearPhoneForm();
     showModalBottomSheet(
@@ -418,7 +416,7 @@ class _VerificationPageState extends State<VerificationPage>
         icon: Icons.phone,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [ 
+          children: [
             Text(
               'País *',
               style: ThemeColor.bodyMedium.copyWith(
@@ -451,7 +449,7 @@ class _VerificationPageState extends State<VerificationPage>
                         Text(
                           controller.selectedDialCode.value,
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.primaryColor,
+                            color: ThemeColor.tertiaryColor,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -459,7 +457,7 @@ class _VerificationPageState extends State<VerificationPage>
                         Text(
                           selected,
                           style: ThemeColor.bodyMedium.copyWith(
-                            color: ThemeColor.textPrimary,
+                            color: ThemeColor.tertiaryColor,
                           ),
                         ),
                       ] else
@@ -470,14 +468,16 @@ class _VerificationPageState extends State<VerificationPage>
                           ),
                         ),
                       const Spacer(),
-                      Icon(Icons.keyboard_arrow_down,
-                          color: ThemeColor.textSecondary),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: ThemeColor.textSecondary,
+                      ),
                     ],
                   ),
                 ),
               );
             }),
-            const SizedBox(height: ThemeColor.paddingMedium), 
+            const SizedBox(height: ThemeColor.paddingMedium),
             Text(
               'Número de teléfono *',
               style: ThemeColor.bodyMedium.copyWith(
@@ -492,7 +492,7 @@ class _VerificationPageState extends State<VerificationPage>
                 controller: controller.phoneController,
                 keyboardType: TextInputType.phone,
                 style: ThemeColor.bodyMedium.copyWith(
-                  color: ThemeColor.textPrimary,
+                  color: ThemeColor.textDarkColor,
                 ),
                 decoration: InputDecoration(
                   hintText: '123 456 7890',
@@ -514,7 +514,7 @@ class _VerificationPageState extends State<VerificationPage>
                           child: Text(
                             dialCode,
                             style: ThemeColor.bodyMedium.copyWith(
-                              color: ThemeColor.primaryColor,
+                              color: ThemeColor.tertiaryColor,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -526,7 +526,10 @@ class _VerificationPageState extends State<VerificationPage>
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: ThemeColor.circularBorderRadius,
-                    borderSide: BorderSide.none,
+                    borderSide:  BorderSide(
+                      color: ThemeColor.toggleBackground,
+                      width: 1.5,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: ThemeColor.circularBorderRadius,
@@ -560,8 +563,9 @@ class _VerificationPageState extends State<VerificationPage>
 
   void _showCountryPicker() {
     final searchController = TextEditingController();
-    final RxList<Map<String, String>> filtered =
-        RxList.from(VerificationController.countries);
+    final RxList<Map<String, String>> filtered = RxList.from(
+      VerificationController.countries,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -629,7 +633,10 @@ class _VerificationPageState extends State<VerificationPage>
                   hintStyle: ThemeColor.bodyMedium.copyWith(
                     color: ThemeColor.textSecondaryColor,
                   ),
-                  prefixIcon: Icon(Icons.search, color: ThemeColor.textSecondary),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: ThemeColor.textSecondary,
+                  ),
                   filled: true,
                   fillColor: ThemeColor.subtleBackground,
                   contentPadding: const EdgeInsets.symmetric(
@@ -642,7 +649,10 @@ class _VerificationPageState extends State<VerificationPage>
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: ThemeColor.mediumBorderRadius,
-                    borderSide: BorderSide.none,
+                    borderSide:  BorderSide(
+                      color: ThemeColor.toggleBackground,
+                      width: 1.5,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: ThemeColor.mediumBorderRadius,
@@ -796,7 +806,7 @@ class _VerificationPageState extends State<VerificationPage>
               isRequired: true,
               onChanged: controller.onUsernameChanged,
             ),
-            const SizedBox(height: ThemeColor.paddingMedium), 
+            const SizedBox(height: ThemeColor.paddingMedium),
             Obx(() {
               final url = controller.generatedSocialUrl.value;
               if (url.isEmpty) return const SizedBox.shrink();
@@ -823,7 +833,11 @@ class _VerificationPageState extends State<VerificationPage>
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.link, size: 16, color: ThemeColor.primaryColor),
+                        Icon(
+                          Icons.link,
+                          size: 16,
+                          color: ThemeColor.primaryColor,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -849,8 +863,11 @@ class _VerificationPageState extends State<VerificationPage>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.open_in_new,
-                                    size: 14, color: Colors.white),
+                                const Icon(
+                                  Icons.open_in_new,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Ver perfil',
@@ -869,8 +886,11 @@ class _VerificationPageState extends State<VerificationPage>
                   const SizedBox(height: ThemeColor.paddingSmall),
                   Row(
                     children: [
-                      Icon(Icons.info_outline,
-                          size: 13, color: ThemeColor.textSecondary),
+                      Icon(
+                        Icons.info_outline,
+                        size: 13,
+                        color: ThemeColor.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Toca "Ver perfil" para confirmar que es tu cuenta',
@@ -928,19 +948,100 @@ class _VerificationPageState extends State<VerificationPage>
                       const SizedBox(height: 8),
                       Obx(() {
                         final url = profileController.profilePhotoUrl;
-                        return Container(
-                          height: 130,
-                          decoration: BoxDecoration(
-                            color: ThemeColor.subtleBackground,
-                            borderRadius: ThemeColor.largeBorderRadius,
-                            border: Border.all(color: ThemeColor.subtleBorder),
+                        return GestureDetector(
+                          onTap: url.isEmpty
+                              ? () async {
+                                  await profileController
+                                      .pickProfilePhotoFromGallery();
+                                }
+                              : null,
+                          child: Container(
+                            height: 130,
+                            decoration: BoxDecoration(
+                              color: ThemeColor.subtleBackground,
+                              borderRadius: ThemeColor.largeBorderRadius,
+                              border: Border.all(
+                                color: url.isEmpty
+                                    ? ThemeColor.primaryColor.withOpacity(0.4)
+                                    : ThemeColor.subtleBorder,
+                                width: url.isEmpty ? 1.5 : 1,
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: url.isNotEmpty
+                                ? Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      Image.network(
+                                        url,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                      ),
+                                      Positioned(
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        child: GestureDetector(
+                                          onTap: profileController
+                                              .pickProfilePhotoFromGallery,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 6,
+                                            ),
+                                            color: Colors.black45,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(
+                                                  Icons.edit,
+                                                  color: Colors.white,
+                                                  size: 12,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  'Cambiar',
+                                                  style: ThemeColor.caption
+                                                      .copyWith(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_a_photo,
+                                        size: 32,
+                                        color: ThemeColor.primaryColor,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Agregar foto',
+                                        style: ThemeColor.caption.copyWith(
+                                          color: ThemeColor.primaryColor,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Requerida para la selfie',
+                                        style: ThemeColor.caption.copyWith(
+                                          color: ThemeColor.textSecondary,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
-                          clipBehavior: Clip.antiAlias,
-                          child: url.isNotEmpty
-                              ? Image.network(url, fit: BoxFit.cover,
-                                  width: double.infinity)
-                              : Icon(Icons.person, size: 50,
-                                  color: ThemeColor.textSecondary),
                         );
                       }),
                     ],
@@ -985,9 +1086,11 @@ class _VerificationPageState extends State<VerificationPage>
                                 : Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.camera_alt,
-                                          size: 36,
-                                          color: ThemeColor.primaryColor),
+                                      Icon(
+                                        Icons.camera_alt,
+                                        size: 36,
+                                        color: ThemeColor.primaryColor,
+                                      ),
                                       const SizedBox(height: 6),
                                       Text(
                                         'Tomar selfie',
@@ -1029,8 +1132,11 @@ class _VerificationPageState extends State<VerificationPage>
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline,
-                      color: ThemeColor.infoColor, size: 18),
+                  Icon(
+                    Icons.info_outline,
+                    color: ThemeColor.infoColor,
+                    size: 18,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -1048,9 +1154,8 @@ class _VerificationPageState extends State<VerificationPage>
               () => ThemeColor.widgetButton(
                 text: 'Enviar selfie',
                 isLoading: controller.isSubmittingSelfie.value,
-                onPressed: () => controller.submitSelfie(
-                  profileController.profilePhotoUrl,
-                ),
+                onPressed: () =>
+                    controller.submitSelfie(profileController.profilePhotoUrl),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 14,
@@ -1065,7 +1170,7 @@ class _VerificationPageState extends State<VerificationPage>
     );
   }
 }
- 
+
 class _SheetWrapper extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -1114,8 +1219,7 @@ class _SheetWrapper extends StatelessWidget {
                       color: ThemeColor.primaryColor.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child:
-                        Icon(icon, color: ThemeColor.primaryColor, size: 22),
+                    child: Icon(icon, color: ThemeColor.primaryColor, size: 22),
                   ),
                   const SizedBox(width: ThemeColor.paddingMedium),
                   Expanded(
@@ -1127,8 +1231,7 @@ class _SheetWrapper extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon:
-                        Icon(Icons.close, color: ThemeColor.textSecondary),
+                    icon: Icon(Icons.close, color: ThemeColor.textSecondary),
                     onPressed: () => Get.back(),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),

@@ -8,7 +8,7 @@ class ThemeColor {
   // Colores principales - Tema de citas (Burdeos/Vino)
   //static const Color primaryColor = Color(0xFF4A141E); // Burdeos principal
   static const Color secondaryColor = Color(0xFF8B2C4B); // Burdeos oscuro
-  static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
+  //static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
 
   static const Color accentColor = Color(0xFFB83A5E); // Rosa burdeos claro
   static const Color radarScanner = Color(
@@ -20,6 +20,17 @@ class ThemeColor {
   static const Color cardColor = Colors.white; // Cards blancas
   // static final Color backgroundColorfondo = Color(0xFFEFEFEA);
   //static final Color backgroundColor = Colors.white;
+  static Color get tertiaryColor {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return ctrl.isDarkMode.value
+          ?   Color(0xFF4A141E)
+          :Color(0xFF4A141E) ;
+    } catch (_) {
+      return const Color(0xFF4A141E);
+    }
+  }
+
   static Color get primaryColor {
     try {
       final ctrl = Get.find<ThemeController>();
@@ -1047,7 +1058,7 @@ static Widget createLabeledTextField({
         onChanged: onChanged,
         enabled: enabled,
         maxLines: maxLines,
-        inputFormatters: inputFormatters, // ✅ Agrega esto
+        inputFormatters: inputFormatters,
         style:
             textStyle ??
             bodyMedium.copyWith(color: textColor ?? textDarkColor),
@@ -1075,12 +1086,12 @@ static Widget createLabeledTextField({
             borderRadius: borderRadius ?? circularBorderRadius,
             borderSide: showError
                 ? BorderSide(color: errorColor, width: 1.5)
-                : BorderSide.none,
+                :BorderSide(color: toggleBackground, width: 1.5)
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: borderRadius ?? circularBorderRadius,
             borderSide: BorderSide(
-              color: (borderColor ?? dividerColor).withOpacity(0.5),
+              color: (borderColor ?? toggleBackground).withOpacity(0.5),
               width: 1,
             ),
           ),

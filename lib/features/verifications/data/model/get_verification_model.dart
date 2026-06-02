@@ -12,7 +12,7 @@ class GetVerificationModel extends GetVerificationEntity {
     required super.updatedAt,
     super.phone,
     super.social,
-    super.selfie,
+  //  super.selfie,
     super.revisadoEn,
   });
 
@@ -36,7 +36,7 @@ class GetVerificationModel extends GetVerificationEntity {
       social: tipo == 'red_social'
           ? VerificationsDataSocialModel.fromJson(datos)
           : null,
-      selfie: tipo == 'selfie' ? VerificationSelfieModel.fromJson(datos) : null,
+     // selfie: tipo == 'selfie' ? VerificationSelfieModel.fromJson(datos) : null,
     );
   }
 }

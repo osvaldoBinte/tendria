@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 
 class SelfieCameraResult {
@@ -25,23 +26,23 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   CameraController? _cameraController;
   bool _isCameraReady = false;
  
-  final FaceDetector _faceDetector = FaceDetector(
-    options: FaceDetectorOptions(
-      performanceMode: FaceDetectorMode.fast,
-    ),
-  );
+  final LanguageController _l = Get.find<LanguageController>();
  
+  final FaceDetector _faceDetector = FaceDetector(
+    options: FaceDetectorOptions(performanceMode: FaceDetectorMode.fast),
+  );
+
   Timer? _detectionTimer;
   bool _isAnalyzing = false;
  
   final RxString _detectionState = 'idle'.obs;
   final RxBool _faceDetected = false.obs;
   final RxBool _photoTaken = false.obs;
-  final RxString _statusMessage = 'Coloca tu rostro en el círculo'.obs;
+  final RxString _statusMessage = ''.obs;
 
-  int _stableFrames = 0; 
+  int _stableFrames = 0;
   static const int _requiredStableFrames = 4;
- 
+
   int _failedAttempts = 0;
   static const int _attemptsBeforeManual = 6;
   final RxBool _showManualButton = false.obs;
@@ -51,10 +52,11 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
 
   File? _capturedPhoto;
   String? _tempPath;
-
+ 
   @override
   void initState() {
     super.initState();
+    _statusMessage.value = _l.t('selfie_place_face');
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _initCamera();
@@ -66,9 +68,11 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     _detectionTimer?.cancel();
     _captureTimer?.cancel();
     _cameraController?.dispose();
-    _faceDetector.close(); 
+    _faceDetector.close();
     if (_tempPath != null) {
-      try { File(_tempPath!).deleteSync(); } catch (_) {}
+      try {
+        File(_tempPath!).deleteSync();
+      } catch (_) {}
     }
     super.dispose();
   }
@@ -90,10 +94,10 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
         (c) => c.lensDirection == CameraLensDirection.front,
       );
       if (front == null) {
-        _statusMessage.value = 'No se encontró cámara frontal';
+        _statusMessage.value = _l.t('selfie_no_front_camera');
         return;
       }
- 
+
       _cameraController = CameraController(
         front,
         ResolutionPreset.medium,
@@ -103,14 +107,14 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       await _cameraController!.initialize();
       if (!mounted) return;
       setState(() => _isCameraReady = true);
- 
+
       final dir = await getTemporaryDirectory();
       _tempPath = '${dir.path}/selfie_detect.jpg';
 
       _startDetectionTimer();
     } catch (e) {
       debugPrint('Error init camera: $e');
-      _statusMessage.value = 'Error al iniciar la cámara';
+      _statusMessage.value = _l.t('selfie_camera_error');
     }
   }
  
@@ -136,13 +140,12 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     }
 
     _isAnalyzing = true;
-    try { 
+    try {
       final xFile = await _cameraController!.takePicture();
       final file = File(xFile.path);
- 
       await file.copy(_tempPath!);
       await file.delete();
- 
+
       final inputImage = InputImage.fromFilePath(_tempPath!);
       final faces = await _faceDetector.processImage(inputImage);
 
@@ -161,11 +164,12 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
 
     if (faces.isNotEmpty) {
       _faceDetected.value = true;
+      _failedAttempts = 0;
 
       if (state == 'idle' || state == 'lost') {
         _stableFrames = 1;
         _detectionState.value = 'stabilizing';
-        _statusMessage.value = 'Rostro detectado, mantente quieto...';
+        _statusMessage.value = _l.t('selfie_face_detected');
       } else if (state == 'stabilizing') {
         _stableFrames++;
         if (_stableFrames >= _requiredStableFrames) {
@@ -178,25 +182,25 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
 
       if (state == 'stabilizing') {
         _detectionState.value = 'idle';
-        _statusMessage.value = 'Coloca tu rostro en el círculo';
+        _statusMessage.value = _l.t('selfie_place_face');
       } else if (state == 'countdown') {
         _cancelCountdown();
         _detectionState.value = 'lost';
-        _statusMessage.value = '⚠️ Moviste la cara, vuelve a colocarla';
+        _statusMessage.value = _l.t('selfie_moved');
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted && _detectionState.value == 'lost') {
             _detectionState.value = 'idle';
-            _statusMessage.value = 'Coloca tu rostro en el círculo';
+            _statusMessage.value = _l.t('selfie_place_face');
           }
         });
       } else {
-        _detectionState.value = 'idle'; 
+        _detectionState.value = 'idle';
         _failedAttempts++;
         if (_failedAttempts >= _attemptsBeforeManual &&
             !_showManualButton.value) {
           _showManualButton.value = true;
         }
-        _statusMessage.value = 'Coloca tu rostro en el círculo';
+        _statusMessage.value = _l.t('selfie_place_face');
       }
     }
   }
@@ -204,7 +208,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   void _startCaptureCountdown() {
     _detectionState.value = 'countdown';
     _countdown.value = 3;
-    _statusMessage.value = '¡No te muevas! Tomando foto en 3...';
+    _statusMessage.value = _l.t('selfie_no_move_3');
 
     _captureTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_detectionState.value != 'countdown') {
@@ -214,9 +218,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       }
       _countdown.value--;
       if (_countdown.value == 2) {
-        _statusMessage.value = '¡No te muevas! Tomando foto en 2...';
+        _statusMessage.value = _l.t('selfie_no_move_2');
       } else if (_countdown.value == 1) {
-        _statusMessage.value = '¡No te muevas! Tomando foto en 1...';
+        _statusMessage.value = _l.t('selfie_no_move_1');
       } else if (_countdown.value <= 0) {
         timer.cancel();
         _countdown.value = 0;
@@ -228,14 +232,13 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   void _cancelCountdown() {
     _captureTimer?.cancel();
     _countdown.value = 0;
-  }
- 
+  } 
   Future<void> _capturePhoto() async {
     if (_photoTaken.value) return;
     try {
       _stopDetection();
       _detectionState.value = 'capturing';
-      _statusMessage.value = '📸 Tomando foto...';
+      _statusMessage.value = _l.t('selfie_taking');
 
       final xFile = await _cameraController?.takePicture();
       if (xFile == null) throw Exception('No se pudo capturar');
@@ -243,10 +246,10 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       _capturedPhoto = File(xFile.path);
       _photoTaken.value = true;
       _detectionState.value = 'done';
-      _statusMessage.value = '¡Selfie lista!';
+      _statusMessage.value = _l.t('selfie_ready');
     } catch (e) {
       debugPrint('Capture error: $e');
-      _statusMessage.value = 'Error al tomar la foto, intenta de nuevo';
+      _statusMessage.value = _l.t('selfie_error');
       _photoTaken.value = false;
       _detectionState.value = 'idle';
       _stableFrames = 0;
@@ -263,7 +266,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     _failedAttempts = 0;
     _showManualButton.value = false;
     _detectionState.value = 'idle';
-    _statusMessage.value = 'Coloca tu rostro en el círculo';
+    _statusMessage.value = _l.t('selfie_place_face');
     _startDetectionTimer();
   }
 
@@ -317,7 +320,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                         strokeWidth: 6,
                         backgroundColor: Colors.white24,
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.white),
+                          Colors.white,
+                        ),
                       ),
                     ),
                     Text(
@@ -326,9 +330,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                         fontSize: 72,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(blurRadius: 20, color: Colors.black54)
-                        ],
+                        shadows: [Shadow(blurRadius: 20, color: Colors.black54)],
                       ),
                     ),
                   ],
@@ -342,7 +344,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
               right: 0,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -353,14 +357,19 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                           color: Colors.black38,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 7),
+                        horizontal: 14,
+                        vertical: 7,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black45,
                         borderRadius: BorderRadius.circular(20),
@@ -368,12 +377,18 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.face_retouching_natural,
-                              color: Colors.white70, size: 16),
+                          const Icon(
+                            Icons.face_retouching_natural,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
                           const SizedBox(width: 6),
-                          Text('Detección automática',
-                              style: ThemeColor.caption
-                                  .copyWith(color: Colors.white70)),
+                          Text(
+                            _l.t('selfie_auto_detection'),
+                            style: ThemeColor.caption.copyWith(
+                              color: Colors.white70,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -386,54 +401,57 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
               bottom: 180,
               left: 24,
               right: 24,
-              child: Obx(() => AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Container(
-                      key: ValueKey(_statusMessage.value),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: _detectionState.value == 'lost'
-                            ? ThemeColor.errorColor.withOpacity(0.90)
-                            : _detectionState.value == 'countdown'
-                                ? ThemeColor.successColor.withOpacity(0.90)
-                                : _faceDetected.value && !_photoTaken.value
-                                    ? ThemeColor.primaryColor.withOpacity(0.85)
-                                    : Colors.black54,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _photoTaken.value
-                                ? Icons.check_circle
-                                : _detectionState.value == 'lost'
-                                    ? Icons.warning_rounded
-                                    : _faceDetected.value
-                                        ? Icons.face
-                                        : Icons.face_outlined,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              _statusMessage.value,
-                              style: ThemeColor.bodySmall.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
+              child: Obx(
+                () => AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    key: ValueKey(_statusMessage.value),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
                     ),
-                  )),
-            ),
- 
+                    decoration: BoxDecoration(
+                      color: _detectionState.value == 'lost'
+                          ? ThemeColor.errorColor.withOpacity(0.90)
+                          : _detectionState.value == 'countdown'
+                          ? ThemeColor.successColor.withOpacity(0.90)
+                          : _faceDetected.value && !_photoTaken.value
+                          ? ThemeColor.primaryColor.withOpacity(0.85)
+                          : Colors.black54,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _photoTaken.value
+                              ? Icons.check_circle
+                              : _detectionState.value == 'lost'
+                              ? Icons.warning_rounded
+                              : _faceDetected.value
+                              ? Icons.face
+                              : Icons.face_outlined,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            _statusMessage.value,
+                            style: ThemeColor.bodySmall.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ), 
             Positioned(
               bottom: 48,
               left: 24,
@@ -451,18 +469,26 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                               color: Colors.black54,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                  color: Colors.white38, width: 1),
+                                color: Colors.white38,
+                                width: 1,
+                              ),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.refresh,
-                                    color: Colors.white, size: 20),
+                                const Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
-                                Text('Repetir',
-                                    style: ThemeColor.bodyMedium.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600)),
+                                Text(
+                                  _l.t('selfie_retake'),
+                                  style: ThemeColor.bodyMedium.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -482,13 +508,19 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.check,
-                                    color: Colors.white, size: 20),
+                                const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
-                                Text('Usar esta foto',
-                                    style: ThemeColor.bodyMedium.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600)),
+                                Text(
+                                  _l.t('selfie_use'),
+                                  style: ThemeColor.bodyMedium.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -498,42 +530,47 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                   );
                 }
  
-                return Obx(() => _showManualButton.value
-                    ? Column(
-                        children: [
-                          GestureDetector(
-                            onTap: _capturePhoto,
-                            child: Container(
-                              width: 72,
-                              height: 72,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border:
-                                    Border.all(color: Colors.white, width: 3),
-                                color: Colors.white24,
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
+                return Obx(
+                  () => _showManualButton.value
+                      ? Column(
+                          children: [
+                            GestureDetector(
+                              onTap: _capturePhoto,
+                              child: Container(
+                                width: 72,
+                                height: 72,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
                                     color: Colors.white,
+                                    width: 3,
+                                  ),
+                                  color: Colors.white24,
+                                ),
+                                child: Center(
+                                  child: Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'No te detectamos, toca para fotografiar',
-                            style: ThemeColor.caption
-                                .copyWith(color: Colors.white60),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink());
+                            const SizedBox(height: 10),
+                            Text(
+                              _l.t('selfie_not_detected'),
+                              style: ThemeColor.caption.copyWith(
+                                color: Colors.white60,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                );
               }),
             ),
           ],
@@ -561,8 +598,7 @@ class _FaceOvalOverlayPainter extends CustomPainter {
       ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
       ..addOval(ovalRect)
       ..fillType = PathFillType.evenOdd;
-    canvas.drawPath(
-        bgPath, Paint()..color = Colors.black.withOpacity(0.55));
+    canvas.drawPath(bgPath, Paint()..color = Colors.black.withOpacity(0.55));
 
     final Color borderColor;
     final double borderWidth;
@@ -600,11 +636,14 @@ class _FaceOvalOverlayPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round;
       const arcLen = 0.35;
       canvas.drawArc(
-          ovalRect, -1.5707 - arcLen / 2, arcLen, false, cornerPaint);
+        ovalRect, -1.5707 - arcLen / 2, arcLen, false, cornerPaint,
+      );
       canvas.drawArc(
-          ovalRect, 1.5707 - arcLen / 2, arcLen, false, cornerPaint);
+        ovalRect, 1.5707 - arcLen / 2, arcLen, false, cornerPaint,
+      );
       canvas.drawArc(
-          ovalRect, 3.1415 - arcLen / 2, arcLen, false, cornerPaint);
+        ovalRect, 3.1415 - arcLen / 2, arcLen, false, cornerPaint,
+      );
       canvas.drawArc(ovalRect, -arcLen / 2, arcLen, false, cornerPaint);
     }
   }

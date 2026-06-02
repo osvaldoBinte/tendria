@@ -106,9 +106,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
         .toList();
 
     final labels = {
-      'selfie': 'Selfie',
-      'telefono': 'Teléfono',
-      'red_social': 'Red social',
+      'selfie': _l.t('verify_selfie_title'),
+      'telefono': _l.t('verify_phone_title'),
+      'red_social': _l.t('verify_social_title'),
     };
 
     final icons = {
@@ -137,7 +137,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'Verifica tu perfil para usar el radar',
+              _l.t('verify_gate_title'),
               style: ThemeColor.headingMedium.copyWith(
                 fontWeight: FontWeight.bold,
                 color: ThemeColor.textPrimary,
@@ -146,7 +146,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              'Necesitas completar todas las verificaciones antes de buscar personas cercanas.',
+              _l.t('verify_gate_desc'),
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textSecondary,
                 height: 1.5,
@@ -199,7 +199,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
                               ),
                             ),
                             Text(
-                              'Sin verificar',
+                              _l.t('verify_gate_not_verified'),
                               style: ThemeColor.caption.copyWith(
                                 color: ThemeColor.warningColor,
                               ),
@@ -225,9 +225,9 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               child: ElevatedButton.icon(
                 onPressed: () => Get.toNamed(RoutesNames.verificationPage),
                 icon: const Icon(Icons.shield_outlined, color: Colors.white),
-                label: const Text(
-                  'Verificar mi perfil',
-                  style: TextStyle(
+                label: Text(
+                  _l.t('verify_gate_btn'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -605,8 +605,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             'selfie',
             'telefono',
             'red_social',
-          ].every((t) => _verificationCtrl.isVerified(t));
-
+          ].every((t) => _verificationCtrl.getVerification(t) != null);
           if (!allVerified && !_verificationCtrl.isLoadingVerifications.value) {
             return _buildVerificationGate();
           }

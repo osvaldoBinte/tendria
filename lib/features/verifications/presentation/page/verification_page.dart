@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/verifications/domain/entities/get_verification_entity.dart';
@@ -17,6 +18,7 @@ class _VerificationPageState extends State<VerificationPage>
     with SingleTickerProviderStateMixin {
   final VerificationController controller = Get.find<VerificationController>();
   final ProfileController profileController = Get.find<ProfileController>();
+  final LanguageController _l = Get.find<LanguageController>();
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -76,24 +78,24 @@ class _VerificationPageState extends State<VerificationPage>
                   _buildVerificationCard(
                     tipo: 'selfie',
                     icon: Icons.face,
-                    title: 'Selfie',
-                    subtitle: 'Verifica que eres una persona real',
+                    title: _l.t('verify_selfie_title'),
+                    subtitle: _l.t('verify_selfie_subtitle'),
                     onTap: _showSelfieSheet,
                   ),
                   const SizedBox(height: ThemeColor.paddingMedium),
                   _buildVerificationCard(
                     tipo: 'telefono',
                     icon: Icons.phone,
-                    title: 'Teléfono',
-                    subtitle: 'Confirma tu número de teléfono',
+                    title: _l.t('verify_phone_title'),
+                    subtitle: _l.t('verify_phone_subtitle'),
                     onTap: _showPhoneSheet,
                   ),
                   const SizedBox(height: ThemeColor.paddingMedium),
                   _buildVerificationCard(
                     tipo: 'red_social',
                     icon: Icons.share,
-                    title: 'Red social',
-                    subtitle: 'Vincula tu cuenta de redes sociales',
+                    title: _l.t('verify_social_title'),
+                    subtitle: _l.t('verify_social_subtitle'),
                     onTap: _showSocialSheet,
                   ),
                   const SizedBox(height: ThemeColor.paddingLarge),
@@ -116,7 +118,7 @@ class _VerificationPageState extends State<VerificationPage>
         onPressed: () => Get.back(),
       ),
       title: Text(
-        'Verificación',
+        _l.t('verify_title'),
         style: ThemeColor.headingSmall.copyWith(color: ThemeColor.textPrimary),
       ),
       centerTitle: true,
@@ -142,14 +144,14 @@ class _VerificationPageState extends State<VerificationPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Tu perfil verificado',
+                    _l.t('verify_profile_verified'),
                     style: ThemeColor.headingSmall.copyWith(
                       color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Genera más confianza y consigue más matches',
+                    _l.t('verify_profile_desc'),
                     style: ThemeColor.bodySmall.copyWith(color: Colors.white70),
                   ),
                   const SizedBox(height: ThemeColor.paddingMedium),
@@ -166,7 +168,7 @@ class _VerificationPageState extends State<VerificationPage>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '$verified de $total verificaciones completadas',
+                    '$verified ${_l.t('verify_completed')}',
                     style: ThemeColor.caption.copyWith(color: Colors.white70),
                   ),
                 ],
@@ -212,15 +214,15 @@ class _VerificationPageState extends State<VerificationPage>
 
       if (verified) {
         statusColor = ThemeColor.successColor;
-        statusLabel = 'Verificado';
+        statusLabel = _l.t('verify_status_verified');
         statusIcon = Icons.check_circle;
       } else if (pending) {
         statusColor = ThemeColor.warningColor;
-        statusLabel = 'En revisión';
+        statusLabel = _l.t('verify_status_pending');
         statusIcon = Icons.hourglass_top;
       } else {
         statusColor = ThemeColor.textSecondaryColor;
-        statusLabel = 'Sin verificar';
+        statusLabel = _l.t('verify_status_none');
         statusIcon = Icons.radio_button_unchecked;
       }
 
@@ -330,7 +332,7 @@ class _VerificationPageState extends State<VerificationPage>
           return '${red[0].toUpperCase()}${red.substring(1)} · @$user';
         }
       case 'selfie':
-        return 'Selfie enviada';
+        return _l.t('verify_selfie_sent');
     }
     return null;
   }
@@ -340,7 +342,7 @@ class _VerificationPageState extends State<VerificationPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '¿Por qué verificarte?',
+          _l.t('verify_benefits_title'),
           style: ThemeColor.subtitleMedium.copyWith(
             color: ThemeColor.textPrimary,
             fontWeight: FontWeight.bold,
@@ -349,18 +351,18 @@ class _VerificationPageState extends State<VerificationPage>
         const SizedBox(height: ThemeColor.paddingMedium),
         _buildBenefitRow(
           Icons.favorite,
-          'Más matches',
-          'Los perfiles verificados reciben hasta 3x más likes',
+          _l.t('verify_benefit1_title'),
+          _l.t('verify_benefit1_desc'),
         ),
         _buildBenefitRow(
           Icons.shield,
-          'Mayor confianza',
-          'Los usuarios confían más en perfiles verificados',
+          _l.t('verify_benefit2_title'),
+          _l.t('verify_benefit2_desc'),
         ),
         _buildBenefitRow(
           Icons.star,
-          'Destacado en búsquedas',
-          'Aparece antes en los resultados del radar',
+          _l.t('verify_benefit3_title'),
+          _l.t('verify_benefit3_desc'),
         ),
       ],
     );
@@ -406,19 +408,19 @@ class _VerificationPageState extends State<VerificationPage>
   }
 
   void _showPhoneSheet() {
-    controller.clearPhoneForm();
+    controller.clearPhoneForm(userCity: profileController.city);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _SheetWrapper(
-        title: 'Verificar teléfono',
+        title: _l.t('verify_phone_sheet_title'),
         icon: Icons.phone,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'País *',
+              _l.t('verify_phone_country_label'),
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textPrimary,
                 fontWeight: FontWeight.w500,
@@ -428,7 +430,7 @@ class _VerificationPageState extends State<VerificationPage>
             Obx(() {
               final selected = controller.selectedCountry.value;
               return GestureDetector(
-                onTap: () => _showCountryPicker(),
+                onTap: _showCountryPicker,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: ThemeColor.paddingLarge,
@@ -462,7 +464,7 @@ class _VerificationPageState extends State<VerificationPage>
                         ),
                       ] else
                         Text(
-                          'Selecciona tu país',
+                          _l.t('verify_phone_country_hint'),
                           style: ThemeColor.bodyMedium.copyWith(
                             color: ThemeColor.textSecondaryColor,
                           ),
@@ -479,7 +481,7 @@ class _VerificationPageState extends State<VerificationPage>
             }),
             const SizedBox(height: ThemeColor.paddingMedium),
             Text(
-              'Número de teléfono *',
+              _l.t('verify_phone_number_label'),
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textPrimary,
                 fontWeight: FontWeight.w500,
@@ -495,7 +497,7 @@ class _VerificationPageState extends State<VerificationPage>
                   color: ThemeColor.textDarkColor,
                 ),
                 decoration: InputDecoration(
-                  hintText: '123 456 7890',
+                  hintText: _l.t('verify_phone_number_hint'),
                   hintStyle: ThemeColor.bodyMedium.copyWith(
                     color: ThemeColor.textSecondaryColor,
                   ),
@@ -526,7 +528,7 @@ class _VerificationPageState extends State<VerificationPage>
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: ThemeColor.circularBorderRadius,
-                    borderSide:  BorderSide(
+                    borderSide: BorderSide(
                       color: ThemeColor.toggleBackground,
                       width: 1.5,
                     ),
@@ -544,7 +546,7 @@ class _VerificationPageState extends State<VerificationPage>
             const SizedBox(height: ThemeColor.paddingLarge),
             Obx(
               () => ThemeColor.widgetButton(
-                text: 'Enviar para verificación',
+                text: _l.t('verify_send_btn'),
                 isLoading: controller.isSubmittingPhone.value,
                 onPressed: controller.submitPhone,
                 padding: const EdgeInsets.symmetric(
@@ -596,7 +598,7 @@ class _VerificationPageState extends State<VerificationPage>
                 children: [
                   Expanded(
                     child: Text(
-                      'Selecciona tu país',
+                      _l.t('verify_country_picker_title'),
                       style: ThemeColor.headingSmall.copyWith(
                         color: ThemeColor.textPrimary,
                       ),
@@ -629,7 +631,7 @@ class _VerificationPageState extends State<VerificationPage>
                   color: ThemeColor.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Buscar país...',
+                  hintText: _l.t('verify_country_search_hint'),
                   hintStyle: ThemeColor.bodyMedium.copyWith(
                     color: ThemeColor.textSecondaryColor,
                   ),
@@ -649,7 +651,7 @@ class _VerificationPageState extends State<VerificationPage>
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: ThemeColor.mediumBorderRadius,
-                    borderSide:  BorderSide(
+                    borderSide: BorderSide(
                       color: ThemeColor.toggleBackground,
                       width: 1.5,
                     ),
@@ -725,13 +727,13 @@ class _VerificationPageState extends State<VerificationPage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _SheetWrapper(
-        title: 'Verificar red social',
+        title: _l.t('verify_social_sheet_title'),
         icon: Icons.share,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Red social',
+              _l.t('verify_social_network_label'),
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textPrimary,
                 fontWeight: FontWeight.w500,
@@ -800,9 +802,9 @@ class _VerificationPageState extends State<VerificationPage>
             ),
             const SizedBox(height: ThemeColor.paddingMedium),
             ThemeColor.createLabeledTextField(
-              label: 'Nombre de usuario',
+              label: _l.t('verify_username_label'),
               controller: controller.usernameController,
-              hintText: '@tuusuario',
+              hintText: _l.t('verify_username_hint'),
               isRequired: true,
               onChanged: controller.onUsernameChanged,
             ),
@@ -814,7 +816,7 @@ class _VerificationPageState extends State<VerificationPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'URL generada',
+                    _l.t('verify_url_generated'),
                     style: ThemeColor.bodySmall.copyWith(
                       color: ThemeColor.textSecondary,
                       fontWeight: FontWeight.w500,
@@ -870,7 +872,7 @@ class _VerificationPageState extends State<VerificationPage>
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Ver perfil',
+                                  _l.t('verify_view_profile'),
                                   style: ThemeColor.caption.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -892,10 +894,12 @@ class _VerificationPageState extends State<VerificationPage>
                         color: ThemeColor.textSecondary,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        'Toca "Ver perfil" para confirmar que es tu cuenta',
-                        style: ThemeColor.caption.copyWith(
-                          color: ThemeColor.textSecondary,
+                      Flexible(
+                        child: Text(
+                          _l.t('verify_view_profile_hint'),
+                          style: ThemeColor.caption.copyWith(
+                            color: ThemeColor.textSecondary,
+                          ),
                         ),
                       ),
                     ],
@@ -906,7 +910,7 @@ class _VerificationPageState extends State<VerificationPage>
             const SizedBox(height: ThemeColor.paddingLarge),
             Obx(
               () => ThemeColor.widgetButton(
-                text: 'Enviar para verificación',
+                text: _l.t('verify_send_btn'),
                 isLoading: controller.isSubmittingSocial.value,
                 onPressed: controller.submitSocial,
                 padding: const EdgeInsets.symmetric(
@@ -930,7 +934,7 @@ class _VerificationPageState extends State<VerificationPage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _SheetWrapper(
-        title: 'Verificar con selfie',
+        title: _l.t('verify_selfie_sheet_title'),
         icon: Icons.face,
         child: Column(
           children: [
@@ -940,7 +944,7 @@ class _VerificationPageState extends State<VerificationPage>
                   child: Column(
                     children: [
                       Text(
-                        'Tu foto de perfil',
+                        _l.t('verify_profile_photo_label'),
                         style: ThemeColor.caption.copyWith(
                           color: ThemeColor.textSecondary,
                         ),
@@ -948,8 +952,11 @@ class _VerificationPageState extends State<VerificationPage>
                       const SizedBox(height: 8),
                       Obx(() {
                         final url = profileController.profilePhotoUrl;
+                        final isUploading =
+                            profileController.isUploadingProfilePhoto.value;
+
                         return GestureDetector(
-                          onTap: url.isEmpty
+                          onTap: (url.isEmpty && !isUploading)
                               ? () async {
                                   await profileController
                                       .pickProfilePhotoFromGallery();
@@ -968,7 +975,28 @@ class _VerificationPageState extends State<VerificationPage>
                               ),
                             ),
                             clipBehavior: Clip.antiAlias,
-                            child: url.isNotEmpty
+                            child: isUploading 
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 32,
+                                        height: 32,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          color: ThemeColor.primaryColor,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        _l.t('loading'),
+                                        style: ThemeColor.caption.copyWith(
+                                          color: ThemeColor.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : url.isNotEmpty 
                                 ? Stack(
                                     fit: StackFit.expand,
                                     children: [
@@ -1000,7 +1028,7 @@ class _VerificationPageState extends State<VerificationPage>
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  'Cambiar',
+                                                  _l.t('verify_change_photo'),
                                                   style: ThemeColor.caption
                                                       .copyWith(
                                                         color: Colors.white,
@@ -1014,7 +1042,7 @@ class _VerificationPageState extends State<VerificationPage>
                                         ),
                                       ),
                                     ],
-                                  )
+                                  ) 
                                 : Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -1025,7 +1053,7 @@ class _VerificationPageState extends State<VerificationPage>
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        'Agregar foto',
+                                        _l.t('verify_add_photo'),
                                         style: ThemeColor.caption.copyWith(
                                           color: ThemeColor.primaryColor,
                                           fontWeight: FontWeight.w600,
@@ -1033,7 +1061,7 @@ class _VerificationPageState extends State<VerificationPage>
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Requerida para la selfie',
+                                        _l.t('verify_photo_required'),
                                         style: ThemeColor.caption.copyWith(
                                           color: ThemeColor.textSecondary,
                                           fontSize: 10,
@@ -1058,7 +1086,7 @@ class _VerificationPageState extends State<VerificationPage>
                   child: Column(
                     children: [
                       Text(
-                        'Tu selfie',
+                        _l.t('verify_selfie_label'),
                         style: ThemeColor.caption.copyWith(
                           color: ThemeColor.textSecondary,
                         ),
@@ -1093,7 +1121,7 @@ class _VerificationPageState extends State<VerificationPage>
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        'Tomar selfie',
+                                        _l.t('verify_take_selfie'),
                                         style: ThemeColor.caption.copyWith(
                                           color: ThemeColor.primaryColor,
                                           fontWeight: FontWeight.w600,
@@ -1118,7 +1146,7 @@ class _VerificationPageState extends State<VerificationPage>
                 onPressed: controller.pickSelfie,
                 icon: Icon(Icons.refresh, color: ThemeColor.primaryColor),
                 label: Text(
-                  'Tomar otra',
+                  _l.t('verify_retake'),
                   style: TextStyle(color: ThemeColor.primaryColor),
                 ),
               );
@@ -1140,7 +1168,7 @@ class _VerificationPageState extends State<VerificationPage>
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Asegúrate de que tu rostro sea claramente visible y coincida con tu foto de perfil.',
+                      _l.t('verify_selfie_info'),
                       style: ThemeColor.caption.copyWith(
                         color: ThemeColor.infoColor,
                       ),
@@ -1152,7 +1180,7 @@ class _VerificationPageState extends State<VerificationPage>
             const SizedBox(height: ThemeColor.paddingLarge),
             Obx(
               () => ThemeColor.widgetButton(
-                text: 'Enviar selfie',
+                text: _l.t('verify_send_selfie'),
                 isLoading: controller.isSubmittingSelfie.value,
                 onPressed: () =>
                     controller.submitSelfie(profileController.profilePhotoUrl),

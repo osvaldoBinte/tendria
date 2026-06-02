@@ -27,7 +27,7 @@ class VerificationSelfieModel extends VerificationSelfieEntity {
 
     request.files.add(
       await http.MultipartFile.fromPath(
-        'Foto ',
+        'Foto',
         foto.path,
         filename: foto.path.split('/').last,
       ),

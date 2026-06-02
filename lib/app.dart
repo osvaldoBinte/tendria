@@ -11,6 +11,7 @@ import 'package:tendria/common/services/translation_service.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/auth/presentation/page/Splash/splash_controller.dart';
+import 'package:tendria/features/auth/presentation/page/home/start_controller.dart';
 import 'package:tendria/features/auth/presentation/page/login/login_controller.dart';
 import 'package:tendria/features/auth/presentation/page/register/register_controller.dart';
 import 'package:tendria/features/chat/presentation/page/chat_controller.dart';
@@ -226,6 +227,7 @@ class App extends StatelessWidget {
         Get.lazyPut(() => ProfileTutorialController(), fenix: true);
         Get.lazyPut(() => StartTutorialController(), fenix: true);
         Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
+        Get.lazyPut(() =>StartController(updateLocationUsecase: Get.find()), fenix: true);
         
         Get.lazyPut(
           () => PurchaseController(

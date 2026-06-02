@@ -22,7 +22,7 @@ class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
-    controller   = Get.put(StartController());
+    controller   = Get.find<StartController>();
     tutorialCtrl =  Get.find<StartTutorialController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -70,22 +70,30 @@
             android:value="2" />
 
     </application>
+<queries>
+    <!-- Requerido para comunicarse con Google Play Store en Android 11+ -->
+    <package android:name="com.android.vending" />
 
-    <queries>
-        <!-- Requerido para comunicarse con Google Play Store en Android 11+ -->
-        <package android:name="com.android.vending" />
+    <!-- Flutter ProcessText plugin -->
+    <intent>
+        <action android:name="android.intent.action.PROCESS_TEXT"/>
+        <data android:mimeType="text/plain"/>
+    </intent>
 
-        <!-- Flutter ProcessText plugin -->
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
+    <!-- Marcador telefónico -->
+    <intent>
+        <action android:name="android.intent.action.DIAL" />
+        <data android:scheme="tel" />
+    </intent>
 
-        <!-- Marcador telefónico -->
-        <intent>
-            <action android:name="android.intent.action.DIAL" />
-            <data android:scheme="tel" />
-        </intent>
-    </queries>
-
+    <!-- ← AGREGAR ESTO para que canLaunchUrl funcione con http/https -->
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="https" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="http" />
+    </intent>
+</queries>
 </manifest>

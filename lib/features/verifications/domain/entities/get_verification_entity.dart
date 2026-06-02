@@ -8,7 +8,7 @@ class GetVerificationEntity {
   final String estado;
   final VerificationsDataPhoneEntity? phone;
   final VerificationsDataSocialEntity? social;
-  final VerificationSelfieEntity? selfie;
+ // final VerificationSelfieEntity? selfie;
   final DateTime? revisadoEn;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -20,7 +20,7 @@ class GetVerificationEntity {
     required this.estado,
     this.phone,
     this.social,
-    this.selfie,
+   // this.selfie,
     this.revisadoEn,
     required this.createdAt,
     required this.updatedAt,

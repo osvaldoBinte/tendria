@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper_getx.dart';
 import 'package:tendria/features/verifications/presentation/page/selfie_camera_page.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tendria/features/verifications/domain/entities/get_verification_entity.dart';
 import 'package:tendria/features/verifications/domain/entities/verification_selfie_entity.dart';
 import 'package:tendria/features/verifications/domain/entities/verifications_entity.dart';
@@ -22,6 +23,8 @@ class VerificationController extends GetxController {
     required this.getVerificationUsecase,
   });
  
+  LanguageController get _l => Get.find<LanguageController>();
+ 
   final RxBool isLoadingVerifications = false.obs;
   final RxBool isSubmittingPhone = false.obs;
   final RxBool isSubmittingSocial = false.obs;
@@ -29,7 +32,7 @@ class VerificationController extends GetxController {
 
   final RxList<GetVerificationEntity> verifications =
       <GetVerificationEntity>[].obs;
- 
+
   final Rx<File?> selfieFile = Rx<File?>(null);
  
   final TextEditingController phoneController = TextEditingController();
@@ -38,50 +41,50 @@ class VerificationController extends GetxController {
   final RxString selectedCountryFlag = ''.obs;
 
   static const List<Map<String, String>> countries = [
-    {'name': 'México',          'code': '+52',  'flag': '🇲🇽'},
-    {'name': 'España',          'code': '+34',  'flag': '🇪🇸'},
-    {'name': 'Estados Unidos',  'code': '+1',   'flag': '🇺🇸'},
-    {'name': 'Argentina',       'code': '+54',  'flag': '🇦🇷'},
-    {'name': 'Colombia',        'code': '+57',  'flag': '🇨🇴'},
-    {'name': 'Chile',           'code': '+56',  'flag': '🇨🇱'},
-    {'name': 'Venezuela',       'code': '+58',  'flag': '🇻🇪'},
-    {'name': 'Perú',            'code': '+51',  'flag': '🇵🇪'},
-    {'name': 'Ecuador',         'code': '+593', 'flag': '🇪🇨'},
-    {'name': 'Bolivia',         'code': '+591', 'flag': '🇧🇴'},
-    {'name': 'Paraguay',        'code': '+595', 'flag': '🇵🇾'},
-    {'name': 'Uruguay',         'code': '+598', 'flag': '🇺🇾'},
-    {'name': 'Guatemala',       'code': '+502', 'flag': '🇬🇹'},
-    {'name': 'Cuba',            'code': '+53',  'flag': '🇨🇺'},
-    {'name': 'Honduras',        'code': '+504', 'flag': '🇭🇳'},
-    {'name': 'El Salvador',     'code': '+503', 'flag': '🇸🇻'},
-    {'name': 'Nicaragua',       'code': '+505', 'flag': '🇳🇮'},
-    {'name': 'Costa Rica',      'code': '+506', 'flag': '🇨🇷'},
-    {'name': 'Panamá',          'code': '+507', 'flag': '🇵🇦'},
-    {'name': 'República Dom.',  'code': '+1',   'flag': '🇩🇴'},
-    {'name': 'Brasil',          'code': '+55',  'flag': '🇧🇷'},
-    {'name': 'Francia',         'code': '+33',  'flag': '🇫🇷'},
-    {'name': 'Alemania',        'code': '+49',  'flag': '🇩🇪'},
-    {'name': 'Italia',          'code': '+39',  'flag': '🇮🇹'},
-    {'name': 'Portugal',        'code': '+351', 'flag': '🇵🇹'},
-    {'name': 'Reino Unido',     'code': '+44',  'flag': '🇬🇧'},
-    {'name': 'Canadá',          'code': '+1',   'flag': '🇨🇦'},
-    {'name': 'China',           'code': '+86',  'flag': '🇨🇳'},
-    {'name': 'Japón',           'code': '+81',  'flag': '🇯🇵'},
-    {'name': 'Corea del Sur',   'code': '+82',  'flag': '🇰🇷'},
-    {'name': 'India',           'code': '+91',  'flag': '🇮🇳'},
-    {'name': 'Australia',       'code': '+61',  'flag': '🇦🇺'},
+    {'name': 'México',         'code': '+52',  'flag': '🇲🇽'},
+    {'name': 'España',         'code': '+34',  'flag': '🇪🇸'},
+    {'name': 'Estados Unidos', 'code': '+1',   'flag': '🇺🇸'},
+    {'name': 'Argentina',      'code': '+54',  'flag': '🇦🇷'},
+    {'name': 'Colombia',       'code': '+57',  'flag': '🇨🇴'},
+    {'name': 'Chile',          'code': '+56',  'flag': '🇨🇱'},
+    {'name': 'Venezuela',      'code': '+58',  'flag': '🇻🇪'},
+    {'name': 'Perú',           'code': '+51',  'flag': '🇵🇪'},
+    {'name': 'Ecuador',        'code': '+593', 'flag': '🇪🇨'},
+    {'name': 'Bolivia',        'code': '+591', 'flag': '🇧🇴'},
+    {'name': 'Paraguay',       'code': '+595', 'flag': '🇵🇾'},
+    {'name': 'Uruguay',        'code': '+598', 'flag': '🇺🇾'},
+    {'name': 'Guatemala',      'code': '+502', 'flag': '🇬🇹'},
+    {'name': 'Cuba',           'code': '+53',  'flag': '🇨🇺'},
+    {'name': 'Honduras',       'code': '+504', 'flag': '🇭🇳'},
+    {'name': 'El Salvador',    'code': '+503', 'flag': '🇸🇻'},
+    {'name': 'Nicaragua',      'code': '+505', 'flag': '🇳🇮'},
+    {'name': 'Costa Rica',     'code': '+506', 'flag': '🇨🇷'},
+    {'name': 'Panamá',         'code': '+507', 'flag': '🇵🇦'},
+    {'name': 'República Dom.', 'code': '+1',   'flag': '🇩🇴'},
+    {'name': 'Brasil',         'code': '+55',  'flag': '🇧🇷'},
+    {'name': 'Francia',        'code': '+33',  'flag': '🇫🇷'},
+    {'name': 'Alemania',       'code': '+49',  'flag': '🇩🇪'},
+    {'name': 'Italia',         'code': '+39',  'flag': '🇮🇹'},
+    {'name': 'Portugal',       'code': '+351', 'flag': '🇵🇹'},
+    {'name': 'Reino Unido',    'code': '+44',  'flag': '🇬🇧'},
+    {'name': 'Canadá',         'code': '+1',   'flag': '🇨🇦'},
+    {'name': 'China',          'code': '+86',  'flag': '🇨🇳'},
+    {'name': 'Japón',          'code': '+81',  'flag': '🇯🇵'},
+    {'name': 'Corea del Sur',  'code': '+82',  'flag': '🇰🇷'},
+    {'name': 'India',          'code': '+91',  'flag': '🇮🇳'},
+    {'name': 'Australia',      'code': '+61',  'flag': '🇦🇺'},
   ];
 
   void selectCountry(Map<String, String> country) {
-    selectedCountry.value   = country['name']!;
-    selectedDialCode.value  = country['code']!;
+    selectedCountry.value = country['name']!;
+    selectedDialCode.value = country['code']!;
     selectedCountryFlag.value = country['flag']!;
   }
  
   final TextEditingController usernameController = TextEditingController();
   final RxString selectedSocialNetwork = 'instagram'.obs;
   final RxString generatedSocialUrl = ''.obs;
- 
+
   static const Map<String, String> _socialBaseUrls = {
     'instagram': 'https://instagram.com/',
     'facebook': 'https://facebook.com/',
@@ -89,8 +92,99 @@ class VerificationController extends GetxController {
     'tiktok': 'https://tiktok.com/@',
     'linkedin': 'https://linkedin.com/in/',
   };
-
  
+  static const Map<String, String> _cityToCountry = {
+    
+    'mexico': 'México', 'méxico': 'México', 'cdmx': 'México',
+    'guadalajara': 'México', 'monterrey': 'México', 'puebla': 'México',
+    'tijuana': 'México', 'juárez': 'México', 'juarez': 'México',
+    'mérida': 'México', 'merida': 'México', 'tuxtla': 'México',
+    'cancún': 'México', 'cancun': 'México', 'oaxaca': 'México',
+    'chihuahua': 'México', 'veracruz': 'México', 'aguascalientes': 'México',
+    'tlaxcala': 'México', 'hermosillo': 'México', 'culiacán': 'México',
+    'culiacan': 'México', 'saltillo': 'México', 'morelia': 'México',
+    
+    'madrid': 'España', 'barcelona': 'España', 'valencia': 'España',
+    'sevilla': 'España', 'bilbao': 'España', 'españa': 'España',
+    'spain': 'España', 'zaragoza': 'España', 'málaga': 'España',
+    'malaga': 'España',
+    
+    'buenos aires': 'Argentina', 'córdoba': 'Argentina', 'rosario': 'Argentina',
+    'argentina': 'Argentina', 'mendoza': 'Argentina',
+   
+    'bogotá': 'Colombia', 'bogota': 'Colombia', 'medellín': 'Colombia',
+    'medellin': 'Colombia', 'cali': 'Colombia', 'colombia': 'Colombia',
+    'barranquilla': 'Colombia', 'cartagena': 'Colombia',
+    
+    'santiago': 'Chile', 'valparaíso': 'Chile', 'valparaiso': 'Chile',
+    'chile': 'Chile', 
+    'new york': 'Estados Unidos', 'los angeles': 'Estados Unidos',
+    'chicago': 'Estados Unidos', 'houston': 'Estados Unidos',
+    'usa': 'Estados Unidos', 'united states': 'Estados Unidos',
+    'miami': 'Estados Unidos', 'dallas': 'Estados Unidos',
+    
+    'são paulo': 'Brasil', 'sao paulo': 'Brasil',
+    'rio de janeiro': 'Brasil', 'brasil': 'Brasil', 'brazil': 'Brasil',
+    'brasília': 'Brasil', 'brasilia': 'Brasil',
+    
+    'lima': 'Perú', 'perú': 'Perú', 'peru': 'Perú', 'arequipa': 'Perú',
+     
+    'caracas': 'Venezuela', 'venezuela': 'Venezuela', 'maracaibo': 'Venezuela',
+   
+    'quito': 'Ecuador', 'guayaquil': 'Ecuador', 'ecuador': 'Ecuador',
+    
+    'san josé': 'Costa Rica', 'san jose': 'Costa Rica',
+    'costa rica': 'Costa Rica',
+    
+    'guatemala': 'Guatemala', 'ciudad de guatemala': 'Guatemala',
+    
+    'panamá': 'Panamá', 'panama': 'Panamá',
+   
+    'tegucigalpa': 'Honduras', 'honduras': 'Honduras',
+    
+    'san salvador': 'El Salvador', 'el salvador': 'El Salvador',
+    
+    'managua': 'Nicaragua', 'nicaragua': 'Nicaragua',
+   
+    'la habana': 'Cuba', 'habana': 'Cuba', 'cuba': 'Cuba',
+    
+    'santo domingo': 'República Dom.', 'república dominicana': 'República Dom.',
+   
+    'la paz': 'Bolivia', 'bolivia': 'Bolivia', 'santa cruz': 'Bolivia',
+     
+    'asunción': 'Paraguay', 'asuncion': 'Paraguay', 'paraguay': 'Paraguay',
+     
+    'montevideo': 'Uruguay', 'uruguay': 'Uruguay',
+   
+    'lisboa': 'Portugal', 'lisbon': 'Portugal', 'porto': 'Portugal',
+    'portugal': 'Portugal',
+   
+    'paris': 'Francia', 'parís': 'Francia', 'france': 'Francia',
+    'francia': 'Francia',
+   
+    'berlin': 'Alemania', 'berlín': 'Alemania', 'munich': 'Alemania',
+    'alemania': 'Alemania', 'germany': 'Alemania',
+   
+    'roma': 'Italia', 'rome': 'Italia', 'milán': 'Italia', 'milan': 'Italia',
+    'italia': 'Italia', 'italy': 'Italia',
+   
+    'london': 'Reino Unido', 'londres': 'Reino Unido',
+    'manchester': 'Reino Unido', 'reino unido': 'Reino Unido',
+    
+    'sydney': 'Australia', 'melbourne': 'Australia', 'australia': 'Australia',
+    
+    'toronto': 'Canadá', 'vancouver': 'Canadá', 'montreal': 'Canadá',
+    'canada': 'Canadá', 'canadá': 'Canadá',
+     
+    'mumbai': 'India', 'delhi': 'India', 'india': 'India',
+   
+    'beijing': 'China', 'shanghai': 'China', 'china': 'China',
+     
+    'tokyo': 'Japón', 'osaka': 'Japón', 'japón': 'Japón', 'japan': 'Japón',
+ 
+    'seoul': 'Corea del Sur', 'busan': 'Corea del Sur',
+    'korea': 'Corea del Sur',
+  }; 
   @override
   void onInit() {
     super.onInit();
@@ -127,14 +221,46 @@ class VerificationController extends GetxController {
       final result = await getVerificationUsecase.call();
       verifications.assignAll(result);
     } catch (e) {
-      showErrorSnackbarGetx('No se pudieron cargar las verificaciones');
+     print('Error al cargar verificaciones: $e');
+     
     } finally {
       isLoadingVerifications.value = false;
     }
   }
  
-  void clearPhoneForm() {
+  void clearPhoneForm({String? userCity}) {
     phoneController.clear();
+    _autoSelectCountry(userCity);
+  }
+
+  void _autoSelectCountry(String? userCity) {
+    if (userCity == null || userCity.isEmpty) {
+      selectedCountry.value = '';
+      selectedDialCode.value = '';
+      selectedCountryFlag.value = '';
+      return;
+    }
+
+    final cityLower = userCity.toLowerCase();
+    String? countryName;
+
+    for (final entry in _cityToCountry.entries) {
+      if (cityLower.contains(entry.key) || entry.key.contains(cityLower)) {
+        countryName = entry.value;
+        break;
+      }
+    }
+
+    if (countryName != null) {
+      final country = countries.firstWhereOrNull(
+        (c) => c['name'] == countryName,
+      );
+      if (country != null) {
+        selectCountry(country);
+        return;
+      }
+    }
+
     selectedCountry.value = '';
     selectedDialCode.value = '';
     selectedCountryFlag.value = '';
@@ -143,11 +269,11 @@ class VerificationController extends GetxController {
   Future<void> submitPhone() async {
     final numero = phoneController.text.trim();
     if (numero.isEmpty) {
-      showErrorSnackbarGetx('Ingresa tu número de teléfono');
+      showErrorSnackbarGetx(_l.t('verify_phone_empty'));
       return;
     }
     if (selectedCountry.value.isEmpty) {
-      showErrorSnackbarGetx('Selecciona tu país');
+      showErrorSnackbarGetx(_l.t('verify_country_empty'));
       return;
     }
     try {
@@ -165,9 +291,9 @@ class VerificationController extends GetxController {
       );
       await loadVerifications();
       Get.back();
-      showSuccessSnackbarGetx('Teléfono enviado para verificación');
+      showSuccessSnackbarGetx(_l.t('verify_phone_success'));
     } catch (e) {
-      showErrorSnackbarGetx ('$e');
+      showErrorSnackbarGetx('$e');
     } finally {
       isSubmittingPhone.value = false;
     }
@@ -178,7 +304,7 @@ class VerificationController extends GetxController {
     selectedSocialNetwork.value = 'instagram';
     generatedSocialUrl.value = '';
   }
- 
+
   void onUsernameChanged(String username) {
     final base = _socialBaseUrls[selectedSocialNetwork.value] ?? '';
     final clean = username.trim().replaceFirst(RegExp(r'^@'), '');
@@ -189,29 +315,35 @@ class VerificationController extends GetxController {
     selectedSocialNetwork.value = network;
     onUsernameChanged(usernameController.text);
   }
- 
+
   Future<void> openSocialProfile() async {
     final url = generatedSocialUrl.value;
     if (url.isEmpty) {
-      showErrorSnackbarGetx('Ingresa tu nombre de usuario primero');
+      showErrorSnackbarGetx(_l.t('verify_username_empty'));
       return;
     }
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      showErrorSnackbarGetx('No se pudo abrir el navegador');
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+      }
+    } catch (_) {
+      showErrorSnackbarGetx(_l.t('verify_browser_error'));
     }
   }
 
   Future<void> submitSocial() async {
     final username = usernameController.text.trim();
     if (username.isEmpty) {
-      showErrorSnackbarGetx('Ingresa tu nombre de usuario');
+      showErrorSnackbarGetx(_l.t('verify_username_empty'));
       return;
     }
     if (generatedSocialUrl.value.isEmpty) {
-      showErrorSnackbarGetx('La URL no se pudo generar');
+      showErrorSnackbarGetx(_l.t('verify_url_error'));
       return;
     }
     try {
@@ -229,7 +361,7 @@ class VerificationController extends GetxController {
       );
       await loadVerifications();
       Get.back();
-      showSuccessSnackbarGetx('Red social enviada para verificación');
+      showSuccessSnackbarGetx(_l.t('verify_social_success'));
     } catch (e) {
       showErrorSnackbarGetx('$e');
     } finally {
@@ -249,11 +381,11 @@ class VerificationController extends GetxController {
 
   Future<void> submitSelfie(String profilePhotoUrl) async {
     if (selfieFile.value == null) {
-      showErrorSnackbarGetx('Toma una selfie primero');
+      showErrorSnackbarGetx(_l.t('verify_selfie_empty'));
       return;
     }
     if (profilePhotoUrl.isEmpty) {
-      showErrorSnackbarGetx('No tienes foto de perfil configurada');
+      showErrorSnackbarGetx(_l.t('verify_no_profile_photo'));
       return;
     }
     try {
@@ -266,12 +398,11 @@ class VerificationController extends GetxController {
       );
       await loadVerifications();
       Get.back();
-      showSuccessSnackbarGetx('Selfie enviada para verificación');
+      showSuccessSnackbarGetx(_l.t('verify_selfie_success'));
     } catch (e) {
       showErrorSnackbarGetx('$e');
     } finally {
       isSubmittingSelfie.value = false;
     }
   }
-  
 }

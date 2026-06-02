@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_entity.dart';
@@ -9,6 +10,8 @@ import 'package:tendria/features/purchase/presentation/controller/purchase_contr
 
 class PurchasePage extends StatelessWidget {
   const PurchasePage({super.key});
+
+  LanguageController get _l => Get.find<LanguageController>();
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +47,11 @@ class PurchasePage extends StatelessWidget {
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-        
+              children: [ 
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
                   child: Text(
-                    'Adquirir Créditos',
+                    _l.t('purchase_title'),
                     style: ThemeColor.headingLarge.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 28,
@@ -60,14 +62,13 @@ class PurchasePage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
                   child: Text(
-                    'Agrega créditos a tu cuenta y desbloquea más conexiones.',
+                    _l.t('purchase_subtitle'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textSecondary,
                     ),
                   ),
                 ),
-
-            
+ 
                 if (controller.isLoadingProducts.value)
                   Expanded(
                     child: Center(
@@ -100,11 +101,11 @@ class PurchasePage extends StatelessWidget {
                   ),
 
                 const SizedBox(height: 8),
-  
+ 
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                   child: Text(
-                    'Método de pago:',
+                    _l.t('purchase_payment_method'),
                     style: ThemeColor.bodyMedium.copyWith(
                       color: ThemeColor.textPrimary,
                     ),
@@ -114,10 +115,20 @@ class PurchasePage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _buildPlatformBadge(),
                 ),
+ 
+                if (Platform.isAndroid) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _buildCouponField(controller),
+                  ),
+                ],
 
                 const SizedBox(height: 20),
  
-                Padding(
+               SafeArea(
+  top: false,  
+  child:  Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
                   child: Obx(() {
                     final isPurchasing = controller.isPurchasing.value;
@@ -158,7 +169,7 @@ class PurchasePage extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                'Comprar',
+                                _l.t('purchase_buy_btn'),
                                 style: ThemeColor.buttonText.copyWith(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
@@ -168,13 +179,13 @@ class PurchasePage extends StatelessWidget {
                     );
                   }),
                 ),
+                ),
               ],
             );
           }),
         ));
   }
  
-
   Widget _buildProductTile(
       PurchaseController controller, PurchaseEntity product) {
     return Obx(() {
@@ -223,7 +234,7 @@ class PurchasePage extends StatelessWidget {
                           color: Colors.amber, size: 12),
                       const SizedBox(width: 2),
                       Text(
-                        '${product.credits} créditos',
+                        '${product.credits} ${_l.t('purchase_credits')}',
                         style: ThemeColor.caption.copyWith(
                           color: ThemeColor.textSecondary,
                           fontSize: 11,
@@ -244,12 +255,125 @@ class PurchasePage extends StatelessWidget {
     final isIOS = Platform.isIOS;
     return _PaymentChip(
       icon: isIOS ? Icons.apple : Icons.android,
-      label: isIOS ? 'App Store' : 'Google Play',
+      label: isIOS ? _l.t('purchase_appstore') : _l.t('purchase_googleplay'),
       selected: true,
     );
   }
  
-
+  Widget _buildCouponField(PurchaseController controller) {
+    return Obx(() {
+      final hasCoupon = controller.couponCode.value.trim().isNotEmpty;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              _l.t('purchase_coupon_label'),
+              style: ThemeColor.bodyMedium.copyWith(
+                color: ThemeColor.textPrimary,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.couponController,
+                  onChanged: (val) => controller.couponCode.value = val,
+                  textCapitalization: TextCapitalization.characters,
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textPrimary,
+                    letterSpacing: 1.5,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: _l.t('purchase_coupon_hint'),
+                    hintStyle: ThemeColor.bodyMedium.copyWith(
+                      color: ThemeColor.textSecondaryColor,
+                      letterSpacing: 0,
+                    ),
+                    filled: true,
+                    fillColor: ThemeColor.cardBackground,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.local_offer_outlined,
+                      color: hasCoupon
+                          ? ThemeColor.primaryColor
+                          : ThemeColor.textSecondary,
+                      size: 20,
+                    ),
+                    suffixIcon: hasCoupon
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: ThemeColor.textSecondary,
+                              size: 18,
+                            ),
+                            onPressed: controller.clearCoupon,
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: ThemeColor.dividerColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: hasCoupon
+                            ? ThemeColor.primaryColor.withOpacity(0.5)
+                            : ThemeColor.dividerColor,
+                        width: hasCoupon ? 1.5 : 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: ThemeColor.primaryColor,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (hasCoupon) ...[
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: ThemeColor.successColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: ThemeColor.successColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.check_circle_outline,
+                    color: ThemeColor.successColor,
+                    size: 22,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          if (hasCoupon)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 4),
+              child: Text(
+                _l.t('purchase_coupon_applied'),
+                style: ThemeColor.caption.copyWith(
+                  color: ThemeColor.successColor,
+                ),
+              ),
+            ),
+        ],
+      );
+    });
+  }
+ 
   Widget _buildEmptyState(PurchaseController controller) {
     return Center(
       child: Column(
@@ -259,14 +383,14 @@ class PurchasePage extends StatelessWidget {
               size: 64, color: ThemeColor.disabledColor),
           const SizedBox(height: ThemeColor.paddingMedium),
           Text(
-            'Sin productos disponibles',
+            _l.t('purchase_empty_title'),
             style: ThemeColor.subtitleMedium.copyWith(
               color: ThemeColor.textSecondary,
             ),
           ),
           const SizedBox(height: ThemeColor.paddingLarge),
           ThemeColor.widgetButton(
-            text: 'Reintentar',
+            text: _l.t('purchase_retry'),
             onPressed: controller.loadProducts,
             backgroundColor: ThemeColor.primaryColor,
             textColor: ThemeColor.textLightColor,
@@ -278,7 +402,6 @@ class PurchasePage extends StatelessWidget {
     );
   }
  
-
   void _showSnackbar(BuildContext context, String message,
       {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -299,7 +422,6 @@ class PurchasePage extends StatelessWidget {
   }
 }
  
-
 class _PaymentChip extends StatelessWidget {
   const _PaymentChip({
     required this.icon,

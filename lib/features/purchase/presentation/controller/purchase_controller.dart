@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
+import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_apple_entity.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_entity.dart';
@@ -24,21 +26,25 @@ class PurchaseController extends GetxController {
     required this.purchaseAppleUsecase,
     required this.purchaseGoogleUsecase,
   });
-
+ 
+  LanguageController get _l => Get.find<LanguageController>();
+ 
   final RxBool isLoadingProducts = false.obs;
   final RxBool isPurchasing = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString successMessage = ''.obs;
   final RxList<PurchaseEntity> products = <PurchaseEntity>[].obs;
   final RxString selectedProductId = ''.obs;
- 
   final RxMap<String, Map<String, String>> storePrices =
       <String, Map<String, String>>{}.obs;
-
+ 
+  final RxString couponCode = ''.obs;
+  final TextEditingController couponController = TextEditingController();
+ 
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   bool _iapAvailable = false;
-
+ 
   @override
   void onInit() {
     super.onInit();
@@ -49,10 +55,10 @@ class PurchaseController extends GetxController {
   @override
   void onClose() {
     _purchaseSubscription?.cancel();
+    couponController.dispose();
     super.onClose();
   }
  
-
   Future<void> _initIAP() async {
     print('🚀 Inicializando IAP...');
     _iapAvailable = await _iap.isAvailable();
@@ -82,15 +88,14 @@ class PurchaseController extends GetxController {
       onError: (e) {
         print('💥 Error en stream: $e');
         isPurchasing.value = false;
-        errorMessage.value = 'Error en el proceso de compra';
-        showErrorSnackbar('Error en el proceso de compra');
+        errorMessage.value = _l.t('purchase_stream_error');
+        showErrorSnackbar(_l.t('purchase_stream_error'));
       },
     );
 
     print('✅ IAP inicializado y stream escuchando');
   }
  
-
   Future<void> loadProducts() async {
     try {
       print('🛒 Cargando productos del backend...');
@@ -104,14 +109,13 @@ class PurchaseController extends GetxController {
       await _fetchStorePrices(result);
     } catch (e) {
       print('❌ Error al cargar productos: $e');
-      errorMessage.value = 'Error al cargar los productos';
-      showErrorSnackbar('Error al cargar los productos');
+      errorMessage.value = _l.t('purchase_load_error');
+      showErrorSnackbar(_l.t('purchase_load_error'));
     } finally {
       isLoadingProducts.value = false;
     }
   }
  
-
   Future<void> _fetchStorePrices(List<PurchaseEntity> productList) async {
     if (!_iapAvailable || productList.isEmpty) {
       print('⚠️ IAP no disponible: se usarán precios del backend');
@@ -138,30 +142,21 @@ class PurchaseController extends GetxController {
 
       for (final detail in response.productDetails) {
         String currency = '';
- 
+
         if (Platform.isIOS && detail is AppStoreProductDetails) {
-          currency =
-              detail.skProduct.priceLocale.currencyCode ?? '';
-          print(
-              '🍎 iOS currencyCode [${detail.id}]: $currency | priceLocale: ${detail.skProduct.priceLocale.currencyCode}');
-        } else if (Platform.isAndroid &&
-            detail is GooglePlayProductDetails) {
-          currency = detail
-                  .productDetails
-                  .oneTimePurchaseOfferDetails
+          currency = detail.skProduct.priceLocale.currencyCode ?? '';
+        } else if (Platform.isAndroid && detail is GooglePlayProductDetails) {
+          currency = detail.productDetails.oneTimePurchaseOfferDetails
                   ?.priceCurrencyCode ??
               '';
-          print(
-              '🤖 Android currencyCode [${detail.id}]: $currency');
         }
 
         prices[detail.id] = {
-          'price': detail.price,   
-          'currency': currency,    
+          'price': detail.price,
+          'currency': currency,
         };
 
-        print(
-            '💰 [${detail.id}] price: ${detail.price} | currency: $currency');
+        print('💰 [${detail.id}] price: ${detail.price} | currency: $currency');
       }
 
       storePrices.assignAll(prices);
@@ -169,49 +164,39 @@ class PurchaseController extends GetxController {
           '✅ Precios de tienda cargados: ${prices.length}/${productList.length}');
     } catch (e) {
       print('🔥 Excepción al consultar precios de tienda: $e');
-     }
-  } 
+    }
+  }
+ 
   String displayPrice(PurchaseEntity product) {
     final data = storePrices[product.productId];
-    print('🏷️ displayPrice [${product.productId}] → data: $data');
 
     if (data != null) {
       final price = data['price'] ?? '';
       final currency = data['currency'] ?? '';
 
-      if (price.isNotEmpty) { 
+      if (price.isNotEmpty) {
         final result = currency.isNotEmpty && !price.contains(currency)
             ? '$price $currency'
             : price;
-        print('   ✅ Precio final: $result');
         return result;
       }
     }
- 
-    if (product.price != null) {
-      final fallback = '\$${product.price}';
-      print('   ⚠️ Usando fallback backend: $fallback');
-      return fallback;
-    }
 
-    print('   ❌ Sin precio disponible');
+    if (product.price != null) return '\$${product.price}';
     return '—';
   }
  
-
   Future<void> buyProduct(PurchaseEntity product) async {
     print('💳 buyProduct llamado: ${product.productId}');
 
     if (!_iapAvailable) {
-      print('⚠️ IAP no disponible');
-      errorMessage.value = 'Compras no disponibles en este dispositivo';
-      showErrorSnackbar('Compras no disponibles en este dispositivo');
+      errorMessage.value = _l.t('purchase_no_device');
+      showErrorSnackbar(_l.t('purchase_no_device'));
       return;
     }
 
     if (isPurchasing.value) {
-      print('⚠️ Ya hay una compra en progreso');
-      showInfoSnackbar('Ya hay una compra en progreso');
+      showInfoSnackbar(_l.t('purchase_in_progress'));
       return;
     }
 
@@ -222,145 +207,111 @@ class PurchaseController extends GetxController {
       selectedProductId.value = product.productId;
 
       final Set<String> ids = {product.productId};
-      print('🔍 Consultando producto en tienda: $ids');
-
       final ProductDetailsResponse response =
           await _iap.queryProductDetails(ids);
 
-      print(
-          '📊 Productos encontrados: ${response.productDetails.length}');
-      print('❓ IDs no encontrados: ${response.notFoundIDs}');
-
-      if (response.error != null) {
-        print('❌ Error en queryProductDetails: ${response.error}');
-        errorMessage.value = 'Producto no encontrado en la tienda';
-        showErrorSnackbar('Producto no encontrado en la tienda');
-        isPurchasing.value = false;
-        return;
-      }
-
-      if (response.productDetails.isEmpty) {
-        print('❌ Lista de productos vacía');
-        errorMessage.value = 'Producto no encontrado en la tienda';
-        showErrorSnackbar('Producto no encontrado en la tienda');
+      if (response.error != null || response.productDetails.isEmpty) {
+        errorMessage.value = _l.t('purchase_product_not_found');
+        showErrorSnackbar(_l.t('purchase_product_not_found'));
         isPurchasing.value = false;
         return;
       }
 
       final productDetails = response.productDetails.first;
-      print(
-          '✅ Producto listo: ${productDetails.id} | Precio: ${productDetails.price}');
-
       final purchaseParam = PurchaseParam(productDetails: productDetails);
       await _iap.buyConsumable(purchaseParam: purchaseParam);
       print('⏳ buyConsumable ejecutado, esperando stream...');
     } catch (e) {
       print('🔥 Exception en buyProduct: $e');
       isPurchasing.value = false;
-      errorMessage.value = 'Error al iniciar la compra';
-      showErrorSnackbar('Error al iniciar la compra');
+      errorMessage.value = _l.t('purchase_error');
+      showErrorSnackbar(_l.t('purchase_error'));
     }
   }
  
-
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
-    print('🔔 _onPurchaseUpdate con ${purchases.length} compra(s)');
-
     for (final purchase in purchases) {
       print(
           '📋 ProductID: ${purchase.productID} | Status: ${purchase.status}');
 
       switch (purchase.status) {
         case PurchaseStatus.pending:
-          print('⏳ Compra pendiente...');
-          showInfoSnackbar('Procesando compra...');
+          showInfoSnackbar(_l.t('purchase_processing'));
           break;
 
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          print('✅ purchased/restored → _verifyAndDeliver');
           await _verifyAndDeliver(purchase);
           break;
 
         case PurchaseStatus.error:
-          print('❌ Error: ${purchase.error?.message}');
           isPurchasing.value = false;
           selectedProductId.value = '';
           errorMessage.value =
-              purchase.error?.message ?? 'Error en la compra';
+              purchase.error?.message ?? _l.t('purchase_error');
           showErrorSnackbar(
-              purchase.error?.message ?? 'Error en la compra');
+              purchase.error?.message ?? _l.t('purchase_error'));
           break;
 
         case PurchaseStatus.canceled:
-          print('🚫 Compra cancelada');
           isPurchasing.value = false;
           selectedProductId.value = '';
-          showInfoSnackbar('Compra cancelada');
+          showInfoSnackbar(_l.t('purchase_canceled'));
           break;
       }
 
       if (purchase.pendingCompletePurchase) {
-        print('🔄 Completando compra: ${purchase.productID}');
         await _iap.completePurchase(purchase);
-        print('✅ completePurchase ejecutado');
       }
     }
   }
  
-
   Future<void> _verifyAndDeliver(PurchaseDetails purchase) async {
-    print(
-        '🔍 _verifyAndDeliver | iOS: ${Platform.isIOS} | Android: ${Platform.isAndroid}');
-
     try {
       if (Platform.isAndroid) {
         if (purchase is! GooglePlayPurchaseDetails) {
-          errorMessage.value = 'Error interno al procesar la compra';
-          showErrorSnackbar('Error interno al procesar la compra');
+          errorMessage.value = _l.t('purchase_internal_error');
+          showErrorSnackbar(_l.t('purchase_internal_error'));
           return;
         }
         await purchaseGoogleUsecase.call(
           PurchaseGoogleEntity(
             productoId: purchase.productID,
-            purchaseToken:
-                purchase.billingClientPurchase.purchaseToken,
-            packageName:
-                purchase.billingClientPurchase.packageName,
+            purchaseToken: purchase.billingClientPurchase.purchaseToken,
+            packageName: purchase.billingClientPurchase.packageName,
+            couponcode: couponCode.value.trim().isNotEmpty
+                ? couponCode.value.trim()
+                : null,
           ),
         );
-     } else if (Platform.isIOS) {
-  if (purchase is! AppStorePurchaseDetails) {
-    errorMessage.value = 'Error interno al procesar la compra';
-    showErrorSnackbar('Error interno al procesar la compra');
-    return;
-  }
- 
-  final skPaymentTransaction = purchase.skPaymentTransaction;
-  final transactionId = skPaymentTransaction.transactionIdentifier;
-  final originalTransactionId =
-      skPaymentTransaction.originalTransaction?.transactionIdentifier;
+      } else if (Platform.isIOS) {
+        if (purchase is! AppStorePurchaseDetails) {
+          errorMessage.value = _l.t('purchase_internal_error');
+          showErrorSnackbar(_l.t('purchase_internal_error'));
+          return;
+        }
 
-  final receiptData = originalTransactionId ?? transactionId ?? '';
-  print('🎫 receiptData (transactionId): $receiptData');
+        final skPaymentTransaction = purchase.skPaymentTransaction;
+        final transactionId = skPaymentTransaction.transactionIdentifier;
+        final originalTransactionId =
+            skPaymentTransaction.originalTransaction?.transactionIdentifier;
+        final receiptData = originalTransactionId ?? transactionId ?? '';
 
-  await purchaseAppleUsecase.call(
-    PurchaseAppleEntity(
-      productoId: purchase.productID,
-      receiptData: receiptData,
-    ),
-  );
-}
+        await purchaseAppleUsecase.call(
+          PurchaseAppleEntity(
+            productoId: purchase.productID,
+            receiptData: receiptData,
+          ),
+        );
+      }
 
-      successMessage.value = '¡Compra completada exitosamente!';
-      showSuccessSnackbar('¡Compra completada exitosamente!');
+      successMessage.value = _l.t('purchase_success');
+      showSuccessSnackbar(_l.t('purchase_success'));
       print('🎉 Compra completada');
     } catch (e, stackTrace) {
       print('🔥 Error en _verifyAndDeliver: $e\n$stackTrace');
-      errorMessage.value =
-          'Error al verificar la compra con el servidor';
-      showErrorSnackbar(
-          'Error al verificar la compra con el servidor');
+      errorMessage.value = _l.t('purchase_verify_error');
+      showErrorSnackbar(_l.t('purchase_verify_error'));
     } finally {
       isPurchasing.value = false;
       selectedProductId.value = '';
@@ -371,8 +322,12 @@ class PurchaseController extends GetxController {
     errorMessage.value = '';
     successMessage.value = '';
   }
+
+  void clearCoupon() {
+    couponController.clear();
+    couponCode.value = '';
+  }
 }
- 
 
 class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
   @override

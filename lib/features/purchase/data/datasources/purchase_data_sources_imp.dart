@@ -55,12 +55,10 @@ class PurchaseDataSourcesImp {
 Future<void> purchaseApple(PurchaseAppleEntity entity, String token) async {
   try {
     Uri url = Uri.parse('$defaultApiServer/Compras/verificar/apple');
-    print('➡️ URL: $url');
+ 
 
     final body = jsonEncode(PurchaseAppleModel.fromEntity(entity).toJson());
-    print('📦 Body: $body');
-
-    print('🔐 Token: $token');
+ 
 
     final response = await http.post(
       url,
@@ -70,16 +68,13 @@ Future<void> purchaseApple(PurchaseAppleEntity entity, String token) async {
       },
       body: body,
     );
-
-    print('📡 Status Code: ${response.statusCode}');
-    print('📨 Response Body: ${response.body}');
+ 
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      print('✅ Compra verificada correctamente');
+     
       return;
     }
-
-    print('❌ Error en la respuesta');
+ 
     ApiExceptionCustom exception = ApiExceptionCustom(response: response);
     exception.validateMesage();
     throw exception;

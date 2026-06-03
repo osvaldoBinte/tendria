@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -22,23 +23,29 @@ class SelfieCameraPage extends StatefulWidget {
 }
 
 class _SelfieCameraPageState extends State<SelfieCameraPage>
-    with WidgetsBindingObserver { 
+    with WidgetsBindingObserver {
   CameraController? _cameraController;
   bool _isCameraReady = false;
- 
+
   final LanguageController _l = Get.find<LanguageController>();
- 
+
   final FaceDetector _faceDetector = FaceDetector(
     options: FaceDetectorOptions(performanceMode: FaceDetectorMode.fast),
   );
 
-  Timer? _detectionTimer;
   bool _isAnalyzing = false;
- 
+  bool _isDisposed = false;
+
+  // Android: timer + takePicture
+  Timer? _detectionTimer;
+  String? _tempPath;
+
   final RxString _detectionState = 'idle'.obs;
   final RxBool _faceDetected = false.obs;
   final RxBool _photoTaken = false.obs;
   final RxString _statusMessage = ''.obs;
+
+  int _statusKeyCounter = 0;
 
   int _stableFrames = 0;
   static const int _requiredStableFrames = 4;
@@ -51,12 +58,20 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   final RxInt _countdown = 0.obs;
 
   File? _capturedPhoto;
-  String? _tempPath;
- 
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────
+
+  void _setStatus(String msg) {
+    _statusKeyCounter++;
+    _statusMessage.value = msg;
+  }
+
+  // ─── Lifecycle ───────────────────────────────────────────────────────────
+
   @override
   void initState() {
     super.initState();
-    _statusMessage.value = _l.t('selfie_place_face');
+    _setStatus(_l.t('selfie_place_face'));
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _initCamera();
@@ -64,21 +79,32 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
 
   @override
   void dispose() {
+    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _detectionTimer?.cancel();
     _captureTimer?.cancel();
-    _cameraController?.dispose();
     _faceDetector.close();
+
+    try {
+      if (_cameraController != null &&
+          _cameraController!.value.isInitialized &&
+          _cameraController!.value.isStreamingImages) {
+        _cameraController!.stopImageStream();
+      }
+    } catch (_) {}
+
+    _cameraController?.dispose();
+    _cameraController = null;
+
     if (_tempPath != null) {
-      try {
-        File(_tempPath!).deleteSync();
-      } catch (_) {}
+      try { File(_tempPath!).deleteSync(); } catch (_) {}
     }
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isDisposed) return;
     if (state == AppLifecycleState.inactive) {
       _stopDetection();
       _cameraController?.dispose();
@@ -86,7 +112,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       _initCamera();
     }
   }
- 
+
+  // ─── Camera init ─────────────────────────────────────────────────────────
+
   Future<void> _initCamera() async {
     try {
       final cameras = await availableCameras();
@@ -94,7 +122,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
         (c) => c.lensDirection == CameraLensDirection.front,
       );
       if (front == null) {
-        _statusMessage.value = _l.t('selfie_no_front_camera');
+        _setStatus(_l.t('selfie_no_front_camera'));
         return;
       }
 
@@ -102,36 +130,106 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
         front,
         ResolutionPreset.medium,
         enableAudio: false,
+        // iOS necesita bgra8888 para imageStream + MLKit
+        // Android usa el default (no especificar imageFormatGroup)
+        imageFormatGroup: Platform.isIOS
+            ? ImageFormatGroup.bgra8888
+            : ImageFormatGroup.yuv420,
       );
 
       await _cameraController!.initialize();
-      if (!mounted) return;
+      if (_isDisposed || !mounted) return;
       setState(() => _isCameraReady = true);
 
-      final dir = await getTemporaryDirectory();
-      _tempPath = '${dir.path}/selfie_detect.jpg';
-
-      _startDetectionTimer();
+      if (Platform.isIOS) {
+        // iOS: imageStream con InputImageMetadata para rotación correcta
+        _startImageStream();
+      } else {
+        // Android: timer + takePicture + fromFilePath (funciona bien)
+        final dir = await getTemporaryDirectory();
+        _tempPath = '${dir.path}/selfie_detect.jpg';
+        _startDetectionTimer();
+      }
     } catch (e) {
       debugPrint('Error init camera: $e');
-      _statusMessage.value = _l.t('selfie_camera_error');
+      if (!_isDisposed) _setStatus(_l.t('selfie_camera_error'));
     }
   }
- 
+
+  // ─── iOS: imageStream ────────────────────────────────────────────────────
+
+  void _startImageStream() {
+    if (_isDisposed) return;
+    _cameraController?.startImageStream((CameraImage image) async {
+      if (_isDisposed) return;
+      if (_isAnalyzing) return;
+      if (_photoTaken.value) return;
+      if (_detectionState.value == 'capturing') return;
+
+      _isAnalyzing = true;
+      try {
+        final inputImage = _convertCameraImageIOS(image);
+        if (inputImage == null) return;
+        final faces = await _faceDetector.processImage(inputImage);
+        if (!_isDisposed && mounted) _onFacesDetected(faces);
+      } catch (e) {
+        debugPrint('Stream analyze error: $e');
+      } finally {
+        _isAnalyzing = false;
+      }
+    });
+  }
+
+  InputImage? _convertCameraImageIOS(CameraImage image) {
+    final camera = _cameraController!.description;
+    final rotation =
+        InputImageRotationValue.fromRawValue(camera.sensorOrientation);
+    if (rotation == null) return null;
+
+    final format = InputImageFormatValue.fromRawValue(image.format.raw);
+    if (format == null) return null;
+    if (image.planes.isEmpty) return null;
+
+    // bgra8888 tiene un solo plano
+    final plane = image.planes.first;
+
+    return InputImage.fromBytes(
+      bytes: plane.bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: rotation,
+        format: format,
+        bytesPerRow: plane.bytesPerRow,
+      ),
+    );
+  }
+
+  void _stopImageStream() {
+    try {
+      if (_cameraController != null &&
+          _cameraController!.value.isInitialized &&
+          _cameraController!.value.isStreamingImages) {
+        _cameraController!.stopImageStream();
+      }
+    } catch (_) {}
+  }
+
+  // ─── Android: timer + takePicture ────────────────────────────────────────
+
   void _startDetectionTimer() {
     _detectionTimer?.cancel();
     _detectionTimer = Timer.periodic(
       const Duration(milliseconds: 600),
-      (_) => _analyzeFrame(),
+      (_) => _analyzeFrameAndroid(),
     );
   }
 
-  void _stopDetection() {
+  void _stopDetectionTimer() {
     _detectionTimer?.cancel();
     _detectionTimer = null;
   }
 
-  Future<void> _analyzeFrame() async {
+  Future<void> _analyzeFrameAndroid() async {
     if (_isAnalyzing) return;
     if (_photoTaken.value) return;
     if (_detectionState.value == 'capturing') return;
@@ -149,15 +247,37 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       final inputImage = InputImage.fromFilePath(_tempPath!);
       final faces = await _faceDetector.processImage(inputImage);
 
-      if (mounted) _onFacesDetected(faces);
+      if (!_isDisposed && mounted) _onFacesDetected(faces);
     } catch (e) {
       debugPrint('Analyze error: $e');
     } finally {
       _isAnalyzing = false;
     }
   }
- 
+
+  // ─── Stop detection (ambas plataformas) ──────────────────────────────────
+
+  void _stopDetection() {
+    if (Platform.isIOS) {
+      _stopImageStream();
+    } else {
+      _stopDetectionTimer();
+    }
+  }
+
+  void _resumeDetection() {
+    if (_isDisposed) return;
+    if (Platform.isIOS) {
+      _startImageStream();
+    } else {
+      _startDetectionTimer();
+    }
+  }
+
+  // ─── Detection logic ─────────────────────────────────────────────────────
+
   void _onFacesDetected(List<Face> faces) {
+    if (_isDisposed) return;
     if (_photoTaken.value || _detectionState.value == 'capturing') return;
 
     final state = _detectionState.value;
@@ -169,7 +289,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       if (state == 'idle' || state == 'lost') {
         _stableFrames = 1;
         _detectionState.value = 'stabilizing';
-        _statusMessage.value = _l.t('selfie_face_detected');
+        _setStatus(_l.t('selfie_face_detected'));
       } else if (state == 'stabilizing') {
         _stableFrames++;
         if (_stableFrames >= _requiredStableFrames) {
@@ -182,15 +302,15 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
 
       if (state == 'stabilizing') {
         _detectionState.value = 'idle';
-        _statusMessage.value = _l.t('selfie_place_face');
+        _setStatus(_l.t('selfie_place_face'));
       } else if (state == 'countdown') {
         _cancelCountdown();
         _detectionState.value = 'lost';
-        _statusMessage.value = _l.t('selfie_moved');
+        _setStatus(_l.t('selfie_moved'));
         Future.delayed(const Duration(seconds: 2), () {
-          if (mounted && _detectionState.value == 'lost') {
+          if (!_isDisposed && mounted && _detectionState.value == 'lost') {
             _detectionState.value = 'idle';
-            _statusMessage.value = _l.t('selfie_place_face');
+            _setStatus(_l.t('selfie_place_face'));
           }
         });
       } else {
@@ -200,7 +320,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
             !_showManualButton.value) {
           _showManualButton.value = true;
         }
-        _statusMessage.value = _l.t('selfie_place_face');
+        _setStatus(_l.t('selfie_place_face'));
       }
     }
   }
@@ -208,9 +328,13 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   void _startCaptureCountdown() {
     _detectionState.value = 'countdown';
     _countdown.value = 3;
-    _statusMessage.value = _l.t('selfie_no_move_3');
+    _setStatus(_l.t('selfie_no_move_3'));
 
     _captureTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isDisposed) {
+        timer.cancel();
+        return;
+      }
       if (_detectionState.value != 'countdown') {
         timer.cancel();
         _countdown.value = 0;
@@ -218,9 +342,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       }
       _countdown.value--;
       if (_countdown.value == 2) {
-        _statusMessage.value = _l.t('selfie_no_move_2');
+        _setStatus(_l.t('selfie_no_move_2'));
       } else if (_countdown.value == 1) {
-        _statusMessage.value = _l.t('selfie_no_move_1');
+        _setStatus(_l.t('selfie_no_move_1'));
       } else if (_countdown.value <= 0) {
         timer.cancel();
         _countdown.value = 0;
@@ -232,28 +356,41 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   void _cancelCountdown() {
     _captureTimer?.cancel();
     _countdown.value = 0;
-  } 
+  }
+
+  // ─── Capture ─────────────────────────────────────────────────────────────
+
   Future<void> _capturePhoto() async {
-    if (_photoTaken.value) return;
+    if (_isDisposed || _photoTaken.value) return;
     try {
-      _stopDetection();
       _detectionState.value = 'capturing';
-      _statusMessage.value = _l.t('selfie_taking');
+      _setStatus(_l.t('selfie_taking'));
+
+      // Detener detección antes de capturar
+      // En iOS es obligatorio (no puede correr stream y takePicture juntos)
+      // En Android lo detenemos también para evitar conflictos
+      _stopDetection();
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      if (_isDisposed) return;
 
       final xFile = await _cameraController?.takePicture();
       if (xFile == null) throw Exception('No se pudo capturar');
 
       _capturedPhoto = File(xFile.path);
+      if (_isDisposed) return;
+
       _photoTaken.value = true;
       _detectionState.value = 'done';
-      _statusMessage.value = _l.t('selfie_ready');
+      _setStatus(_l.t('selfie_ready'));
     } catch (e) {
       debugPrint('Capture error: $e');
-      _statusMessage.value = _l.t('selfie_error');
+      if (_isDisposed) return;
+      _setStatus(_l.t('selfie_error'));
       _photoTaken.value = false;
       _detectionState.value = 'idle';
       _stableFrames = 0;
-      _startDetectionTimer();
+      _resumeDetection();
     }
   }
 
@@ -266,8 +403,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     _failedAttempts = 0;
     _showManualButton.value = false;
     _detectionState.value = 'idle';
-    _statusMessage.value = _l.t('selfie_place_face');
-    _startDetectionTimer();
+    _setStatus(_l.t('selfie_place_face'));
+    _resumeDetection();
   }
 
   void _confirm() {
@@ -275,7 +412,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       Get.back(result: SelfieCameraResult(_capturedPhoto!));
     }
   }
- 
+
+  // ─── Build ───────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,7 +422,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
-          children: [ 
+          children: [
+            // Cámara / foto capturada
             Obx(() {
               if (_photoTaken.value && _capturedPhoto != null) {
                 return Image.file(_capturedPhoto!, fit: BoxFit.contain);
@@ -295,7 +435,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
               }
               return CameraPreview(_cameraController!);
             }),
- 
+
+            // Overlay oval
             Obx(() {
               if (_photoTaken.value) return const SizedBox.shrink();
               return CustomPaint(
@@ -305,7 +446,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 child: const SizedBox.expand(),
               );
             }),
- 
+
+            // Countdown
             Obx(() {
               if (_countdown.value <= 0) return const SizedBox.shrink();
               return Center(
@@ -337,7 +479,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 ),
               );
             }),
- 
+
+            // Top bar
             Positioned(
               top: 0,
               left: 0,
@@ -396,7 +539,8 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 ),
               ),
             ),
- 
+
+            // Status message
             Positioned(
               bottom: 180,
               left: 24,
@@ -405,7 +549,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 () => AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: Container(
-                    key: ValueKey(_statusMessage.value),
+                    key: ValueKey(_statusKeyCounter),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 10,
@@ -414,10 +558,10 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                       color: _detectionState.value == 'lost'
                           ? ThemeColor.errorColor.withOpacity(0.90)
                           : _detectionState.value == 'countdown'
-                          ? ThemeColor.successColor.withOpacity(0.90)
-                          : _faceDetected.value && !_photoTaken.value
-                          ? ThemeColor.primaryColor.withOpacity(0.85)
-                          : Colors.black54,
+                              ? ThemeColor.successColor.withOpacity(0.90)
+                              : _faceDetected.value && !_photoTaken.value
+                                  ? ThemeColor.primaryColor.withOpacity(0.85)
+                                  : Colors.black54,
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: Row(
@@ -428,10 +572,10 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                           _photoTaken.value
                               ? Icons.check_circle
                               : _detectionState.value == 'lost'
-                              ? Icons.warning_rounded
-                              : _faceDetected.value
-                              ? Icons.face
-                              : Icons.face_outlined,
+                                  ? Icons.warning_rounded
+                                  : _faceDetected.value
+                                      ? Icons.face
+                                      : Icons.face_outlined,
                           color: Colors.white,
                           size: 18,
                         ),
@@ -451,7 +595,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                   ),
                 ),
               ),
-            ), 
+            ),
+
+            // Botones inferiores
             Positioned(
               bottom: 48,
               left: 24,
@@ -529,7 +675,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                     ],
                   );
                 }
- 
+
                 return Obx(
                   () => _showManualButton.value
                       ? Column(
@@ -579,7 +725,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     );
   }
 }
- 
+
+// ─── Painter ───────────────────────────────────────────────────────────────
+
 class _FaceOvalOverlayPainter extends CustomPainter {
   final String detectionState;
   _FaceOvalOverlayPainter({required this.detectionState});

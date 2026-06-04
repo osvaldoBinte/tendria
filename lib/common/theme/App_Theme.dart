@@ -15,6 +15,7 @@ class ThemeColor {
     0xFFB9141E,
   ); // Rojo intenso para radar scanner
 
+  static const Color colorAccionButtons = accentColor;
   // Colores de fondo
   static const Color surfaceColor = Colors.white; // Superficies blancas
   static const Color cardColor = Colors.white; // Cards blancas

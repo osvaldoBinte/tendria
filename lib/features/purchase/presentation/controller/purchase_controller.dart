@@ -7,6 +7,8 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:tendria/common/services/auth_service.dart';
 import 'package:tendria/common/settings/language_controller.dart';
 import 'package:tendria/common/widgets/alert/snackbar_helper.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_apple_entity.dart';
@@ -15,20 +17,24 @@ import 'package:tendria/features/purchase/domain/entity/purchase_google_entity.d
 import 'package:tendria/features/purchase/domain/usecase/get_purchases_usecase.dart';
 import 'package:tendria/features/purchase/domain/usecase/purchase_apple_usecase.dart';
 import 'package:tendria/features/purchase/domain/usecase/purchase_google_usecase.dart';
+import 'package:tendria/features/purchase/domain/usecase/validate_coupons_usecase.dart';
+import 'package:tendria/features/purchase/presentation/widget/qr_scanner_widget.dart';
 
-class PurchaseController extends GetxController {
+class PurchaseController extends GetxController with QRScannerMixin {
   final PurchaseAppleUsecase purchaseAppleUsecase;
   final PurchaseGoogleUsecase purchaseGoogleUsecase;
   final GetPurchasesUsecase getPurchasesUsecase;
+  final ValidateCouponsUsecase validateCouponsUsecase;
 
   PurchaseController({
     required this.getPurchasesUsecase,
     required this.purchaseAppleUsecase,
     required this.purchaseGoogleUsecase,
+    required this.validateCouponsUsecase,
   });
- 
+
   LanguageController get _l => Get.find<LanguageController>();
- 
+
   final RxBool isLoadingProducts = false.obs;
   final RxBool isPurchasing = false.obs;
   final RxString errorMessage = ''.obs;
@@ -37,14 +43,19 @@ class PurchaseController extends GetxController {
   final RxString selectedProductId = ''.obs;
   final RxMap<String, Map<String, String>> storePrices =
       <String, Map<String, String>>{}.obs;
- 
+
   final RxString couponCode = ''.obs;
   final TextEditingController couponController = TextEditingController();
- 
+
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   bool _iapAvailable = false;
- 
+  Timer? _couponDebounce;
+  final RxBool isValidatingCoupon = false.obs;
+  final RxBool couponIsValid = false.obs;
+  final RxInt couponBonusPoints = 0.obs;
+  final RxString couponDescription = ''.obs;
+  final RxString couponError = ''.obs;
   @override
   void onInit() {
     super.onInit();
@@ -54,11 +65,64 @@ class PurchaseController extends GetxController {
 
   @override
   void onClose() {
+    _couponDebounce?.cancel();
+
     _purchaseSubscription?.cancel();
     couponController.dispose();
     super.onClose();
   }
- 
+
+  void onCouponChanged(String value) {
+    couponCode.value = value;
+    couponIsValid.value = false;
+    couponBonusPoints.value = 0;
+    couponDescription.value = '';
+    couponError.value = '';
+
+    _couponDebounce?.cancel();
+    if (value.trim().isEmpty) return;
+    _couponDebounce = Timer(const Duration(milliseconds: 800), () {
+      validateCoupon();
+    });
+  }
+
+  Future<void> validateCoupon() async {
+    final code = couponCode.value.trim();
+    if (code.isEmpty) return;
+
+    try {
+      isValidatingCoupon.value = true;
+      couponIsValid.value = false;
+      couponBonusPoints.value = 0;
+      couponDescription.value = '';
+
+      final userId = await Get.find<AuthService>().getUserId() ?? 0;
+
+      final selectedProduct = selectedProductId.value.isNotEmpty
+          ? products.firstWhereOrNull(
+              (p) => p.productId == selectedProductId.value,
+            )
+          : null;
+
+      final result = await validateCouponsUsecase.execute(
+        code,
+        userId,
+        selectedProduct?.credits,
+      );
+
+      couponIsValid.value = result.isValid;
+      couponBonusPoints.value = result.bonusPoints;
+      couponDescription.value = result.description;
+
+      
+    } catch (e) {
+      couponIsValid.value = false;
+      couponError.value = _l.t('coupon_validate_error');
+    } finally {
+      isValidatingCoupon.value = false;
+    }
+  }
+
   Future<void> _initIAP() async {
     print('🚀 Inicializando IAP...');
     _iapAvailable = await _iap.isAvailable();
@@ -71,8 +135,8 @@ class PurchaseController extends GetxController {
 
     if (Platform.isIOS) {
       print('🍎 Configurando delegate de iOS...');
-      final iosPlatformAddition =
-          _iap.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+      final iosPlatformAddition = _iap
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
       await iosPlatformAddition.setDelegate(ExamplePaymentQueueDelegate());
     }
 
@@ -95,7 +159,7 @@ class PurchaseController extends GetxController {
 
     print('✅ IAP inicializado y stream escuchando');
   }
- 
+
   Future<void> loadProducts() async {
     try {
       print('🛒 Cargando productos del backend...');
@@ -115,7 +179,7 @@ class PurchaseController extends GetxController {
       isLoadingProducts.value = false;
     }
   }
- 
+
   Future<void> _fetchStorePrices(List<PurchaseEntity> productList) async {
     if (!_iapAvailable || productList.isEmpty) {
       print('⚠️ IAP no disponible: se usarán precios del backend');
@@ -126,8 +190,9 @@ class PurchaseController extends GetxController {
       final ids = productList.map((p) => p.productId).toSet();
       print('🔍 Consultando precios en tienda para: $ids');
 
-      final ProductDetailsResponse response =
-          await _iap.queryProductDetails(ids);
+      final ProductDetailsResponse response = await _iap.queryProductDetails(
+        ids,
+      );
 
       if (response.error != null) {
         print('❌ Error al consultar precios: ${response.error}');
@@ -146,27 +211,28 @@ class PurchaseController extends GetxController {
         if (Platform.isIOS && detail is AppStoreProductDetails) {
           currency = detail.skProduct.priceLocale.currencyCode ?? '';
         } else if (Platform.isAndroid && detail is GooglePlayProductDetails) {
-          currency = detail.productDetails.oneTimePurchaseOfferDetails
+          currency =
+              detail
+                  .productDetails
+                  .oneTimePurchaseOfferDetails
                   ?.priceCurrencyCode ??
               '';
         }
 
-        prices[detail.id] = {
-          'price': detail.price,
-          'currency': currency,
-        };
+        prices[detail.id] = {'price': detail.price, 'currency': currency};
 
         print('💰 [${detail.id}] price: ${detail.price} | currency: $currency');
       }
 
       storePrices.assignAll(prices);
       print(
-          '✅ Precios de tienda cargados: ${prices.length}/${productList.length}');
+        '✅ Precios de tienda cargados: ${prices.length}/${productList.length}',
+      );
     } catch (e) {
       print('🔥 Excepción al consultar precios de tienda: $e');
     }
   }
- 
+
   String displayPrice(PurchaseEntity product) {
     final data = storePrices[product.productId];
 
@@ -185,10 +251,13 @@ class PurchaseController extends GetxController {
     if (product.price != null) return '\$${product.price}';
     return '—';
   }
- 
+
   Future<void> buyProduct(PurchaseEntity product) async {
     print('💳 buyProduct llamado: ${product.productId}');
-
+    if (couponCode.value.trim().isNotEmpty && !couponIsValid.value) {
+      showErrorSnackbar(_l.t('coupon_must_validate'));
+      return;
+    }
     if (!_iapAvailable) {
       errorMessage.value = _l.t('purchase_no_device');
       showErrorSnackbar(_l.t('purchase_no_device'));
@@ -207,8 +276,9 @@ class PurchaseController extends GetxController {
       selectedProductId.value = product.productId;
 
       final Set<String> ids = {product.productId};
-      final ProductDetailsResponse response =
-          await _iap.queryProductDetails(ids);
+      final ProductDetailsResponse response = await _iap.queryProductDetails(
+        ids,
+      );
 
       if (response.error != null || response.productDetails.isEmpty) {
         errorMessage.value = _l.t('purchase_product_not_found');
@@ -228,11 +298,10 @@ class PurchaseController extends GetxController {
       showErrorSnackbar(_l.t('purchase_error'));
     }
   }
- 
+
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
-      print(
-          '📋 ProductID: ${purchase.productID} | Status: ${purchase.status}');
+      print('📋 ProductID: ${purchase.productID} | Status: ${purchase.status}');
 
       switch (purchase.status) {
         case PurchaseStatus.pending:
@@ -249,8 +318,7 @@ class PurchaseController extends GetxController {
           selectedProductId.value = '';
           errorMessage.value =
               purchase.error?.message ?? _l.t('purchase_error');
-          showErrorSnackbar(
-              purchase.error?.message ?? _l.t('purchase_error'));
+          showErrorSnackbar(purchase.error?.message ?? _l.t('purchase_error'));
           break;
 
         case PurchaseStatus.canceled:
@@ -265,7 +333,7 @@ class PurchaseController extends GetxController {
       }
     }
   }
- 
+
   Future<void> _verifyAndDeliver(PurchaseDetails purchase) async {
     try {
       if (Platform.isAndroid) {
@@ -326,6 +394,47 @@ class PurchaseController extends GetxController {
   void clearCoupon() {
     couponController.clear();
     couponCode.value = '';
+    couponIsValid.value = false;
+    couponBonusPoints.value = 0;
+    couponDescription.value = '';
+    couponError.value = '';
+  }
+
+  @override
+  final Rx<MobileScannerController?> qrScannerController =
+      Rx<MobileScannerController?>(null);
+
+  @override
+  final RxBool isTorchOn = false.obs;
+
+  @override
+  void iniciarEscaneoQR() {
+    qrScannerController.value = MobileScannerController();
+  }
+
+  @override
+  void detenerEscaneoQR() {
+    qrScannerController.value?.dispose();
+    qrScannerController.value = null;
+    Get.back();
+  }
+
+  @override
+  void toggleTorch() {
+    isTorchOn.value = !isTorchOn.value;
+    qrScannerController.value?.toggleTorch();
+  }
+
+  @override
+  void switchCamera() {
+    qrScannerController.value?.switchCamera();
+  }
+
+  @override
+  void onQRCodeDetected(String qrData) {
+    detenerEscaneoQR();
+    couponController.text = qrData;
+    onCouponChanged(qrData);
   }
 }
 
@@ -334,8 +443,7 @@ class ExamplePaymentQueueDelegate implements SKPaymentQueueDelegateWrapper {
   bool shouldContinueTransaction(
     SKPaymentTransactionWrapper transaction,
     SKStorefrontWrapper storefront,
-  ) =>
-      true;
+  ) => true;
 
   @override
   bool shouldShowPriceConsent() => false;

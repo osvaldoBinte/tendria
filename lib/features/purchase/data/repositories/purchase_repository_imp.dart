@@ -3,6 +3,7 @@ import 'package:tendria/features/purchase/data/datasources/purchase_data_sources
 import 'package:tendria/features/purchase/domain/entity/purchase_apple_entity.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_entity.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_google_entity.dart';
+import 'package:tendria/features/purchase/domain/entity/validate_coupons_entity.dart';
 import 'package:tendria/features/purchase/domain/repositories/purchase_repository.dart';
 
 class PurchaseRepositoryImp  extends PurchaseRepository {
@@ -28,5 +29,10 @@ class PurchaseRepositoryImp  extends PurchaseRepository {
        final token = await authService.getToken() ?? (throw Exception('No hay sesión activa. El usuario debe iniciar sesión.'));
        return await purchaseDataSourcesImp.purchaseGoogle(entity, token);
 
+  }
+    @override
+  Future<ValidateCouponsEntity> validateCoupons(String couponCode, int userId,num? creditsToBuy) async {
+    final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
+    return await purchaseDataSourcesImp.validateCoupons(couponCode, userId, creditsToBuy, token);
   }
 }

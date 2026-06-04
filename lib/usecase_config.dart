@@ -78,6 +78,7 @@ import 'package:tendria/features/user/domain/usecase/update_location_usecase.dar
 import 'package:tendria/features/user/domain/usecase/update_user_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_media_usecase.dart';
 import 'package:tendria/features/user/domain/usecase/upload_picture_perfile_usecase.dart';
+import 'package:tendria/features/purchase/domain/usecase/validate_coupons_usecase.dart';
 import 'package:tendria/features/verifications/data/datasources/verifications_data_sources_imp.dart';
 import 'package:tendria/features/verifications/data/repositories/verifications_repository_imp.dart';
 import 'package:tendria/features/verifications/domain/usecase/get_verification_usecase.dart';
@@ -136,6 +137,7 @@ class UsecaseConfig {
   UploadPicturePerfileUsecase? uploadPicturePerfileUsecase;
   UpdateUserUsecase? updateUserUsecase;
   GetBalanceUsecase? getBalanceUsecase;
+  ValidateCouponsUsecase? validateCouponsUsecase;
   
 
  
@@ -278,7 +280,7 @@ class UsecaseConfig {
       getPurchasesUsecase = GetPurchasesUsecase(purchaseRepository: purchaseRepositoryImp!);
       purchaseAppleUsecase = PurchaseAppleUsecase(purchaseRepository: purchaseRepositoryImp!);
       purchaseGoogleUsecase = PurchaseGoogleUsecase(purchaseRepository: purchaseRepositoryImp!);
-
+      validateCouponsUsecase = ValidateCouponsUsecase(purchaseRepository: purchaseRepositoryImp!);
 
       logViewProfileUsecase = LogViewProfileUsecase(facebookRepository: facebookRepositoryImp!);
       logRegisterUsecase = LogRegisterUsecase(facebookRepository: facebookRepositoryImp!);

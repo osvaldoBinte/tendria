@@ -7,6 +7,7 @@ import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
 import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
 import 'package:tendria/features/user/domain/entities/user_balance_entity.dart';
+import 'package:tendria/features/purchase/domain/entity/validate_coupons_entity.dart';
 import 'package:tendria/features/user/domain/repositories/user_repository.dart';
 
 class UserRepositoryImp extends UserRepository {
@@ -108,4 +109,6 @@ class UserRepositoryImp extends UserRepository {
     final token = await authService.getToken() ?? (throw Exception("No hay sesión activa. El usuario debe iniciar sesión.",));
     return await userDataSourcesImp.updateCity(entity, token);
   }
+
+
 }

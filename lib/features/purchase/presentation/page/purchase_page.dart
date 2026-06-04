@@ -7,6 +7,7 @@ import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/features/purchase/domain/entity/purchase_entity.dart';
 import 'package:tendria/features/purchase/presentation/controller/purchase_controller.dart';
+import 'package:tendria/features/purchase/presentation/widget/qr_scanner_widget.dart';
 
 class PurchasePage extends StatelessWidget {
   const PurchasePage({super.key});
@@ -17,118 +18,125 @@ class PurchasePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<PurchaseController>();
 
-    return Obx(() => Scaffold(
-          backgroundColor: ThemeColor.backgroundColor,
-          appBar: AppBar(
-            backgroundColor: ThemeColor.cardBackground,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: ThemeColor.iconColor,
-                size: 20,
-              ),
-              onPressed: () => Get.offNamed(RoutesNames.homePage),
+    return Obx(
+      () => Scaffold(
+        backgroundColor: ThemeColor.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: ThemeColor.cardBackground,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: ThemeColor.iconColor,
+              size: 20,
             ),
+            onPressed: () => Get.offNamed(RoutesNames.homePage),
           ),
-          body: Obx(() {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (controller.errorMessage.isNotEmpty) {
-                _showSnackbar(context, controller.errorMessage.value,
-                    isError: true);
-                controller.clearMessages();
-              }
-              if (controller.successMessage.isNotEmpty) {
-                _showSnackbar(context, controller.successMessage.value,
-                    isError: false);
-                controller.clearMessages();
-              }
-            });
+        ),
+        body: Obx(() {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (controller.errorMessage.isNotEmpty) {
+              _showSnackbar(
+                context,
+                controller.errorMessage.value,
+                isError: true,
+              );
+              controller.clearMessages();
+            }
+            if (controller.successMessage.isNotEmpty) {
+              _showSnackbar(
+                context,
+                controller.successMessage.value,
+                isError: false,
+              );
+              controller.clearMessages();
+            }
+          });
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [ 
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
-                  child: Text(
-                    _l.t('purchase_title'),
-                    style: ThemeColor.headingLarge.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 28,
-                      color: ThemeColor.textPrimary,
-                    ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 4),
+                child: Text(
+                  _l.t('purchase_title'),
+                  style: ThemeColor.headingLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 28,
+                    color: ThemeColor.textPrimary,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-                  child: Text(
-                    _l.t('purchase_subtitle'),
-                    style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textSecondary,
-                    ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                child: Text(
+                  _l.t('purchase_subtitle'),
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textSecondary,
                   ),
                 ),
- 
-                if (controller.isLoadingProducts.value)
-                  Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: ThemeColor.primaryColor,
-                      ),
-                    ),
-                  )
-                else if (controller.products.isEmpty)
-                  Expanded(child: _buildEmptyState(controller))
-                else
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 2.4,
-                        ),
-                        itemCount: controller.products.length,
-                        itemBuilder: (_, index) {
-                          final product = controller.products[index];
-                          return _buildProductTile(controller, product);
-                        },
-                      ),
-                    ),
-                  ),
+              ),
 
-                const SizedBox(height: 8),
- 
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                  child: Text(
-                    _l.t('purchase_payment_method'),
-                    style: ThemeColor.bodyMedium.copyWith(
-                      color: ThemeColor.textPrimary,
+              if (controller.isLoadingProducts.value)
+                Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: ThemeColor.primaryColor,
+                    ),
+                  ),
+                )
+              else if (controller.products.isEmpty)
+                Expanded(child: _buildEmptyState(controller))
+              else
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 2.4,
+                          ),
+                      itemCount: controller.products.length,
+                      itemBuilder: (_, index) {
+                        final product = controller.products[index];
+                        return _buildProductTile(controller, product);
+                      },
                     ),
                   ),
                 ),
+
+              const SizedBox(height: 8),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: Text(
+                  _l.t('purchase_payment_method'),
+                  style: ThemeColor.bodyMedium.copyWith(
+                    color: ThemeColor.textPrimary,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildPlatformBadge(),
+              ),
+
+              if (Platform.isAndroid) ...[
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildPlatformBadge(),
+                  child: _buildCouponField(controller),
                 ),
- 
-                if (Platform.isAndroid) ...[
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _buildCouponField(controller),
-                  ),
-                ],
+              ],
 
-                const SizedBox(height: 20),
- 
-               SafeArea(
-  top: false,  
-  child:  Padding(
+              const SizedBox(height: 20),
+
+              SafeArea(
+                top: false,
+                child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
                   child: Obx(() {
                     final isPurchasing = controller.isPurchasing.value;
@@ -142,8 +150,7 @@ class PurchasePage extends StatelessWidget {
                         onPressed: (isPurchasing || !hasSelection)
                             ? null
                             : () {
-                                final product =
-                                    controller.products.firstWhere(
+                                final product = controller.products.firstWhere(
                                   (p) =>
                                       p.productId ==
                                       controller.selectedProductId.value,
@@ -152,8 +159,8 @@ class PurchasePage extends StatelessWidget {
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ThemeColor.primaryColor,
-                          disabledBackgroundColor:
-                              ThemeColor.primaryColor.withOpacity(0.4),
+                          disabledBackgroundColor: ThemeColor.primaryColor
+                              .withOpacity(0.4),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -179,15 +186,18 @@ class PurchasePage extends StatelessWidget {
                     );
                   }),
                 ),
-                ),
-              ],
-            );
-          }),
-        ));
+              ),
+            ],
+          );
+        }),
+      ),
+    );
   }
- 
+
   Widget _buildProductTile(
-      PurchaseController controller, PurchaseEntity product) {
+    PurchaseController controller,
+    PurchaseEntity product,
+  ) {
     return Obx(() {
       final isSelected =
           controller.selectedProductId.value == product.productId;
@@ -230,8 +240,11 @@ class PurchasePage extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.bolt_rounded,
-                          color: Colors.amber, size: 12),
+                      const Icon(
+                        Icons.bolt_rounded,
+                        color: Colors.amber,
+                        size: 12,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         '${product.credits} ${_l.t('purchase_credits')}',
@@ -250,7 +263,7 @@ class PurchasePage extends StatelessWidget {
       );
     });
   }
- 
+
   Widget _buildPlatformBadge() {
     final isIOS = Platform.isIOS;
     return _PaymentChip(
@@ -259,10 +272,15 @@ class PurchasePage extends StatelessWidget {
       selected: true,
     );
   }
- 
+
   Widget _buildCouponField(PurchaseController controller) {
     return Obx(() {
       final hasCoupon = controller.couponCode.value.trim().isNotEmpty;
+      final isValid = controller.couponIsValid.value;
+      final isValidating = controller.isValidatingCoupon.value;
+      final bonusPoints = controller.couponBonusPoints.value;
+      final couponError = controller.couponError.value;
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -273,6 +291,7 @@ class PurchasePage extends StatelessWidget {
               style: ThemeColor.bodyMedium.copyWith(
                 color: ThemeColor.textPrimary,
               ),
+              overflow: TextOverflow.ellipsis,  
             ),
           ),
           Row(
@@ -280,7 +299,7 @@ class PurchasePage extends StatelessWidget {
               Expanded(
                 child: TextField(
                   controller: controller.couponController,
-                  onChanged: (val) => controller.couponCode.value = val,
+                  onChanged: controller.onCouponChanged,
                   textCapitalization: TextCapitalization.characters,
                   style: ThemeColor.bodyMedium.copyWith(
                     color: ThemeColor.textPrimary,
@@ -300,12 +319,25 @@ class PurchasePage extends StatelessWidget {
                     ),
                     prefixIcon: Icon(
                       Icons.local_offer_outlined,
-                      color: hasCoupon
+                      color: isValid
+                          ? ThemeColor.successColor
+                          : couponError.isNotEmpty
+                          ? ThemeColor.errorColor
+                          : hasCoupon
                           ? ThemeColor.primaryColor
                           : ThemeColor.textSecondary,
                       size: 20,
                     ),
-                    suffixIcon: hasCoupon
+                    suffixIcon: isValidating
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : hasCoupon
                         ? IconButton(
                             icon: Icon(
                               Icons.close,
@@ -315,15 +347,14 @@ class PurchasePage extends StatelessWidget {
                             onPressed: controller.clearCoupon,
                           )
                         : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          BorderSide(color: ThemeColor.dividerColor),
-                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: hasCoupon
+                        color: isValid
+                            ? ThemeColor.successColor
+                            : couponError.isNotEmpty
+                            ? ThemeColor.errorColor
+                            : hasCoupon
                             ? ThemeColor.primaryColor.withOpacity(0.5)
                             : ThemeColor.dividerColor,
                         width: hasCoupon ? 1.5 : 1,
@@ -336,10 +367,44 @@ class PurchasePage extends StatelessWidget {
                         width: 1.5,
                       ),
                     ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
-              if (hasCoupon) ...[
+
+              if (!isValid && !isValidating) ...[
+                const SizedBox(width: 10),
+                SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      controller.iniciarEscaneoQR();
+                      Get.bottomSheet(
+                        QRScannerWidget(controller: controller),
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ThemeColor.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: const Icon(
+                      Icons.qr_code_scanner,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ],
+
+              if (isValid) ...[
                 const SizedBox(width: 10),
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -359,7 +424,27 @@ class PurchasePage extends StatelessWidget {
               ],
             ],
           ),
-          if (hasCoupon)
+ 
+          if (isValid && bonusPoints > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.bolt_rounded, color: Colors.amber, size: 14),
+                  const SizedBox(width: 4),
+                  Flexible( 
+                    child: Text(
+                      '+$bonusPoints ${_l.t('purchase_credits')} ${_l.t('coupon_bonus')}',
+                      style: ThemeColor.caption.copyWith(
+                        color: ThemeColor.successColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ) 
+          else if (isValid)
             Padding(
               padding: const EdgeInsets.only(top: 6, left: 4),
               child: Text(
@@ -367,20 +452,47 @@ class PurchasePage extends StatelessWidget {
                 style: ThemeColor.caption.copyWith(
                   color: ThemeColor.successColor,
                 ),
+                overflow: TextOverflow.ellipsis, 
+              ),
+            ) 
+          else if (couponError.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: ThemeColor.errorColor,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible( 
+                    child: Text(
+                      couponError,
+                      style: ThemeColor.caption.copyWith(
+                        color: ThemeColor.errorColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
       );
     });
   }
- 
+
   Widget _buildEmptyState(PurchaseController controller) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_bag_outlined,
-              size: 64, color: ThemeColor.disabledColor),
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 64,
+            color: ThemeColor.disabledColor,
+          ),
           const SizedBox(height: ThemeColor.paddingMedium),
           Text(
             _l.t('purchase_empty_title'),
@@ -401,27 +513,33 @@ class PurchasePage extends StatelessWidget {
       ),
     );
   }
- 
-  void _showSnackbar(BuildContext context, String message,
-      {required bool isError}) {
+
+  void _showSnackbar(
+    BuildContext context,
+    String message, {
+    required bool isError,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,
-          style: ThemeColor.bodyMedium
-              .copyWith(color: ThemeColor.textLightColor),
+          style: ThemeColor.bodyMedium.copyWith(
+            color: ThemeColor.textLightColor,
+          ),
         ),
-        backgroundColor:
-            isError ? ThemeColor.errorColor : ThemeColor.successColor,
+        backgroundColor: isError
+            ? ThemeColor.errorColor
+            : ThemeColor.successColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-            borderRadius: ThemeColor.mediumBorderRadius),
+          borderRadius: ThemeColor.mediumBorderRadius,
+        ),
         margin: const EdgeInsets.all(ThemeColor.paddingMedium),
       ),
     );
   }
 }
- 
+
 class _PaymentChip extends StatelessWidget {
   const _PaymentChip({
     required this.icon,
@@ -435,36 +553,35 @@ class _PaymentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: selected
-                ? ThemeColor.primaryColor.withOpacity(0.08)
-                : ThemeColor.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected
-                  ? ThemeColor.primaryColor
-                  : ThemeColor.dividerColor,
-              width: selected ? 2 : 1,
-            ),
+    return Obx(
+      () => AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? ThemeColor.primaryColor.withOpacity(0.08)
+              : ThemeColor.cardBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? ThemeColor.primaryColor : ThemeColor.dividerColor,
+            width: selected ? 2 : 1,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 18, color: ThemeColor.iconColor),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: ThemeColor.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: ThemeColor.textPrimary,
-                ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: ThemeColor.iconColor),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: ThemeColor.bodyMedium.copyWith(
+                fontWeight: FontWeight.w500,
+                color: ThemeColor.textPrimary,
               ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

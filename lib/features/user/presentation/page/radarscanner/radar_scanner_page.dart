@@ -363,7 +363,131 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
+    Obx(() {
+                    if (!controller.myProfileController.isTravelMode) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: ThemeColor.paddingSmall),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: ThemeColor.warningColor.withOpacity(0.1),
+                          borderRadius: ThemeColor.mediumBorderRadius,
+                          border: Border.all(
+                            color: ThemeColor.warningColor.withOpacity(0.5),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.flight_rounded,
+                              color: ThemeColor.warningColor,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _l.t('travel_mode_active'),
+                                    style: ThemeColor.bodyMedium.copyWith(
+                                      color: ThemeColor.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  Text(
+                                    _l.t('travel_mode_active_desc'),
+                                    style: ThemeColor.caption.copyWith(
+                                      color: ThemeColor.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Obx(
+                              () => controller.isLoading.value
+                                  ? SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: ThemeColor.warningColor,
+                                      ),
+                                    )
+                                  : TextButton(
+                                      onPressed: () =>
+                                          controller.deactivateTrip(),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: ThemeColor.warningColor
+                                            .withOpacity(0.15),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Text(
+                                        _l.t('deactivate'),
+                                        style: TextStyle(
+                                          color: ThemeColor.warningColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }), 
+                    SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton.icon(
+                      onPressed: () => controller.showCitySearchSheet(),
+                      icon: Icon(
+                        Icons.search_rounded,
+                        color: ThemeColor.primaryColor,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _l.t('search_city_btn'),
+                        style: TextStyle(
+                          color: ThemeColor.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: ThemeColor.primaryColor.withOpacity(0.6),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: ThemeColor.mediumBorderRadius,
+                        ),
+                      ),
+                    ),
+                  ),
 
+                  SizedBox(height: ThemeColor.paddingSmall),
             Obx(() {
               final profileCtrl = Get.find<ProfileController>();
               final km =

@@ -9,6 +9,7 @@ import 'package:tendria/features/user/data/model/create_reports_user_model.dart'
 import 'package:tendria/features/user/data/model/update_location_model.dart';
 import 'package:tendria/features/user/data/model/update_user_model.dart';
 import 'package:tendria/features/user/data/model/user_balance_model.dart';
+import 'package:tendria/features/purchase/data/model/validate_coupons_model.dart';
 import 'package:tendria/features/user/domain/entities/create_reports_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/entities/update_user_entity.dart';
@@ -19,6 +20,7 @@ import 'package:tendria/features/user/domain/entities/get_user_entity.dart';
 import 'package:tendria/features/user/domain/entities/preferences_entity.dart';
 import 'package:tendria/features/user/domain/entities/upload_media_entity.dart';
 import 'package:tendria/features/user/domain/entities/user_balance_entity.dart';
+import 'package:tendria/features/purchase/domain/entity/validate_coupons_entity.dart';
 
 class UserDataSourcesImp {
   String defaultApiServer = AppConstants.serverBase;
@@ -52,10 +54,9 @@ class UserDataSourcesImp {
       }
       throw Exception('$e');
     }
-
-
   }
- Future<UserBalanceEntity> getuserbalance(String token) async {
+
+  Future<UserBalanceEntity> getuserbalance(String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/saldo-usuario');
 
@@ -85,319 +86,292 @@ class UserDataSourcesImp {
       }
       throw Exception('$e');
     }
-
-
   }
 
+  Future<List<GetUserEntity>> getNearbyUsers(
+    int pageNumber,
+    int pageSize,
+    String token,
+  ) async {
+    try {
+      Uri url = Uri.parse(
+        '$defaultApiServer/User/usuarios-cercanos?pageNumber=$pageNumber&pageSize=$pageSize',
+      );
 
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-  Future<List<GetUserEntity>> getNearbyUsers(int pageNumber,int pageSize,String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/usuarios-cercanos?pageNumber=$pageNumber&pageSize=$pageSize');
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-  if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final dataUTF8 = utf8.decode(response.bodyBytes);
         final responseDecode = jsonDecode(dataUTF8);
 
         final List data = responseDecode['items'];
-        return data
-            .map((json) => GetUserModel.fromJson(json))
-            .toList();
+        return data.map((json) => GetUserModel.fromJson(json)).toList();
       }
 
-    final exception = ApiExceptionCustom(response: response);
-    exception.validateMesage();
-    throw exception;
-
-  } catch (e) {
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      throw Exception(convertMessageException(error: e));
+      final exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        throw Exception(convertMessageException(error: e));
+      }
+      throw Exception(e.toString());
     }
-    throw Exception(e.toString());
   }
-}
-
 
   Future<GetUserEntity> getuserbyid(int iduser, String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/perfil-usuario/$iduser');
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/perfil-usuario/$iduser');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-  if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final dataUTF8 = utf8.decode(response.bodyBytes);
         final responseDecode = jsonDecode(dataUTF8);
 
-      
         return GetUserModel.fromJson(responseDecode);
       }
 
-    final exception = ApiExceptionCustom(response: response);
-    exception.validateMesage();
-    throw exception;
-
-  } catch (e) {
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      throw Exception(convertMessageException(error: e));
-    }
-    throw Exception(e.toString());
-  }
-}
-
-Future<void> preferencesUser(PreferencesEntity entity, String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/preferencias');
-
-    final model = PreferencesModel.fromEntity(entity);
-    final bodyData = jsonEncode(model.toJson());
-
-    final response = await http.post(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: bodyData,
-    );
-
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
- 
-      return;
-    }
-
-    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-    exception.validateMesage();
-    throw exception;
-  } catch (e, stackTrace) {
-
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      final message = convertMessageException(error: e);
-      throw Exception(message);
-    }
-
-    throw Exception('$e');
-  }
-}
-
-
-Future<void> putpreferencesUser(PreferencesEntity entity, String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/preferencias');
-
-    final model = PreferencesModel.fromEntity(entity);
-    final bodyData = jsonEncode(model.toJson());
-
-    final response = await http.put(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: bodyData, 
-    );
-
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
- 
-      return;
-    }
-
-    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-    exception.validateMesage();
-    throw exception;
-  } catch (e, stackTrace) {
-
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      final message = convertMessageException(error: e);
-      throw Exception(message);
-    }
-
-    throw Exception('$e');
-  }
-}
-Future<void> deleteMedia(int mediaId, String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/delete-media?idMedia=$mediaId');
-
-
-    final response = await http.delete(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
- 
-      return;
-    }
-
-    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-    exception.validateMesage();
-    throw exception;
-  } catch (e) {
-
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      final message = convertMessageException(error: e);
-      throw Exception(message);
-    }
-
-    throw Exception('$e');
-  }
-}
-
-Future<void> deleteUser( String token) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/eliminar-cuenta');
-
-
-    final response = await http.delete(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
- 
-      return;
-    }
-
-    ApiExceptionCustom exception = ApiExceptionCustom(response: response);
-    exception.validateMesage();
-    throw exception;
-  } catch (e, stackTrace) {
-
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      final message = convertMessageException(error: e);
-      throw Exception(message);
-    }
-
-    throw Exception('$e');
-  }
-}
-Future<void> createMedia(
-  List<UploadMediaEntity> entities,
-  String token,
-) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/upload-media');
-
-    var request = http.MultipartRequest('POST', url);
-
-    request.headers.addAll({
-      'Authorization': 'Bearer $token',
-    });
-
-    for (var entity in entities) {
-      final model = UploadMediaModel.fromEntity(entity);
-
-      try {
-        await model.addFileToRequest(request); 
-      } catch (e) {
-        print('❌ Archivo no permitido: ${entity.mediaPath}');
-        throw Exception(
-          'Solo se permiten imágenes (jpg, png, gif, webp) para subir'
-        );
+      final exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        throw Exception(convertMessageException(error: e));
       }
+      throw Exception(e.toString());
     }
-
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
-    }
-
-    print("✅ Media(s) subida(s) correctamente");
-
-  } catch (e) {
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      throw Exception(convertMessageException(error: e));
-    }
-
-    throw Exception('Error procesando procedimiento: $e');
   }
-}
 
+  Future<void> preferencesUser(PreferencesEntity entity, String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/preferencias');
 
-Future<void> uploadPicturePerfil(
-  String file,
-  String token,
-) async {
-  try {
-    Uri url = Uri.parse('$defaultApiServer/User/cambiar-foto-perfil');
+      final model = PreferencesModel.fromEntity(entity);
+      final bodyData = jsonEncode(model.toJson());
 
-    var request = http.MultipartRequest('POST', url);
-
-    request.headers.addAll({
-      'Authorization': 'Bearer $token',
-    });
-
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file',
-        file,
-      ),
-    );
-
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception(
-        'Error HTTP ${response.statusCode}: ${response.body}',
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: bodyData,
       );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e, stackTrace) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        final message = convertMessageException(error: e);
+        throw Exception(message);
+      }
+
+      throw Exception('$e');
     }
-
-    print('✅ Foto de perfil actualizada correctamente');
-
-  } catch (e) {
-    if (e is SocketException ||
-        e is http.ClientException ||
-        e is TimeoutException) {
-      throw Exception(convertMessageException(error: e));
-    }
-
-    throw Exception('Error cambiando foto de perfil: $e');
   }
-}
 
+  Future<void> putpreferencesUser(
+    PreferencesEntity entity,
+    String token,
+  ) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/preferencias');
 
-  Future<List<UpdateLocationEntity>> searchcity(String city,String token) async {
+      final model = PreferencesModel.fromEntity(entity);
+      final bodyData = jsonEncode(model.toJson());
+
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: bodyData,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e, stackTrace) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        final message = convertMessageException(error: e);
+        throw Exception(message);
+      }
+
+      throw Exception('$e');
+    }
+  }
+
+  Future<void> deleteMedia(int mediaId, String token) async {
+    try {
+      Uri url = Uri.parse(
+        '$defaultApiServer/User/delete-media?idMedia=$mediaId',
+      );
+
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        final message = convertMessageException(error: e);
+        throw Exception(message);
+      }
+
+      throw Exception('$e');
+    }
+  }
+
+  Future<void> deleteUser(String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/eliminar-cuenta');
+
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      ApiExceptionCustom exception = ApiExceptionCustom(response: response);
+      exception.validateMesage();
+      throw exception;
+    } catch (e, stackTrace) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        final message = convertMessageException(error: e);
+        throw Exception(message);
+      }
+
+      throw Exception('$e');
+    }
+  }
+
+  Future<void> createMedia(
+    List<UploadMediaEntity> entities,
+    String token,
+  ) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/upload-media');
+
+      var request = http.MultipartRequest('POST', url);
+
+      request.headers.addAll({'Authorization': 'Bearer $token'});
+
+      for (var entity in entities) {
+        final model = UploadMediaModel.fromEntity(entity);
+
+        try {
+          await model.addFileToRequest(request);
+        } catch (e) {
+          print('❌ Archivo no permitido: ${entity.mediaPath}');
+          throw Exception(
+            'Solo se permiten imágenes (jpg, png, gif, webp) para subir',
+          );
+        }
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
+      }
+
+      print("✅ Media(s) subida(s) correctamente");
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('Error procesando procedimiento: $e');
+    }
+  }
+
+  Future<void> uploadPicturePerfil(String file, String token) async {
+    try {
+      Uri url = Uri.parse('$defaultApiServer/User/cambiar-foto-perfil');
+
+      var request = http.MultipartRequest('POST', url);
+
+      request.headers.addAll({'Authorization': 'Bearer $token'});
+
+      request.files.add(await http.MultipartFile.fromPath('file', file));
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
+      }
+
+      print('✅ Foto de perfil actualizada correctamente');
+    } catch (e) {
+      if (e is SocketException ||
+          e is http.ClientException ||
+          e is TimeoutException) {
+        throw Exception(convertMessageException(error: e));
+      }
+
+      throw Exception('Error cambiando foto de perfil: $e');
+    }
+  }
+
+  Future<List<UpdateLocationEntity>> searchcity(
+    String city,
+    String token,
+  ) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/buscar-ciudad?query=$city');
 
@@ -407,10 +381,9 @@ Future<void> uploadPicturePerfil(
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-         
       );
 
-    if (response.statusCode == 200||response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final dataUTF8 = utf8.decode(response.bodyBytes);
         final List data = jsonDecode(dataUTF8);
         return data.map((json) => UpdateLocationModel.fromJson(json)).toList();
@@ -430,7 +403,7 @@ Future<void> uploadPicturePerfil(
     }
   }
 
-  Future<void> updateCity(UpdateLocationEntity entity,String token) async {
+  Future<void> updateCity(UpdateLocationEntity entity, String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/cambiar-ciudad');
 
@@ -461,7 +434,8 @@ Future<void> uploadPicturePerfil(
       throw Exception('$e');
     }
   }
-  Future<void> deactivateTrip(String token) async{
+
+  Future<void> deactivateTrip(String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/desactivar-viaje');
 
@@ -491,7 +465,8 @@ Future<void> uploadPicturePerfil(
       throw Exception('$e');
     }
   }
-  Future<void> updateLocation(UpdateLocationEntity entity,String token) async {
+
+  Future<void> updateLocation(UpdateLocationEntity entity, String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/actualizar-ubicacion');
 
@@ -522,7 +497,8 @@ Future<void> uploadPicturePerfil(
       throw Exception('$e');
     }
   }
-  Future<void> updateuser(UpdateUserEntity entity,String token) async {
+
+  Future<void> updateuser(UpdateUserEntity entity, String token) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/User/actualizar-perfil');
 
@@ -553,7 +529,11 @@ Future<void> uploadPicturePerfil(
       throw Exception('$e');
     }
   }
-  Future<void> createReportsUser(CreateReportsUserEntity entity,String token) async {
+
+  Future<void> createReportsUser(
+    CreateReportsUserEntity entity,
+    String token,
+  ) async {
     try {
       Uri url = Uri.parse('$defaultApiServer/Reportes');
 
@@ -584,4 +564,5 @@ Future<void> uploadPicturePerfil(
       throw Exception('$e');
     }
   }
+
 }

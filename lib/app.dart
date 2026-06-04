@@ -80,6 +80,7 @@ class App extends StatelessWidget {
         Get.put(usecaseConfig.deleteMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadMediaUsecase!, permanent: true);
         Get.put(usecaseConfig.uploadPicturePerfileUsecase!, permanent: true);
+        Get.put(usecaseConfig.validateCouponsUsecase!, permanent: true);
         Get.put(usecaseConfig.addLikeToStoryUsecase!, permanent: true);
         Get.put(usecaseConfig.createStroryUsecase!, permanent: true);
         Get.put(usecaseConfig.fetchStoriesByIdUsecase!, permanent: true);
@@ -170,7 +171,7 @@ class App extends StatelessWidget {
         Get.lazyPut(() => UpdateProfileTutorialController(), fenix: true);
         Get.lazyPut(() =>StartController(updateLocationUsecase: Get.find()), fenix: true);
         
-        Get.lazyPut(  () => PurchaseController(  getPurchasesUsecase: Get.find(),  purchaseAppleUsecase: Get.find(), purchaseGoogleUsecase: Get.find(),  ), fenix: true,  );
+        Get.lazyPut(  () => PurchaseController(  getPurchasesUsecase: Get.find(),  purchaseAppleUsecase: Get.find(), purchaseGoogleUsecase: Get.find(), validateCouponsUsecase: Get.find(),  ), fenix: true,  );
         Get.lazyPut( () => VerificationController(  verificationUsecase: Get.find(), verificationSelfieUsecase: Get.find(), getVerificationUsecase: Get.find(), ),  fenix: true,  );
       }),
 

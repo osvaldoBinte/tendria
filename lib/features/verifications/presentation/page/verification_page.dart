@@ -113,10 +113,7 @@ class _VerificationPageState extends State<VerificationPage>
     return AppBar(
       backgroundColor: ThemeColor.backgroundColor,
       elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios, color: ThemeColor.iconColor, size: 20),
-        onPressed: () => Get.back(),
-      ),
+       
       title: Text(
         _l.t('verify_title'),
         style: ThemeColor.headingSmall.copyWith(color: ThemeColor.textPrimary),
@@ -803,6 +800,7 @@ class _VerificationPageState extends State<VerificationPage>
             const SizedBox(height: ThemeColor.paddingMedium),
             ThemeColor.createLabeledTextField(
               label: _l.t('verify_username_label'),
+              labelColor: ThemeColor.textPrimary,
               controller: controller.usernameController,
               hintText: _l.t('verify_username_hint'),
               isRequired: true,

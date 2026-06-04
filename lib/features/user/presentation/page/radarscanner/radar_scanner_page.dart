@@ -14,6 +14,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tendria/features/user/presentation/controller/profile_controller.dart';
 import 'package:tendria/features/user/presentation/controller/update_profile_controller.dart';
 import 'package:tendria/features/verifications/presentation/controller/verification_controller.dart';
+import 'package:tendria/features/verifications/presentation/page/verification_page.dart';
 import 'package:video_player/video_player.dart';
 
 class RadarScannerScreen extends StatefulWidget {
@@ -865,7 +866,7 @@ class _RadarScannerScreenState extends State<RadarScannerScreen>
             'red_social',
           ].every((t) => _verificationCtrl.getVerification(t) != null);
           if (!allVerified && !_verificationCtrl.isLoadingVerifications.value) {
-            return _buildVerificationGate();
+            return VerificationPage();
           }
 
           if (controller.locationPermissionDenied.value) {

@@ -139,52 +139,50 @@ class PurchasePage extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
                   child: Obx(() {
-                    final isPurchasing = controller.isPurchasing.value;
-                    final hasSelection =
-                        controller.selectedProductId.value.isNotEmpty;
+  final isPurchasing = controller.isPurchasing.value;
+  final hasSelection = controller.selectedProductId.value.isNotEmpty;
+  final couponBlocking = controller.couponCode.value.trim().isNotEmpty &&
+      !controller.couponIsValid.value;  
 
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: (isPurchasing || !hasSelection)
-                            ? null
-                            : () {
-                                final product = controller.products.firstWhere(
-                                  (p) =>
-                                      p.productId ==
-                                      controller.selectedProductId.value,
-                                );
-                                controller.buyProduct(product);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ThemeColor.primaryColor,
-                          disabledBackgroundColor: ThemeColor.primaryColor
-                              .withOpacity(0.4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: isPurchasing
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                _l.t('purchase_buy_btn'),
-                                style: ThemeColor.buttonText.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                      ),
-                    );
-                  }),
+  return SizedBox(
+    width: double.infinity,
+    height: 54,
+    child: ElevatedButton(
+      onPressed: (isPurchasing || !hasSelection || couponBlocking)  
+          ? null
+          : () {
+              final product = controller.products.firstWhere(
+                (p) => p.productId == controller.selectedProductId.value,
+              );
+              controller.buyProduct(product);
+            },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: ThemeColor.primaryColor,
+        disabledBackgroundColor: ThemeColor.primaryColor.withOpacity(0.4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+      ),
+      child: isPurchasing
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white,
+              ),
+            )
+          : Text(
+              _l.t('purchase_buy_btn'),
+              style: ThemeColor.buttonText.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+    ),
+  );
+}),
                 ),
               ),
             ],

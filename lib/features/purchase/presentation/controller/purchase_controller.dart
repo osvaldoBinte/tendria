@@ -311,7 +311,7 @@ class PurchaseController extends GetxController {
     } catch (e, stackTrace) {
       print('🔥 Error en _verifyAndDeliver: $e\n$stackTrace');
       errorMessage.value = _l.t('purchase_verify_error');
-      showErrorSnackbar(_l.t('purchase_verify_error'));
+      showErrorSnackbar('${errorMessage.value}: $e');
     } finally {
       isPurchasing.value = false;
       selectedProductId.value = '';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tendria/common/constants/constants.dart';
 import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_controller.dart';
 import 'package:tendria/common/tutorial/tutorial_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
@@ -14,10 +15,13 @@ import 'package:tendria/features/user/presentation/controller/profile_controller
 import 'package:tendria/features/user/presentation/page/profile/profile_page.dart';
 import 'package:tendria/features/user/presentation/page/radarscanner/radar_scanner_page.dart';
 import 'package:tendria/features/user/presentation/profiledetail/nearby_users_page.dart';
+import 'package:tendria/framework/preferences_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StartController extends GetxController with WidgetsBindingObserver { 
   final UpdateLocationUsecase updateLocationUsecase;
-
+  
+  ProfileController get _profile => Get.find<ProfileController>();
   StartController({required this.updateLocationUsecase});
  
   final List<Widget> pages = [
@@ -46,14 +50,104 @@ class StartController extends GetxController with WidgetsBindingObserver {
   final RxInt selectedIndex = 0.obs;
   final RxBool isCheckingProfile = true.obs;
  
-  @override
-  void onInit() {
-    super.onInit();
-    WidgetsBinding.instance.addObserver(this);
-    _checkProfileCompletion();
-    _handleInitialTab(); 
-    _updateUserCity();
+@override
+void onInit() {
+  super.onInit();
+  WidgetsBinding.instance.addObserver(this);
+  _checkProfileCompletion();
+  _handleInitialTab();
+  _updateUserCity();
+  _checkReviewPrompt(); 
+}
+
+Future<void> _checkReviewPrompt() async {
+  try { 
+    await Future.delayed(const Duration(milliseconds: 1500));
+ 
+    final alreadyRequested = await PreferencesUser()
+        .loadPrefs(type: bool, key: AppConstants.reviewRequestedKey);
+    if (alreadyRequested == true) return;
+ 
+    final creationDateStr = _profile.creationdate;
+    if (creationDateStr.isEmpty) return;
+
+    final creationDate = DateTime.tryParse(creationDateStr);
+    if (creationDate == null) return;
+
+    final daysSinceCreation =
+        DateTime.now().difference(creationDate).inDays;
+    if (daysSinceCreation < 45) return;
+ 
+    _showReviewDialog();
+  } catch (e) {
+    print('Error en _checkReviewPrompt: $e');
   }
+}
+
+void _showReviewDialog() {
+  Get.dialog(
+    AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text(
+        '¿Te está gustando Tendria? 💜',
+        textAlign: TextAlign.center,
+      ),
+      content: const Text(
+        'Tu opinión nos ayuda a mejorar y llegar a más personas. '
+        '¿Nos dejas una reseña?',
+        textAlign: TextAlign.center,
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        TextButton(
+          onPressed: () {
+            // Guardar que ya se mostró aunque diga "Ahora no"
+            PreferencesUser().savePrefs(
+              type: bool,
+              key: AppConstants.reviewRequestedKey,
+              value: true,
+            );
+            Get.back();
+          },
+          child: const Text('Ahora no'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            PreferencesUser().savePrefs(
+              type: bool,
+              key: AppConstants.reviewRequestedKey,
+              value: true,
+            );
+            Get.back();
+            await _openStoreReview();
+          },
+          child: const Text('Dejar reseña ⭐'),
+        ),
+      ],
+    ),
+    barrierDismissible: false,
+  );
+}
+
+Future<void> _openStoreReview() async {
+  final Uri url;
+
+if (GetPlatform.isIOS) {
+    url = Uri.parse(
+      'https://apps.apple.com/app/id${AppConstants.appStoreId}?action=write-review',
+    );
+  } else {
+    url = Uri.parse(
+      'https://play.google.com/store/apps/details?id=${AppConstants.playStoreId}&showAllReviews=true',
+    );
+  }
+
+  if (await canLaunchUrl(url)) {
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  } else {
+    print('No se pudo abrir la tienda: $url');
+  }
+}
 
   @override
   void onClose() {
@@ -73,8 +167,7 @@ class StartController extends GetxController with WidgetsBindingObserver {
     final position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.low,
       timeLimit: const Duration(seconds: 10),
-    );
-
+    ); 
     final placemarks = await placemarkFromCoordinates(
       position.latitude,
       position.longitude,

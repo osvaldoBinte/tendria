@@ -5,7 +5,10 @@ class AppConstants {
   static const String accesos = "accesostendria";
    static   const String tutorialKey = 'has_seen_tutdorial';
 
-  
+  static const String reviewRequestedKey = 'review_requesteds';
+
+static const String  appStoreId  = 'XXXXXXXXXX';      
+static const String  playStoreId = 'dev.binteconsulting.tendria';  
   static const String startTutorialKey = 'start_tutorial_seen';
     static const String profileTutorialKey = 'profile_tutorial_seen';
   static const String updateProfileTutorialKey = 'update_profile_tutorial_seend';

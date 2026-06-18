@@ -17,6 +17,7 @@ class GetUserEntity {
   final PreferencesEntity? preferences;
   final LikeStatusEntity? likeStatus;
   final bool? isTravelMode;
+  final String? creationdate;
   
   final String? status;
   final ChatEntity? chat;
@@ -39,6 +40,7 @@ class GetUserEntity {
       this.status,
       this.chat,
       this.isTravelMode,
+      this.creationdate
   });
 
 }

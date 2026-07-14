@@ -100,8 +100,7 @@ void _showReviewDialog() {
       actionsAlignment: MainAxisAlignment.center,
       actions: [
         TextButton(
-          onPressed: () {
-            // Guardar que ya se mostró aunque diga "Ahora no"
+          onPressed: () { 
             PreferencesUser().savePrefs(
               type: bool,
               key: AppConstants.reviewRequestedKey,

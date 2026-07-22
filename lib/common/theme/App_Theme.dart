@@ -5,129 +5,122 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tendria/common/controller/theme_controller.dart';
 
 class ThemeColor {
-static T _byMode<T>({required T light, required T dark, required T vip}) {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    switch (ctrl.themeMode.value) {
-      case AppThemeMode.vip:
-        return vip;
-      case AppThemeMode.dark:
-        return dark;
-      case AppThemeMode.light:
-        return light;
+  static T _byMode<T>({required T light, required T dark, required T vip}) {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      switch (ctrl.themeMode.value) {
+        case AppThemeMode.vip:
+          return vip;
+        case AppThemeMode.dark:
+          return dark;
+        case AppThemeMode.light:
+          return light;
+      }
+    } catch (_) {
+      return light;
     }
-  } catch (_) {
-    return light;
   }
-}
-  static const Color secondaryColor = Color(0xFF8B2C4B);  
-  static const Color accentColor = Color(0xFFB83A5E);  
-  static const Color radarScanner = Color(
-    0xFFB9141E,
-  ); 
+
+  static const Color secondaryColor = Color(0xFF8B2C4B);
+  static const Color accentColor = Color(0xFFB83A5E);
+  static const Color radarScanner = Color(0xFFB9141E);
 
   static const Color colorAccionButtons = accentColor;
- 
-  static const Color surfaceColor = Colors.white;  
-  static const Color cardColor = Colors.white; 
+
+  static const Color surfaceColor = Colors.white;
+  static const Color cardColor = Colors.white;
   static Color get primaryColor => _byMode(
-  light: const Color(0xFF4A141E),
-  dark: const Color(0xFFB9141E),
-  vip: const Color(0xFFD4AF37), // dorado
-);
+    light: const Color(0xFF4A141E),
+    dark: const Color(0xFFB9141E),
+    vip: const Color(0xFFD4AF37),
+  );
 
-static Color get tertiaryColor => _byMode(
-  light: const Color(0xFF4A141E),
-  dark: const Color(0xFF4A141E),
-  vip: const Color(0xFF0F0F10),
-);
+  static Color get tertiaryColor => _byMode(
+    light: const Color(0xFF4A141E),
+    dark: const Color(0xFF4A141E),
+    vip: const Color(0xFF0F0F10),
+  );
 
-static Color get backgroundColor => _byMode(
-  light: Colors.white,
-  dark: const Color(0xFF050709),
-  vip: const Color(0xFF0A0A0B),
-);
+  static Color get backgroundColor => _byMode(
+    light: Colors.white,
+    dark: const Color(0xFF050709),
+    vip: const Color(0xFF0A0A0B),
+  );
 
-static Color get backgroundColorfondo => _byMode(
-  light: const Color(0xFFEFEFEA),
-  dark: const Color(0xFF0F1215),
-  vip: const Color(0xFF0A0A0B),
-);
+  static Color get backgroundColorfondo => _byMode(
+    light: const Color(0xFFEFEFEA),
+    dark: const Color(0xFF0F1215),
+    vip: const Color(0xFF0A0A0B),
+  );
 
-static Color get cardBackground => _byMode(
-  light: Colors.white,
-  dark: const Color(0xFF0F1215),
-  vip: const Color(0xFF17140C), // negro con tinte cálido
-);
+  static Color get cardBackground => _byMode(
+    light: Colors.white,
+    dark: const Color(0xFF0F1215),
+    vip: const Color(0xFF17140C),
+  );
 
-static Color get textPrimary => _byMode(
-  light: Colors.black87,
-  dark: Colors.white,
-  vip: const Color(0xFFF5D998), // dorado claro
-);
+  static Color get textPrimary => _byMode(
+    light: Colors.black87,
+    dark: Colors.white,
+    vip: const Color(0xFFF5D998),
+  );
 
-static Color get textSecondary => _byMode(
-  light: const Color(0xFF5F6368),
-  dark: Colors.white60,
-  vip: const Color(0xFFB8975A),
-);
+  static Color get textSecondary => _byMode(
+    light: const Color(0xFF5F6368),
+    dark: Colors.white60,
+    vip: const Color(0xFFB8975A),
+  );
 
-static Color get iconColor => _byMode(
-  light: Colors.black,
-  dark: Colors.white,
-  vip: const Color(0xFFD4AF37),
-);
+  static Color get iconColor => _byMode(
+    light: Colors.black,
+    dark: Colors.white,
+    vip: const Color(0xFFD4AF37),
+  );
 
-static Color get colorstatus => _byMode(
-  light: const Color(0xFF4A141E),
-  dark: Colors.white,
-  vip: const Color(0xFFD4AF37),
-);
+  static Color get colorstatus => _byMode(
+    light: const Color(0xFF4A141E),
+    dark: Colors.white,
+    vip: const Color(0xFFD4AF37),
+  );
 
-static Color get toggleBackground => _byMode(
-  light: const Color(0xFFE0E0E0),
-  dark: const Color(0xFF2C2C3E),
-  vip: const Color(0xFF2A2416),
-);
+  static Color get toggleBackground => _byMode(
+    light: const Color(0xFFE0E0E0),
+    dark: const Color(0xFF2C2C3E),
+    vip: const Color(0xFF2A2416),
+  );
 
-static Color get toggleThumb => _byMode(
-  light: const Color(0xFF2C2C3E),
-  dark: const Color(0xFFE0E0E0),
-  vip: const Color(0xFFD4AF37),
-);
+  static Color get toggleThumb => _byMode(
+    light: const Color(0xFF2C2C3E),
+    dark: const Color(0xFFE0E0E0),
+    vip: const Color(0xFFD4AF37),
+  );
 
-static Color get subtleBorder => _byMode(
-  light: Colors.black12,
-  dark: Colors.white24,
-  vip: const Color(0xFFD4AF37).withOpacity(0.3),
-);
+  static Color get subtleBorder => _byMode(
+    light: Colors.black12,
+    dark: Colors.white24,
+    vip: const Color(0xFFD4AF37).withOpacity(0.3),
+  );
 
-static Color get subtleBackground => _byMode(
-  light: Colors.grey.shade100,
-  dark: const Color(0xFF1E2226),
-  vip: const Color(0xFF15130C),
-);
+  static Color get subtleBackground => _byMode(
+    light: Colors.grey.shade100,
+    dark: const Color(0xFF1E2226),
+    vip: const Color(0xFF15130C),
+  );
 
-static Color get backgroundColorRadart => _byMode(
-  light: Colors.white,
-  dark: Colors.black,
-  vip: Colors.black,
-);
+  static Color get backgroundColorRadart =>
+      _byMode(light: Colors.white, dark: Colors.black, vip: Colors.black);
 
-  // Colores de texto
-  static const Color textPrimaryColor = Colors.black87; // Texto principal
-  static const Color textSecondaryColor = Color(0xFF5F6368); // Texto secundario
-  static const Color textTertiaryColor = Color(0xFF656565); // Texto terciario
+  static const Color textPrimaryColor = Colors.black87;
+  static const Color textSecondaryColor = Color(0xFF5F6368);
+  static const Color textTertiaryColor = Color(0xFF656565);
   static const Color textLightColor = Colors.white;
   static const Color textDarkColor = Colors.black;
 
-  // Colores de estado
-  static const Color successColor = Color(0xFF4CAF50); // Verde éxito
-  static const Color warningColor = Color(0xFFF7770E); // Naranja advertencia
-  static const Color errorColor = Color(0xFFFF3B3B); // Rojo error
-  static const Color infoColor = Color(0xFF2196F3); // Azul información
-  static const Color onlineColor = Color(0xFF4CAF50); // Verde online
-  //loading
+  static const Color successColor = Color(0xFF4CAF50);
+  static const Color warningColor = Color(0xFFF7770E);
+  static const Color errorColor = Color(0xFFFF3B3B);
+  static const Color infoColor = Color(0xFF2196F3);
+  static const Color onlineColor = Color(0xFF4CAF50);
   static final Color loaddingwithOpacity1 = const Color.fromARGB(
     255,
     200,
@@ -142,27 +135,19 @@ static Color get backgroundColorRadart => _byMode(
   ).withOpacity(0.35);
   static final Color loadding = const Color.fromARGB(255, 160, 160, 160);
 
-  // Colores específicos de la app
-  static Color badgeColor = primaryColor; // Color de badges "Tu turno"
-  static Color distanceBadgeColor = primaryColor; // Badge de distancia
-  static Color likeButtonColor = primaryColor; // Botón de like
-  static const Color storyGradientStart = Color(
-    0xFF8B2C4B,
-  ); // Inicio gradiente historia
-  static const Color storyGradientEnd = Color(
-    0xFF4A1428,
-  ); // Fin gradiente historia
+  static Color badgeColor = primaryColor;
+  static Color distanceBadgeColor = primaryColor;
+  static Color likeButtonColor = primaryColor;
+  static const Color storyGradientStart = Color(0xFF8B2C4B);
+  static const Color storyGradientEnd = Color(0xFF4A1428);
 
-  // Colores para navegación
   static Color navbarSelectedColor = primaryColor;
   static final Color navbarUnselectedColor = Colors.grey.shade600;
 
-  // Utilidades
   static final Color shadowColor = Colors.black.withOpacity(0.1);
   static final Color dividerColor = const Color(0xFFE0E0E0);
   static final Color disabledColor = Colors.grey.shade400;
 
-  // Dimensiones
   static const double smallRadius = 8.0;
   static const double mediumRadius = 12.0;
   static const double largeRadius = 16.0;
@@ -177,7 +162,6 @@ static Color get backgroundColorRadart => _byMode(
   static const double elevationMedium = 4.0;
   static const double elevationLarge = 8.0;
 
-  // BorderRadius
   static BorderRadius get smallBorderRadius =>
       BorderRadius.circular(smallRadius);
   static BorderRadius get mediumBorderRadius =>
@@ -188,7 +172,6 @@ static Color get backgroundColorRadart => _byMode(
       BorderRadius.circular(extraLargeRadius);
   static BorderRadius get circularBorderRadius => BorderRadius.circular(100);
 
-  // Sombras
   static BoxShadow get lightShadow => BoxShadow(
     color: Colors.black.withOpacity(0.05),
     blurRadius: 8,
@@ -219,7 +202,6 @@ static Color get backgroundColorRadart => _byMode(
     offset: const Offset(0, 4),
   );
 
-  // Gradientes
   static LinearGradient get primaryGradient => LinearGradient(
     colors: [primaryColor, secondaryColor],
     begin: Alignment.topLeft,
@@ -236,7 +218,7 @@ static Color get backgroundColorRadart => _byMode(
     end: Alignment.bottomRight,
   );
   static LinearGradient get favoriteroundedGradient => LinearGradient(
-    colors:  [Color(0xFFFF5757), Color(0xFFff52af)],
+    colors: [Color(0xFFFF5757), Color(0xFFff52af)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -257,7 +239,6 @@ static Color get backgroundColorRadart => _byMode(
     colors: [Colors.black.withOpacity(0.5), Colors.black.withOpacity(0.5)],
   );
 
-  // Decoraciones
   static BoxDecoration get cardDecoration => BoxDecoration(
     color: cardColor,
     borderRadius: mediumBorderRadius,
@@ -270,7 +251,6 @@ static Color get backgroundColorRadart => _byMode(
     boxShadow: [cardShadow],
   );
 
-  // Estilos de texto
   static TextStyle get headingLarge => const TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
@@ -447,9 +427,6 @@ static Color get backgroundColorRadart => _byMode(
     iconTheme: const IconThemeData(color: textPrimaryColor, size: 24),
   );
 
-  // ========================================
-  // WIDGETS PERSONALIZADOS
-  // ========================================
   static Widget createAppLogo({
     String imagePath = 'assets/logo/icon.jpeg',
     double size = 150,
@@ -472,7 +449,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Badge de "Tu turno"
   static Widget createTurnBadge(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -484,7 +460,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Badge de distancia
   static Widget createDistanceBadge(String distance) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -553,8 +528,7 @@ static Color get backgroundColorRadart => _byMode(
         onPressed ?? (text == 'AGENDAR CITA' ? defaultOnPressed : () {});
 
     return MouseRegion(
-      // ⬅️ Nuevo
-      cursor: SystemMouseCursors.click, // ⬅️ Cambia el cursor al pasar el mouse
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: isLoading ? null : finalOnPressed,
         child: Container(
@@ -599,7 +573,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Botón circular de acción (like, etc)
   static Widget createCircularActionButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -622,7 +595,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Card de perfil recomendado
   static Widget createRecommendedProfileCard({
     required String imageUrl,
     required String name,
@@ -681,7 +653,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Card de perfil activo
   static Widget createActiveProfileCard({
     required String imageUrl,
     required String name,
@@ -729,7 +700,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Botón de nueva gente
   static Widget createNewPeopleButton({
     required String text,
     required VoidCallback onTap,
@@ -754,7 +724,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // Item de chat en lista
   static Widget createChatItem({
     required String imageUrl,
     required String name,
@@ -825,7 +794,6 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-  // En ThemeColor — SIN Obx, solo retorna el widget directamente
   static Widget createMainScaffold({
     required Widget body,
     required int currentIndex,
@@ -865,8 +833,7 @@ static Color get backgroundColorRadart => _byMode(
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: ThemeColor
-            .cardBackground, // ← getter reactivo, funciona porque el Obx padre lo envuelve
+        color: ThemeColor.cardBackground,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
@@ -933,144 +900,145 @@ static Color get backgroundColorRadart => _byMode(
     );
   }
 
-static Widget widgetLogo({double width = 100, double height = 100}) {
-  try {
-    final ctrl = Get.find<ThemeController>();
-    return Obx(() {
-      final mode = ctrl.themeMode.value;  
-      final asset = switch (mode) {
-        AppThemeMode.vip => 'assets/logo/logo-radar-dark.png',
-        AppThemeMode.dark => 'assets/logo/logo-radar-dark.png',
-        AppThemeMode.light => 'assets/logo/logo.png',
-      };
-      return Image.asset(asset, width: width, height: height);
-    });
-  } catch (_) {
-    return Image.asset('assets/logo/logo.png', width: width, height: height);
+  static Widget widgetLogo({double width = 100, double height = 100}) {
+    try {
+      final ctrl = Get.find<ThemeController>();
+      return Obx(() {
+        final mode = ctrl.themeMode.value;
+        final asset = switch (mode) {
+          AppThemeMode.vip => 'assets/logo/logo-radar-dark.png',
+          AppThemeMode.dark => 'assets/logo/logo-radar-dark.png',
+          AppThemeMode.light => 'assets/logo/logo.png',
+        };
+        return Image.asset(asset, width: width, height: height);
+      });
+    } catch (_) {
+      return Image.asset('assets/logo/logo.png', width: width, height: height);
+    }
   }
-}
-static Widget createLabeledTextField({
-  required String label,
-  required TextEditingController controller,
-  FocusNode? focusNode,
-  String? hintText,
-  TextInputType keyboardType = TextInputType.text,
-  bool obscureText = false,
-  Widget? suffixIcon,
-  void Function(String)? onSubmitted,
-  void Function(String)? onChanged,
-  bool enabled = true,
-  int maxLines = 1,
-  String? errorText,
-  bool showError = false,
-  EdgeInsets? contentPadding,
-  Color? fillColor,
-  Color? labelColor,
-  Color? textColor,
-  Color? hintColor,
-  Color? borderColor,
-  Color? focusedBorderColor,
-  BorderRadius? borderRadius,
-  TextStyle? labelStyle,
-  TextStyle? textStyle,
-  TextStyle? hintStyle,
-  double? labelSpacing,
-  bool isRequired = false,
-  List<TextInputFormatter>? inputFormatters,  
-}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        children: [
-          Text(
-            label,
-            style:
-                labelStyle ??
-                bodyMedium.copyWith(
-                  color: labelColor ?? textDarkColor,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          if (isRequired)
-            Text(
-              ' *',
-              style: TextStyle(
-                color: errorColor,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-        ],
-      ),
-      SizedBox(height: labelSpacing ?? paddingSmall),
 
-      TextField(
-        controller: controller,
-        focusNode: focusNode,
-        keyboardType: keyboardType,
-        obscureText: obscureText,
-        onSubmitted: onSubmitted,
-        onChanged: onChanged,
-        enabled: enabled,
-        maxLines: maxLines,
-        inputFormatters: inputFormatters,
-        style:
-            textStyle ??
-            bodyMedium.copyWith(color: textColor ?? textDarkColor),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle:
-              hintStyle ??
-              bodyMedium.copyWith(color: hintColor ?? textSecondaryColor),
-          errorText: showError ? errorText : null,
-          errorStyle: bodySmall.copyWith(color: errorColor, height: 1.5),
-          filled: true,
-          fillColor: fillColor ?? surfaceColor,
-          contentPadding:
-              contentPadding ??
-              EdgeInsets.symmetric(
-                horizontal: paddingLarge,
-                vertical: paddingMedium,
+  static Widget createLabeledTextField({
+    required String label,
+    required TextEditingController controller,
+    FocusNode? focusNode,
+    String? hintText,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    void Function(String)? onSubmitted,
+    void Function(String)? onChanged,
+    bool enabled = true,
+    int maxLines = 1,
+    String? errorText,
+    bool showError = false,
+    EdgeInsets? contentPadding,
+    Color? fillColor,
+    Color? labelColor,
+    Color? textColor,
+    Color? hintColor,
+    Color? borderColor,
+    Color? focusedBorderColor,
+    BorderRadius? borderRadius,
+    TextStyle? labelStyle,
+    TextStyle? textStyle,
+    TextStyle? hintStyle,
+    double? labelSpacing,
+    bool isRequired = false,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style:
+                  labelStyle ??
+                  bodyMedium.copyWith(
+                    color: labelColor ?? textDarkColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            if (isRequired)
+              Text(
+                ' *',
+                style: TextStyle(
+                  color: errorColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-          suffixIcon: suffixIcon,
-          border: OutlineInputBorder(
-            borderRadius: borderRadius ?? circularBorderRadius,
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: borderRadius ?? circularBorderRadius,
-            borderSide: showError
-                ? BorderSide(color: errorColor, width: 1.5)
-                :BorderSide(color: toggleBackground, width: 1.5)
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: borderRadius ?? circularBorderRadius,
-            borderSide: BorderSide(
-              color: (borderColor ?? toggleBackground).withOpacity(0.5),
-              width: 1,
+          ],
+        ),
+        SizedBox(height: labelSpacing ?? paddingSmall),
+
+        TextField(
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          onSubmitted: onSubmitted,
+          onChanged: onChanged,
+          enabled: enabled,
+          maxLines: maxLines,
+          inputFormatters: inputFormatters,
+          style:
+              textStyle ??
+              bodyMedium.copyWith(color: textColor ?? textDarkColor),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle:
+                hintStyle ??
+                bodyMedium.copyWith(color: hintColor ?? textSecondaryColor),
+            errorText: showError ? errorText : null,
+            errorStyle: bodySmall.copyWith(color: errorColor, height: 1.5),
+            filled: true,
+            fillColor: fillColor ?? surfaceColor,
+            contentPadding:
+                contentPadding ??
+                EdgeInsets.symmetric(
+                  horizontal: paddingLarge,
+                  vertical: paddingMedium,
+                ),
+            suffixIcon: suffixIcon,
+            border: OutlineInputBorder(
+              borderRadius: borderRadius ?? circularBorderRadius,
+              borderSide: BorderSide.none,
             ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: borderRadius ?? circularBorderRadius,
-            borderSide: BorderSide(
-              color: showError
-                  ? errorColor
-                  : (focusedBorderColor ?? primaryColor),
-              width: 1.5,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: borderRadius ?? circularBorderRadius,
+              borderSide: showError
+                  ? BorderSide(color: errorColor, width: 1.5)
+                  : BorderSide(color: toggleBackground, width: 1.5),
             ),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: borderRadius ?? circularBorderRadius,
-            borderSide: BorderSide(color: errorColor, width: 1.5),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: borderRadius ?? circularBorderRadius,
-            borderSide: BorderSide(color: errorColor, width: 2),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: borderRadius ?? circularBorderRadius,
+              borderSide: BorderSide(
+                color: (borderColor ?? toggleBackground).withOpacity(0.5),
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: borderRadius ?? circularBorderRadius,
+              borderSide: BorderSide(
+                color: showError
+                    ? errorColor
+                    : (focusedBorderColor ?? primaryColor),
+                width: 1.5,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: borderRadius ?? circularBorderRadius,
+              borderSide: BorderSide(color: errorColor, width: 1.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: borderRadius ?? circularBorderRadius,
+              borderSide: BorderSide(color: errorColor, width: 2),
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 }

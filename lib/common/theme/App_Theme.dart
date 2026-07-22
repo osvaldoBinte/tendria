@@ -5,159 +5,114 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tendria/common/controller/theme_controller.dart';
 
 class ThemeColor {
-  // Colores principales - Tema de citas (Burdeos/Vino)
-  //static const Color primaryColor = Color(0xFF4A141E); // Burdeos principal
-  static const Color secondaryColor = Color(0xFF8B2C4B); // Burdeos oscuro
-  //static const Color tertiaryColor = Color(0xFF2E3A44); // Dorado suave
-
-  static const Color accentColor = Color(0xFFB83A5E); // Rosa burdeos claro
+static T _byMode<T>({required T light, required T dark, required T vip}) {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    switch (ctrl.themeMode.value) {
+      case AppThemeMode.vip:
+        return vip;
+      case AppThemeMode.dark:
+        return dark;
+      case AppThemeMode.light:
+        return light;
+    }
+  } catch (_) {
+    return light;
+  }
+}
+  static const Color secondaryColor = Color(0xFF8B2C4B);  
+  static const Color accentColor = Color(0xFFB83A5E);  
   static const Color radarScanner = Color(
     0xFFB9141E,
-  ); // Rojo intenso para radar scanner
+  ); 
 
   static const Color colorAccionButtons = accentColor;
-  // Colores de fondo
-  static const Color surfaceColor = Colors.white; // Superficies blancas
-  static const Color cardColor = Colors.white; // Cards blancas
-  // static final Color backgroundColorfondo = Color(0xFFEFEFEA);
-  //static final Color backgroundColor = Colors.white;
-  static Color get tertiaryColor {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value
-          ?   Color(0xFF4A141E)
-          :Color(0xFF4A141E) ;
-    } catch (_) {
-      return const Color(0xFF4A141E);
-    }
-  }
+ 
+  static const Color surfaceColor = Colors.white;  
+  static const Color cardColor = Colors.white; 
+  static Color get primaryColor => _byMode(
+  light: const Color(0xFF4A141E),
+  dark: const Color(0xFFB9141E),
+  vip: const Color(0xFFD4AF37), // dorado
+);
 
-  static Color get primaryColor {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value
-          ? const Color(0xFFB9141E)
-          : Color(0xFF4A141E);
-    } catch (_) {
-      return const Color(0xFF4A141E);
-    }
-  }
+static Color get tertiaryColor => _byMode(
+  light: const Color(0xFF4A141E),
+  dark: const Color(0xFF4A141E),
+  vip: const Color(0xFF0F0F10),
+);
 
-  static Color get toggleBackground {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value
-          ? const Color(0xFF2C2C3E)
-          : const Color(0xFFE0E0E0);
-    } catch (_) {
-      return const Color(0xFFE0E0E0);
-    }
-  }
+static Color get backgroundColor => _byMode(
+  light: Colors.white,
+  dark: const Color(0xFF050709),
+  vip: const Color(0xFF0A0A0B),
+);
 
-  static Color get toggleThumb {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value
-          ? const Color(0xFFE0E0E0)
-          : Color(0xFF2C2C3E);
-    } catch (_) {
-      return Colors.white;
-    }
-  }
+static Color get backgroundColorfondo => _byMode(
+  light: const Color(0xFFEFEFEA),
+  dark: const Color(0xFF0F1215),
+  vip: const Color(0xFF0A0A0B),
+);
 
-  static Color get backgroundColorRadart {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? const Color(0xFF000000) : Colors.white;
-    } catch (_) {
-      return Colors.white;
-    }
-  }
+static Color get cardBackground => _byMode(
+  light: Colors.white,
+  dark: const Color(0xFF0F1215),
+  vip: const Color(0xFF17140C), // negro con tinte cálido
+);
 
-  static Color get colorstatus {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? Colors.white : Color(0xFF4A141E);
-    } catch (_) {
-      return Colors.white;
-    }
-  }
+static Color get textPrimary => _byMode(
+  light: Colors.black87,
+  dark: Colors.white,
+  vip: const Color(0xFFF5D998), // dorado claro
+);
 
-  static Color get backgroundColor {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? const Color(0xFF050709) : Colors.white;
-    } catch (_) {
-      return Colors.white;
-    }
-  }
+static Color get textSecondary => _byMode(
+  light: const Color(0xFF5F6368),
+  dark: Colors.white60,
+  vip: const Color(0xFFB8975A),
+);
 
-  static Color get subtleBorder {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? Colors.white24 : Colors.black12;
-    } catch (_) {
-      return Colors.grey.shade300;
-    }
-  }
+static Color get iconColor => _byMode(
+  light: Colors.black,
+  dark: Colors.white,
+  vip: const Color(0xFFD4AF37),
+);
 
-  static Color get subtleBackground {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value
-          ? const Color(0xFF1E2226)
-          : Colors.grey.shade100;
-    } catch (_) {
-      return Colors.grey.shade100;
-    }
-  }
+static Color get colorstatus => _byMode(
+  light: const Color(0xFF4A141E),
+  dark: Colors.white,
+  vip: const Color(0xFFD4AF37),
+);
 
-  static Color get backgroundColorfondo {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value
-          ? const Color(0xFF0F1215)
-          : const Color(0xFFEFEFEA);
-    } catch (_) {
-      return const Color(0xFFEFEFEA);
-    }
-  }
+static Color get toggleBackground => _byMode(
+  light: const Color(0xFFE0E0E0),
+  dark: const Color(0xFF2C2C3E),
+  vip: const Color(0xFF2A2416),
+);
 
-  static Color get textPrimary {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? Colors.white : Colors.black87;
-    } catch (_) {
-      return Colors.black87;
-    }
-  }
+static Color get toggleThumb => _byMode(
+  light: const Color(0xFF2C2C3E),
+  dark: const Color(0xFFE0E0E0),
+  vip: const Color(0xFFD4AF37),
+);
 
-  static Color get textSecondary {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? Colors.white60 : const Color(0xFF5F6368);
-    } catch (_) {
-      return const Color(0xFF5F6368);
-    }
-  }
+static Color get subtleBorder => _byMode(
+  light: Colors.black12,
+  dark: Colors.white24,
+  vip: const Color(0xFFD4AF37).withOpacity(0.3),
+);
 
-  static Color get cardBackground {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? const Color(0xFF0F1215) : Colors.white;
-    } catch (_) {
-      return Colors.white;
-    }
-  }
+static Color get subtleBackground => _byMode(
+  light: Colors.grey.shade100,
+  dark: const Color(0xFF1E2226),
+  vip: const Color(0xFF15130C),
+);
 
-  static Color get iconColor {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return ctrl.isDarkMode.value ? Colors.white : Colors.black;
-    } catch (_) {
-      return Colors.black;
-    }
-  }
+static Color get backgroundColorRadart => _byMode(
+  light: Colors.white,
+  dark: Colors.black,
+  vip: Colors.black,
+);
 
   // Colores de texto
   static const Color textPrimaryColor = Colors.black87; // Texto principal
@@ -978,22 +933,22 @@ class ThemeColor {
     );
   }
 
-  static Widget widgetLogo({double width = 100, double height = 100}) {
-    try {
-      final ctrl = Get.find<ThemeController>();
-      return Obx(
-        () => Image.asset(
-          ctrl.isDarkMode.value
-              ? 'assets/logo/logo-radar-dark.png'
-              : 'assets/logo/logo.png',
-          width: width,
-          height: height,
-        ),
-      );
-    } catch (_) {
-      return Image.asset('assets/logo/logo.png', width: width, height: height);
-    }
+static Widget widgetLogo({double width = 100, double height = 100}) {
+  try {
+    final ctrl = Get.find<ThemeController>();
+    return Obx(() {
+      final mode = ctrl.themeMode.value;  
+      final asset = switch (mode) {
+        AppThemeMode.vip => 'assets/logo/logo-radar-dark.png',
+        AppThemeMode.dark => 'assets/logo/logo-radar-dark.png',
+        AppThemeMode.light => 'assets/logo/logo.png',
+      };
+      return Image.asset(asset, width: width, height: height);
+    });
+  } catch (_) {
+    return Image.asset('assets/logo/logo.png', width: width, height: height);
   }
+}
 static Widget createLabeledTextField({
   required String label,
   required TextEditingController controller,

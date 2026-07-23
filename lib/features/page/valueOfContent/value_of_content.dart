@@ -73,32 +73,10 @@ class _valueOfContentScreenState extends State<valueOfContent> {
                   Stack(
                     alignment: Alignment.center,
                     children: [
+                     
                       Container(
-                        width: 260,
-                        height: 260,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: ThemeColor.primaryColor.withOpacity(0.15),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 190,
-                        height: 190,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              ThemeColor.primaryColor.withOpacity(0.18),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 150,
-                        height: 150,
+                        width: 400,
+                        height: 400,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: ThemeColor.cardBackground.withOpacity(0.4),
@@ -109,34 +87,15 @@ class _valueOfContentScreenState extends State<valueOfContent> {
                         child: Center(
                           child: Image.asset(
                             'assets/icons/iconsPREMIUM.png',
-                            width: 70,
-                            height: 70,
+                            width: 400,
+                            height: 400,
                           ),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 28),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: ThemeColor.subtleBackground,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: ThemeColor.subtleBorder),
-                      ),
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        color: Color(0xFFFF6FA5),
-                        size: 20,
-                      ),
-                    ),
-                  ),
-
+                   
                   const SizedBox(height: 20),
 
                   Align(
@@ -174,8 +133,8 @@ class _valueOfContentScreenState extends State<valueOfContent> {
                     ),
                   ),
 
-                  const Spacer(flex: 3),
 
+                  const SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {},
                     child: Container(
@@ -218,6 +177,7 @@ class _valueOfContentScreenState extends State<valueOfContent> {
                     }),
                   ),
 
+                  const Spacer(flex: 3),
                   const SizedBox(height: 24),
                 ],
               ),

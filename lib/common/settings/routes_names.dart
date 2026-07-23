@@ -17,4 +17,6 @@ class RoutesNames {
   static const String notificationPage = '/notification-page';
   static const String purchasePage = '/purchase-page';
   static const String verificationPage = '/verification-page';
+
+  static const String valueOfContentPage = '/value-of-content-page';
 }

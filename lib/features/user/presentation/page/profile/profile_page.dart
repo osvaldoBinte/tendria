@@ -153,7 +153,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                   Obx(() {
-                    final isDark = _themeCtrl.isDarkMode.value;
+                    final isDark =
+                        _themeCtrl.themeMode.value != AppThemeMode.light;
                     return GestureDetector(
                       onTap: _themeCtrl.toggleTheme,
                       child: AnimatedContainer(
@@ -175,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: Icon(
                                   Icons.wb_sunny_rounded,
                                   size: 16,
-                                  color:ThemeColor.toggleThumb
+                                  color: ThemeColor.toggleThumb,
                                 ),
                               ),
                             ),
@@ -186,7 +187,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: Icon(
                                   Icons.dark_mode_rounded,
                                   size: 16,
-                                  color:ThemeColor.toggleThumb
+                                  color: ThemeColor.toggleThumb,
                                 ),
                               ),
                             ),
@@ -249,9 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: ThemeColor.colorstatus.withOpacity(
-                                  0.12,
-                                ),
+                                color: ThemeColor.colorstatus.withOpacity(0.12),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(12),
                                   topRight: Radius.circular(12),

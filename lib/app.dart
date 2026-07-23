@@ -56,7 +56,9 @@ class App extends StatelessWidget {
       ],
       debugShowCheckedModeBanner: false,
      
-        themeMode: themeCtrl.isDarkMode.value ? ThemeMode.dark : ThemeMode.light,
+        themeMode: themeCtrl.themeMode.value == AppThemeMode.light
+        ? ThemeMode.light
+        : ThemeMode.dark,
         theme: ThemeColor.themeData,
         darkTheme: ThemeColor.darkThemeData,
       initialBinding: BindingsBuilder(() {
@@ -145,10 +147,7 @@ class App extends StatelessWidget {
         //  Get.lazyPut(() => ProfileDetailController( fetchNearbyUsersUsecase: Get.find()), fenix: true);
         Get.lazyPut(() => NearbyUsersController( fetchNearbyUsersUsecase: Get.find(),
             toggleLikeUsecase: Get.find(), updateLocationUsecase: Get.find(), createReportsUserUsecase:  Get.find(), deactivateTripUsecase:  Get.find(), updateCityUsecase:  Get.find(), searchCityUsecase: Get.find(), ),fenix: true,);
-        Get.lazyPut(
-          () => MyMatchController(getMyChatsUsecase: Get.find()),
-        fenix: true,
-        );
+        Get.lazyPut(  () => MyMatchController(getMyChatsUsecase: Get.find()),  fenix: true,);
 
         Get.lazyPut( () => ChatController( getChatMensajeUsecase: Get.find(), sendMessageUsecase: Get.find(),
             authService: Get.find(),startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find(),), fenix: true, );
@@ -156,13 +155,9 @@ class App extends StatelessWidget {
         //    Get.lazyPut(() => StartConversationsController(startConversationsUsecase: Get.find(), paymentsChatUsecase: Get.find()), fenix:true);
         Get.lazyPut(() => UserProfileController( getUserByIdUsecase: Get.find(), toggleLikeUsecase: Get.find(), blockUserUsecase: Get.find(), logViewProfileUsecase:  Get.find(), createReportsUserUsecase: Get.find(),),fenix: true,);
         Get.lazyPut(() => BlockedUsersController( fetchBlockedUsersUsecase: Get.find(), unblockUserUsecase: Get.find(), ),fenix: true,);
-        Get.lazyPut(  () => UpdateProfileController( deleteInterestsUsecase: Get.find(),deleteQualitiesUsecase: Get.find(),  updateUserUsecase: Get.find(),  fetchInterestsUsecase: Get.find(),
-            fetchQualitiesUsecase: Get.find(),  postInterestsUsecase: Get.find(),  postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(),  deleteUserUsecase: Get.find(),),fenix: true,);
+        Get.lazyPut(  () => UpdateProfileController( deleteInterestsUsecase: Get.find(),deleteQualitiesUsecase: Get.find(),  updateUserUsecase: Get.find(),  fetchInterestsUsecase: Get.find(),fetchQualitiesUsecase: Get.find(),  postInterestsUsecase: Get.find(),  postQualitiesUsecase: Get.find(), putPreferencesUserUsecase: Get.find(),  deleteUserUsecase: Get.find(),),fenix: true,);
         Get.lazyPut( () => NotificationController(getNotificationUsecase: Get.find(),markAllNotificationsAsReadUsecase: Get.find(),), fenix: true, );
-        Get.lazyPut(
-          () => BalanceController(getBalanceUsecase: Get.find()),
-          fenix: true,
-        );
+        Get.lazyPut(   () => BalanceController(getBalanceUsecase: Get.find()),  fenix: true, );
         Get.lazyPut(() => LanguageController(), fenix: true);
         Get.put(TranslationService());
         Get.lazyPut(() => TutorialController(), fenix: true);

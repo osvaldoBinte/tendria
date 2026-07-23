@@ -10,6 +10,7 @@ import 'package:tendria/features/auth/presentation/page/register/register_page.d
 import 'package:tendria/features/chat/presentation/page/chat_page.dart'; 
 import 'package:tendria/features/notification/presentation/page/notificasiones/notification_page.dart'; 
 import 'package:tendria/features/page/parami/for_you_page.dart';
+import 'package:tendria/features/page/valueOfContent/value_of_content.dart';
 import 'package:tendria/features/purchase/presentation/page/purchase_page.dart';
 import 'package:tendria/features/unlock/presentation/page/blocked_users_page.dart';
 import 'package:tendria/features/user/presentation/page/profile/update_profile_page.dart';
@@ -22,7 +23,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () => SplashPage()),
+        GetPage(name: RoutesNames.welcomePage, page: () => valueOfContent()),
         GetPage(name: RoutesNames.chatPage, page: () => ChatPage()),
         GetPage(name: RoutesNames.radarScannerPage, page: () => RadarScannerScreen()),
         GetPage(name: RoutesNames.preferencesPage, page: () => PreferencesPage()),
@@ -37,7 +38,9 @@ class AppPages {
         GetPage(name: RoutesNames.updateProfilePage, page: () => UpdateProfilePage()), 
         GetPage (name: RoutesNames.notificationPage, page: () => NotificationPage()),
         GetPage(name: RoutesNames.purchasePage, page: () =>PurchasePage()),
-        GetPage(name: RoutesNames.verificationPage, page: () => VerificationPage())
+        GetPage(name: RoutesNames.verificationPage, page: () => VerificationPage()),
+
+        GetPage(name: RoutesNames.valueOfContentPage, page: () => valueOfContent()),
   ];
 
   static final unknownRoute = GetPage(

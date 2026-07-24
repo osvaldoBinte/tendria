@@ -27,6 +27,15 @@ class ThemeColor {
 
   static const Color colorAccionButtons = accentColor;
 
+  static const Color vipfondo = Color(0xFF5C4D53);
+
+  static const Color vipfondo2 =Color(0xF0E0D10);
+  static const Color live =Color(0xFFFFB4AB);
+ static LinearGradient get vipBackgroundGradient => LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [vipfondo, vipfondo2],
+);
   static const Color surfaceColor = Colors.white;
   static const Color cardColor = Colors.white;
   static Color get primaryColor => _byMode(
@@ -62,13 +71,13 @@ class ThemeColor {
   static Color get textPrimary => _byMode(
     light: Colors.black87,
     dark: Colors.white,
-    vip: const Color(0xFFF5D998),
+    vip: const Color(0xFFF5D998),// const Color(0xFFF5D998),
   );
 
   static Color get textSecondary => _byMode(
     light: const Color(0xFF5F6368),
     dark: Colors.white60,
-    vip: const Color(0xFFB8975A),
+    vip:  Color(0xFFFFFFFF),
   );
 
   static Color get iconColor => _byMode(
@@ -228,7 +237,7 @@ class ThemeColor {
     end: Alignment.bottomRight,
   );
   static LinearGradient get storyGradient => LinearGradient(
-    colors: [storyGradientStart, storyGradientEnd],
+    colors: [ThemeColor.live, ThemeColor.live],
     begin: Alignment.topRight,
     end: Alignment.bottomLeft,
   );
@@ -445,6 +454,37 @@ class ThemeColor {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  static Widget createLiveRing({
+    required Widget child,
+    bool hasStory = true,
+    bool isViewed = false,
+    double size = 80,
+    double borderWidth = 2,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: hasStory && !isViewed ? storyGradient : null,
+        border: !hasStory || isViewed
+            ? Border.all(color: Colors.grey[300]!, width: borderWidth)
+            : null,
+        boxShadow: [storyShadow],
+      ),
+      child: Container(
+        margin: EdgeInsets.all(hasStory && !isViewed ? 3 : 0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: hasStory && !isViewed
+              ? Border.all(color: Colors.black, width: borderWidth)
+              : null,
+        ),
+        child: ClipOval(child: child),
       ),
     );
   }

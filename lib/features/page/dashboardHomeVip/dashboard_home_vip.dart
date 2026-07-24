@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/controller/theme_controller.dart';
@@ -18,67 +19,76 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
     final themeCtrl = Get.find<ThemeController>();
 
     return Obx(() {
-      final mode = themeCtrl.themeMode.value; 
+      final mode = themeCtrl.themeMode.value;
       return Scaffold(
-        backgroundColor: ThemeColor.backgroundColorfondo,
-        body: SafeArea(
-          bottom: false,
+        backgroundColor: Colors.transparent,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(gradient: ThemeColor.vipBackgroundGradient),
           child: Column(
             children: [
-              _buildAppBar(),
+              _buildAppBar(context),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    const SizedBox(height: 16),
-                    _buildWelcome(),
-                    const SizedBox(height: 24),
-                    _buildLiveCreators(),
-                    const SizedBox(height: 20),
-                    _buildGiftsCard(),
-                    const SizedBox(height: 16),
-                    _buildBalanceCard(),
-                    const SizedBox(height: 24),
-                    _buildMarketplaceSection(),
-                    const SizedBox(height: 28),
-                    _buildRecentContentHeader(),
-                    const SizedBox(height: 16),
-                    _LockedPostCard(
-                      name: 'Alex Mercer',
-                      handle: '@mercerfit',
-                      level: 'Nivel 3 - Oro',
-                      credits: 50,
-                      unlockedByCount: 50,
-                    ),
-                    const SizedBox(height: 20),
-                    _UnlockedPostCard(
-                      name: 'Elena V.',
-                      handle: '@elenavisuals',
-                      level: 'Nivel 2 - Plata',
-                      unlockedByCount: 500,
-                      caption:
-                          'Detrás de escena de la sesión de hoy. Solo para '
-                          'mis suscriptores, aquí pueden ver cómo montamos '
-                          'la iluminación principal para lograr ese look '
-                          'cinemático. 📸🎥',
-                      likes: 892,
-                      comments: 45,
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                child: SafeArea(
+                  top: false,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      const SizedBox(height: 16),
+                      _buildWelcome(),
+                      const SizedBox(height: 24),
+                      _buildLiveCreators(),
+                      const SizedBox(height: 20),
+                      _buildGiftsCard(),
+                      const SizedBox(height: 16),
+                      _buildBalanceCard(),
+                      const SizedBox(height: 24),
+                      _buildMarketplaceSection(),
+                      const SizedBox(height: 28),
+                      _buildRecentContentHeader(),
+                      const SizedBox(height: 16),
+                      _LockedPostCard(
+                        name: 'Alex Mercer',
+                        handle: '@mercerfit',
+                        level: 'Nivel 3 - Oro',
+                        credits: 50,
+                        unlockedByCount: 50,
+                      ),
+                      const SizedBox(height: 20),
+                      _UnlockedPostCard(
+                        name: 'Elena V.',
+                        handle: '@elenavisuals',
+                        level: 'Nivel 2 - Plata',
+                        unlockedByCount: 500,
+                        caption:
+                            'Detrás de escena de la sesión de hoy. Solo para '
+                            'mis suscriptores, aquí pueden ver cómo montamos '
+                            'la iluminación principal para lograr ese look '
+                            'cinemático. 📸🎥',
+                        likes: 892,
+                        comments: 45,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        
       );
     });
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        MediaQuery.of(context).padding.top + 12,
+        16,
+        12,
+      ),
       color: ThemeColor.backgroundColorfondo,
       child: Row(
         children: [
@@ -102,8 +112,11 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.account_balance_wallet_rounded,
-                    size: 14, color: Colors.black),
+                const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  size: 14,
+                  color: Colors.black,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '\$1,240.00',
@@ -134,7 +147,7 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
         Text(
           'Bienvenido de nuevo, Tatendría',
           style: ThemeColor.headingSmall.copyWith(
-            color: ThemeColor.textPrimary,
+            color: ThemeColor.textSecondary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -151,9 +164,14 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
 
   Widget _buildLiveCreators() {
     final creators = [
-      {'name': 'Elena V.', 'live': true},
-      {'name': 'Marc J.', 'live': true},
-      {'name': 'Sofi K.', 'live': false},
+      {
+        'name': 'Elena V.',
+        'live': true,
+        'imageUrl':
+            'https://media.sproutsocial.com/uploads/2022/06/profile-picture.jpeg',
+      },
+      {'name': 'Marc J.', 'live': true, 'imageUrl': null},
+      {'name': 'Sofi K.', 'live': false, 'imageUrl': null},
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +185,7 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: Colors.redAccent,
+                    color: ThemeColor.live,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -175,7 +193,7 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
                 Text(
                   'CREADORES EN VIVO',
                   style: ThemeColor.caption.copyWith(
-                    color: ThemeColor.textSecondary,
+                    color: ThemeColor.live,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
                   ),
@@ -184,7 +202,9 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
             ),
             Text(
               'Ver todos',
-              style: ThemeColor.caption.copyWith(color: ThemeColor.primaryColor),
+              style: ThemeColor.caption.copyWith(
+                color: ThemeColor.primaryColor,
+              ),
             ),
           ],
         ),
@@ -198,67 +218,75 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
             itemBuilder: (context, i) {
               final c = creators[i];
               final isLive = c['live'] as bool;
+              final imageUrl = c['imageUrl'] as String?;
+
               return Column(
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: isLive
-                          ? LinearGradient(
-                              colors: [
-                                ThemeColor.primaryColor,
-                                ThemeColor.secondaryColor,
-                              ],
-                            )
-                          : null,
-                      border: !isLive
-                          ? Border.all(color: ThemeColor.subtleBorder)
-                          : null,
-                    ),
-                    child: Stack(
-                      children: [
-                        ClipOval(
-                          child: Container(
-                            color: ThemeColor.subtleBackground,
-                            child: Icon(Icons.person,
-                                color: ThemeColor.iconColor, size: 28),
-                          ),
-                        ),
-                        if (isLive)
-                          Positioned(
-                            bottom: -2,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'LIVE',
-                                  style: TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ThemeColor.createLiveRing(
+                        size: 60,
+                        borderWidth: 2,
+                        hasStory: isLive,
+                        isViewed: false,
+                        child: Container(
+                          color: ThemeColor.subtleBackground,
+                          child: (imageUrl != null && imageUrl.isNotEmpty)
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Icon(
+                                    Icons.person,
+                                    color: ThemeColor.iconColor,
+                                    size: 28,
                                   ),
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.person,
+                                    color: ThemeColor.iconColor,
+                                    size: 28,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.person,
+                                  color: ThemeColor.iconColor,
+                                  size: 28,
+                                ),
+                        ),
+                      ),
+                      if (isLive)
+                        Positioned(
+                          bottom: -2,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: ThemeColor.live,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'LIVE',
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     c['name'] as String,
                     style: ThemeColor.caption.copyWith(
-                      color: ThemeColor.textPrimary,
+                      color: Colors.white,
                       fontSize: 11,
                     ),
                   ),
@@ -285,7 +313,7 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.card_giftcard_rounded, color: ThemeColor.primaryColor),
+              Icon(Icons.card_giftcard_rounded, color: ThemeColor.live),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -295,7 +323,7 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
                 child: Text(
                   '3 Nuevos',
                   style: ThemeColor.caption.copyWith(
-                    color: ThemeColor.primaryColor,
+                    color: ThemeColor.live,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -306,7 +334,7 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
           Text(
             'Regalos pendientes',
             style: ThemeColor.subtitleLarge.copyWith(
-              color: ThemeColor.textPrimary,
+              color: ThemeColor.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -322,16 +350,18 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: ThemeColor.primaryColor,
+                backgroundColor: ThemeColor.live.withValues(alpha: 0.2),
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 12),
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: ThemeColor.mediumBorderRadius,
+                  side: BorderSide(color: ThemeColor.live, width: 1.5),
                 ),
-                elevation: 0,
               ),
               child: Text(
                 'Abrir regalos',
-                style: ThemeColor.buttonText.copyWith(color: Colors.black),
+                style: ThemeColor.buttonText.copyWith(color: ThemeColor.live),
               ),
             ),
           ),
@@ -381,7 +411,11 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
               const SizedBox(height: 4),
               Row(
                 children: const [
-                  Icon(Icons.trending_up_rounded, size: 14, color: Colors.black87),
+                  Icon(
+                    Icons.trending_up_rounded,
+                    size: 14,
+                    color: Colors.black87,
+                  ),
                   SizedBox(width: 4),
                   Text(
                     '+12% esta semana',
@@ -391,8 +425,11 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
               ),
             ],
           ),
-          const Icon(Icons.account_balance_wallet_rounded,
-              color: Colors.black87, size: 30),
+          const Icon(
+            Icons.account_balance_wallet_rounded,
+            color: Colors.black87,
+            size: 30,
+          ),
         ],
       ),
     );
@@ -400,8 +437,16 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
 
   Widget _buildMarketplaceSection() {
     final items = [
-      {'title': 'Vuelo Privado: BTS', 'author': '@Vanesa_Exclusive', 'price': '\$49.99'},
-      {'title': 'Colección "Gold Dust"', 'author': '@Tatendria_VIP', 'price': '\$25.00'},
+      {
+        'title': 'Vuelo Privado: BTS',
+        'author': '@Vanesa_Exclusive',
+        'price': '\$49.99',
+      },
+      {
+        'title': 'Colección "Gold Dust"',
+        'author': '@Tatendria_VIP',
+        'price': '\$25.00',
+      },
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,7 +464,9 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
             ),
             Text(
               'Explorar mercado',
-              style: ThemeColor.caption.copyWith(color: ThemeColor.primaryColor),
+              style: ThemeColor.caption.copyWith(
+                color: ThemeColor.primaryColor,
+              ),
             ),
           ],
         ),
@@ -451,9 +498,11 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
                               height: 90,
                               width: double.infinity,
                               color: ThemeColor.subtleBackground,
-                              child: Icon(Icons.image_rounded,
-                                  color: ThemeColor.iconColor.withOpacity(0.3),
-                                  size: 32),
+                              child: Icon(
+                                Icons.image_rounded,
+                                color: ThemeColor.iconColor.withOpacity(0.3),
+                                size: 32,
+                              ),
                             ),
                           ),
                           Positioned(
@@ -461,7 +510,9 @@ class _DashboardHomeVipScreenState extends State<DashboardHomeVip> {
                             left: 8,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 3),
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.6),
                                 borderRadius: BorderRadius.circular(6),
@@ -564,13 +615,16 @@ class _LockedPostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PostHeader(name: name, handle: handle, level: level, levelColor: const Color(0xFFD4AF37)),
+          _PostHeader(
+            name: name,
+            handle: handle,
+            level: level,
+            levelColor: const Color(0xFFD4AF37),
+          ),
           Container(
             width: double.infinity,
             height: 220,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.85),
-            ),
+            decoration: BoxDecoration(color: Colors.black.withOpacity(0.85)),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -580,8 +634,11 @@ class _LockedPostCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: ThemeColor.primaryColor.withOpacity(0.15),
                   ),
-                  child: Icon(Icons.lock_rounded,
-                      color: ThemeColor.primaryColor, size: 28),
+                  child: Icon(
+                    Icons.lock_rounded,
+                    color: ThemeColor.primaryColor,
+                    size: 28,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -599,12 +656,19 @@ class _LockedPostCard extends StatelessWidget {
                     'Esta publicación está reservada para miembros VIP o '
                     'requiere desbloqueo individual.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: ThemeColor.primaryColor,
                     borderRadius: BorderRadius.circular(20),
@@ -612,7 +676,11 @@ class _LockedPostCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.lock_rounded, size: 14, color: Colors.black),
+                      const Icon(
+                        Icons.lock_rounded,
+                        size: 14,
+                        color: Colors.black,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Desbloquear · $credits créditos',
@@ -632,11 +700,17 @@ class _LockedPostCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                Icon(Icons.favorite_border_rounded,
-                    size: 18, color: ThemeColor.textSecondary),
+                Icon(
+                  Icons.favorite_border_rounded,
+                  size: 18,
+                  color: ThemeColor.textSecondary,
+                ),
                 const SizedBox(width: 16),
-                Icon(Icons.mode_comment_outlined,
-                    size: 18, color: ThemeColor.textSecondary),
+                Icon(
+                  Icons.mode_comment_outlined,
+                  size: 18,
+                  color: ThemeColor.textSecondary,
+                ),
                 const Spacer(),
               ],
             ),
@@ -658,7 +732,8 @@ class _LockedPostCard extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: '[Contenido bloqueado] actualmente se desbloqueó '
+                    text:
+                        '[Contenido bloqueado] actualmente se desbloqueó '
                         'por $unlockedByCount personas',
                   ),
                 ],
@@ -706,7 +781,10 @@ class _UnlockedPostCard extends StatelessWidget {
             handle: handle,
             level: level,
             levelColor: const Color(0xFFB0B4BA),
-            trailing: Icon(Icons.more_horiz_rounded, color: ThemeColor.iconColor),
+            trailing: Icon(
+              Icons.more_horiz_rounded,
+              color: ThemeColor.iconColor,
+            ),
           ),
           Stack(
             children: [
@@ -714,8 +792,11 @@ class _UnlockedPostCard extends StatelessWidget {
                 width: double.infinity,
                 height: 260,
                 color: ThemeColor.subtleBackground,
-                child: Icon(Icons.image_rounded,
-                    color: ThemeColor.iconColor.withOpacity(0.3), size: 40),
+                child: Icon(
+                  Icons.image_rounded,
+                  color: ThemeColor.iconColor.withOpacity(0.3),
+                  size: 40,
+                ),
               ),
               Positioned(
                 top: 10,
@@ -723,7 +804,10 @@ class _UnlockedPostCard extends StatelessWidget {
                 right: 0,
                 child: Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(12),
@@ -731,8 +815,11 @@ class _UnlockedPostCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_rounded,
-                            size: 13, color: ThemeColor.primaryColor),
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 13,
+                          color: ThemeColor.primaryColor,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'CONTENIDO DESBLOQUEADO POR $unlockedByCount PERSONAS',
@@ -755,17 +842,37 @@ class _UnlockedPostCard extends StatelessWidget {
               children: [
                 Icon(Icons.favorite_rounded, size: 18, color: Colors.redAccent),
                 const SizedBox(width: 6),
-                Text('$likes', style: ThemeColor.bodySmall.copyWith(color: ThemeColor.textSecondary)),
+                Text(
+                  '$likes',
+                  style: ThemeColor.bodySmall.copyWith(
+                    color: ThemeColor.textSecondary,
+                  ),
+                ),
                 const SizedBox(width: 16),
-                Icon(Icons.mode_comment_outlined, size: 18, color: ThemeColor.textSecondary),
+                Icon(
+                  Icons.mode_comment_outlined,
+                  size: 18,
+                  color: ThemeColor.textSecondary,
+                ),
                 const SizedBox(width: 6),
-                Text('$comments', style: ThemeColor.bodySmall.copyWith(color: ThemeColor.textSecondary)),
+                Text(
+                  '$comments',
+                  style: ThemeColor.bodySmall.copyWith(
+                    color: ThemeColor.textSecondary,
+                  ),
+                ),
                 const Spacer(),
-                Icon(Icons.card_giftcard_rounded, size: 16, color: ThemeColor.primaryColor),
+                Icon(
+                  Icons.card_giftcard_rounded,
+                  size: 16,
+                  color: ThemeColor.primaryColor,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Enviar regalo',
-                  style: ThemeColor.caption.copyWith(color: ThemeColor.primaryColor),
+                  style: ThemeColor.caption.copyWith(
+                    color: ThemeColor.primaryColor,
+                  ),
                 ),
               ],
             ),
@@ -840,7 +947,10 @@ class _PostHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: levelColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(6),

@@ -74,24 +74,13 @@ class _valueOfContentScreenState extends State<valueOfContent> {
                     alignment: Alignment.center,
                     children: [
                      
-                      Container(
-                        width: 400,
-                        height: 400,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: ThemeColor.cardBackground.withOpacity(0.4),
-                          border: Border.all(
-                            color: ThemeColor.primaryColor.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Center(
+                     Center(
                           child: Image.asset(
                             'assets/icons/iconsPREMIUM.png',
                             width: 400,
                             height: 400,
                           ),
                         ),
-                      ),
                     ],
                   ),
 

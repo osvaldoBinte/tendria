@@ -21,4 +21,5 @@ class RoutesNames {
   static const String valueOfContentPage = '/value-of-content-page';
   static const String statusAndLevelsPage = '/status-and-levels-page';
   static const String finishOnboardingVipPage = '/finish-onboarding-vip-page';
+  static const String dashboardHomeVipPage = '/dashboard-home-vip-page';
 }

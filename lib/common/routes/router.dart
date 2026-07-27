@@ -9,6 +9,7 @@ import 'package:tendria/features/auth/presentation/page/login/login_page.dart';
 import 'package:tendria/features/auth/presentation/page/register/register_page.dart';
 import 'package:tendria/features/chat/presentation/page/chat_page.dart'; 
 import 'package:tendria/features/notification/presentation/page/notificasiones/notification_page.dart';
+import 'package:tendria/features/page/contentUnlocked/content_unlocked.dart';
 import 'package:tendria/features/page/dashboardHomeVip/dashboard_home_vip.dart';
 import 'package:tendria/features/page/finishOnboardingVip/finish_onboarding_vip.dart'; 
 import 'package:tendria/features/page/parami/for_you_page.dart';
@@ -26,7 +27,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () =>DashboardHomeVip()),//SplashPage
+        GetPage(name: RoutesNames.welcomePage, page: () =>ContentUnlocked()),//SplashPage
         GetPage(name: RoutesNames.chatPage, page: () => ChatPage()),
         GetPage(name: RoutesNames.radarScannerPage, page: () => RadarScannerScreen()),
         GetPage(name: RoutesNames.preferencesPage, page: () => PreferencesPage()),
@@ -47,6 +48,7 @@ class AppPages {
         GetPage(name: RoutesNames.statusAndLevelsPage, page: () => StatusAndLevels()),
         GetPage(name: RoutesNames.finishOnboardingVipPage, page: () => FinishOnboardingVip()),
         GetPage(name: RoutesNames.dashboardHomeVipPage, page: () => DashboardHomeVip()),
+        GetPage(name: RoutesNames.contentUnlockedPage, page: () => ContentUnlocked()),
   ];
 
   static final unknownRoute = GetPage(

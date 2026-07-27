@@ -22,4 +22,5 @@ class RoutesNames {
   static const String statusAndLevelsPage = '/status-and-levels-page';
   static const String finishOnboardingVipPage = '/finish-onboarding-vip-page';
   static const String dashboardHomeVipPage = '/dashboard-home-vip-page';
+  static const String contentUnlockedPage = '/content-unlocked-page';
 }

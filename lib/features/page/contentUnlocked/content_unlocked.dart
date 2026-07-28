@@ -16,7 +16,7 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
     final themeCtrl = Get.find<ThemeController>();
 
     return Obx(() {
-      final mode = themeCtrl.themeMode.value; // dispara reactividad
+      final mode = themeCtrl.themeMode.value; 
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: Container(
@@ -36,8 +36,7 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Círculo con check
+                    children: [ 
                       Container(
                         width: 90,
                         height: 90,
@@ -72,8 +71,7 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
                       ),
 
                       const SizedBox(height: 24),
-
-                      // Título
+ 
                       Text(
                         'Contenido desbloqueado',
                         textAlign: TextAlign.center,
@@ -86,8 +84,7 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
                       ),
 
                       const SizedBox(height: 10),
-
-                      // Subtítulo
+ 
                       Text(
                         'Este contenido ahora está disponible de forma '
                         'permanente.',
@@ -99,8 +96,7 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
                       ),
 
                       const SizedBox(height: 24),
-
-                      // Imagen del contenido
+ 
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Image.asset(
@@ -112,11 +108,9 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
                       ),
 
                       const SizedBox(height: 28),
-
-                      // Botón ver contenido
+ 
                       GestureDetector(
-                        onTap: () {
-                          // TODO: navegar al contenido desbloqueado
+                        onTap: () { 
                         },
                         child: Container(
                           width: double.infinity,
@@ -150,8 +144,7 @@ class _ContentUnlockedScreenState extends State<ContentUnlocked> {
                       ),
 
                       const SizedBox(height: 16),
-
-                      // Volver al inicio
+ 
                       GestureDetector(
                         onTap: () => Get.back(),
                         child: Text(

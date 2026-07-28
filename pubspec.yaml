@@ -126,6 +126,10 @@ flutter:
    - assets/icons/home/home.png
    - assets/icons/home/mensaje.png
    - assets/icons/home/heart.png
+   - assets/icons/star_rounded.png
+   - assets/icons/calendar_month_rounded.png
+   - assets/icons/diamond_rounded.png
+   - assets/icons/lock_rounded.png
    - assets/successful.png
    - assets/contenido-desbloqueado.png
    - assets/logo/iosicon.jpg

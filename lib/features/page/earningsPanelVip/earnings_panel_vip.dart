@@ -11,7 +11,7 @@ class EarningsPanelVip extends StatefulWidget {
 }
 
 class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
-  int _currentNavIndex = 2;  
+  int _currentNavIndex = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
         body: Container(
           width: double.infinity,
           height: double.infinity,
-          color:ThemeColor.backgroundColorfondo,
+          color: ThemeColor.backgroundColorfondo,
           child: Column(
             children: [
               _buildAppBar(context),
@@ -54,7 +54,6 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
             ],
           ),
         ),
-        
       );
     });
   }
@@ -115,7 +114,7 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
   }
 
   Widget _buildEarningsTodayCard() {
-    final values = [0.35, 0.45, 0.3, 0.6, 0.55, 0.7, 1.0];  
+    final values = [0.35, 0.45, 0.3, 0.6, 0.55, 0.7, 1.0];
     final labels = ['L', 'M', 'M', 'J', 'V', 'S', 'Hoy'];
 
     return _CardContainer(
@@ -139,8 +138,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                   color: ThemeColor.subtleBackground,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.bar_chart_rounded,
-                    size: 16, color: ThemeColor.primaryColor),
+                child: Icon(
+                  Icons.bar_chart_rounded,
+                  size: 16,
+                  color: ThemeColor.primaryColor,
+                ),
               ),
             ],
           ),
@@ -161,8 +163,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
-                    const Icon(Icons.trending_up_rounded,
-                        size: 14, color: ThemeColor.live,),
+                    const Icon(
+                      Icons.trending_up_rounded,
+                      size: 14,
+                      color: ThemeColor.live,
+                    ),
                     const SizedBox(width: 2),
                     const Text(
                       '+12%',
@@ -207,11 +212,19 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Text('Lunes',
-                  style: ThemeColor.caption.copyWith(color: ThemeColor.textSecondary)),
+              Text(
+                'Lunes',
+                style: ThemeColor.caption.copyWith(
+                  color: ThemeColor.textSecondary,
+                ),
+              ),
               const Spacer(),
-              Text('Hoy',
-                  style: ThemeColor.caption.copyWith(color: ThemeColor.textSecondary)),
+              Text(
+                'Hoy',
+                style: ThemeColor.caption.copyWith(
+                  color: ThemeColor.textSecondary,
+                ),
+              ),
             ],
           ),
         ],
@@ -232,8 +245,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                   color: ThemeColor.textPrimary,
                 ),
               ),
-              Icon(Icons.military_tech_rounded,
-                  color: ThemeColor.primaryColor, size: 20),
+              Icon(
+                Icons.military_tech_rounded,
+                color: ThemeColor.primaryColor,
+                size: 20,
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -276,7 +292,9 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
           const SizedBox(height: 4),
           Text(
             'Próximo: Diamante',
-            style: ThemeColor.bodySmall.copyWith(color: ThemeColor.textSecondary),
+            style: ThemeColor.bodySmall.copyWith(
+              color: ThemeColor.textSecondary,
+            ),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -304,7 +322,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
 
   Widget _buildNewFollowersCard() {
     final followers = [
-      {'name': 'Marco Aurelio', 'subtitle': 'Suscripción Premium', 'amount': '+\$15'},
+      {
+        'name': 'Marco Aurelio',
+        'subtitle': 'Suscripción Premium',
+        'amount': '+\$15',
+      },
       {'name': 'Elena S.', 'subtitle': 'Propina recibida', 'amount': '+\$50'},
       {'name': 'Carlos G.', 'subtitle': 'Nuevo Fan', 'amount': null},
     ];
@@ -341,7 +363,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                   CircleAvatar(
                     radius: 20,
                     backgroundColor: ThemeColor.subtleBackground,
-                    child: Icon(Icons.person, color: ThemeColor.iconColor, size: 22),
+                    child: Icon(
+                      Icons.person,
+                      color: ThemeColor.iconColor,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -358,7 +384,7 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                         Text(
                           f['subtitle'] as String,
                           style: ThemeColor.caption.copyWith(
-                            color: ThemeColor.textPrimary ,
+                            color: ThemeColor.textPrimary,
                           ),
                         ),
                       ],
@@ -373,8 +399,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                             fontSize: 14,
                           ),
                         )
-                      : Icon(Icons.trending_up_rounded,
-                          color: ThemeColor.textSecondary, size: 18),
+                      : Icon(
+                          Icons.trending_up_rounded,
+                          color: ThemeColor.textSecondary,
+                          size: 18,
+                        ),
                 ],
               ),
             );
@@ -386,10 +415,26 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
 
   Widget _buildAchievementsCard() {
     final achievements = [
-      {'label': 'Top 1%', 'icon': Icons.star_rounded, 'unlocked': true},
-      {'label': 'Racha 30', 'icon': Icons.calendar_month_rounded, 'unlocked': true},
-      {'label': 'Récord \$', 'icon': Icons.diamond_rounded, 'unlocked': true},
-      {'label': 'Siguiente', 'icon': Icons.lock_rounded, 'unlocked': false},
+      {
+        'label': 'Top 1%',
+        'icon': 'assets/icons/star_rounded.png',
+        'unlocked': true,
+      },
+      {
+        'label': 'Racha 30',
+        'icon': 'assets/icons/calendar_month_rounded.png',
+        'unlocked': true,
+      },
+      {
+        'label': 'Récord \$',
+        'icon': 'assets/icons/diamond_rounded.png',
+        'unlocked': true,
+      },
+      {
+        'label': 'Siguiente',
+        'icon': 'assets/icons/lock_rounded.png',
+        'unlocked': false,
+      },
     ];
 
     return _CardContainer(
@@ -401,9 +446,15 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
             children: [
               Text(
                 'Tus Logros',
-                style: ThemeColor.subtitleLarge.copyWith(color: ThemeColor.textPrimary),
+                style: ThemeColor.subtitleLarge.copyWith(
+                  color: ThemeColor.textPrimary,
+                ),
               ),
-              Icon(Icons.emoji_events_rounded, color: ThemeColor.primaryColor, size: 20),
+              Icon(
+                Icons.emoji_events_rounded,
+                color: ThemeColor.primaryColor,
+                size: 20,
+              ),
             ],
           ),
           const SizedBox(height: 18),
@@ -414,8 +465,9 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
               return Column(
                 children: [
                   Container(
-                    width: 52,
-                    height: 52,
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: unlocked
@@ -427,12 +479,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                             : ThemeColor.subtleBorder,
                       ),
                     ),
-                    child: Icon(
-                      a['icon'] as IconData,
-                      color: unlocked
-                          ? ThemeColor.primaryColor
-                          : ThemeColor.textSecondary.withOpacity(0.5),
-                      size: 22,
+                    child: Image.asset(
+                      a['icon'] as String,
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -465,7 +516,7 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                     Text(
                       'RANKING GLOBAL',
                       style: ThemeColor.caption.copyWith(
-                        color: ThemeColor.textSecondary,
+                        color: ThemeColor.primaryColor,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
                       ),
@@ -473,7 +524,7 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                     Text(
                       '#142',
                       style: TextStyle(
-                        color: ThemeColor.primaryColor,
+                        color: ThemeColor.textSecondary,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -526,8 +577,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
                   ),
                 ),
               ),
-              Icon(Icons.auto_awesome_rounded,
-                  color: ThemeColor.primaryColor.withOpacity(0.6), size: 26),
+              Icon(
+                Icons.auto_awesome_rounded,
+                color: ThemeColor.primaryColor.withOpacity(0.6),
+                size: 26,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -545,8 +599,11 @@ class _earningsPanelVipScreenState extends State<EarningsPanelVip> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {},
-              icon: const Icon(Icons.add_circle_outline_rounded,
-                  color: Colors.black, size: 18),
+              icon: const Icon(
+                Icons.add_circle_outline_rounded,
+                color: Colors.black,
+                size: 18,
+              ),
               label: Text(
                 'Publicar Contenido VIP',
                 style: ThemeColor.buttonText.copyWith(color: Colors.black),

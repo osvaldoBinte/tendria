@@ -3,14 +3,14 @@ import 'package:get/get.dart';
 import 'package:tendria/common/controller/theme_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 
-class creatorProfilePremium extends StatefulWidget {
-  const creatorProfilePremium({Key? key}) : super(key: key);
+class CreatorProfilePremium extends StatefulWidget {
+  const CreatorProfilePremium({Key? key}) : super(key: key);
 
   @override
-  State<creatorProfilePremium> createState() => _creatorProfilePremiumScreenState();
+  State<CreatorProfilePremium> createState() => _CreatorProfilePremiumScreenState();
 }
 
-class _creatorProfilePremiumScreenState extends State<creatorProfilePremium> {
+class _CreatorProfilePremiumScreenState extends State<CreatorProfilePremium> {
   int _currentNavIndex = 4; 
   bool _isGridView = true;
 
@@ -25,7 +25,7 @@ class _creatorProfilePremiumScreenState extends State<creatorProfilePremium> {
         body: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(gradient: ThemeColor.vipBackgroundGradient),
+          decoration: BoxDecoration(gradient: ThemeColor.vipBackgroundGradient2),
           child: Column(
             children: [
               _buildAppBar(context),
@@ -55,18 +55,7 @@ class _creatorProfilePremiumScreenState extends State<creatorProfilePremium> {
             ],
           ),
         ),
-        bottomNavigationBar: ThemeColor.createBottomNavigationBar(
-          currentIndex: _currentNavIndex,
-          onTap: (i) => setState(() => _currentNavIndex = i),
-          iconPaths: const [
-            'assets/icons/home.png',
-            'assets/icons/explore.png',
-            'assets/icons/publish.png',
-            'assets/icons/balance.png',
-            'assets/icons/profile.png',
-          ],
-          labels: const ['Inicio', 'Explorar', 'Publicar', 'Balance', 'Perfil'],
-        ),
+        
       );
     });
   }
@@ -79,7 +68,8 @@ class _creatorProfilePremiumScreenState extends State<creatorProfilePremium> {
         16,
         12,
       ),
-      color: Colors.transparent,
+      
+      color: ThemeColor.backgroundColorfondo,
       child: Row(
         children: [
           Icon(Icons.menu_rounded, color: ThemeColor.iconColor),
@@ -163,7 +153,7 @@ class _creatorProfilePremiumScreenState extends State<creatorProfilePremium> {
         Text(
           '@TATENDRIA_ELITE',
           style: ThemeColor.caption.copyWith(
-            color: ThemeColor.textSecondary,
+            color: ThemeColor.primaryColor.withOpacity(0.8),
             letterSpacing: 1,
           ),
         ),
@@ -205,7 +195,7 @@ class _creatorProfilePremiumScreenState extends State<creatorProfilePremium> {
             border: Border.all(color: ThemeColor.subtleBorder),
           ),
           child: Icon(Icons.mail_outline_rounded,
-              color: ThemeColor.primaryColor, size: 20),
+              color: ThemeColor.textSecondary, size: 20),
         ),
       ],
     );

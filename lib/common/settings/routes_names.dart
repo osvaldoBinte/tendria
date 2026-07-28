@@ -24,4 +24,5 @@ class RoutesNames {
   static const String dashboardHomeVipPage = '/dashboard-home-vip-page';
   static const String contentUnlockedPage = '/content-unlocked-page';
   static const String earningsPanelVipPage = '/earnings-panel-vip-page';
+  static const String creatorProfilePremiumPage = '/creator-profile-premium-page';
 }

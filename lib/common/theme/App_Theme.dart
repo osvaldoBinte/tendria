@@ -29,13 +29,18 @@ class ThemeColor {
 
   static const Color vipfondo = Color(0xFF5C4D53);
 
-  static const Color vipfondo2 =Color(0xF0E0D10);
-  static const Color live =Color(0xFFFFB4AB);
- static LinearGradient get vipBackgroundGradient => LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [vipfondo, vipfondo2],
-);
+  static const Color vipfondo2 = Color(0xF0E0D10);
+  static const Color live = Color(0xFFFFB4AB);
+  static LinearGradient get vipBackgroundGradient => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [vipfondo, vipfondo2],
+  );
+   static LinearGradient get vipBackgroundGradient2 => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color.fromARGB(255, 111, 62, 81), vipfondo2],
+  );
   static const Color surfaceColor = Colors.white;
   static const Color cardColor = Colors.white;
   static Color get primaryColor => _byMode(
@@ -71,13 +76,13 @@ class ThemeColor {
   static Color get textPrimary => _byMode(
     light: Colors.black87,
     dark: Colors.white,
-    vip: const Color(0xFFF5D998),// const Color(0xFFF5D998),
+    vip: const Color(0xFFF5D998), // const Color(0xFFF5D998),
   );
 
   static Color get textSecondary => _byMode(
     light: const Color(0xFF5F6368),
     dark: Colors.white60,
-    vip:  Color(0xFFFFFFFF),
+    vip: Color(0xFFFFFFFF),
   );
 
   static Color get iconColor => _byMode(

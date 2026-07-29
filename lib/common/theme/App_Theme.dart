@@ -28,6 +28,7 @@ class ThemeColor {
   static const Color colorAccionButtons = accentColor;
 
   static const Color vipfondo = Color(0xFF5C4D53);
+  static const Color textvip = Color(0xFFD1C5B4);
 
   static const Color vipfondo2 = Color(0xF0E0D10);
   static const Color live = Color(0xFFFFB4AB);
@@ -36,7 +37,7 @@ class ThemeColor {
     end: Alignment.bottomCenter,
     colors: [vipfondo, vipfondo2],
   );
-   static LinearGradient get vipBackgroundGradient2 => LinearGradient(
+  static LinearGradient get vipBackgroundGradient2 => LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [Color.fromARGB(255, 111, 62, 81), vipfondo2],

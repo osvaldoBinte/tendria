@@ -27,4 +27,5 @@ class RoutesNames {
   static const String creatorProfilePremiumPage = '/creator-profile-premium-page';
   static const String chatPremiumPage = '/chat-premium-page';
   static const String eliteAchievementsPage = '/elite-achievements-page';
+  static const String achievementsCenterVipPage = '/achievements-center-vip-page';
 }

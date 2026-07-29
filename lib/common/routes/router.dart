@@ -9,6 +9,7 @@ import 'package:tendria/features/auth/presentation/page/login/login_page.dart';
 import 'package:tendria/features/auth/presentation/page/register/register_page.dart';
 import 'package:tendria/features/chat/presentation/page/chat_page.dart'; 
 import 'package:tendria/features/notification/presentation/page/notificasiones/notification_page.dart';
+import 'package:tendria/features/page/achievementsCenterVip/achievements_center_vip.dart';
 import 'package:tendria/features/page/chatPremium/chat_premium.dart';
 import 'package:tendria/features/page/contentUnlocked/content_unlocked.dart';
 import 'package:tendria/features/page/creatorProfilePremium/creator_profile_premium.dart';
@@ -31,7 +32,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () =>EliteAchievements()),//SplashPage
+        GetPage(name: RoutesNames.welcomePage, page: () =>AchievementsCenterVip()),//SplashPage
         GetPage(name: RoutesNames.chatPage, page: () => ChatPage()),
         GetPage(name: RoutesNames.radarScannerPage, page: () => RadarScannerScreen()),
         GetPage(name: RoutesNames.preferencesPage, page: () => PreferencesPage()),
@@ -57,6 +58,7 @@ class AppPages {
         GetPage(name: RoutesNames.creatorProfilePremiumPage, page: () => CreatorProfilePremium()),
         GetPage(name: RoutesNames.chatPremiumPage, page: () => ChatPremium()),
         GetPage(name: RoutesNames.eliteAchievementsPage, page: () => EliteAchievements()),
+        GetPage(name: RoutesNames.achievementsCenterVipPage, page: () => AchievementsCenterVip()),
   ];
 
   static final unknownRoute = GetPage(

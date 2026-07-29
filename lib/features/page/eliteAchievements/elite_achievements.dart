@@ -11,7 +11,7 @@ class EliteAchievements extends StatefulWidget {
 }
 
 class _EliteAchievementsScreenState extends State<EliteAchievements> {
-  int _currentNavIndex = 4;  
+  int _currentNavIndex = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,9 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
         body: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(gradient: ThemeColor.vipBackgroundGradient2),
+          decoration: BoxDecoration(
+            gradient: ThemeColor.vipBackgroundGradient2,
+          ),
           child: Column(
             children: [
               _buildAppBar(context),
@@ -37,33 +39,89 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
                       const SizedBox(height: 16),
                       _buildStatusCard(),
                       const SizedBox(height: 26),
-                      _buildSectionHeader('Fidelidad', Icons.emoji_events_outlined),
+                      _buildSectionHeader(
+                        'Fidelidad',
+                        Icons.emoji_events_outlined,
+                      ),
                       const SizedBox(height: 14),
                       _buildBadgeGrid([
-                        _BadgeData(icon: Icons.calendar_today_rounded, label: '3 Meses VIP', unlocked: true),
-                        _BadgeData(icon: Icons.star_rounded, label: 'Fundador', unlocked: true),
-                        _BadgeData(icon: Icons.event_available_rounded, label: '1 Año VIP', unlocked: false),
-                        _BadgeData(icon: Icons.local_offer_rounded, label: 'Embajador', unlocked: false),
+                        _BadgeData(
+                          icon: Icons.calendar_today_rounded,
+                          label: '3 Meses VIP',
+                          unlocked: true,
+                        ),
+                        _BadgeData(
+                          icon: Icons.star_rounded,
+                          label: 'Fundador',
+                          unlocked: true,
+                        ),
+                        _BadgeData(
+                          icon: Icons.event_available_rounded,
+                          label: '1 Año VIP',
+                          unlocked: false,
+                        ),
+                        _BadgeData(
+                          icon: Icons.local_offer_rounded,
+                          label: 'Embajador',
+                          unlocked: false,
+                        ),
                       ]),
                       const SizedBox(height: 26),
-                      _buildSectionHeader('Generosidad', Icons.card_giftcard_rounded),
+                      _buildSectionHeader(
+                        'Generosidad',
+                        Icons.card_giftcard_rounded,
+                      ),
                       const SizedBox(height: 14),
                       _buildBadgeGrid([
-                        _BadgeData(icon: Icons.redeem_rounded, label: 'Primer Regalo', unlocked: true),
-                        _BadgeData(icon: Icons.wine_bar_rounded, label: 'Socio Champagne', unlocked: true),
-                        _BadgeData(icon: Icons.volunteer_activism_rounded, label: 'Filántropo', unlocked: false),
-                        _BadgeData(icon: Icons.diamond_rounded, label: 'Mecenas Real', unlocked: false),
+                        _BadgeData(
+                          icon: Icons.redeem_rounded,
+                          label: 'Primer Regalo',
+                          unlocked: true,
+                        ),
+                        _BadgeData(
+                          icon: Icons.wine_bar_rounded,
+                          label: 'Socio Champagne',
+                          unlocked: true,
+                        ),
+                        _BadgeData(
+                          icon: Icons.volunteer_activism_rounded,
+                          label: 'Filántropo',
+                          unlocked: false,
+                        ),
+                        _BadgeData(
+                          icon: Icons.diamond_rounded,
+                          label: 'Mecenas Real',
+                          unlocked: false,
+                        ),
                       ]),
                       const SizedBox(height: 26),
-                      _buildSectionHeader('Exclusividad', Icons.lock_outline_rounded),
+                      _buildSectionHeader(
+                        'Exclusividad',
+                        Icons.lock_outline_rounded,
+                      ),
                       const SizedBox(height: 14),
                       _buildBadgeGrid([
-                        _BadgeData(icon: Icons.remove_red_eye_rounded, label: 'Primer Vistazo', unlocked: true),
-                        _BadgeData(icon: Icons.vpn_key_rounded, label: 'Coleccionista', unlocked: false),
-                        _BadgeData(icon: Icons.auto_awesome_rounded, label: 'Invitado Élite', unlocked: false),
+                        _BadgeData(
+                          icon: Icons.remove_red_eye_rounded,
+                          label: 'Primer Vistazo',
+                          unlocked: true,
+                        ),
+                        _BadgeData(
+                          icon: Icons.vpn_key_rounded,
+                          label: 'Coleccionista',
+                          unlocked: false,
+                        ),
+                        _BadgeData(
+                          icon: Icons.auto_awesome_rounded,
+                          label: 'Invitado Élite',
+                          unlocked: false,
+                        ),
                       ]),
                       const SizedBox(height: 28),
-                      _buildSectionHeader('Desafíos en Marcha', Icons.emoji_events_rounded),
+                      _buildSectionHeader(
+                        'Desafíos en Marcha',
+                        Icons.emoji_events_rounded,
+                      ),
                       const SizedBox(height: 14),
                       _ChallengeCard(
                         icon: Icons.card_giftcard_rounded,
@@ -101,7 +159,7 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
               ),
             ],
           ),
-        ), 
+        ),
       );
     });
   }
@@ -175,7 +233,9 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
             children: [
               Text(
                 'Nivel: Coleccionista de Oro',
-                style: ThemeColor.bodyMedium.copyWith(color: ThemeColor.textPrimary),
+                style: ThemeColor.bodyMedium.copyWith(
+                  color: ThemeColor.textPrimary,
+                ),
               ),
             ],
           ),
@@ -185,7 +245,9 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
             children: [
               Text(
                 'Progreso de Nivel',
-                style: ThemeColor.bodySmall.copyWith(color: ThemeColor.textSecondary),
+                style: ThemeColor.bodySmall.copyWith(
+                  color: ThemeColor.textSecondary,
+                ),
               ),
               Text(
                 '75%',
@@ -211,7 +273,9 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
           Center(
             child: Text(
               'Siguiente Insignia: Mecenas VIP',
-              style: ThemeColor.caption.copyWith(color: ThemeColor.textSecondary),
+              style: ThemeColor.caption.copyWith(
+                color: ThemeColor.textSecondary,
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -219,7 +283,11 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {},
-              icon: const Icon(Icons.workspace_premium_rounded, color: Colors.black, size: 18),
+              icon: const Icon(
+                Icons.workspace_premium_rounded,
+                color: Colors.black,
+                size: 18,
+              ),
               label: Text(
                 'Ver recompensas de nivel',
                 style: ThemeColor.buttonText.copyWith(color: Colors.black),
@@ -239,7 +307,11 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {},
-              icon: Icon(Icons.share_rounded, color: ThemeColor.textPrimary, size: 16),
+              icon: Icon(
+                Icons.share_rounded,
+                color: ThemeColor.textPrimary,
+                size: 16,
+              ),
               label: Text(
                 'Compartir Perfil',
                 style: TextStyle(color: ThemeColor.textPrimary, fontSize: 14),
@@ -290,7 +362,11 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
   Widget _buildFooterNote() {
     return Column(
       children: [
-        Icon(Icons.auto_awesome_rounded, color: ThemeColor.primaryColor.withOpacity(0.7), size: 22),
+        Icon(
+          Icons.auto_awesome_rounded,
+          color: ThemeColor.primaryColor.withOpacity(0.7),
+          size: 22,
+        ),
         const SizedBox(height: 10),
         Text(
           'Nuevos logros exclusivos se desbloquean con cada evento especial.',
@@ -303,7 +379,6 @@ class _EliteAchievementsScreenState extends State<EliteAchievements> {
       ],
     );
   }
- 
 }
 
 class _BadgeData {
@@ -455,7 +530,11 @@ class _ChallengeCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.card_giftcard_rounded, size: 13, color: ThemeColor.primaryColor),
+                Icon(
+                  Icons.card_giftcard_rounded,
+                  size: 13,
+                  color: ThemeColor.primaryColor,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -471,7 +550,11 @@ class _ChallengeCard extends StatelessWidget {
           if (note != null)
             Row(
               children: [
-                Icon(Icons.auto_awesome_rounded, size: 13, color: ThemeColor.primaryColor),
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 13,
+                  color: ThemeColor.primaryColor,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   note!,

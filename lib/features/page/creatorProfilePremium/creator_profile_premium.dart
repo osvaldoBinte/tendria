@@ -310,9 +310,9 @@ class _CreatorProfilePremiumScreenState extends State<CreatorProfilePremium> {
           'Contenido Exclusivo',
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w400,
             fontStyle: FontStyle.italic,
-            color: ThemeColor.textPrimary,
+            color: ThemeColor.textSecondary,
           ),
         ),
         Row(

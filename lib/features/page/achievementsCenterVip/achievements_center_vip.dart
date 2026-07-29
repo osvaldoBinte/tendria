@@ -531,7 +531,7 @@ class _ChallengeRow extends StatelessWidget {
               color: ThemeColor.primaryColor.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: ThemeColor.primaryColor, size: 18),
+            child: Icon(icon, color: ThemeColor.live, size: 18),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -541,7 +541,7 @@ class _ChallengeRow extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: ThemeColor.live,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -553,7 +553,7 @@ class _ChallengeRow extends StatelessWidget {
                     value: progress,
                     minHeight: 5,
                     backgroundColor: Colors.white12,
-                    valueColor: AlwaysStoppedAnimation(ThemeColor.primaryColor),
+                    valueColor: AlwaysStoppedAnimation(ThemeColor.live),
                   ),
                 ),
               ],
@@ -563,7 +563,7 @@ class _ChallengeRow extends StatelessWidget {
           Text(
             '$current/$total',
             style: TextStyle(
-              color: ThemeColor.primaryColor,
+              color: ThemeColor.live,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),

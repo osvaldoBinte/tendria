@@ -14,6 +14,7 @@ import 'package:tendria/features/page/contentUnlocked/content_unlocked.dart';
 import 'package:tendria/features/page/creatorProfilePremium/creator_profile_premium.dart';
 import 'package:tendria/features/page/dashboardHomeVip/dashboard_home_vip.dart';
 import 'package:tendria/features/page/earningsPanelVip/earnings_panel_vip.dart';
+import 'package:tendria/features/page/eliteAchievements/elite_achievements.dart';
 import 'package:tendria/features/page/finishOnboardingVip/finish_onboarding_vip.dart'; 
 import 'package:tendria/features/page/parami/for_you_page.dart';
 import 'package:tendria/features/page/statusAndLevels/status_and_levels.dart';
@@ -30,7 +31,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () =>ChatPremium()),//SplashPage
+        GetPage(name: RoutesNames.welcomePage, page: () =>EliteAchievements()),//SplashPage
         GetPage(name: RoutesNames.chatPage, page: () => ChatPage()),
         GetPage(name: RoutesNames.radarScannerPage, page: () => RadarScannerScreen()),
         GetPage(name: RoutesNames.preferencesPage, page: () => PreferencesPage()),
@@ -55,6 +56,7 @@ class AppPages {
         GetPage(name: RoutesNames.earningsPanelVipPage, page: () => EarningsPanelVip()),
         GetPage(name: RoutesNames.creatorProfilePremiumPage, page: () => CreatorProfilePremium()),
         GetPage(name: RoutesNames.chatPremiumPage, page: () => ChatPremium()),
+        GetPage(name: RoutesNames.eliteAchievementsPage, page: () => EliteAchievements()),
   ];
 
   static final unknownRoute = GetPage(

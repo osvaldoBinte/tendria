@@ -26,4 +26,5 @@ class RoutesNames {
   static const String earningsPanelVipPage = '/earnings-panel-vip-page';
   static const String creatorProfilePremiumPage = '/creator-profile-premium-page';
   static const String chatPremiumPage = '/chat-premium-page';
+  static const String eliteAchievementsPage = '/elite-achievements-page';
 }

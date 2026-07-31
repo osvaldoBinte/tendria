@@ -1,0 +1,37 @@
+// 1. Contenido desbloqueado
+showVipDialog(
+  VipFeedbackDialog.unlocked(
+    contentPreview: ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.asset('assets/contenido-desbloqueado.png',
+          height: 160, width: double.infinity, fit: BoxFit.cover),
+    ),
+    onViewContent: () => Get.back(),
+    onBackHome: () => Get.offAllNamed(RoutesNames.homePage),
+  ),
+);
+
+// 2. Invitación VIP
+showVipDialog(
+  VipFeedbackDialog.invitation(
+    level: 3,
+    onAccept: () => Get.back(),
+    onLater: () => Get.back(),
+  ),
+);
+
+// 3. Saldo insuficiente
+showVipDialog(
+  VipFeedbackDialog.insufficientBalance(
+    onBuyCredits: () => Get.toNamed(RoutesNames.buyCreditsPage),
+    onCancel: () => Get.back(),
+  ),
+);
+
+// 4. Compra exitosa
+showVipDialog(
+  VipFeedbackDialog.purchaseSuccess(
+    newBalance: 500,
+    onContinue: () => Get.back(),
+  ),
+);

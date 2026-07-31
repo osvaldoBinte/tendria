@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
+import 'package:tendria/features/page/sendGiftPage/gift_sent_success.dart';
 
 class GiftOption {
   final String name;
   final int price;
   final String imageUrl;
   final bool locked;
-  final String? tag;  
+  final String? tag; // ej. 'ELITE'
 
   GiftOption({
     required this.name,
@@ -17,10 +18,8 @@ class GiftOption {
     this.tag,
   });
 }
- 
-class SendGiftController extends GetxController {
-  final int userBalance = 320;
 
+class SendGiftController extends GetxController {
   final List<GiftOption> gifts = [
     GiftOption(
       name: 'Rosa',
@@ -46,7 +45,8 @@ class SendGiftController extends GetxController {
     ),
   ];
 
-  final RxInt selectedIndex = 2.obs;  
+  final RxInt selectedIndex = 2.obs;
+  final RxInt currentBalance = 320.obs;
 
   void selectGift(int index) {
     if (gifts[index].locked) return;
@@ -55,11 +55,29 @@ class SendGiftController extends GetxController {
 
   GiftOption get selectedGift => gifts[selectedIndex.value];
 
-  void sendGift() { 
-    Get.back();
+  final RxBool showSuccess = false.obs;
+  GiftOption? sentGift;
+  int sentBalanceAfter = 0;
+
+  void sendGift() {
+    final gift = selectedGift;
+
+    if (gift.price > currentBalance.value) {
+      return;
+    }
+
+    currentBalance.value -= gift.price;
+
+    sentGift = gift;
+    sentBalanceAfter = currentBalance.value;
+    showSuccess.value = true;
+  }
+
+  void closeSuccessOverlay() {
+    showSuccess.value = false;
   }
 }
- 
+
 class SendGiftPage extends StatelessWidget {
   const SendGiftPage({Key? key}) : super(key: key);
 
@@ -67,85 +85,107 @@ class SendGiftPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(SendGiftController());
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0E0D10),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 18),
-            _buildBalanceCard(controller),
-            const SizedBox(height: 24),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Obx(
-                  () => GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: controller.gifts.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.85,
-                    ),
-                    itemBuilder: (context, index) {
-                      final gift = controller.gifts[index];
-                      final isSelected = index == controller.selectedIndex.value &&
-                          !gift.locked;
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: const Color(0xFF0E0D10),
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 18),
+                _buildBalanceCard(controller),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Obx(() {
+                      final selected = controller.selectedIndex.value;
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.gifts.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.85,
+                            ),
+                        itemBuilder: (context, index) {
+                          final gift = controller.gifts[index];
+                          final isSelected = index == selected && !gift.locked;
 
-                      return _GiftCard(
-                        gift: gift,
-                        isSelected: isSelected,
-                        onTap: gift.locked ? null : () => controller.selectGift(index),
+                          return _GiftCard(
+                            gift: gift,
+                            isSelected: isSelected,
+                            onTap: gift.locked
+                                ? null
+                                : () => controller.selectGift(index),
+                          );
+                        },
                       );
-                    },
+                    }),
                   ),
                 ),
-              ),
-            ),
-            _buildDivider(),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GestureDetector(
-                onTap: controller.sendGift,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 17),
-                  decoration: BoxDecoration(
-                    color: ThemeColor.primaryColor,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.send_rounded, color: Colors.black, size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ENVIAR REGALO',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          letterSpacing: 0.5,
-                        ),
+                _buildDivider(),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: controller.sendGift,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 17),
+                      decoration: BoxDecoration(
+                        color: ThemeColor.primaryColor,
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                    ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.send_rounded,
+                            color: Colors.black,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'ENVIAR REGALO',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                Text(
+                  'Al enviar confirmas la transacción de créditos.',
+                  style: TextStyle(color: Colors.white38, fontSize: 12),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Al enviar confirmas la transacción de créditos.',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
-            ),
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
-      ),
+
+        Obx(() {
+          if (!controller.showSuccess.value || controller.sentGift == null) {
+            return const SizedBox.shrink();
+          }
+          return giftSentSuccess(
+            giftName: controller.sentGift!.name,
+            giftValue: controller.sentGift!.price,
+            newBalance: controller.sentBalanceAfter,
+          );
+        }),
+      ],
     );
   }
 
@@ -166,7 +206,11 @@ class SendGiftPage extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () => Get.back(),
-            child: const Icon(Icons.close_rounded, color: Colors.white70, size: 24),
+            child: const Icon(
+              Icons.close_rounded,
+              color: Colors.white70,
+              size: 24,
+            ),
           ),
         ],
       ),
@@ -194,12 +238,18 @@ class SendGiftPage extends StatelessWidget {
                 color: ThemeColor.primaryColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.account_balance_wallet_rounded,
-                  size: 16, color: Colors.black),
+              child: const Icon(
+                Icons.account_balance_wallet_rounded,
+                size: 16,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text('Tu Saldo', style: TextStyle(color: Colors.white70, fontSize: 14)),
+              child: Text(
+                'Tu Saldo',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
             ),
             Row(
               children: [
@@ -207,16 +257,25 @@ class SendGiftPage extends StatelessWidget {
                   width: 20,
                   height: 20,
                   alignment: Alignment.center,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Icon(Icons.attach_money_rounded, size: 14, color: Colors.black),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.attach_money_rounded,
+                    size: 14,
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  '${controller.userBalance}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                Obx(
+                  () => Text(
+                    '${controller.currentBalance.value}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ],
@@ -239,7 +298,11 @@ class SendGiftPage extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Icon(Icons.diamond_outlined, color: ThemeColor.primaryColor, size: 16),
+          child: Icon(
+            Icons.diamond_outlined,
+            color: ThemeColor.primaryColor,
+            size: 16,
+          ),
         ),
         Expanded(
           child: Container(
@@ -317,14 +380,21 @@ class _GiftCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
                               color: Colors.white10,
-                              child: Icon(Icons.card_giftcard_rounded,
-                                  color: Colors.white38, size: 22),
+                              child: Icon(
+                                Icons.card_giftcard_rounded,
+                                color: Colors.white38,
+                                size: 22,
+                              ),
                             ),
                           ),
                         ),
                         if (gift.locked)
                           Center(
-                            child: Icon(Icons.lock_rounded, color: Colors.white70, size: 20),
+                            child: Icon(
+                              Icons.lock_rounded,
+                              color: Colors.white70,
+                              size: 20,
+                            ),
                           ),
                       ],
                     ),
@@ -348,7 +418,9 @@ class _GiftCard extends StatelessWidget {
                       height: 16,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: gift.locked ? Colors.white24 : ThemeColor.primaryColor,
+                        color: gift.locked
+                            ? Colors.white24
+                            : ThemeColor.primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -376,7 +448,10 @@ class _GiftCard extends StatelessWidget {
               top: -1,
               left: -1,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: ThemeColor.primaryColor,
                   borderRadius: const BorderRadius.only(

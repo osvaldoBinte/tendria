@@ -18,6 +18,7 @@ import 'package:tendria/features/page/earningsPanelVip/earnings_panel_vip.dart';
 import 'package:tendria/features/page/eliteAchievements/elite_achievements.dart';
 import 'package:tendria/features/page/finishOnboardingVip/finish_onboarding_vip.dart'; 
 import 'package:tendria/features/page/parami/for_you_page.dart';
+import 'package:tendria/features/page/sendGiftPage/send_gift_page.dart';
 import 'package:tendria/features/page/statusAndLevels/status_and_levels.dart';
 import 'package:tendria/features/page/valueOfContent/value_of_content.dart';
 import 'package:tendria/features/purchase/presentation/page/purchase_page.dart';
@@ -32,7 +33,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () =>AchievementsCenterVip()),//SplashPage
+        GetPage(name: RoutesNames.welcomePage, page: () =>SendGiftPage()),//SplashPage
         GetPage(name: RoutesNames.chatPage, page: () => ChatPage()),
         GetPage(name: RoutesNames.radarScannerPage, page: () => RadarScannerScreen()),
         GetPage(name: RoutesNames.preferencesPage, page: () => PreferencesPage()),
@@ -59,6 +60,7 @@ class AppPages {
         GetPage(name: RoutesNames.chatPremiumPage, page: () => ChatPremium()),
         GetPage(name: RoutesNames.eliteAchievementsPage, page: () => EliteAchievements()),
         GetPage(name: RoutesNames.achievementsCenterVipPage, page: () => AchievementsCenterVip()),
+        GetPage(name: RoutesNames.sendGiftPage, page: () => SendGiftPage()),
   ];
 
   static final unknownRoute = GetPage(

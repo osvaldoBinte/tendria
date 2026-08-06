@@ -200,7 +200,7 @@ class giftSentSuccess extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 18),
- 
+   
                   GestureDetector(
                     onTap: onViewAchievements ?? () {},
                     child: Text(

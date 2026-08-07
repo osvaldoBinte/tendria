@@ -34,9 +34,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   );
 
   bool _isAnalyzing = false;
-  bool _isDisposed = false;
-
-  // Android: timer + takePicture
+  bool _isDisposed = false; 
   Timer? _detectionTimer;
   String? _tempPath;
 
@@ -58,15 +56,13 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
   final RxInt _countdown = 0.obs;
 
   File? _capturedPhoto;
-
-  // ─── Helpers ─────────────────────────────────────────────────────────────
+ 
 
   void _setStatus(String msg) {
     _statusKeyCounter++;
     _statusMessage.value = msg;
   }
-
-  // ─── Lifecycle ───────────────────────────────────────────────────────────
+ 
 
   @override
   void initState() {
@@ -112,8 +108,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       _initCamera();
     }
   }
-
-  // ─── Camera init ─────────────────────────────────────────────────────────
+ 
 
   Future<void> _initCamera() async {
     try {
@@ -129,9 +124,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       _cameraController = CameraController(
         front,
         ResolutionPreset.medium,
-        enableAudio: false,
-        // iOS necesita bgra8888 para imageStream + MLKit
-        // Android usa el default (no especificar imageFormatGroup)
+        enableAudio: false, 
         imageFormatGroup: Platform.isIOS
             ? ImageFormatGroup.bgra8888
             : ImageFormatGroup.yuv420,
@@ -141,11 +134,9 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       if (_isDisposed || !mounted) return;
       setState(() => _isCameraReady = true);
 
-      if (Platform.isIOS) {
-        // iOS: imageStream con InputImageMetadata para rotación correcta
+      if (Platform.isIOS) { 
         _startImageStream();
-      } else {
-        // Android: timer + takePicture + fromFilePath (funciona bien)
+      } else { 
         final dir = await getTemporaryDirectory();
         _tempPath = '${dir.path}/selfie_detect.jpg';
         _startDetectionTimer();
@@ -155,8 +146,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       if (!_isDisposed) _setStatus(_l.t('selfie_camera_error'));
     }
   }
-
-  // ─── iOS: imageStream ────────────────────────────────────────────────────
+ 
 
   void _startImageStream() {
     if (_isDisposed) return;
@@ -189,8 +179,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
     if (format == null) return null;
     if (image.planes.isEmpty) return null;
-
-    // bgra8888 tiene un solo plano
+ 
     final plane = image.planes.first;
 
     return InputImage.fromBytes(
@@ -213,8 +202,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       }
     } catch (_) {}
   }
-
-  // ─── Android: timer + takePicture ────────────────────────────────────────
+ 
 
   void _startDetectionTimer() {
     _detectionTimer?.cancel();
@@ -254,8 +242,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       _isAnalyzing = false;
     }
   }
-
-  // ─── Stop detection (ambas plataformas) ──────────────────────────────────
+ 
 
   void _stopDetection() {
     if (Platform.isIOS) {
@@ -273,8 +260,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       _startDetectionTimer();
     }
   }
-
-  // ─── Detection logic ─────────────────────────────────────────────────────
+ 
 
   void _onFacesDetected(List<Face> faces) {
     if (_isDisposed) return;
@@ -357,18 +343,13 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     _captureTimer?.cancel();
     _countdown.value = 0;
   }
-
-  // ─── Capture ─────────────────────────────────────────────────────────────
+ 
 
   Future<void> _capturePhoto() async {
     if (_isDisposed || _photoTaken.value) return;
     try {
       _detectionState.value = 'capturing';
-      _setStatus(_l.t('selfie_taking'));
-
-      // Detener detección antes de capturar
-      // En iOS es obligatorio (no puede correr stream y takePicture juntos)
-      // En Android lo detenemos también para evitar conflictos
+      _setStatus(_l.t('selfie_taking')); 
       _stopDetection();
       await Future.delayed(const Duration(milliseconds: 200));
 
@@ -412,8 +393,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       Get.back(result: SelfieCameraResult(_capturedPhoto!));
     }
   }
-
-  // ─── Build ───────────────────────────────────────────────────────────────
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -422,8 +402,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
-          children: [
-            // Cámara / foto capturada
+          children: [ 
             Obx(() {
               if (_photoTaken.value && _capturedPhoto != null) {
                 return Image.file(_capturedPhoto!, fit: BoxFit.contain);
@@ -435,8 +414,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
               }
               return CameraPreview(_cameraController!);
             }),
-
-            // Overlay oval
+ 
             Obx(() {
               if (_photoTaken.value) return const SizedBox.shrink();
               return CustomPaint(
@@ -446,8 +424,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 child: const SizedBox.expand(),
               );
             }),
-
-            // Countdown
+ 
             Obx(() {
               if (_countdown.value <= 0) return const SizedBox.shrink();
               return Center(
@@ -479,8 +456,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 ),
               );
             }),
-
-            // Top bar
+ 
             Positioned(
               top: 0,
               left: 0,
@@ -539,8 +515,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 ),
               ),
             ),
-
-            // Status message
+ 
             Positioned(
               bottom: 180,
               left: 24,
@@ -596,8 +571,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
                 ),
               ),
             ),
-
-            // Botones inferiores
+ 
             Positioned(
               bottom: 48,
               left: 24,
@@ -725,8 +699,7 @@ class _SelfieCameraPageState extends State<SelfieCameraPage>
     );
   }
 }
-
-// ─── Painter ───────────────────────────────────────────────────────────────
+ 
 
 class _FaceOvalOverlayPainter extends CustomPainter {
   final String detectionState;

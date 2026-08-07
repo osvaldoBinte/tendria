@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:dio/dio.dart' as dio;  // 👈 Alias para Dio
+import 'package:dio/dio.dart' as dio;  
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -220,8 +220,7 @@ class SignalRService {
       
       AppLogger.info('🔌 Intento ${retryCount + 1}/$maxRetries - Creando conexión SignalR...');
       AppLogger.info('📍 URL del Hub: $hubUrl');
-      
-      // Si no es el primer intento, espera un poco
+       
       if (retryCount > 0) {
         AppLogger.info('⏳ Esperando ${retryCount} segundos antes de reintentar...');
         await Future.delayed(Duration(seconds: retryCount));
@@ -247,8 +246,7 @@ class SignalRService {
             30000,
           ])
           .build();
-
-      // Event handlers
+ 
       _hubConnection!.onreconnecting(({error}) {
         AppLogger.warning('⚠️ Reconectando...');
         onReconnecting?.call();
@@ -365,10 +363,7 @@ class SignalRService {
     _hubConnection?.off('ReceiveMessage');
     disconnect();
   }
-}
-// ============================================
-// AUTH CONTROLLER
-// ============================================
+} 
 class AuthController extends GetxController {
   final _apiService = ApiService();
   final _storage = GetStorage();
@@ -441,10 +436,7 @@ class AuthController extends GetxController {
     AppLogger.info('👋 Sesión cerrada');
   }
 }
-
-// ============================================
-// CHAT CONTROLLER
-// ============================================
+ 
 class ChatController extends GetxController {
   final _apiService = ApiService();
   late final SignalRService _signalRService;
@@ -506,19 +498,15 @@ class ChatController extends GetxController {
     try {
       isLoading.value = true;
       currentChatId.value = chatId;
-
-      // Configurar token en API service
+ 
       _apiService.setToken(token);
-
-      // Conectar a SignalR
+ 
       await _signalRService.connect(token);
-      
-      // Unirse al chat específico
+       
       await _signalRService.joinChat(chatId);
       
       isConnected.value = true;
-      
-      // Cargar mensajes anteriores
+       
       await loadMessages();
 
       Get.snackbar(
@@ -661,10 +649,7 @@ class ChatController extends GetxController {
     super.onClose();
   }
 }
-
-// ============================================
-// LOGIN PAGE
-// ============================================
+ 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
@@ -685,8 +670,7 @@ class LoginPage extends StatelessWidget {
               key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Logo/Título
+                children: [ 
                   const Icon(
                     Icons.chat_bubble_rounded,
                     size: 80,
@@ -710,8 +694,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 48),
-
-                  // Email
+ 
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -743,8 +726,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Password
+ 
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -776,8 +758,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Token Display
+ 
                   Obx(() {
                     if (authController.token != null) {
                       return Container(
@@ -811,8 +792,7 @@ class LoginPage extends StatelessWidget {
                     return const SizedBox.shrink();
                   }),
                   const SizedBox(height: 24),
-
-                  // Login Button
+ 
                   Obx(() => SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -866,10 +846,7 @@ class LoginPage extends StatelessWidget {
     }
   }
 }
-
-// ============================================
-// CHAT PAGE
-// ============================================
+  
 class ChatPage extends StatelessWidget {
   ChatPage({super.key});
 

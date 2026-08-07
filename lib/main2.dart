@@ -94,8 +94,7 @@ class AuthResponseModel {
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
     return AuthResponseModel(
-      token: json['token'] as String,
-      // 👇 Maneja tanto String como int
+      token: json['token'] as String, 
       userId: json['userId']?.toString(),
       email: json['email'] as String?,
       nombre: json['nombre'] as String?,
@@ -121,8 +120,7 @@ class MessageModel {
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
-    return MessageModel(
-      // 👇 Maneja conversión segura
+    return MessageModel( 
       id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ''),
       chatId: json['chatId'] is int ? json['chatId'] : int.parse(json['chatId'].toString()),
       mensaje: json['mensaje'] as String,
@@ -134,27 +132,21 @@ class MessageModel {
     );
   }
 }
-
-// ============================================
-// API SERVICE
-// ============================================
-// ============================================
-// API SERVICE
-// ============================================
+ 
 class ApiService {
   static const String baseUrl = 'https://api-tendria.grupogerena.com.mx';
-  late final dio.Dio _dio;  // 👈 Usar alias
+  late final dio.Dio _dio;  
   String? _token;
 
   ApiService() {
-    _dio = dio.Dio(dio.BaseOptions(  // 👈 Usar alias
+    _dio = dio.Dio(dio.BaseOptions(  
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
     ));
 
-    _dio.interceptors.add(dio.InterceptorsWrapper(  // 👈 Usar alias
+    _dio.interceptors.add(dio.InterceptorsWrapper(   
       onRequest: (options, handler) {
         if (_token != null) {
           options.headers['Authorization'] = 'Bearer $_token';
@@ -180,18 +172,15 @@ class ApiService {
 
   void setToken(String token) => _token = token;
 
-  Future<dio.Response> post(String path, {dynamic data}) async {  // 👈 Usar alias
+  Future<dio.Response> post(String path, {dynamic data}) async {   
     return await _dio.post(path, data: data);
   }
 
-  Future<dio.Response> get(String path) async {  // 👈 Usar alias
+  Future<dio.Response> get(String path) async {   
     return await _dio.get(path);
   }
 }
-
-// ============================================
-// SIGNALR SERVICE
-// ============================================
+ 
 class SignalRService {
   HubConnection? _hubConnection;
   

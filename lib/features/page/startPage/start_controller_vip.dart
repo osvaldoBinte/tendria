@@ -18,11 +18,11 @@ import 'package:tendria/features/user/presentation/profiledetail/nearby_users_pa
 import 'package:tendria/framework/preferences_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class StartController extends GetxController with WidgetsBindingObserver { 
+class StartControllerVip extends GetxController with WidgetsBindingObserver { 
   final UpdateLocationUsecase updateLocationUsecase;
   
   ProfileController get _profile => Get.find<ProfileController>();
-  StartController({required this.updateLocationUsecase});
+  StartControllerVip({required this.updateLocationUsecase});
  
   final List<Widget> pages = [
     ProfilePage(),

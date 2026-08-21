@@ -5,24 +5,24 @@ import 'package:tendria/common/tutorial/startTutorial/start_tutorial_overlay.dar
 import 'package:tendria/common/tutorial/tutorialPerfil/profile_tutorial_controller.dart';
 import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/panic_button.dart';
-import 'start_controller.dart';
+import 'start_controller_vip.dart';
 
 
-class StartPage extends StatefulWidget {
-  const StartPage({Key? key}) : super(key: key);
+class StartPageVip extends StatefulWidget {
+  const StartPageVip({Key? key}) : super(key: key);
 
   @override
-  State<StartPage> createState() => _StartPageState();
+  State<StartPageVip> createState() => _StartPageVipState();
 }
 
-class _StartPageState extends State<StartPage> {
-  late final StartController controller;
+class _StartPageVipState extends State<StartPageVip> {
+  late final StartControllerVip controller;
   late final StartTutorialController tutorialCtrl;
 
   @override
   void initState() {
     super.initState();
-    controller   = Get.find<StartController>();
+    controller   = Get.find<StartControllerVip>();
     tutorialCtrl =  Get.find<StartTutorialController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

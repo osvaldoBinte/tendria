@@ -20,6 +20,7 @@ import 'package:tendria/features/like/presentation/controller/liked_by_users_con
 import 'package:tendria/features/like/presentation/controller/my_match_controller.dart';
 import 'package:tendria/features/like/presentation/controller/start_conversations_controller.dart';
 import 'package:tendria/features/notification/presentation/page/notification_controller.dart';
+import 'package:tendria/features/page/startPage/start_controller_vip.dart';
 import 'package:tendria/features/purchase/presentation/controller/purchase_controller.dart';
 import 'package:tendria/features/stories/presentation/page/story_controller.dart';
 import 'package:tendria/features/unlock/presentation/controller/blocked_users_controller.dart';
@@ -168,6 +169,7 @@ class App extends StatelessWidget {
         
         Get.lazyPut(  () => PurchaseController(  getPurchasesUsecase: Get.find(),  purchaseAppleUsecase: Get.find(), purchaseGoogleUsecase: Get.find(), validateCouponsUsecase: Get.find(),  ), fenix: true,  );
         Get.lazyPut( () => VerificationController(  verificationUsecase: Get.find(), verificationSelfieUsecase: Get.find(), getVerificationUsecase: Get.find(), ),  fenix: true,  );
+        Get.lazyPut(() =>StartControllerVip(updateLocationUsecase: Get.find()));
       }),
 
       getPages: AppPages.routes,

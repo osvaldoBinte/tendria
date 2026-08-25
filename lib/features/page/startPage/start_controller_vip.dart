@@ -8,6 +8,10 @@ import 'package:tendria/common/tutorial/tutorial_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/features/like/presentation/page/liked_by_users_page.dart';
 import 'package:tendria/features/like/presentation/page/my_match_page.dart';
+import 'package:tendria/features/page/dashboardHomeVip/dashboard_home_vip.dart';
+import 'package:tendria/features/page/finishOnboardingVip/finish_onboarding_vip.dart';
+import 'package:tendria/features/page/statusAndLevels/status_and_levels.dart';
+import 'package:tendria/features/page/valueOfContent/value_of_content.dart';
 import 'package:tendria/features/user/domain/entities/update_location_entity.dart';
 import 'package:tendria/features/user/domain/usecase/update_location_usecase.dart';
 import 'package:tendria/features/user/presentation/controller/nearby_users_controller.dart';
@@ -25,10 +29,10 @@ class StartControllerVip extends GetxController with WidgetsBindingObserver {
   StartControllerVip({required this.updateLocationUsecase});
  
   final List<Widget> pages = [
-    ProfilePage(),
-    RadarScannerScreen(),
-    LikedByUsersView(),
-    MyMatchView(),
+    valueOfContent(),
+    StatusAndLevels(),
+    FinishOnboardingVip(),
+    DashboardHomeVip(),
   ];
 
   final List<String> labels = ['Perfil', 'Radar', 'Match', 'Chat'];

@@ -29,7 +29,7 @@ class StartControllerVip extends GetxController with WidgetsBindingObserver {
   StartControllerVip({required this.updateLocationUsecase});
  
   final List<Widget> pages = [
-    valueOfContent(),
+    DashboardHomeVip(),
     StatusAndLevels(),
     FinishOnboardingVip(),
     DashboardHomeVip(),

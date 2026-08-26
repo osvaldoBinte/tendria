@@ -8,7 +8,9 @@ import 'package:tendria/common/tutorial/tutorial_controller.dart';
 import 'package:tendria/common/settings/routes_names.dart';
 import 'package:tendria/features/like/presentation/page/liked_by_users_page.dart';
 import 'package:tendria/features/like/presentation/page/my_match_page.dart';
+import 'package:tendria/features/page/contentUnlocked/content_unlocked.dart';
 import 'package:tendria/features/page/dashboardHomeVip/dashboard_home_vip.dart';
+import 'package:tendria/features/page/earningsPanelVip/earnings_panel_vip.dart';
 import 'package:tendria/features/page/finishOnboardingVip/finish_onboarding_vip.dart';
 import 'package:tendria/features/page/statusAndLevels/status_and_levels.dart';
 import 'package:tendria/features/page/valueOfContent/value_of_content.dart';
@@ -30,8 +32,8 @@ class StartControllerVip extends GetxController with WidgetsBindingObserver {
  
   final List<Widget> pages = [
     DashboardHomeVip(),
-    StatusAndLevels(),
-    FinishOnboardingVip(),
+    ContentUnlocked(),
+    EarningsPanelVip(),
     DashboardHomeVip(),
   ];
 

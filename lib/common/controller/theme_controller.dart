@@ -6,7 +6,7 @@ enum AppThemeMode { light, dark, vip }
 
 class ThemeController extends GetxController {
   final _prefs = PreferencesUser();
-  final Rx<AppThemeMode> themeMode = AppThemeMode.dark.obs;
+  final Rx<AppThemeMode> themeMode = AppThemeMode.vip.obs;
  
   bool get isDarkMode => themeMode.value == AppThemeMode.dark;
   bool get isVipMode => themeMode.value == AppThemeMode.vip;
@@ -23,7 +23,7 @@ class ThemeController extends GetxController {
     final saved = await _prefs.loadPrefs(type: int, key: _key);
     themeMode.value = (saved != null && saved < AppThemeMode.values.length)
         ? AppThemeMode.values[saved]
-        : AppThemeMode.dark;
+        : AppThemeMode.vip;
     _applyFlutterThemeMode();
   }
 

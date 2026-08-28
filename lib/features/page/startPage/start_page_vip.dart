@@ -7,7 +7,6 @@ import 'package:tendria/common/theme/App_Theme.dart';
 import 'package:tendria/common/widgets/panic_button.dart';
 import 'start_controller_vip.dart';
 
-
 class StartPageVip extends StatefulWidget {
   const StartPageVip({Key? key}) : super(key: key);
 
@@ -22,8 +21,8 @@ class _StartPageVipState extends State<StartPageVip> {
   @override
   void initState() {
     super.initState();
-    controller   = Get.find<StartControllerVip>();
-    tutorialCtrl =  Get.find<StartTutorialController>();
+    controller = Get.find<StartControllerVip>();
+    tutorialCtrl = Get.find<StartTutorialController>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tutorialCtrl.notifyPageReady();
@@ -34,27 +33,30 @@ class _StartPageVipState extends State<StartPageVip> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Obx(() => ThemeColor.createMainScaffold(
-          body: controller.currentPage,
-          currentIndex: controller.selectedIndex.value,
-          onNavigationTap: controller.changePage,
-          iconPaths: controller.iconPaths,
-          labels: controller.labels,
-          backgroundColor: ThemeColor.backgroundColorfondo,
-          bottomNavBackgroundColor: Colors.white, 
-          navKeys: [
-            tutorialCtrl.navProfileKey,
-            tutorialCtrl.navRadarKey,
-            tutorialCtrl.navMatchKey,
-            tutorialCtrl.navChatKey,
-          ],
-          floatingActionButton: KeyedSubtree(
-            key: tutorialCtrl.panicButtonKey,
-            child: const PanicButton(),
+        Obx(
+          () => ThemeColor.createMainScaffold(
+            body: controller.currentPage,
+            currentIndex: controller.selectedIndex.value,
+            onNavigationTap: controller.changePage,
+            icons: controller.icons,
+            labels: controller.labels,
+            backgroundColor: ThemeColor.backgroundColorfondo,
+            bottomNavBackgroundColor: Colors.white,
+            navKeys: [
+              tutorialCtrl.navProfileKey,
+              tutorialCtrl.navRadarKey,
+              tutorialCtrl.navMatchKey,
+              tutorialCtrl.navChatKey,
+            ],
+            floatingActionButton: KeyedSubtree(
+              key: tutorialCtrl.panicButtonKey,
+              child: const PanicButton(),
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.endFloat,
           ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        )),
- 
+        ),
+
         Obx(
           () => tutorialCtrl.isVisible.value
               ? const StartTutorialOverlay()

@@ -839,12 +839,14 @@ class ThemeColor {
       ),
     );
   }
+// --- Reemplaza estos dos métodos dentro de tu clase ThemeColor (App_Theme.dart) ---
 
   static Widget createMainScaffold({
     required Widget body,
     required int currentIndex,
     required Function(int) onNavigationTap,
-    required List<String> iconPaths,
+    List<String>? iconPaths,
+    List<IconData>? icons,
     List<String>? labels,
     Color? backgroundColor,
     Color? bottomNavBackgroundColor,
@@ -861,6 +863,7 @@ class ThemeColor {
         currentIndex: currentIndex,
         onTap: onNavigationTap,
         iconPaths: iconPaths,
+        icons: icons,
         labels: labels,
         navKeys: navKeys,
       ),
@@ -870,13 +873,22 @@ class ThemeColor {
   static Widget createBottomNavigationBar({
     required int currentIndex,
     required Function(int) onTap,
-    required List<String> iconPaths,
+    // Ruta de imágenes (comportamiento original, sigue funcionando igual).
+    List<String>? iconPaths,
+    // NUEVO: pasa esto en vez de iconPaths para usar Icon() nativos.
+    List<IconData>? icons,
     List<String>? labels,
     Color? backgroundColor,
     Color? selectedItemColor,
     Color? unselectedItemColor,
     List<Key?>? navKeys,
   }) {
+    assert(
+      icons != null || iconPaths != null,
+      'Provee "icons" (IconData) o "iconPaths" (assets) para el bottom nav.',
+    );
+    final itemCount = icons?.length ?? iconPaths!.length;
+
     return Container(
       decoration: BoxDecoration(
         color: ThemeColor.cardBackground,
@@ -894,8 +906,12 @@ class ThemeColor {
           height: 70,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(iconPaths.length, (index) {
+            children: List.generate(itemCount, (index) {
               final isSelected = currentIndex == index;
+              final iconColor = isSelected
+                  ? ThemeColor.textPrimary
+                  : ThemeColor.textSecondary;
+
               return KeyedSubtree(
                 key: navKeys != null && index < navKeys.length
                     ? navKeys[index]
@@ -910,15 +926,15 @@ class ThemeColor {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image.asset(
-                          iconPaths[index],
-                          width: 26,
-                          height: 26,
-                          fit: BoxFit.contain,
-                          color: isSelected
-                              ? ThemeColor.textPrimary
-                              : ThemeColor.textSecondary,
-                        ),
+                        icons != null
+                            ? Icon(icons[index], size: 26, color: iconColor)
+                            : Image.asset(
+                                iconPaths![index],
+                                width: 26,
+                                height: 26,
+                                fit: BoxFit.contain,
+                                color: iconColor,
+                              ),
                         if (labels != null && index < labels.length) ...[
                           const SizedBox(height: 4),
                           Text(
@@ -928,9 +944,7 @@ class ThemeColor {
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.normal,
-                              color: isSelected
-                                  ? ThemeColor.textPrimary
-                                  : ThemeColor.textSecondary,
+                              color: iconColor,
                             ),
                           ),
                         ],
@@ -945,7 +959,6 @@ class ThemeColor {
       ),
     );
   }
-
   static Widget widgetLogo({double width = 100, double height = 100}) {
     try {
       final ctrl = Get.find<ThemeController>();

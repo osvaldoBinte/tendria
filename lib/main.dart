@@ -21,4 +21,4 @@ void main() async {
   await facebookAppEvents.setAdvertiserTracking(enabled: true); 
 
   runApp(const App());
-} 
+}   

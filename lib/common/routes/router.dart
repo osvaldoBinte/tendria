@@ -34,7 +34,7 @@ class AppPages {
   static final routes = [
    
    
-        GetPage(name: RoutesNames.welcomePage, page: () =>StartPageVip()),//SplashPage
+        GetPage(name: RoutesNames.welcomePage, page: () =>SplashPage()),//SplashPage
         GetPage(name: RoutesNames.chatPage, page: () => ChatPage()),
         GetPage(name: RoutesNames.radarScannerPage, page: () => RadarScannerScreen()),
         GetPage(name: RoutesNames.preferencesPage, page: () => PreferencesPage()),
